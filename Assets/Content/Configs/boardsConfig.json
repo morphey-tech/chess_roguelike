@@ -1,6 +1,7 @@
 {
   "boards": [
     {
+      "id": "0",
       "width": 8,
       "height": 8,
       "board_data": [
@@ -15,6 +16,7 @@
       ]
     },
     {
+      "id": "1",
       "width": 8,
       "height": 8,
       "board_data": [
@@ -29,6 +31,7 @@
       ]
     },
     {
+      "id": "2",
       "width": 8,
       "height": 8,
       "board_data": [

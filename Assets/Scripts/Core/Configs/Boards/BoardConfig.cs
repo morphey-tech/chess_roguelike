@@ -6,6 +6,9 @@ namespace Project.Core.Core.Configs
     [Serializable]
     public class BoardConfig
     {
+        [JsonProperty("id")]
+        public string Id { get; set; }
+        
         [JsonProperty("width")]
         public int Width { get; set; } = 8;
         
@@ -20,11 +23,18 @@ namespace Project.Core.Core.Configs
             char[,] board2D = new char[Height, Width];
             for (int i = 0; i < Height; i++)
             {
+                string row = Board[i];
+                if (row.Length != Width)
+                {
+                    throw new Exception($"Row {i} length {row.Length} does not match board width {Width}");
+                }
+
                 for (int j = 0; j < Width; j++)
                 {
-                    board2D[i, j] = Board[i * Width + j][0]; // Конвертируем строку в символ
+                    board2D[i, j] = row[j];
                 }
             }
+
             return board2D;
         }
     }

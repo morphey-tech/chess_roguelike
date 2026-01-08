@@ -201,14 +201,6 @@ PrefabInstance:
       propertyPath: _worldObjectCollector
       value: 
       objectReference: {fileID: 595317964}
-    - target: {fileID: 8830024331335802143, guid: 05328408175a70f4a8e51703e0ce58ab, type: 3}
-      propertyPath: autoInjectGameObjects.Array.size
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8830024331335802143, guid: 05328408175a70f4a8e51703e0ce58ab, type: 3}
-      propertyPath: 'autoInjectGameObjects.Array.data[0]'
-      value: 
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -450,9 +442,7 @@ PrefabInstance:
       value: GameWorld
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects:
-    - {fileID: 5739208265959917459, guid: 98e5b103b1927ed4690dc3e81d9640d4, type: 3}
-    - {fileID: 3659720102947731271, guid: 98e5b103b1927ed4690dc3e81d9640d4, type: 3}
+    m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 98e5b103b1927ed4690dc3e81d9640d4, type: 3}

@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using Project.Gameplay.Gameplay.Board;
 using UnityEngine;
 
 namespace Project.Unity.Bootstrap
@@ -9,30 +10,22 @@ namespace Project.Unity.Bootstrap
     /// </summary>
     public class GameSceneBootstrap : MonoSceneBootstrap
     {
-        private const string DefaultSpawnPointId = "player_default";
-
+        private BoardSpawnService _boardSpawnService;
+        
         protected override void OnConstruct()
         {
+            _boardSpawnService = Resolve<BoardSpawnService>();
         }
         
         protected override async UniTask OnBootstrapAsync()
         {
-            await SpawnPlayerAsync();
             await InitializeGameServicesAsync();
-        }
-        
-        private async UniTask SpawnPlayerAsync()
-        {
-            Log.Debug("Spawning player...");
         }
         
         private async UniTask InitializeGameServicesAsync()
         {
             Log.Debug("Initializing game services...");
-            
-            // TODO: Загрузка сохранения
-            // TODO: Инициализация квестов
-            
+            await _boardSpawnService.SpawnAsync("0");
             await UniTask.CompletedTask;
         }
     }

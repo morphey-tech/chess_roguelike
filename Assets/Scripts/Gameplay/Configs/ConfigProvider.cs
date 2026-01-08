@@ -27,7 +27,7 @@ namespace Project.Gameplay.Configs
             _logger = logService.CreateLogger<ConfigProvider>();
         }
 
-        public async UniTask<T> Get<T>(string key, CancellationToken cancellationToken) where T : class
+        public async UniTask<T> Get<T>(string key, CancellationToken cancellationToken = default) where T : class
         {
             if (_configsCache.TryGetValue(key, out object? cachedConfig))
             {

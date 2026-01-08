@@ -9,5 +9,18 @@ namespace Project.Core.Core.Configs
     {
         [JsonProperty("boards")]
         public List<BoardConfig> Boards { get; set; }
+
+        public BoardConfig? GetBy(string id)
+        {
+            foreach (BoardConfig config in Boards)
+            {
+                if (config.Id != id)
+                {
+                    continue;
+                }
+                return config;
+            }
+            return null;
+        }
     }
 }
