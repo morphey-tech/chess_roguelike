@@ -16,8 +16,7 @@ namespace Project.Core.Core.Configs
             Converters =
             {
                 new Vector2IntConverter(),
-                new Vec2ObservableDictionaryConverter(),
-                new LevelConfigConverter()
+                new Vec2ObservableDictionaryConverter()
             }
         };
 
@@ -27,24 +26,11 @@ namespace Project.Core.Core.Configs
             Converters =
             {
                 new Vector2IntConverter(),
-                new Vec2ObservableDictionaryConverter(),
-                new LevelConfigConverter()
+                new Vec2ObservableDictionaryConverter()
             }
         };
 
-        public virtual async UniTask Upload(string key, object config, CancellationToken cancellationToken)
-        {
-            try
-            {
-                await InnerUpload(key, config, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                throw new ApplicationException("Cannot upload config", ex);
-            }
-        }
-
-        public virtual async UniTask<T> Download<T>(string key, T storage, CancellationToken cancellationToken)
+        public async UniTask<T> Download<T>(string key, T storage, CancellationToken cancellationToken)
         {
             T result;
             try
@@ -55,10 +41,10 @@ namespace Project.Core.Core.Configs
             {
                 throw new ApplicationException("Cannot download config", ex);
             }
+
             return result;
         }
 
-        protected abstract UniTask InnerUpload(string key, object config, CancellationToken cancellationToken);
         protected abstract UniTask<T> InnerDownload<T>(string key, T storage, CancellationToken cancellationToken);
     }
 }

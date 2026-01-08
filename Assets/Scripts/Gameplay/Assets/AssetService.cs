@@ -257,7 +257,7 @@ namespace Project.Gameplay.Assets
                 _logger.Error($"Exception downloading dependencies for {address}", ex);
             }
         }
-        
+
         private void ThrowIfDisposed()
         {
             if (_disposed)

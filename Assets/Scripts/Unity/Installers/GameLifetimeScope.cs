@@ -1,7 +1,5 @@
 using LiteUI.UI.Service;
 using MessagePipe;
-using Project.Gameplay.Assets;
-using Project.Gameplay.Save;
 using Project.Unity.Bootstrap;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -67,13 +65,6 @@ namespace Project.Unity.Installers
 
         private void ConfigureServices(IContainerBuilder builder)
         {
-            builder.Register<AssetService>(Lifetime.Scoped)
-                .AsImplementedInterfaces()
-                .AsSelf();
-
-            builder.Register<SaveSystem>(Lifetime.Scoped)
-                .AsImplementedInterfaces()
-                .AsSelf();
         }
 
         private void ConfigureQuests(IContainerBuilder builder)
