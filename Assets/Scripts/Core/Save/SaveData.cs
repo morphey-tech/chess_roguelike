@@ -1,5 +1,4 @@
 using System;
-using Project.Core.Player;
 
 namespace Project.Core.Save
 {
@@ -8,7 +7,6 @@ namespace Project.Core.Save
     {
         public string SlotId;
         public long SaveTimeTicks;
-        public PlayerSaveData Player;
         public string SceneName;
         
         public DateTime SaveTime

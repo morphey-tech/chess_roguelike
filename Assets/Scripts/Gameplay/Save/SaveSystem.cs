@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Cysharp.Threading.Tasks;
 using Project.Core.Logging;
-using Project.Core.Player;
 using Project.Core.Save;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -15,15 +14,13 @@ namespace Project.Gameplay.Save
     {
         private const string SaveExtension = ".sav";
         
-        private readonly PlayerModel _playerModel;
         private readonly string _savePath;
         private readonly ILogger _logger;
         private bool _disposed;
         
         [Inject]
-        public SaveSystem(PlayerModel playerModel, ILogService logService)
+        public SaveSystem(ILogService logService)
         {
-            _playerModel = playerModel;
             _logger = logService.CreateLogger<SaveSystem>();
             _savePath = Path.Combine(Application.persistentDataPath, "Saves");
             
@@ -39,11 +36,10 @@ namespace Project.Gameplay.Save
         {
             ThrowIfDisposed();
             
-            SaveData saveData = new SaveData
+            SaveData saveData = new()
             {
                 SlotId = slotId,
                 SaveTime = DateTime.Now,
-                Player = _playerModel.ToSaveData(),
                 SceneName = SceneManager.GetActiveScene().name
             };
             
@@ -69,11 +65,6 @@ namespace Project.Gameplay.Save
             
             string json = await File.ReadAllTextAsync(filePath);
             SaveData saveData = JsonUtility.FromJson<SaveData>(json);
-            
-            if (saveData.Player != null)
-            {
-                _playerModel.FromSaveData(saveData.Player);
-            }
             
             _logger.Info($"Loaded from: {filePath}");
             return true;
