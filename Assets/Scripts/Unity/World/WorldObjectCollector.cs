@@ -1,12 +1,27 @@
 using System.Collections.Generic;
 using System.Linq;
+using Project.Core.World;
 using UnityEngine;
 using static LiteUI.Common.Preconditions;
 
 namespace Project.Unity
 {
-    public class WorldObjectCollector : MonoBehaviour
+    /// <summary>
+    /// Коллектор объектов мира + реализация IWorldRoot для Gameplay слоя.
+    /// </summary>
+    public class WorldObjectCollector : MonoBehaviour, IWorldRoot
     {
+        [Header("Корневые контейнеры для спавна")]
+        [SerializeField] private Transform _boardRoot;
+        [SerializeField] private Transform _unitsRoot;
+        [SerializeField] private Transform _effectsRoot;
+
+        // IWorldRoot - эти свойства использует Gameplay слой
+        public Transform BoardRoot => _boardRoot != null ? _boardRoot : transform;
+        public Transform UnitsRoot => _unitsRoot != null ? _unitsRoot : transform;
+        public Transform EffectsRoot => _effectsRoot != null ? _effectsRoot : transform;
+
+        // Остальное - для Unity слоя
         public T? GetObjectByType<T>(bool includeInactive = false)
             where T : class
         {

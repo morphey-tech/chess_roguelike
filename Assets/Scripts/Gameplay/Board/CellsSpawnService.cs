@@ -3,22 +3,30 @@ using Cysharp.Threading.Tasks;
 using Project.Core.Assets;
 using Project.Core.Core.Configs.Cells;
 using Project.Core.Logging;
+using Project.Core.World;
 using Project.Gameplay.Configs;
-using Object = UnityEngine.Object;
+using UnityEngine;
 
 namespace Project.Gameplay.Gameplay.Board
 {
     public class CellsSpawnService
     {
         private readonly IAssetService _assetService;
+        private readonly IWorldRoot _worldRoot;
         private readonly ConfigProvider _configProvider;
         private readonly ILogger<CellsSpawnService> _logger;
 
-        public CellsSpawnService(IAssetService assetService,
+        // Размер клетки (можно вынести в конфиг)
+        private const float CellSize = 1f;
+
+        public CellsSpawnService(
+            IAssetService assetService,
+            IWorldRoot worldRoot,
             ConfigProvider configProvider,
             ILogService logService)
         {
             _assetService = assetService ?? throw new ArgumentNullException(nameof(assetService));
+            _worldRoot = worldRoot ?? throw new ArgumentNullException(nameof(worldRoot));
             _configProvider = configProvider ?? throw new ArgumentNullException(nameof(configProvider));
             _logger = logService.CreateLogger<CellsSpawnService>();
         }
@@ -34,14 +42,19 @@ namespace Project.Gameplay.Gameplay.Board
                 throw new Exception($"No config found for cell alias {alias}.");
             }
 
-            Object? asset = await _assetService.LoadAssetAsync<Object>(cellConfig.AssetKey);
+            Vector3 position = new(col * CellSize, 0f, row * CellSize);
+            GameObject? cell = await _assetService.InstantiateAsync(
+                cellConfig.AssetKey,
+                position,
+                Quaternion.identity,
+                _worldRoot.BoardRoot);  // <-- родитель из IWorldRoot
 
-            if (asset == null)
+            if (cell == null)
             {
-                throw new Exception($"Failed to load asset for {alias}.");
+                throw new Exception($"Failed to instantiate cell for {alias}.");
             }
 
-            _logger.Debug($"Spawning asset: {asset} at position ({row}, {col})");
+            _logger.Debug($"Spawned cell '{alias}' at ({row}, {col})");
         }
     }
 }

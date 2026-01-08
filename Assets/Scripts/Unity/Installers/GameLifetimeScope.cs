@@ -1,5 +1,6 @@
 using LiteUI.UI.Service;
 using MessagePipe;
+using Project.Core.World;
 using Project.Gameplay.Gameplay.Board;
 using Project.Unity.Bootstrap;
 using UnityEngine;
@@ -43,7 +44,11 @@ namespace Project.Unity.Installers
         {
             if (_worldObjectCollector != null)
             {
-                builder.RegisterInstance(_worldObjectCollector);
+                // Регистрируем как конкретный тип (для Unity слоя) 
+                // и как IWorldRoot (для Gameplay слоя)
+                builder.RegisterInstance(_worldObjectCollector)
+                    .AsSelf()
+                    .As<IWorldRoot>();
             }
             if (_uiObjectCollector != null)
             {
