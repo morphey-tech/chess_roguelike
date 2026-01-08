@@ -1,10 +1,18 @@
+using System;
+using Newtonsoft.Json;
+
 namespace Project.Core.Core.Configs
 {
-    public class LevelConfig
+    [Serializable]
+    public class BoardConfig
     {
+        [JsonProperty("width")]
         public int Width { get; set; } = 8;
+        
+        [JsonProperty("height")]
         public int Height { get; set; } = 8;
         
+        [JsonProperty("board_data")]
         public string[] Board { get; set; }
         
         public char[,] GetBoard2D()

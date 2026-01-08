@@ -1,0 +1,12 @@
+{
+  "cells": [
+    {
+      "board_data_alias": "W",
+      "asset_key": "white_cell"
+    },
+    {
+      "board_data_alias": "B",
+      "asset_key": "black_cell"
+    }
+  ]
+}

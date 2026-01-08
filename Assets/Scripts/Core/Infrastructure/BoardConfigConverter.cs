@@ -4,9 +4,9 @@ using Project.Core.Core.Configs;
 
 namespace Project.Core.Core.Infrastructure
 {
-     public class LevelConfigConverter : JsonConverter<LevelConfig>
+     public class BoardConfigConverter : JsonConverter<BoardConfig>
     {
-        public override void WriteJson(JsonWriter writer, LevelConfig value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, BoardConfig value, JsonSerializer serializer)
         {
             writer.WriteStartObject();
 
@@ -26,9 +26,9 @@ namespace Project.Core.Core.Infrastructure
             writer.WriteEndObject();
         }
 
-        public override LevelConfig ReadJson(JsonReader reader, Type objectType, LevelConfig existingValue, bool hasExistingValue, JsonSerializer serializer)
+        public override BoardConfig ReadJson(JsonReader reader, Type objectType, BoardConfig existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
-            LevelConfig levelConfig = new();
+            BoardConfig boardConfig = new();
             while (reader.Read())
             {
                 if (reader.TokenType == JsonToken.PropertyName)
@@ -38,21 +38,21 @@ namespace Project.Core.Core.Infrastructure
                     {
                         case "Width":
                             reader.Read();
-                            levelConfig.Width = (int)reader.Value;
+                            boardConfig.Width = (int)reader.Value;
                             break;
                         case "Height":
                             reader.Read();
-                            levelConfig.Height = (int)reader.Value;
+                            boardConfig.Height = (int)reader.Value;
                             break;
                         case "Board":
                             reader.Read();
                             string[]? board = serializer.Deserialize<string[]>(reader);
-                            levelConfig.Board = board;
+                            boardConfig.Board = board;
                             break;
                     }
                 }
             }
-            return levelConfig;
+            return boardConfig;
         }
     }
 }
