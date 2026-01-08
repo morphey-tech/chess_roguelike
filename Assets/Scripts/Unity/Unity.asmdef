@@ -1,0 +1,25 @@
+{
+    "name": "Unity",
+    "rootNamespace": "Project.Unity",
+    "references": [
+        "Core",
+        "Gameplay",
+        "UniTask",
+        "UniRx",
+        "VContainer",
+        "Unity.InputSystem",
+        "MessagePipe",
+        "MessagePipe.VContainer",
+        "LiteUI",
+        "DOTween.Modules"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

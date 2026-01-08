@@ -1,0 +1,16 @@
+﻿{
+  "name": "Editor.Tests",
+  "rootNamespace": "Project.Tests.Editor",
+  "references": [
+    "Core",
+    "Gameplay"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": []
+}

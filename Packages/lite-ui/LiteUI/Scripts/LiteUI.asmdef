@@ -1,0 +1,27 @@
+{
+    "name": "LiteUI",
+    "rootNamespace": "LiteUI",
+    "references": [
+        "GUID:75469ad4d38634e559750d17036d5f7c",
+        "GUID:f51ebe6a0ceec4240a699833d6309b23",
+        "GUID:9e24947de15b9834991c9d8411ea37cf",
+        "GUID:6055be8ebefd69e48b49212b09b47b2f",
+        "GUID:b0214a6008ed146ff8f122a6a9c2f6cc",
+        "GUID:08b38f39e2d9e594389b7a4cf4c2c338",
+        "GUID:84651a3751eca9349aac36a66bba901b",
+        "GUID:69448af7b92c7f342b298e06a37122aa",
+        "GUID:8722daf622184f24391a0103844a389b",
+        "GUID:b6406ec57a847e343ac1c9488a674c27",
+        "GUID:2bafac87e7f4b9b418d9448d219b01ab",
+        "GUID:4f682e06dbb3e624faedad9cc27106cc"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

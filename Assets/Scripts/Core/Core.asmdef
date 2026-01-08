@@ -1,0 +1,17 @@
+{
+    "name": "Core",
+    "rootNamespace": "Project.Core",
+    "references": [
+        "UniTask",
+        "UniRx"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
