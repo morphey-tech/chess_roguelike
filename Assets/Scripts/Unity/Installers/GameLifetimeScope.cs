@@ -26,24 +26,17 @@ namespace Project.Unity.Installers
             ConfigureCollectors(builder);
             ConfigureConfigs(builder);
             ConfigureInput(builder);
-            builder.RegisterBuildCallback(InjectSceneComponents);
             ConfigurePlayer(builder);
             ConfigureServices(builder);
             ConfigureQuests(builder);
+            builder.RegisterBuildCallback(RunBootstrap);
         }
         
-        private void InjectSceneComponents(IObjectResolver resolver)
-        {
-            var bootstraps = FindObjectsByType<MonoSceneBootstrap>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
-            foreach (MonoSceneBootstrap? bootstrap in bootstraps)
-            {
-                resolver.Inject(bootstrap);
-            }
-        }
-
         private void ConfigureMessagePipe(IContainerBuilder builder)
         {
             MessagePipeOptions options = builder.RegisterMessagePipe();
+            options.HandlingSubscribeDisposedPolicy = HandlingSubscribeDisposedPolicy.Throw;
+            options.EnableCaptureStackTrace = true;
         }
         
         private void ConfigureStates(IContainerBuilder builder)
@@ -85,6 +78,11 @@ namespace Project.Unity.Installers
 
         private void ConfigureQuests(IContainerBuilder builder)
         {
+        }
+
+        private void RunBootstrap(IObjectResolver resolver)
+        { 
+            resolver.Inject(_worldObjectCollector.RequireObjectByType<MonoSceneBootstrap>());
         }
     }
 }
