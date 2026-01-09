@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Project.Gameplay.Gameplay.Board
 {
-    public class NoAnimationBoardSpawnStrategy: IBoardAppearAnimationStrategy
+    public class BoardNoneAppearStrategy: IBoardAppearAnimationStrategy
     {
         public string Id => "none";
 

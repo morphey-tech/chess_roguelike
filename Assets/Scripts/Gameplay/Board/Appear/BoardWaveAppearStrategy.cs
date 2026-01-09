@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Project.Gameplay.Gameplay.Board.Appear
 {
-    public class WaveSpawnAnimationStrategy: IBoardAppearAnimationStrategy
+    public class BoardWaveAppearStrategy: IBoardAppearAnimationStrategy
     {
         public string Id => "wave";
 

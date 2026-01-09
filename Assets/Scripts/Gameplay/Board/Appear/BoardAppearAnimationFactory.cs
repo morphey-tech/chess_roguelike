@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Project.Gameplay.Gameplay.Board.Appear
 {
-    public class BoardAppearAnimationFactory
+    public sealed class BoardAppearAnimationFactory
     {
         private readonly Dictionary<string, IBoardAppearAnimationStrategy> _strategies;
 

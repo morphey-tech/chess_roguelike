@@ -1,7 +1,9 @@
+using System.Collections.Generic;
 using LiteUI.UI.Service;
 using MessagePipe;
 using Project.Core.World;
 using Project.Gameplay.Gameplay.Board;
+using Project.Gameplay.Gameplay.Board.Appear;
 using Project.Unity.Bootstrap;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -44,8 +46,6 @@ namespace Project.Unity.Installers
         {
             if (_worldObjectCollector != null)
             {
-                // Регистрируем как конкретный тип (для Unity слоя) 
-                // и как IWorldRoot (для Gameplay слоя)
                 builder.RegisterInstance(_worldObjectCollector)
                     .AsSelf()
                     .As<IWorldRoot>();
@@ -58,6 +58,12 @@ namespace Project.Unity.Installers
 
         private void ConfigureServices(IContainerBuilder builder)
         {
+            builder.Register<BoardAppearAnimationFactory>(Lifetime.Singleton)
+                .WithParameter(new List<IBoardAppearAnimationStrategy>
+                {
+                    new BoardNoneAppearStrategy(),
+                    new BoardWaveAppearStrategy()
+                });
             builder.Register<BoardSpawnService>(Lifetime.Singleton);
             builder.Register<CellsSpawnService>(Lifetime.Singleton);
         }
