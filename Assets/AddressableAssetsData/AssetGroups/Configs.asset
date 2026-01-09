@@ -15,8 +15,18 @@ MonoBehaviour:
   m_GroupName: Configs
   m_GUID: d5bda6645f02ab1428bf65697a591e97
   m_SerializeEntries:
+  - m_GUID: 75a89f9811af4340b39e0e64beed6c64
+    m_Address: stages_conf
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7c60432051cc6c44dbdc057d23564b51
     m_Address: boards_conf
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 817ca298577143b4bd44135544c40d67
+    m_Address: runs_conf
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

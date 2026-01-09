@@ -7,7 +7,7 @@ namespace Project.Core.Core.Configs.Cells
     [Serializable]
     public class CellConfigRepository
     {
-        [JsonProperty("cells")]
+        [JsonProperty("content")]
         public List<CellConfig> Cells { get; set; }
     }
 }

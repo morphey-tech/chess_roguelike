@@ -4,6 +4,8 @@ using MessagePipe;
 using Project.Core.World;
 using Project.Gameplay.Gameplay.Board;
 using Project.Gameplay.Gameplay.Board.Appear;
+using Project.Gameplay.Gameplay.Run;
+using Project.Gameplay.Gameplay.Stage;
 using Project.Unity.Bootstrap;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -58,6 +60,9 @@ namespace Project.Unity.Installers
 
         private void ConfigureServices(IContainerBuilder builder)
         {
+            builder.Register<RunFactory>(Lifetime.Singleton);
+            builder.Register<StageFactory>(Lifetime.Singleton);
+            
             builder.Register<BoardAppearAnimationFactory>(Lifetime.Singleton)
                 .WithParameter(new List<IBoardAppearAnimationStrategy>
                 {
@@ -69,7 +74,10 @@ namespace Project.Unity.Installers
         }
 
         private void RunBootstrap(IObjectResolver resolver)
-        { 
+        {
+            // Принудительно создаём BoardSpawnService чтобы он подписался на сообщения
+            resolver.Resolve<BoardSpawnService>();
+            
             resolver.Inject(_worldObjectCollector.RequireObjectByType<MonoSceneBootstrap>());
         }
     }

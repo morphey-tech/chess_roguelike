@@ -7,7 +7,7 @@ namespace Project.Core.Core.Configs
     [Serializable]
     public class BoardConfigRepository
     {
-        [JsonProperty("boards")]
+        [JsonProperty("content")]
         public List<BoardConfig> Boards { get; set; }
 
         public BoardConfig? GetBy(string id)

@@ -6,17 +6,23 @@ namespace Project.Gameplay.Gameplay.Board.Appear
     public sealed class BoardAppearAnimationFactory
     {
         private readonly Dictionary<string, IBoardAppearAnimationStrategy> _strategies;
+        private readonly IBoardAppearAnimationStrategy _fallback;
 
         public BoardAppearAnimationFactory(
             IEnumerable<IBoardAppearAnimationStrategy> strategies)
         {
             _strategies = strategies.ToDictionary(s => s.Id);
+            _fallback = new BoardNoneAppearStrategy();
         }
 
         public IBoardAppearAnimationStrategy Get(string id)
         {
+            if (string.IsNullOrEmpty(id))
+                return _fallback;
+                
             return _strategies.TryGetValue(id, out IBoardAppearAnimationStrategy strategy) 
-                ? strategy : _strategies["none"];
+                ? strategy 
+                : _fallback;
         }
     }
 }
