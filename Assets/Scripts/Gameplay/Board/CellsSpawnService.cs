@@ -9,14 +9,13 @@ using UnityEngine;
 
 namespace Project.Gameplay.Gameplay.Board
 {
-    public class CellsSpawnService
+    public sealed class CellsSpawnService
     {
         private readonly IAssetService _assetService;
         private readonly IWorldRoot _worldRoot;
         private readonly ConfigProvider _configProvider;
         private readonly ILogger<CellsSpawnService> _logger;
 
-        // Размер клетки (можно вынести в конфиг)
         private const float CellSize = 1f;
 
         public CellsSpawnService(
@@ -31,23 +30,30 @@ namespace Project.Gameplay.Gameplay.Board
             _logger = logService.CreateLogger<CellsSpawnService>();
         }
 
-        public async UniTask SpawnAsync(int row, int col, char cellSymbol)
+        public async UniTask<GameObject> SpawnAsync(int row, int col, char cellSymbol)
         {
             string alias = cellSymbol.ToString();
-            CellConfigRepository? cellConfigRepository = await _configProvider.Get<CellConfigRepository>("cells_conf");
-            CellConfig cellConfig = cellConfigRepository.Cells.Find(c => c.Alias == alias);
+            CellConfigRepository cellConfigRepository =
+                await _configProvider.Get<CellConfigRepository>("cells_conf");
+            CellConfig cellConfig =
+                cellConfigRepository.Cells.Find(c => c.Alias == alias);
 
             if (cellConfig == null)
             {
                 throw new Exception($"No config found for cell alias {alias}.");
             }
 
-            Vector3 position = new(col * CellSize, 0f, row * CellSize);
-            GameObject? cell = await _assetService.InstantiateAsync(
-                cellConfig.AssetKey,
-                position,
-                Quaternion.identity,
-                _worldRoot.BoardRoot);  // <-- родитель из IWorldRoot
+            Vector3 position = new(
+                col * CellSize,
+                0f,
+                row * CellSize);
+
+            GameObject cell =
+                await _assetService.InstantiateAsync(
+                    cellConfig.AssetKey,
+                    position,
+                    Quaternion.identity,
+                    _worldRoot.BoardRoot);
 
             if (cell == null)
             {
@@ -55,6 +61,7 @@ namespace Project.Gameplay.Gameplay.Board
             }
 
             _logger.Debug($"Spawned cell '{alias}' at ({row}, {col})");
+            return cell;
         }
     }
 }

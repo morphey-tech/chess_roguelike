@@ -14,16 +14,5 @@ namespace Project.Core.Bootstrap
         UniTask ReturnToMainMenuAsync();
         UniTask QuitGameAsync();
     }
-
-    public enum GameState
-    {
-        None,
-        Initializing,
-        MainMenu,
-        Loading,
-        Playing,
-        Paused,
-        Quitting
-    }
 }
 

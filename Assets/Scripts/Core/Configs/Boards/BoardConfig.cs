@@ -17,6 +17,9 @@ namespace Project.Core.Core.Configs
         
         [JsonProperty("board_data")]
         public string[] Board { get; set; }
+
+        [JsonProperty("appear_id")]
+        public string AppearStrategyId { get; set; }
         
         public char[,] GetBoard2D()
         {

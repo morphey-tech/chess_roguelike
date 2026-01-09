@@ -73,33 +73,7 @@ namespace Project.Gameplay.Logging
             _loggerFactory?.Dispose();
         }
     }
-    
-    /// <summary>
-    /// Обёртка над ZLogger для нашего интерфейса.
-    /// Использует стандартные методы логирования (без C# 10 interpolation).
-    /// </summary>
-    public class ZLoggerWrapper : ILogger
-    {
-        private readonly Microsoft.Extensions.Logging.ILogger _logger;
-        
-        public string Category { get; }
-        
-        public ZLoggerWrapper(Microsoft.Extensions.Logging.ILogger logger, string category)
-        {
-            _logger = logger;
-            Category = category;
-        }
-        
-        public void Trace(string message) => _logger.LogTrace("[{Category}] {Message}", Category, message);
-        public void Debug(string message) => _logger.LogDebug("[{Category}] {Message}", Category, message);
-        public void Info(string message) => _logger.LogInformation("[{Category}] {Message}", Category, message);
-        public void Warning(string message) => _logger.LogWarning("[{Category}] {Message}", Category, message);
-        public void Error(string message) => _logger.LogError("[{Category}] {Message}", Category, message);
-        public void Error(string message, Exception ex) => _logger.LogError(ex, "[{Category}] {Message}", Category, message);
-        public void Fatal(string message) => _logger.LogCritical("[{Category}] {Message}", Category, message);
-        public void Fatal(string message, Exception ex) => _logger.LogCritical(ex, "[{Category}] {Message}", Category, message);
-    }
-    
+
     /// <summary>
     /// Типизированная обёртка
     /// </summary>

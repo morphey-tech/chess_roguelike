@@ -180,10 +180,5 @@ namespace Project.Gameplay.Bootstrap
             _logger.Info("Disposed");
         }
     }
-
-    public interface IInitializable
-    {
-        UniTask InitializeAsync();
-    }
 }
 
