@@ -1,4 +1,6 @@
 using Project.Core.Core.Grid;
+using Project.Gameplay.Gameplay.Cells;
+using Project.Gameplay.Gameplay.Figures;
 
 namespace Project.Gameplay.Gameplay.Grid
 {
@@ -6,12 +8,25 @@ namespace Project.Gameplay.Gameplay.Grid
     {
         public GridPosition Position { get; }
 
-        //TODO: temp
-        public bool IsWalkable => false;
-        
+        public Figure? OccupiedBy { get; private set; }
+        public CellEffectContainer Effects { get; }
+
+        public bool IsWalkable => OccupiedBy == null;
+
         public BoardCell(GridPosition position)
         {
             Position = position;
+            Effects = new CellEffectContainer();
+        }
+
+        public void PlaceFigure(Figure figure)
+        {
+            OccupiedBy = figure;
+        }
+
+        public void RemoveFigure()
+        {
+            OccupiedBy = null;
         }
     }
 }
