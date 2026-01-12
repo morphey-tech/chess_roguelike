@@ -1,0 +1,9 @@
+{
+  "content": [
+    {
+      "id": "pawn",
+      "asset_key": "pawn_figure",
+      "behaviour_id": "none"
+    }
+  ]
+}
