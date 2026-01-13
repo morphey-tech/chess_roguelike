@@ -78,8 +78,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0dd9188c60f7ffa4ca3a1208b5834371, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity::Project.Unity.WorldObjectCollector
-  _boardRoot: {fileID: 0}
-  _unitsRoot: {fileID: 0}
+  _boardRoot: {fileID: 6201183284455142329}
+  _figureRoot: {fileID: 4651211947585227532}
   _effectsRoot: {fileID: 0}
 --- !u!114 &117507623264450218
 MonoBehaviour:

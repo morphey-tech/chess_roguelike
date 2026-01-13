@@ -63,7 +63,7 @@ namespace Project.Unity.Unity.Views
                 config.AssetKey,
                 worldPos,
                 rotation,
-                _worldRoot.UnitsRoot);
+                _worldRoot.FigureRoot);
 
             if (figureGO == null)
             {

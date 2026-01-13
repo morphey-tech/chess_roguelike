@@ -4,7 +4,7 @@ using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
 
-namespace Project.Gameplay.Gameplay.Board.Appear
+namespace Project.Gameplay.Gameplay.Board.Appear.Strategies
 {
     public class BoardWaveAppearStrategy: IBoardAppearAnimationStrategy
     {

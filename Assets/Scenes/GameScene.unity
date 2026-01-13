@@ -425,14 +425,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 3655741697909723524, guid: 98e5b103b1927ed4690dc3e81d9640d4, type: 3}
-      propertyPath: _boardRoot
-      value: 
-      objectReference: {fileID: 8079000343660485718}
-    - target: {fileID: 3655741697909723524, guid: 98e5b103b1927ed4690dc3e81d9640d4, type: 3}
-      propertyPath: _unitsRoot
-      value: 
-      objectReference: {fileID: 8079000343660485717}
     - target: {fileID: 4885574322500113236, guid: 98e5b103b1927ed4690dc3e81d9640d4, type: 3}
       propertyPath: m_Name
       value: GameWorld
@@ -442,16 +434,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 98e5b103b1927ed4690dc3e81d9640d4, type: 3}
---- !u!4 &8079000343660485717 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 4651211947585227532, guid: 98e5b103b1927ed4690dc3e81d9640d4, type: 3}
-  m_PrefabInstance: {fileID: 8079000343660485712}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &8079000343660485718 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 6201183284455142329, guid: 98e5b103b1927ed4690dc3e81d9640d4, type: 3}
-  m_PrefabInstance: {fileID: 8079000343660485712}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

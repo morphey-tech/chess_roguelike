@@ -9,7 +9,7 @@ namespace Project.Core.Core.World
     public interface IWorldRoot
     {
         Transform BoardRoot { get; }
-        Transform UnitsRoot { get; }
+        Transform FigureRoot { get; }
         Transform EffectsRoot { get; }
     }
 }

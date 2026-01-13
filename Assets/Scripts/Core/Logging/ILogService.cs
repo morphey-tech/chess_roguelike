@@ -15,13 +15,6 @@ namespace Project.Core.Core.Logging
         ILogger CreateLogger(string category);
         ILogger<T> CreateLogger<T>();
     }
-
-    /// <summary>
-    /// Типизированный логгер
-    /// </summary>
-    public interface ILogger<T> : ILogger
-    {
-    }
 }
 
 

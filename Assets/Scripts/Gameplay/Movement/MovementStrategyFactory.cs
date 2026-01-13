@@ -12,18 +12,9 @@ namespace Project.Gameplay.Gameplay.Movement
         private readonly Dictionary<string, IMovementStrategy> _strategies;
         private readonly IMovementStrategy _fallback;
 
-        private MovementStrategyFactory()
+        private MovementStrategyFactory(IEnumerable<IMovementStrategy> strategies)
         {
-            IMovementStrategy[] all =
-            {
-                new PawnMovement(),
-                new KnightMovement(),
-                new RookMovement(),
-                new BishopMovement(),
-                new QueenMovement()
-            };
-
-            _strategies = all.ToDictionary(s => s.Id);
+            _strategies = strategies.ToDictionary(s => s.Id);
             _fallback = new PawnMovement();
         }
 

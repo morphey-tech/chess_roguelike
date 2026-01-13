@@ -4,9 +4,11 @@ using MessagePipe;
 using Project.Core.Core.World;
 using Project.Gameplay.Gameplay.Board;
 using Project.Gameplay.Gameplay.Board.Appear;
+using Project.Gameplay.Gameplay.Board.Appear.Strategies;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Input;
 using Project.Gameplay.Gameplay.Movement;
+using Project.Gameplay.Gameplay.Movement.Strategies;
 using Project.Gameplay.Gameplay.Run;
 using Project.Gameplay.Gameplay.Selection;
 using Project.Gameplay.Gameplay.Stage;
@@ -70,8 +72,7 @@ namespace Project.Unity.Unity.Installers
         {
             // Views are regular classes - they implement Core interfaces
             builder.Register<BoardPresenter>(Lifetime.Singleton)
-                .As<IBoardPresenter>()
-                .AsSelf();
+                .As<IBoardPresenter>();
 
             builder.Register<FigurePresenter>(Lifetime.Singleton)
                 .As<IFigurePresenter>();
@@ -111,7 +112,15 @@ namespace Project.Unity.Unity.Installers
                 });
 
             // Movement strategies
-            builder.Register<MovementStrategyFactory>(Lifetime.Singleton);
+            builder.Register<MovementStrategyFactory>(Lifetime.Singleton)
+                .WithParameter(new List<IMovementStrategy>
+                {
+                    new PawnMovement(),
+                    new KnightMovement(),
+                    new RookMovement(),
+                    new BishopMovement(),
+                    new QueenMovement()
+                });
 
             // Pure gameplay services
             builder.Register<BoardSpawnService>(Lifetime.Singleton);

@@ -7,6 +7,7 @@ using Project.Core.Core.Logging;
 using Project.Core.Core.World;
 using Project.Gameplay.Gameplay.Board;
 using Project.Gameplay.Gameplay.Board.Appear;
+using Project.Gameplay.Gameplay.Board.Appear.Strategies;
 using Project.Gameplay.Gameplay.Configs;
 using UnityEngine;
 

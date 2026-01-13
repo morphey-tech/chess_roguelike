@@ -13,15 +13,13 @@ namespace Project.Unity.Unity.World
     {
         [Header("Корневые контейнеры для спавна")]
         [SerializeField] private Transform _boardRoot;
-        [SerializeField] private Transform _unitsRoot;
+        [SerializeField] private Transform _figureRoot;
         [SerializeField] private Transform _effectsRoot;
 
-        // IWorldRoot - эти свойства использует Gameplay слой
-        public Transform BoardRoot => _boardRoot != null ? _boardRoot : transform;
-        public Transform UnitsRoot => _unitsRoot != null ? _unitsRoot : transform;
-        public Transform EffectsRoot => _effectsRoot != null ? _effectsRoot : transform;
-
-        // Остальное - для Unity слоя
+        Transform IWorldRoot.BoardRoot => _boardRoot != null ? _boardRoot : transform;
+        Transform IWorldRoot.FigureRoot => _figureRoot != null ? _figureRoot : transform;
+        Transform IWorldRoot.EffectsRoot => _effectsRoot != null ? _effectsRoot : transform;
+        
         public T? GetObjectByType<T>(bool includeInactive = false)
             where T : class
         {
