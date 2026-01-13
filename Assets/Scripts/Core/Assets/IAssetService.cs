@@ -2,7 +2,7 @@ using System;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-namespace Project.Core.Assets
+namespace Project.Core.Core.Assets
 {
     public interface IAssetService
     {

@@ -1,6 +1,6 @@
 using Cysharp.Threading.Tasks;
 
-namespace Project.Core.Save
+namespace Project.Core.Core.Save
 {
     public interface ISaveSystem
     {

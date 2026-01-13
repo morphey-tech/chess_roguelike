@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-namespace Project.Gameplay.Gameplay.Board
+namespace Project.Gameplay.Gameplay.Board.Appear
 {
     public interface IBoardAppearAnimationStrategy
     {

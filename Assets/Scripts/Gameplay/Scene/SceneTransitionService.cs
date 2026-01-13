@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Project.Core.Bootstrap;
-using Project.Core.Logging;
-using Project.Core.Scene;
+using Project.Core.Core.Bootstrap;
+using Project.Core.Core.Logging;
+using Project.Core.Core.Scene;
+using Project.Gameplay.Gameplay.Memory;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using VContainer;
 using VContainer.Unity;
-using ILogger = Project.Core.Logging.ILogger;
+using ILogger = Project.Core.Core.Logging.ILogger;
 
-namespace Project.Gameplay.Scene
+namespace Project.Gameplay.Gameplay.Scene
 {
     public sealed class SceneTransitionService
     {

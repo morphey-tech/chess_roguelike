@@ -1,6 +1,6 @@
 using System;
 
-namespace Project.Core.Logging
+namespace Project.Core.Core.Logging
 {
     /// <summary>
     /// Интерфейс логгера для категории

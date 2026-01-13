@@ -1,24 +1,31 @@
 using System.Collections.Generic;
 using LiteUI.UI.Service;
 using MessagePipe;
-using Project.Core.World;
+using Project.Core.Core.World;
 using Project.Gameplay.Gameplay.Board;
 using Project.Gameplay.Gameplay.Board.Appear;
+using Project.Gameplay.Gameplay.Figures;
+using Project.Gameplay.Gameplay.Input;
+using Project.Gameplay.Gameplay.Movement;
 using Project.Gameplay.Gameplay.Run;
+using Project.Gameplay.Gameplay.Selection;
 using Project.Gameplay.Gameplay.Stage;
-using Project.Unity.Bootstrap;
+using Project.Gameplay.Gameplay.Turn;
+using Project.Unity.Unity.Bootstrap;
+using Project.Unity.Unity.Views;
+using Project.Unity.Unity.World;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using VContainer;
 using VContainer.Unity;
 
-namespace Project.Unity.Installers
+namespace Project.Unity.Unity.Installers
 {
     public class GameLifetimeScope : LifetimeScope
     {
         [Header("Input")]
         [SerializeField] private InputActionAsset _inputActions;
-        
+
         [Header("Collectors")]
         [SerializeField] private WorldObjectCollector _worldObjectCollector;
         [SerializeField] private UiObjectCollector _uiObjectCollector;
@@ -28,17 +35,18 @@ namespace Project.Unity.Installers
             ConfigureMessagePipe(builder);
             ConfigureInput(builder);
             ConfigureCollectors(builder);
+            ConfigureViews(builder);
             ConfigureServices(builder);
-            builder.RegisterBuildCallback(RunBootstrap);
+            builder.RegisterBuildCallback(OnContainerBuilt);
         }
-        
+
         private void ConfigureMessagePipe(IContainerBuilder builder)
         {
             MessagePipeOptions options = builder.RegisterMessagePipe();
             options.HandlingSubscribeDisposedPolicy = HandlingSubscribeDisposedPolicy.Throw;
             options.EnableCaptureStackTrace = true;
         }
-        
+
         private void ConfigureInput(IContainerBuilder builder)
         {
             builder.RegisterInstance(_inputActions);
@@ -58,27 +66,73 @@ namespace Project.Unity.Installers
             }
         }
 
+        private void ConfigureViews(IContainerBuilder builder)
+        {
+            // Views are regular classes - they implement Core interfaces
+            builder.Register<BoardPresenter>(Lifetime.Singleton)
+                .As<IBoardPresenter>()
+                .AsSelf();
+
+            builder.Register<FigurePresenter>(Lifetime.Singleton)
+                .As<IFigurePresenter>();
+        }
+
         private void ConfigureServices(IContainerBuilder builder)
         {
+            // Run & Stage
+            builder.Register<RunHolder>(Lifetime.Singleton);
             builder.Register<RunFactory>(Lifetime.Singleton);
             builder.Register<StageFactory>(Lifetime.Singleton);
-            
+
+            // Input - dispatches input events via MessagePipe
+            builder.Register<InputDispatcher>(Lifetime.Singleton)
+                .AsImplementedInterfaces()
+                .AsSelf();
+
+            // Turn & Selection - subscribe to input events
+            builder.Register<TurnSystem>(Lifetime.Singleton)
+                .AsImplementedInterfaces()
+                .AsSelf();
+            builder.Register<SelectionService>(Lifetime.Singleton)
+                .AsImplementedInterfaces()
+                .AsSelf();
+
+            // Stage Service - handles stage events
+            builder.Register<StageService>(Lifetime.Singleton)
+                .AsImplementedInterfaces()
+                .AsSelf();
+
+            // Board - animation strategies
             builder.Register<BoardAppearAnimationFactory>(Lifetime.Singleton)
                 .WithParameter(new List<IBoardAppearAnimationStrategy>
                 {
                     new BoardNoneAppearStrategy(),
                     new BoardWaveAppearStrategy()
                 });
+
+            // Movement strategies
+            builder.Register<MovementStrategyFactory>(Lifetime.Singleton);
+
+            // Pure gameplay services
             builder.Register<BoardSpawnService>(Lifetime.Singleton);
-            builder.Register<CellsSpawnService>(Lifetime.Singleton);
+            builder.Register<FigureSpawnService>(Lifetime.Singleton);
+            builder.Register<DamageService>(Lifetime.Singleton);
+            builder.Register<MovementService>(Lifetime.Singleton);
         }
 
-        private void RunBootstrap(IObjectResolver resolver)
+        private void OnContainerBuilt(IObjectResolver resolver)
         {
-            // Принудительно создаём BoardSpawnService чтобы он подписался на сообщения
-            resolver.Resolve<BoardSpawnService>();
-            
-            resolver.Inject(_worldObjectCollector.RequireObjectByType<MonoSceneBootstrap>());
+            // Принудительно создаём сервисы с подписками
+            resolver.Resolve<TurnSystem>();
+            resolver.Resolve<SelectionService>();
+            resolver.Resolve<StageService>();
+
+            // Инжектим MonoSceneBootstrap
+            MonoSceneBootstrap bootstrap = _worldObjectCollector.GetObjectByType<MonoSceneBootstrap>();
+            if (bootstrap != null)
+            {
+                resolver.Inject(bootstrap);
+            }
         }
     }
 }

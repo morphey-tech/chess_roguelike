@@ -1,8 +1,10 @@
 using System;
 using Cysharp.Threading.Tasks;
+using Project.Core.Core.Configs;
+using Project.Core.Core.Configs.Boards;
 using Project.Core.Core.Configs.Run;
 using Project.Core.Core.Configs.Stage;
-using Project.Gameplay.Configs;
+using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Stage;
 
@@ -45,21 +47,27 @@ namespace Project.Gameplay.Gameplay.Run
         {
             string stageId = _config.Stages[_currentStageIndex];
             
-            StageConfigRepository repository = 
+            StageConfigRepository stageRepository = 
                 await _configProvider.Get<StageConfigRepository>("stages_conf");
             
-            StageConfig stageConfig = Array.Find(repository.Stages, s => s.Id == stageId);
+            StageConfig stageConfig = Array.Find(stageRepository.Stages, s => s.Id == stageId);
             
             if (stageConfig == null)
             {
-                throw new Exception($"Stage config '{stageId}' not found");
+                throw new NullReferenceException($"Stage config '{stageId}' not found");
             }
 
-            // Создаём грид по размерам из конфига борды (пока захардкодим)
-            BoardGrid grid = new BoardGrid(8, 8);
+            BoardConfigRepository boardRepository = await _configProvider.Get<BoardConfigRepository>("boards_conf");
+            BoardConfig? boardConfig = boardRepository.GetBy(stageConfig.BoardId);
             
+            if (boardConfig == null)
+            {
+                throw new NullReferenceException($"Board config '{stageConfig.BoardId}' not found");
+            }
+            
+            BoardGrid grid = new(boardConfig.Width, boardConfig.Height);
             CurrentStage = _stageFactory.Create(stageConfig, grid);
-            CurrentStage.Begin();
+            await CurrentStage.BeginAsync();
         }
     }
 }

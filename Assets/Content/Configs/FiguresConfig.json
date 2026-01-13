@@ -3,7 +3,8 @@
     {
       "id": "pawn",
       "asset_key": "pawn_figure",
-      "behaviour_id": "none"
+      "behaviour_id": "none",
+      "movement_id": "pawn"
     }
   ]
 }

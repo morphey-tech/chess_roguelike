@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
-using Project.Core.Assets;
+using Project.Core.Core.Assets;
 using Project.Core.Core.Configs;
-using Project.Core.Logging;
+using Project.Core.Core.Logging;
 using UnityEngine;
 using VContainer;
-using ILogger = Project.Core.Logging.ILogger;
+using ILogger = Project.Core.Core.Logging.ILogger;
 
-namespace Project.Gameplay.Configs
+namespace Project.Gameplay.Gameplay.Configs
 {
     public class ConfigProvider : ConfigProviderBase, IDisposable
     {

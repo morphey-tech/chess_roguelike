@@ -2,7 +2,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
-namespace Project.Editor
+namespace Editor
 {
     /// <summary>
     /// Автоматический запуск игры с Init сцены.

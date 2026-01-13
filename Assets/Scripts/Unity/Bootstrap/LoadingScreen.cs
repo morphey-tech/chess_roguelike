@@ -1,12 +1,12 @@
 using System;
 using Cysharp.Threading.Tasks;
-using Project.Core.Scene;
+using Project.Core.Core.Scene;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
 using VContainer;
 
-namespace Project.Unity.Bootstrap
+namespace Project.Unity.Unity.Bootstrap
 {
     public class LoadingScreen : MonoBehaviour
     {

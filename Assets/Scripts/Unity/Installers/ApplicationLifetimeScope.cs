@@ -1,15 +1,15 @@
-using Project.Core.Logging;
-using Project.Gameplay;
-using Project.Gameplay.Assets;
-using Project.Gameplay.Configs;
-using Project.Gameplay.Logging;
-using Project.Gameplay.Save;
-using Project.Gameplay.Scene;
+using Project.Core.Core.Logging;
+using Project.Gameplay.Gameplay.Assets;
+using Project.Gameplay.Gameplay.Configs;
+using Project.Gameplay.Gameplay.Logging;
+using Project.Gameplay.Gameplay.Memory;
+using Project.Gameplay.Gameplay.Save;
+using Project.Gameplay.Gameplay.Scene;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
 
-namespace Project.Unity.Installers
+namespace Project.Unity.Unity.Installers
 {
     /// <summary>
     /// Корневой скоуп — синглтоны на всё время жизни игры.

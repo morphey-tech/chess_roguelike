@@ -1,4 +1,4 @@
-namespace Project.Core.Logging
+namespace Project.Core.Core.Logging
 {
     /// <summary>
     /// Уровень логирования

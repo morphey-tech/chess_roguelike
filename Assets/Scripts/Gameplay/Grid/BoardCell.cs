@@ -11,7 +11,7 @@ namespace Project.Gameplay.Gameplay.Grid
         public Figure? OccupiedBy { get; private set; }
         public CellEffectContainer Effects { get; }
 
-        public bool IsWalkable => OccupiedBy == null;
+        public bool IsFree => OccupiedBy == null;
 
         public BoardCell(GridPosition position)
         {

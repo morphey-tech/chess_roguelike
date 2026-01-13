@@ -1,7 +1,7 @@
 using VContainer;
 using VContainer.Unity;
 
-namespace Project.Unity
+namespace Project.Unity.Unity.Installers
 {
     public class MenuLifetimeScope : LifetimeScope
     {

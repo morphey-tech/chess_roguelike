@@ -1,11 +1,11 @@
 using Cysharp.Threading.Tasks;
-using Project.Core.Logging;
-using Project.Core.Scene;
+using Project.Core.Core.Logging;
+using Project.Core.Core.Scene;
 using UnityEngine;
 using UnityEngine.UI;
 using VContainer;
 
-namespace Project.Unity.Bootstrap
+namespace Project.Unity.Unity.Bootstrap
 {
     public class MainMenuController : MonoBehaviour
     {

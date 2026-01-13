@@ -11,8 +11,7 @@ GameObject:
   - component: {fileID: 444147964555339512}
   - component: {fileID: 3958397388189717344}
   - component: {fileID: 8318344406310446554}
-  - component: {fileID: 1132650992986838102}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cap
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -28,8 +27,8 @@ Transform:
   m_GameObject: {fileID: 3169772628077902484}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.9, z: 0}
-  m_LocalScale: {x: 1, y: 0.05, z: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.9, y: 0.05, z: 0.9}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5891876457319257473}
@@ -90,27 +89,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &1132650992986838102
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3169772628077902484}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &3363870308254189545
 GameObject:
   m_ObjectHideFlags: 0
@@ -122,8 +100,7 @@ GameObject:
   - component: {fileID: 8790480853281268000}
   - component: {fileID: 4626510841166412345}
   - component: {fileID: 918221176516605725}
-  - component: {fileID: 7965294439920099469}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Base
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -139,8 +116,8 @@ Transform:
   m_GameObject: {fileID: 3363870308254189545}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.001, y: 0.75, z: 0}
-  m_LocalScale: {x: 1, y: 0.25, z: 1}
+  m_LocalPosition: {x: 0, y: -0.15, z: 0}
+  m_LocalScale: {x: 0.9, y: 0.25, z: 0.9}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5891876457319257473}
@@ -178,7 +155,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 2e483c0a8b221cb4a986c998da3736a1, type: 2}
+  - {fileID: 2100000, guid: ca85aa7f48db8f0488c926071dd1b19c, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -201,27 +178,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &7965294439920099469
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3363870308254189545}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &9026925232284595385
 GameObject:
   m_ObjectHideFlags: 0
@@ -231,7 +187,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5891876457319257473}
-  m_Layer: 0
+  - component: {fileID: 5954411633879373137}
+  - component: {fileID: 1417268932744069436}
+  m_Layer: 6
   m_Name: WhiteCell
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -255,3 +213,44 @@ Transform:
   - {fileID: 444147964555339512}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &5954411633879373137
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9026925232284595385}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.9, y: 0.25, z: 0.9}
+  m_Center: {x: 0, y: -0.1, z: 0}
+--- !u!114 &1417268932744069436
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9026925232284595385}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed554b7ab8445b64c93e172efb8f96e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity::Project.Unity.Views.Components.BoardCellView
+  _appearDuration: 0.2
+  _appearEase: 27
+  _hitDuration: 0.15
+  _hitShake: 0.05
+  _renderer: {fileID: 0}
+  _highlightColor: {r: 1, g: 1, b: 0.5, a: 1}
+  _moveTargetColor: {r: 0.5, g: 1, b: 0.5, a: 1}
+  _attackTargetColor: {r: 1, g: 0.5, b: 0.5, a: 1}

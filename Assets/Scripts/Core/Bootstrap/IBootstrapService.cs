@@ -1,7 +1,7 @@
 using System;
 using Cysharp.Threading.Tasks;
 
-namespace Project.Core.Bootstrap
+namespace Project.Core.Core.Bootstrap
 {
     public interface IBootstrapService
     {

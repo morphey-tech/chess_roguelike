@@ -1,5 +1,5 @@
 using Project.Core.Core.Configs.Run;
-using Project.Gameplay.Configs;
+using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.Gameplay.Stage;
 
 namespace Project.Gameplay.Gameplay.Run

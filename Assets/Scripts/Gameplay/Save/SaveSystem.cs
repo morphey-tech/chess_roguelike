@@ -1,14 +1,14 @@
 using System;
 using System.IO;
 using Cysharp.Threading.Tasks;
-using Project.Core.Logging;
-using Project.Core.Save;
+using Project.Core.Core.Logging;
+using Project.Core.Core.Save;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using VContainer;
-using ILogger = Project.Core.Logging.ILogger;
+using ILogger = Project.Core.Core.Logging.ILogger;
 
-namespace Project.Gameplay.Save
+namespace Project.Gameplay.Gameplay.Save
 {
     public class SaveSystem : ISaveSystem, IDisposable
     {

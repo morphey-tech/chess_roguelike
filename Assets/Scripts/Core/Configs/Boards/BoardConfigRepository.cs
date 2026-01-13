@@ -1,14 +1,13 @@
 using System;
-using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace Project.Core.Core.Configs
+namespace Project.Core.Core.Configs.Boards
 {
     [Serializable]
     public class BoardConfigRepository
     {
         [JsonProperty("content")]
-        public List<BoardConfig> Boards { get; set; }
+        public BoardConfig[] Boards { get; set; }
 
         public BoardConfig? GetBy(string id)
         {

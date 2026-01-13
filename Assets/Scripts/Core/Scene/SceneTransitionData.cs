@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Project.Core.Scene
+namespace Project.Core.Core.Scene
 {
     /// <summary>
     /// Данные для передачи между сценами.

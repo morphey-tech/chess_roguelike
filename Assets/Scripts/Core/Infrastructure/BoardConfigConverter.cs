@@ -1,6 +1,7 @@
 using System;
 using Newtonsoft.Json;
 using Project.Core.Core.Configs;
+using Project.Core.Core.Configs.Boards;
 
 namespace Project.Core.Core.Infrastructure
 {

@@ -1,7 +1,7 @@
 using VContainer;
 using VContainer.Unity;
 
-namespace Project.Unity.Installers
+namespace Project.Unity.Unity.Installers
 {
     /// <summary>
     /// Скоуп для Init сцены. Наследуется от RootLifetimeScope.

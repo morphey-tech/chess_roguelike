@@ -1,4 +1,4 @@
-namespace Project.Core.Assets
+namespace Project.Core.Core.Assets
 {
     public readonly struct AssetKey
     {

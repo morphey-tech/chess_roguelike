@@ -1,6 +1,6 @@
 using System;
 
-namespace Project.Core.Save
+namespace Project.Core.Core.Save
 {
     [Serializable]
     public class SaveData

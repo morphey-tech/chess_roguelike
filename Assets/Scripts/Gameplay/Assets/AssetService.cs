@@ -1,15 +1,15 @@
 using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using Project.Core.Assets;
-using Project.Core.Logging;
+using Project.Core.Core.Assets;
+using Project.Core.Core.Logging;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using VContainer;
-using ILogger = Project.Core.Logging.ILogger;
+using ILogger = Project.Core.Core.Logging.ILogger;
 
-namespace Project.Gameplay.Assets
+namespace Project.Gameplay.Gameplay.Assets
 {
     public class AssetService : IAssetService, IDisposable
     {

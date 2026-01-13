@@ -15,7 +15,7 @@ MonoBehaviour:
   m_GroupName: Figures
   m_GUID: d0f300d672abddf4c92f307c11433933
   m_SerializeEntries:
-  - m_GUID: 3605a6e4fde7d594aa08481185959edb
+  - m_GUID: dc8aba5da95c66743ba01eb6a55c588a
     m_Address: pawn_figure
     m_ReadOnly: 0
     m_SerializedLabels: []

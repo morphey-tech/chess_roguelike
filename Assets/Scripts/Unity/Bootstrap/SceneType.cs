@@ -1,4 +1,4 @@
-namespace Project.Unity.Bootstrap
+namespace Project.Unity.Unity.Bootstrap
 {
     public enum SceneType
     {

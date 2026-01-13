@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
-using Project.Core.World;
+using Project.Core.Core.World;
 using UnityEngine;
 using static LiteUI.Common.Preconditions;
 
-namespace Project.Unity
+namespace Project.Unity.Unity.World
 {
     /// <summary>
     /// Коллектор объектов мира + реализация IWorldRoot для Gameplay слоя.

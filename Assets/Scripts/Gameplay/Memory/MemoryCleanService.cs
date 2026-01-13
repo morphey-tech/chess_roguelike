@@ -3,7 +3,7 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using VContainer.Unity;
 
-namespace Project.Gameplay
+namespace Project.Gameplay.Gameplay.Memory
 {
     public sealed class MemoryCleanService : IInitializable, IDisposable
     {

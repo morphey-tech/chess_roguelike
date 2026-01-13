@@ -1,4 +1,4 @@
-namespace Project.Core.Bootstrap
+namespace Project.Core.Core.Bootstrap
 {
     public enum GameState
     {

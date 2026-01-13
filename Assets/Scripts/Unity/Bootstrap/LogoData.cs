@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Project.Unity.Bootstrap
+namespace Project.Unity.Unity.Bootstrap
 {
     /// <summary>
     /// Данные одного логотипа

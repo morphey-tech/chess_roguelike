@@ -1,4 +1,4 @@
-namespace Project.Core.Scene
+namespace Project.Core.Core.Scene
 {
     public readonly struct SceneUnloadedMessage
     {

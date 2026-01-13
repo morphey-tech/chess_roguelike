@@ -1,7 +1,7 @@
 using System;
 using Cysharp.Threading.Tasks;
 
-namespace Project.Core.Scene
+namespace Project.Core.Core.Scene
 {
     public interface ISceneService
     {

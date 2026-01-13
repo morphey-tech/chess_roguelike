@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Project.Core.World
+namespace Project.Core.Core.World
 {
     /// <summary>
     /// Предоставляет корневые Transform'ы для спавна объектов.

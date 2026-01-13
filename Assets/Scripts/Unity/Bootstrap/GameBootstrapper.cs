@@ -1,13 +1,13 @@
 using Cysharp.Threading.Tasks;
-using Project.Core.Bootstrap;
-using Project.Core.Logging;
-using Project.Core.Scene;
+using Project.Core.Core.Bootstrap;
+using Project.Core.Core.Logging;
+using Project.Core.Core.Scene;
 using UniRx;
 using UnityEngine;
 using VContainer;
-using ILogger = Project.Core.Logging.ILogger;
+using ILogger = Project.Core.Core.Logging.ILogger;
 
-namespace Project.Unity.Bootstrap
+namespace Project.Unity.Unity.Bootstrap
 {
     public class GameBootstrapper : MonoBehaviour
     {

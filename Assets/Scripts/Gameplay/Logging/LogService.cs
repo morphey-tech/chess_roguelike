@@ -1,12 +1,12 @@
 using System;
 using Microsoft.Extensions.Logging;
-using Project.Core.Logging;
+using Project.Core.Core.Logging;
 using ZLogger.Unity;
-using ILogger = Project.Core.Logging.ILogger;
-using LogLevel = Project.Core.Logging.LogLevel;
+using ILogger = Project.Core.Core.Logging.ILogger;
+using LogLevel = Project.Core.Core.Logging.LogLevel;
 using MsLogLevel = Microsoft.Extensions.Logging.LogLevel;
 
-namespace Project.Gameplay.Logging
+namespace Project.Gameplay.Gameplay.Logging
 {
     /// <summary>
     /// Реализация сервиса логирования на ZLogger
@@ -49,7 +49,7 @@ namespace Project.Gameplay.Logging
             return new ZLoggerWrapper(_loggerFactory.CreateLogger(category), category);
         }
         
-        public Core.Logging.ILogger<T> CreateLogger<T>()
+        public Core.Core.Logging.ILogger<T> CreateLogger<T>()
         {
             return new ZLoggerWrapper<T>(_loggerFactory.CreateLogger<T>());
         }
@@ -77,7 +77,7 @@ namespace Project.Gameplay.Logging
     /// <summary>
     /// Типизированная обёртка
     /// </summary>
-    public class ZLoggerWrapper<T> : ZLoggerWrapper, Core.Logging.ILogger<T>
+    public class ZLoggerWrapper<T> : ZLoggerWrapper, Core.Core.Logging.ILogger<T>
     {
         public ZLoggerWrapper(Microsoft.Extensions.Logging.ILogger<T> logger) 
             : base(logger, typeof(T).Name)

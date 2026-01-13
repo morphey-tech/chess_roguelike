@@ -1,7 +1,7 @@
 using System;
 using Newtonsoft.Json;
 
-namespace Project.Core.Core.Configs
+namespace Project.Core.Core.Configs.Boards
 {
     [Serializable]
     public class BoardConfig

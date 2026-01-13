@@ -1,9 +1,9 @@
 using Cysharp.Threading.Tasks;
 using Project.Core.Core.Configs.Run;
-using Project.Gameplay.Configs;
+using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.Gameplay.Run;
 
-namespace Project.Unity.Bootstrap
+namespace Project.Unity.Unity.Bootstrap
 {
     /// <summary>
     /// Бутстрап игровой сцены.
@@ -13,14 +13,15 @@ namespace Project.Unity.Bootstrap
     {
         private ConfigProvider _configProvider;
         private RunFactory _runFactory;
+        private RunHolder _runHolder;
 
-        // ID рана для теста (потом можно передавать через TransitionData)
         private const string DefaultRunId = "0";
 
         protected override void OnConstruct()
         {
             _configProvider = Resolve<ConfigProvider>();
             _runFactory = Resolve<RunFactory>();
+            _runHolder = Resolve<RunHolder>();
         }
 
         protected override async UniTask OnBootstrapAsync()
@@ -30,6 +31,9 @@ namespace Project.Unity.Bootstrap
             RunConfig runConfig = await LoadRunConfigAsync(DefaultRunId);
             Run run = _runFactory.Create(runConfig);
             
+            // Сохраняем в holder чтобы другие сервисы могли получить доступ
+            _runHolder.Set(run);
+            
             Log.Info($"Starting run: {runConfig.Id}");
             run.Begin();
         }
@@ -38,15 +42,8 @@ namespace Project.Unity.Bootstrap
         {
             RunConfigRepository repository = 
                 await _configProvider.Get<RunConfigRepository>("runs_conf");
-
             RunConfig config = System.Array.Find(repository.Runs, r => r.Id == runId);
-
-            if (config == null)
-            {
-                throw new System.Exception($"Run config '{runId}' not found");
-            }
-
-            return config;
+            return config ?? throw new System.Exception($"Run config '{runId}' not found");
         }
     }
 }

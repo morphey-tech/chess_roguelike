@@ -1,8 +1,8 @@
 using System;
-using Project.Core.Logging;
+using Project.Core.Core.Logging;
 using LoggerExtensions = Microsoft.Extensions.Logging.LoggerExtensions;
 
-namespace Project.Gameplay.Logging
+namespace Project.Gameplay.Gameplay.Logging
 {
     /// <summary>
     /// Обёртка над ZLogger для нашего интерфейса.

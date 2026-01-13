@@ -1,7 +1,7 @@
 using System;
 using UnityEngine.Events;
 
-namespace Project.Unity.Bootstrap
+namespace Project.Unity.Unity.Bootstrap
 {
     [Serializable]
     public class InitializationStep

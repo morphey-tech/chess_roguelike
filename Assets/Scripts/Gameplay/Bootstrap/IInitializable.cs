@@ -1,6 +1,6 @@
 using Cysharp.Threading.Tasks;
 
-namespace Project.Gameplay.Bootstrap
+namespace Project.Gameplay.Gameplay.Bootstrap
 {
     public interface IInitializable
     {

@@ -1,7 +1,7 @@
 using Cysharp.Threading.Tasks;
-using Project.Core.Scene;
+using Project.Core.Core.Scene;
 
-namespace Project.Core.Bootstrap
+namespace Project.Core.Core.Bootstrap
 {
     /// <summary>
     /// Интерфейс для бутстраперов сцен.
