@@ -15,8 +15,8 @@ MonoBehaviour:
   m_GroupName: Figures
   m_GUID: d0f300d672abddf4c92f307c11433933
   m_SerializeEntries:
-  - m_GUID: dc8aba5da95c66743ba01eb6a55c588a
-    m_Address: pawn_figure
+  - m_GUID: f633b20e89673ae41b7f5645e337cd58
+    m_Address: pawn_white_figure
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

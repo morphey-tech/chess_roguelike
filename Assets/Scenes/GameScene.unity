@@ -218,10 +218,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: GameRenderer
       objectReference: {fileID: 0}
-    - target: {fileID: 6270153928390058465, guid: 11ea32b68b618064f8627d6d951ea469, type: 3}
-      propertyPath: m_TagString
-      value: MainCamera
-      objectReference: {fileID: 0}
     - target: {fileID: 7493035300613384819, guid: 11ea32b68b618064f8627d6d951ea469, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

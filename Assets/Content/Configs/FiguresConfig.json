@@ -2,7 +2,7 @@
   "content": [
     {
       "id": "pawn",
-      "asset_key": "pawn_figure",
+      "asset_key": "pawn_white_figure",
       "behaviour_id": "none",
       "movement_id": "pawn"
     }
