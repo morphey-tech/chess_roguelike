@@ -2,6 +2,7 @@
   "content": [
     {
       "id": "0",
+      "type": "Duel",
       "board_id" : "0"
     }
   ]

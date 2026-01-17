@@ -1,45 +1,34 @@
+using System.Collections.Generic;
+using MessagePipe;
 using Project.Core.Core.Configs.Stage;
 using Project.Core.Core.Logging;
-using Project.Gameplay.Gameplay.Board;
-using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
-using Project.Gameplay.Gameplay.Selection;
+using Project.Gameplay.Gameplay.Stage.Messages;
 using VContainer;
 
 namespace Project.Gameplay.Gameplay.Stage
 {
     public class StageFactory
     {
-        private readonly BoardSpawnService _boardSpawnService;
-        private readonly FigureSpawnService _figureSpawnService;
-        private readonly MovementService _movementService;
-        private readonly SelectionService _selectionService;
+        private readonly IPublisher<StageCompletedMessage> _completedPublisher;
         private readonly ILogService _logService;
 
         [Inject]
         private StageFactory(
-            BoardSpawnService boardSpawnService,
-            FigureSpawnService figureSpawnService,
-            MovementService movementService,
-            SelectionService selectionService,
+            IPublisher<StageCompletedMessage> completedPublisher,
             ILogService logService)
         {
-            _boardSpawnService = boardSpawnService;
-            _figureSpawnService = figureSpawnService;
-            _movementService = movementService;
-            _selectionService = selectionService;
+            _completedPublisher = completedPublisher;
             _logService = logService;
         }
 
-        public Stage Create(StageConfig config, BoardGrid grid)
+        public Stage Create(StageConfig config, BoardGrid grid, IEnumerable<IStagePhase> phases)
         {
             return new Stage(
                 config, 
                 grid, 
-                _boardSpawnService, 
-                _figureSpawnService,
-                _movementService,
-                _selectionService,
+                phases,
+                _completedPublisher,
                 _logService);
         }
     }

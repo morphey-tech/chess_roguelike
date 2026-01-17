@@ -12,6 +12,7 @@ using Project.Gameplay.Gameplay.Movement.Strategies;
 using Project.Gameplay.Gameplay.Run;
 using Project.Gameplay.Gameplay.Selection;
 using Project.Gameplay.Gameplay.Stage;
+using Project.Gameplay.Gameplay.Stage.Phase;
 using Project.Gameplay.Gameplay.Turn;
 using Project.Unity.Unity.Bootstrap;
 using Project.Unity.Unity.Views;
@@ -84,6 +85,7 @@ namespace Project.Unity.Unity.Installers
             builder.Register<RunHolder>(Lifetime.Singleton);
             builder.Register<RunFactory>(Lifetime.Singleton);
             builder.Register<StageFactory>(Lifetime.Singleton);
+            builder.Register<StagePhaseFactory>(Lifetime.Singleton);
 
             // Input - dispatches input events via MessagePipe
             builder.Register<InputDispatcher>(Lifetime.Singleton)

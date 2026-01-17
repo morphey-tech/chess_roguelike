@@ -1,82 +1,97 @@
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using MessagePipe;
 using Project.Core.Core.Configs.Stage;
-using Project.Core.Core.Configs.Suites;
-using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
-using Project.Gameplay.Gameplay.Board;
-using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
-using Project.Gameplay.Gameplay.Save.Models;
-using Project.Gameplay.Gameplay.Selection;
+using Project.Gameplay.Gameplay.Stage.Messages;
 
 namespace Project.Gameplay.Gameplay.Stage
 {
     /// <summary>
-    /// Represents a single stage/level. Controls the flow: spawn board → spawn figures.
-    /// Pure gameplay - no Unity dependencies.
+    /// Represents a single stage/level. Controls the flow through phases.
+    /// Stage owns the phase execution - phases don't call back into Stage.
     /// </summary>
     public class Stage
     {
         public string Id => _config.Id;
         public string BoardId => _config.BoardId;
         public BoardGrid Grid { get; }
+        public bool IsCompleted { get; private set; }
 
         private readonly StageConfig _config;
-        private readonly BoardSpawnService _boardSpawnService;
-        private readonly FigureSpawnService _figureSpawnService;
-        private readonly MovementService _movementService;
-        private readonly SelectionService _selectionService;
+        private readonly List<IStagePhase> _phases;
+        private readonly IPublisher<StageCompletedMessage> _completedPublisher;
         private readonly ILogger<Stage> _logger;
+
+        private StageContext _context;
+        private int _currentPhaseIndex = -1;
+        private UniTaskCompletionSource<PhaseResult> _waitingPhaseCompletion;
 
         public Stage(
             StageConfig config,
             BoardGrid grid,
-            BoardSpawnService boardSpawnService,
-            FigureSpawnService figureSpawnService,
-            MovementService movementService,
-            SelectionService selectionService,
+            IEnumerable<IStagePhase> phases,
+            IPublisher<StageCompletedMessage> completedPublisher,
             ILogService logService)
         {
             _config = config;
             Grid = grid;
-            _boardSpawnService = boardSpawnService;
-            _figureSpawnService = figureSpawnService;
-            _movementService = movementService;
-            _selectionService = selectionService;
+            _phases = new List<IStagePhase>(phases);
+            _completedPublisher = completedPublisher;
             _logger = logService.CreateLogger<Stage>();
         }
 
-        public async UniTask BeginAsync(SuiteConfig suiteConfig)
+        public async UniTask BeginAsync()
         {
-            _logger.Info($"Stage {Id} beginning, board: {BoardId}");
-
-            await _boardSpawnService.SpawnAsync(BoardId);
-            _logger.Info("Board spawned");
-
-            _movementService.Configure(Grid);
-            _selectionService.Configure(Grid);
-
-            await SpawnInitialFiguresAsync(suiteConfig);
-            _logger.Info($"Stage {Id} ready");
+            _logger.Info($"Stage {Id} beginning, board: {BoardId}, phases: {_phases.Count}");
+            _context = new StageContext(this, _config);
+            _context.CompletePhase = OnPhaseCompleted;
+            await RunPhasesAsync();
         }
 
-        private async UniTask SpawnInitialFiguresAsync(SuiteConfig suite)
+        private async UniTask RunPhasesAsync()
         {
-            for (int index = 0; index < suite.Figures.Length; index++)
+            while (++_currentPhaseIndex < _phases.Count)
             {
-                string figureId = suite.Figures[index];
-                GridPosition spawnPosition = new(1 + index, Grid.Width / 2);
+                IStagePhase phase = _phases[_currentPhaseIndex];
+                _logger.Info($"[Phase {_currentPhaseIndex + 1}/{_phases.Count}] {phase.GetType().Name} starting");
 
-                _logger.Info($"Spawning player pawn at ({spawnPosition.Row}, {spawnPosition.Column})");
+                PhaseResult result = await phase.ExecuteAsync(_context);
 
-                await _figureSpawnService.SpawnAsync(
-                    Grid,
-                    spawnPosition,
-                    figureId,
-                    Team.Player);
+                if (result == PhaseResult.WaitForCompletion)
+                {
+                    _waitingPhaseCompletion = new UniTaskCompletionSource<PhaseResult>();
+                    result = await _waitingPhaseCompletion.Task;
+                    _waitingPhaseCompletion = null;
+                }
+
+                _logger.Info($"[Phase] {phase.GetType().Name} completed with {result}");
+
+                if (result is PhaseResult.Victory or PhaseResult.Defeat)
+                {
+                    Complete(result == PhaseResult.Victory ? StageResult.Victory : StageResult.Defeat);
+                    return;
+                }
             }
 
-            _logger.Info("Initial figures spawned");
+            Complete(StageResult.Victory);
+        }
+
+        private void OnPhaseCompleted(PhaseResult result)
+        {
+            _waitingPhaseCompletion?.TrySetResult(result);
+        }
+
+        private void Complete(StageResult result)
+        {
+            if (IsCompleted)
+            {
+                return;
+            }
+            IsCompleted = true;
+            _logger.Info($"Stage {Id} completed: {result}");
+            _completedPublisher.Publish(new StageCompletedMessage(Id, result));
         }
     }
 }
