@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: Configs
   m_GUID: d5bda6645f02ab1428bf65697a591e97
   m_SerializeEntries:
+  - m_GUID: 2d3dff0a4d4d428f95399db492d577d2
+    m_Address: suites_conf
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3489d7399eb8403697b0c6bae94657c6
     m_Address: figures_conf
     m_ReadOnly: 0

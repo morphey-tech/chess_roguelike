@@ -14,7 +14,7 @@ namespace Project.Gameplay.Gameplay.Save
         private readonly ISaveDataApplier[] _appliers;
 
         [Inject]
-        public SaveService(
+        private SaveService(
             FileSaveStorage storage,
             ISaveEnvironment environment,
             ISaveDataProvider[] providers,

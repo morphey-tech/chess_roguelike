@@ -1,31 +1,35 @@
 using System;
 using Cysharp.Threading.Tasks;
-using Project.Core.Core.Configs;
 using Project.Core.Core.Configs.Boards;
 using Project.Core.Core.Configs.Run;
 using Project.Core.Core.Configs.Stage;
+using Project.Core.Core.Configs.Suites;
 using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.Gameplay.Grid;
+using Project.Gameplay.Gameplay.Save.Models;
 using Project.Gameplay.Gameplay.Stage;
 
 namespace Project.Gameplay.Gameplay.Run
 {
     public class Run
     {
+        public Stage.Stage CurrentStage { get; private set; }
+        public bool IsCompleted => _currentStageIndex >= _config.Stages.Length;
+        
         private readonly RunConfig _config;
         private readonly ConfigProvider _configProvider;
         private readonly StageFactory _stageFactory;
+        private readonly PlayerLoadoutModel _loadoutModel;
 
         private int _currentStageIndex;
 
-        public Stage.Stage CurrentStage { get; private set; }
-        public bool IsCompleted => _currentStageIndex >= _config.Stages.Length;
-
-        public Run(RunConfig config, ConfigProvider configProvider, StageFactory stageFactory)
+        public Run(RunConfig config, ConfigProvider configProvider,
+            StageFactory stageFactory, PlayerLoadoutModel loadoutModel)
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
             _configProvider = configProvider ?? throw new ArgumentNullException(nameof(configProvider));
             _stageFactory = stageFactory ?? throw new ArgumentNullException(nameof(stageFactory));
+            _loadoutModel = loadoutModel ?? throw new ArgumentNullException(nameof(loadoutModel));
         }
 
         public void Begin()
@@ -67,7 +71,11 @@ namespace Project.Gameplay.Gameplay.Run
             
             BoardGrid grid = new(boardConfig.Width, boardConfig.Height);
             CurrentStage = _stageFactory.Create(stageConfig, grid);
-            await CurrentStage.BeginAsync();
+
+            SuiteConfigRepository suiteRepository = 
+                await _configProvider.Get<SuiteConfigRepository>("suites_conf");
+            SuiteConfig suiteConfig = Array.Find(suiteRepository.Suites, s => s.Id == _loadoutModel.SuiteId);
+            await CurrentStage.BeginAsync(suiteConfig);
         }
     }
 }

@@ -1,10 +1,12 @@
 using Cysharp.Threading.Tasks;
 using Project.Core.Core.Configs.Stage;
+using Project.Core.Core.Configs.Suites;
 using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Board;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
+using Project.Gameplay.Gameplay.Save.Models;
 using Project.Gameplay.Gameplay.Selection;
 
 namespace Project.Gameplay.Gameplay.Stage
@@ -44,7 +46,7 @@ namespace Project.Gameplay.Gameplay.Stage
             _logger = logService.CreateLogger<Stage>();
         }
 
-        public async UniTask BeginAsync()
+        public async UniTask BeginAsync(SuiteConfig suiteConfig)
         {
             _logger.Info($"Stage {Id} beginning, board: {BoardId}");
 
@@ -54,22 +56,25 @@ namespace Project.Gameplay.Gameplay.Stage
             _movementService.Configure(Grid);
             _selectionService.Configure(Grid);
 
-            await SpawnInitialFiguresAsync();
+            await SpawnInitialFiguresAsync(suiteConfig);
             _logger.Info($"Stage {Id} ready");
         }
 
-        private async UniTask SpawnInitialFiguresAsync()
+        private async UniTask SpawnInitialFiguresAsync(SuiteConfig suite)
         {
-            // Заглушка для теста, потом из руки будем выставлять
-            GridPosition playerPawnPos = new(1, Grid.Width / 2);
+            for (int index = 0; index < suite.Figures.Length; index++)
+            {
+                string figureId = suite.Figures[index];
+                GridPosition spawnPosition = new(1 + index, Grid.Width / 2);
 
-            _logger.Info($"Spawning player pawn at ({playerPawnPos.Row}, {playerPawnPos.Column})");
+                _logger.Info($"Spawning player pawn at ({spawnPosition.Row}, {spawnPosition.Column})");
 
-            await _figureSpawnService.SpawnAsync(
-                Grid,
-                playerPawnPos,
-                "pawn",
-                Team.Player);
+                await _figureSpawnService.SpawnAsync(
+                    Grid,
+                    spawnPosition,
+                    figureId,
+                    Team.Player);
+            }
 
             _logger.Info("Initial figures spawned");
         }

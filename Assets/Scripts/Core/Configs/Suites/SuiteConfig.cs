@@ -10,6 +10,6 @@ namespace Project.Core.Core.Configs.Suites
         public string Id { get; set; }
         
         [JsonProperty("figures")]
-        public string Figures { get; set; }
+        public string[] Figures { get; set; }
     }
 }

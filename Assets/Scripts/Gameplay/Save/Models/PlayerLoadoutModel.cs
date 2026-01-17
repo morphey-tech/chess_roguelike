@@ -5,8 +5,8 @@ namespace Project.Gameplay.Gameplay.Save.Models
     [Serializable]
     public sealed class PlayerLoadoutModel
     {
-        public string KingId { get; set; }
-        public string SuiteId { get; set; }
+        public string KingId { get; set; } = "default";
+        public string SuiteId { get; set; } = "default";
 
         public bool IsValid()
         {
