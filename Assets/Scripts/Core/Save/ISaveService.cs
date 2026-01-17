@@ -2,13 +2,13 @@ using Cysharp.Threading.Tasks;
 
 namespace Project.Core.Core.Save
 {
-    public interface ISaveSystem
+    public interface ISaveService
     {
         UniTask SaveAsync(string slotId);
         UniTask<bool> LoadAsync(string slotId);
         UniTask<bool> HasSaveAsync(string slotId);
-        UniTask DeleteSaveAsync(string slotId);
-        UniTask<string[]> GetAllSaveSlotsAsync();
+        UniTask DeleteAsync(string slotId);
+        UniTask<string[]> GetSlotsAsync();
     }
 }
 
