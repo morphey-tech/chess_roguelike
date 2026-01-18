@@ -21,7 +21,7 @@ namespace Project.Gameplay.Gameplay.Stage.Phase
                 StageType.Duel => new List<IStagePhase>
                 {
                     _resolver.Resolve<BoardSpawnPhase>(),
-                    _resolver.Resolve<FigureSpawnPhase>(),
+                    _resolver.Resolve<EnemySpawnPhase>(),
                     _resolver.Resolve<PreparePlacementPhase>(),
                     _resolver.Resolve<GameplayInitPhase>()
                 },

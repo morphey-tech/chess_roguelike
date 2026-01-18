@@ -3,6 +3,7 @@
     {
       "id": "0",
       "type": "Duel",
+      "type_config" : "duel_0",
       "board_id" : "0"
     }
   ]

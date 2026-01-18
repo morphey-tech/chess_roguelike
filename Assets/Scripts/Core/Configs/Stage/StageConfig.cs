@@ -13,7 +13,11 @@ namespace Project.Core.Core.Configs.Stage
         [JsonProperty("type")]
         public StageType Type { get; set; }
         
+        [JsonProperty("type_config")]
+        public string TypeConfigId { get; set; }
+        
         [JsonProperty("board_id")]
         public string BoardId { get; set; }
+        
     }
 }

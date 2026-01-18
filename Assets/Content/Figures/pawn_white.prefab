@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 700778397425556649}
   - component: {fileID: 6533899885431309447}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pawn_white
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -68,7 +68,7 @@ GameObject:
   - component: {fileID: 7959975604640284571}
   - component: {fileID: 7929865911331938963}
   - component: {fileID: 7937594608164196725}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: View
   m_TagString: Untagged
   m_Icon: {fileID: 0}

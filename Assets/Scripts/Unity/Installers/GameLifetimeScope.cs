@@ -118,7 +118,7 @@ namespace Project.Unity.Unity.Installers
 
             // Stage phases (Transient - created per stage)
             builder.Register<BoardSpawnPhase>(Lifetime.Transient);
-            builder.Register<FigureSpawnPhase>(Lifetime.Transient);
+            builder.Register<EnemySpawnPhase>(Lifetime.Transient);
             builder.Register<PreparePlacementPhase>(Lifetime.Transient);
             builder.Register<GameplayInitPhase>(Lifetime.Transient);
 
