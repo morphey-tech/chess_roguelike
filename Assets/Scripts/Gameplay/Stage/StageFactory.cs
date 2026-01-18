@@ -3,6 +3,7 @@ using MessagePipe;
 using Project.Core.Core.Configs.Stage;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Grid;
+using Project.Gameplay.Gameplay.Save.Models;
 using Project.Gameplay.Gameplay.Stage.Messages;
 using VContainer;
 
@@ -22,11 +23,12 @@ namespace Project.Gameplay.Gameplay.Stage
             _logService = logService;
         }
 
-        public Stage Create(StageConfig config, BoardGrid grid, IEnumerable<IStagePhase> phases)
+        public Stage Create(StageConfig config, BoardGrid grid, PlayerRunStateModel runState, IEnumerable<IStagePhase> phases)
         {
             return new Stage(
                 config, 
-                grid, 
+                grid,
+                runState,
                 phases,
                 _completedPublisher,
                 _logService);

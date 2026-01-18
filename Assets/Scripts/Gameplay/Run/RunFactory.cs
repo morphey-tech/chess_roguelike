@@ -12,21 +12,29 @@ namespace Project.Gameplay.Gameplay.Run
         private readonly ConfigProvider _configProvider;
         private readonly StageFactory _stageFactory;
         private readonly StagePhaseFactory _phaseFactory;
-        private readonly PlayerLoadoutService _loadoutService;
+        private readonly PlayerRunStateService _runStateService;
 
         [Inject]
-        private RunFactory(ConfigProvider configProvider, StageFactory stageFactory,
-            StagePhaseFactory phaseFactory, PlayerLoadoutService loadoutService)
+        private RunFactory(
+            ConfigProvider configProvider, 
+            StageFactory stageFactory,
+            StagePhaseFactory phaseFactory, 
+            PlayerRunStateService runStateService)
         {
             _configProvider = configProvider;
             _stageFactory = stageFactory;
             _phaseFactory = phaseFactory;
-            _loadoutService = loadoutService;
+            _runStateService = runStateService;
         }
 
         public Run Create(RunConfig config)
         {
-            return new Run(config, _configProvider, _stageFactory, _phaseFactory, _loadoutService.Current);
+            return new Run(
+                config, 
+                _configProvider, 
+                _stageFactory, 
+                _phaseFactory, 
+                _runStateService);
         }
     }
 }

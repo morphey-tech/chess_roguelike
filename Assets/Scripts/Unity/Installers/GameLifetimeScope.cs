@@ -9,6 +9,7 @@ using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Input;
 using Project.Gameplay.Gameplay.Movement;
 using Project.Gameplay.Gameplay.Movement.Strategies;
+using Project.Gameplay.Gameplay.Prepare;
 using Project.Gameplay.Gameplay.Run;
 using Project.Gameplay.Gameplay.Selection;
 using Project.Gameplay.Gameplay.Stage;
@@ -77,6 +78,11 @@ namespace Project.Unity.Unity.Installers
 
             builder.Register<FigurePresenter>(Lifetime.Singleton)
                 .As<IFigurePresenter>();
+
+            // Unity-side input handlers
+            builder.Register<HandFigureClickHandler>(Lifetime.Singleton)
+                .AsImplementedInterfaces()
+                .AsSelf();
         }
 
         private void ConfigureServices(IContainerBuilder builder)
@@ -104,6 +110,17 @@ namespace Project.Unity.Unity.Installers
             builder.Register<StageService>(Lifetime.Singleton)
                 .AsImplementedInterfaces()
                 .AsSelf();
+
+            // Prepare phase
+            builder.Register<PrepareService>(Lifetime.Singleton)
+                .AsImplementedInterfaces()
+                .AsSelf();
+
+            // Stage phases (Transient - created per stage)
+            builder.Register<BoardSpawnPhase>(Lifetime.Transient);
+            builder.Register<FigureSpawnPhase>(Lifetime.Transient);
+            builder.Register<PreparePlacementPhase>(Lifetime.Transient);
+            builder.Register<GameplayInitPhase>(Lifetime.Transient);
 
             // Board - animation strategies
             builder.Register<BoardAppearAnimationFactory>(Lifetime.Singleton)
@@ -137,6 +154,8 @@ namespace Project.Unity.Unity.Installers
             resolver.Resolve<TurnSystem>();
             resolver.Resolve<SelectionService>();
             resolver.Resolve<StageService>();
+            resolver.Resolve<PrepareService>();
+            resolver.Resolve<HandFigureClickHandler>();
 
             // Инжектим MonoSceneBootstrap
             MonoSceneBootstrap bootstrap = _worldObjectCollector.GetObjectByType<MonoSceneBootstrap>();

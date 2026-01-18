@@ -4,10 +4,9 @@ using Cysharp.Threading.Tasks;
 using Project.Core.Core.Configs.Boards;
 using Project.Core.Core.Configs.Run;
 using Project.Core.Core.Configs.Stage;
-using Project.Core.Core.Configs.Suites;
 using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.Gameplay.Grid;
-using Project.Gameplay.Gameplay.Save.Models;
+using Project.Gameplay.Gameplay.Save.Service;
 using Project.Gameplay.Gameplay.Stage;
 using Project.Gameplay.Gameplay.Stage.Phase;
 
@@ -16,37 +15,39 @@ namespace Project.Gameplay.Gameplay.Run
     public class Run
     {
         public Stage.Stage CurrentStage { get; private set; }
-        public bool IsCompleted => _currentStageIndex >= _config.Stages.Length;
+        public bool IsCompleted => GetCurrentStageIndex() >= _config.Stages.Length;
         
         private readonly RunConfig _config;
         private readonly ConfigProvider _configProvider;
         private readonly StageFactory _stageFactory;
         private readonly StagePhaseFactory _phaseFactory;
-        private readonly PlayerLoadoutModel _loadoutModel;
+        private readonly PlayerRunStateService _runStateService;
 
-        private int _currentStageIndex;
-
-        public Run(RunConfig config, ConfigProvider configProvider,
-            StageFactory stageFactory, StagePhaseFactory phaseFactory, PlayerLoadoutModel loadoutModel)
+        public Run(
+            RunConfig config, 
+            ConfigProvider configProvider,
+            StageFactory stageFactory, 
+            StagePhaseFactory phaseFactory, 
+            PlayerRunStateService runStateService)
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
             _configProvider = configProvider ?? throw new ArgumentNullException(nameof(configProvider));
             _stageFactory = stageFactory ?? throw new ArgumentNullException(nameof(stageFactory));
             _phaseFactory = phaseFactory ?? throw new ArgumentNullException(nameof(phaseFactory));
-            _loadoutModel = loadoutModel ?? throw new ArgumentNullException(nameof(loadoutModel));
+            _runStateService = runStateService ?? throw new ArgumentNullException(nameof(runStateService));
         }
 
         public void Begin()
         {
-            _currentStageIndex = 0;
             LaunchCurrentStageAsync().Forget();
         }
 
         public void NextStage()
         {
-            _currentStageIndex++;
-            if (!IsCompleted)
+            int nextIndex = GetCurrentStageIndex() + 1;
+            if (nextIndex < _config.Stages.Length)
             {
+                _runStateService.Current!.StageId = _config.Stages[nextIndex];
                 LaunchCurrentStageAsync().Forget();
             }
         }
@@ -55,17 +56,22 @@ namespace Project.Gameplay.Gameplay.Run
         {
             StageConfig stageConfig = await LoadStageConfig();
             BoardConfig boardConfig = await LoadBoardConfig(stageConfig);
-            SuiteConfig suiteConfig = await LoadSuiteConfig();
             
             BoardGrid grid = new(boardConfig.Width, boardConfig.Height);
-            List<IStagePhase> phases = _phaseFactory.CreatePhasesForStage(stageConfig, suiteConfig);
-            CurrentStage = _stageFactory.Create(stageConfig, grid, phases);
+            List<IStagePhase> phases = _phaseFactory.CreatePhasesForStage(stageConfig);
+            CurrentStage = _stageFactory.Create(stageConfig, grid, _runStateService.Current!, phases);
             await CurrentStage.BeginAsync();
+        }
+
+        private int GetCurrentStageIndex()
+        {
+            string currentStageId = _runStateService.Current?.StageId ?? _config.Stages[0];
+            return Array.IndexOf(_config.Stages, currentStageId);
         }
 
         private async UniTask<StageConfig> LoadStageConfig()
         {
-            string stageId = _config.Stages[_currentStageIndex];
+            string stageId = _runStateService.Current?.StageId ?? _config.Stages[0];
             StageConfigRepository stageRepository = 
                 await _configProvider.Get<StageConfigRepository>("stages_conf");
             StageConfig stageConfig = Array.Find(stageRepository.Stages, s => s.Id == stageId);
@@ -77,14 +83,6 @@ namespace Project.Gameplay.Gameplay.Run
             BoardConfigRepository boardRepository = await _configProvider.Get<BoardConfigRepository>("boards_conf");
             BoardConfig? boardConfig = boardRepository.GetBy(stageConfig.BoardId);
             return boardConfig ?? throw new NullReferenceException($"Board config '{stageConfig.BoardId}' not found");
-        }
-
-        private async UniTask<SuiteConfig> LoadSuiteConfig()
-        {
-            SuiteConfigRepository suiteRepository = 
-                await _configProvider.Get<SuiteConfigRepository>("suites_conf");
-            SuiteConfig suiteConfig = Array.Find(suiteRepository.Suites, s => s.Id == _loadoutModel.SuiteId);
-            return suiteConfig ?? throw new NullReferenceException($"Suite config '{_loadoutModel.SuiteId}' not found");
         }
     }
 }

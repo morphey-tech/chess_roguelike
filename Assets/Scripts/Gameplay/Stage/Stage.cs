@@ -4,6 +4,7 @@ using MessagePipe;
 using Project.Core.Core.Configs.Stage;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Grid;
+using Project.Gameplay.Gameplay.Save.Models;
 using Project.Gameplay.Gameplay.Stage.Messages;
 
 namespace Project.Gameplay.Gameplay.Stage
@@ -20,6 +21,7 @@ namespace Project.Gameplay.Gameplay.Stage
         public bool IsCompleted { get; private set; }
 
         private readonly StageConfig _config;
+        private readonly PlayerRunStateModel _runState;
         private readonly List<IStagePhase> _phases;
         private readonly IPublisher<StageCompletedMessage> _completedPublisher;
         private readonly ILogger<Stage> _logger;
@@ -31,12 +33,14 @@ namespace Project.Gameplay.Gameplay.Stage
         public Stage(
             StageConfig config,
             BoardGrid grid,
+            PlayerRunStateModel runState,
             IEnumerable<IStagePhase> phases,
             IPublisher<StageCompletedMessage> completedPublisher,
             ILogService logService)
         {
             _config = config;
             Grid = grid;
+            _runState = runState;
             _phases = new List<IStagePhase>(phases);
             _completedPublisher = completedPublisher;
             _logger = logService.CreateLogger<Stage>();
@@ -45,7 +49,7 @@ namespace Project.Gameplay.Gameplay.Stage
         public async UniTask BeginAsync()
         {
             _logger.Info($"Stage {Id} beginning, board: {BoardId}, phases: {_phases.Count}");
-            _context = new StageContext(this, _config);
+            _context = new StageContext(this, _config, _runState);
             _context.CompletePhase = OnPhaseCompleted;
             await RunPhasesAsync();
         }

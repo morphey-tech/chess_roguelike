@@ -18,6 +18,7 @@ namespace Project.Gameplay.Gameplay.Input
     public sealed class InputDispatcher : IStartable, IDisposable
     {
         private readonly InputActionAsset _inputActions;
+        private readonly IPublisher<RawClickMessage> _rawClickPublisher;
         private readonly IPublisher<CellClickedMessage> _cellClickedPublisher;
         private readonly IPublisher<EndTurnRequestedMessage> _endTurnPublisher;
         private readonly IPublisher<CancelRequestedMessage> _cancelPublisher;
@@ -32,12 +33,14 @@ namespace Project.Gameplay.Gameplay.Input
 
         public InputDispatcher(
             InputActionAsset inputActions,
+            IPublisher<RawClickMessage> rawClickPublisher,
             IPublisher<CellClickedMessage> cellClickedPublisher,
             IPublisher<EndTurnRequestedMessage> endTurnPublisher,
             IPublisher<CancelRequestedMessage> cancelPublisher,
             ILogService logService)
         {
             _inputActions = inputActions;
+            _rawClickPublisher = rawClickPublisher;
             _cellClickedPublisher = cellClickedPublisher;
             _endTurnPublisher = endTurnPublisher;
             _cancelPublisher = cancelPublisher;
@@ -77,24 +80,23 @@ namespace Project.Gameplay.Gameplay.Input
             Vector2 screenPos = _pointAction.ReadValue<Vector2>();
             Ray ray = _camera.ScreenPointToRay(screenPos);
 
-            if (!Physics.Raycast(ray, out RaycastHit hit, PhysicsSettings.DefaultRaycastDistance, PhysicsSettings.CellLayerMask))
+            // Always publish raw click for services that need it (PrepareService, etc.)
+            _rawClickPublisher.Publish(new RawClickMessage(ray, screenPos));
+
+            // Also publish cell click if we hit a cell
+            if (Physics.Raycast(ray, out RaycastHit hit, PhysicsSettings.DefaultRaycastDistance, PhysicsSettings.CellLayerMask))
             {
-                _logger.Warning($"Raycast missed! Screen: {screenPos}, Ray: {ray.origin} -> {ray.direction}");
-                return;
+                Vector3 p = hit.point;
+                
+                // Клетки спавнятся на (col, 0, row) - это центр клетки
+                int col = Mathf.FloorToInt(p.x + 0.5f);
+                int row = Mathf.FloorToInt(p.z + 0.5f);
+
+                _logger.Debug($"Hit: {p}, Cell: row={row}, col={col}");
+
+                GridPosition gridPos = new(row, col);
+                _cellClickedPublisher.Publish(new CellClickedMessage(gridPos));
             }
-
-            Vector3 p = hit.point;
-            
-            // Клетки спавнятся на (col, 0, row) - это центр клетки
-            // Если pivot в центре, то клетка (0,0) занимает X: -0.5..0.5, Z: -0.5..0.5
-            // Добавляем 0.5 чтобы компенсировать
-            int col = Mathf.FloorToInt(p.x + 0.5f);
-            int row = Mathf.FloorToInt(p.z + 0.5f);
-
-            _logger.Debug($"Hit: {p}, Cell: row={row}, col={col}");
-
-            GridPosition gridPos = new(row, col);
-            _cellClickedPublisher.Publish(new CellClickedMessage(gridPos));
         }
 
         private void OnEndTurnPerformed(InputAction.CallbackContext context)
