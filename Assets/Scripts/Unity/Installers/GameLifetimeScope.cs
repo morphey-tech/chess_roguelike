@@ -116,9 +116,13 @@ namespace Project.Unity.Unity.Installers
                 .AsImplementedInterfaces()
                 .AsSelf();
 
+            // Figures spawn providers
+            builder.Register<DuelFiguresSpawnProvider>(Lifetime.Singleton);
+            builder.Register<EmptyFiguresSpawnProvider>(Lifetime.Singleton);
+            builder.Register<IFiguresSpawnProviderFactory, FiguresSpawnProviderFactory>(Lifetime.Singleton);
+
             // Stage phases (Transient - created per stage)
             builder.Register<BoardSpawnPhase>(Lifetime.Transient);
-            builder.Register<EnemySpawnPhase>(Lifetime.Transient);
             builder.Register<PreparePlacementPhase>(Lifetime.Transient);
             builder.Register<GameplayInitPhase>(Lifetime.Transient);
 
