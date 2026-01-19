@@ -25,7 +25,7 @@ namespace Project.Unity.Unity.Views
         private readonly Dictionary<string, GameObject> _figures = new();
         private readonly List<GameObject> _slots = new();
         
-        private CellConfigRepository _cellConfigCache;
+        private CellConfigRepository? _cellConfigCache;
         private int _totalFigures;
 
         private const float CellSize = 1f;
@@ -72,9 +72,8 @@ namespace Project.Unity.Unity.Views
 
         public void RemoveFigure(string figureId)
         {
-            if (_figures.TryGetValue(figureId, out GameObject figure))
+            if (_figures.Remove(figureId, out GameObject figure))
             {
-                _figures.Remove(figureId);
                 Object.Destroy(figure);
                 _logger.Debug($"Removed figure {figureId} from prepare zone");
             }
@@ -115,6 +114,8 @@ namespace Project.Unity.Unity.Views
 
         private async UniTask<GameObject> SpawnSlotAsync(Vector3 position)
         {
+            _cellConfigCache ??= await _configProvider.Get<CellConfigRepository>("cells_conf");
+            
             CellConfig cellConfig = _cellConfigCache.Cells.Count > 0 
                 ? _cellConfigCache.Cells[0] 
                 : null;

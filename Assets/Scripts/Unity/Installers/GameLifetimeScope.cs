@@ -128,6 +128,7 @@ namespace Project.Unity.Unity.Installers
             builder.Register<BoardSpawnPhase>(Lifetime.Transient);
             builder.Register<PreparePlacementPhase>(Lifetime.Transient);
             builder.Register<GameplayInitPhase>(Lifetime.Transient);
+            builder.Register<BattleDuelPhase>(Lifetime.Transient);
 
             // Board - animation strategies
             builder.Register<BoardAppearAnimationFactory>(Lifetime.Singleton)

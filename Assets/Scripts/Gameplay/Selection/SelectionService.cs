@@ -20,7 +20,9 @@ namespace Project.Gameplay.Gameplay.Selection
 
         private BoardGrid _grid;
         private BoardCell? _selectedCell;
+        private bool _isActive;
 
+        public bool IsActive => _isActive;
         public bool HasSelection => _selectedCell != null;
         public Figure? SelectedFigure => _selectedCell?.OccupiedBy;
 
@@ -49,25 +51,20 @@ namespace Project.Gameplay.Gameplay.Selection
         public void Configure(BoardGrid grid)
         {
             _grid = grid;
+            _isActive = true;
             ClearSelection();
+            _logger.Info("SelectionService activated");
         }
 
         private void OnCellClicked(CellClickedMessage message)
         {
-            GridPosition position = message.Position;
-            _logger.Info($"Cell clicked: ({position.Row}, {position.Column})");
-            
-            if (_grid == null)
+            if (!_isActive)
             {
-                _logger.Warning("Grid not set!");
                 return;
             }
 
-            if (!_turnSystem.IsPlayerTurn)
-            {
-                _logger.Debug("Not player's turn, ignoring");
-                return;
-            }
+            GridPosition position = message.Position;
+            _logger.Info($"Cell clicked: ({position.Row}, {position.Column})");
 
             if (!_grid.IsInside(position))
             {

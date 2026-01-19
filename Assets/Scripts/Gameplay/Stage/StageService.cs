@@ -2,6 +2,7 @@ using System;
 using MessagePipe;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Figures;
+using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Run;
 using Project.Gameplay.Gameplay.Selection;
 using Project.Gameplay.Gameplay.Turn;
@@ -18,20 +19,20 @@ namespace Project.Gameplay.Gameplay.Stage
     public class StageService : IStartable, IDisposable
     {
         private readonly RunHolder _runHolder;
-        private readonly SelectionService _selectionService;
         private readonly MovementService _movementService;
         private readonly TurnSystem _turnSystem;
         private readonly IFigurePresenter _figurePresenter;
+        private readonly IPublisher<FigureDeathMessage> _deathPublisher;
         private readonly ILogger<StageService> _logger;
         private readonly IDisposable _subscriptions;
 
         [Inject]
         private StageService(
             RunHolder runHolder,
-            SelectionService selectionService,
             MovementService movementService,
             TurnSystem turnSystem,
             IFigurePresenter figurePresenter,
+            IPublisher<FigureDeathMessage> deathPublisher,
             ISubscriber<FigureSpawnedMessage> figureSpawnedSubscriber,
             ISubscriber<MoveRequestedMessage> moveSubscriber,
             ISubscriber<FigureSelectedMessage> selectionSubscriber,
@@ -39,10 +40,10 @@ namespace Project.Gameplay.Gameplay.Stage
             ILogService logService)
         {
             _runHolder = runHolder;
-            _selectionService = selectionService;
             _movementService = movementService;
             _turnSystem = turnSystem;
             _figurePresenter = figurePresenter;
+            _deathPublisher = deathPublisher;
             _logger = logService.CreateLogger<StageService>();
 
             DisposableBagBuilder bag = DisposableBag.CreateBuilder();
@@ -63,12 +64,6 @@ namespace Project.Gameplay.Gameplay.Stage
         private void OnFigureSpawned(FigureSpawnedMessage message)
         {
             _logger.Info($"Figure {message.Figure.Id} spawned at ({message.Position.Row}, {message.Position.Column})");
-
-            // Initialize selection service with grid when first figure spawns
-            if (_runHolder.Current?.CurrentStage != null)
-            {
-                _selectionService.Configure(_runHolder.Current.CurrentStage.Grid);
-            }
         }
 
         private void OnMoveRequested(MoveRequestedMessage message)
@@ -82,7 +77,9 @@ namespace Project.Gameplay.Gameplay.Stage
             }
 
             Stage currentStage = _runHolder.Current?.CurrentStage;
-            Figure figure = currentStage?.Grid.GetBoardCell(message.From).OccupiedBy;
+            BoardCell fromCell = currentStage?.Grid.GetBoardCell(message.From);
+            BoardCell toCell = currentStage?.Grid.GetBoardCell(message.To);
+            Figure figure = fromCell?.OccupiedBy;
 
             if (figure == null)
             {
@@ -90,18 +87,20 @@ namespace Project.Gameplay.Gameplay.Stage
                 return;
             }
 
+            Figure targetFigure = toCell?.OccupiedBy;
+            if (targetFigure != null)
+            {
+                _logger.Info($"Capturing {targetFigure.Team} figure {targetFigure.Id}");
+                toCell.RemoveFigure();
+                _figurePresenter.RemoveFigure(targetFigure.Id);
+                _deathPublisher.Publish(new FigureDeathMessage(targetFigure.Id, targetFigure.Team));
+            }
+
             _movementService.MoveFigure(message.From, message.To);
             _figurePresenter.MoveFigure(figure.Id, message.To);
             _logger.Info($"Figure {figure.Id} moved successfully");
 
             _turnSystem.EndTurn();
-
-            // TODO: Remove when AI is implemented
-            if (!_turnSystem.IsPlayerTurn)
-            {
-                _logger.Debug("No AI - auto-skipping enemy turn");
-                _turnSystem.EndTurn();
-            }
         }
 
         private void OnFigureSelected(FigureSelectedMessage message)

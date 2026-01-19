@@ -51,6 +51,14 @@ namespace Project.Gameplay.Gameplay.Turn
 
         public bool IsPlayerTurn => CurrentTeam == Team.Player;
 
+        public void StartBattle()
+        {
+            CurrentTeam = Team.Player;
+            TurnNumber = 1;
+            _logger.Info("Battle started! Player's turn");
+            _turnChangedPublisher.Publish(new TurnChangedMessage(CurrentTeam, TurnNumber));
+        }
+
         public void Dispose()
         {
             _subscriptions?.Dispose();

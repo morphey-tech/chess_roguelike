@@ -15,7 +15,8 @@ namespace Project.Gameplay.Gameplay.Stage.Phase
                     typeof(BoardSpawnPhase),
                     typeof(FiguresSpawnPhase),
                     typeof(PreparePlacementPhase),
-                    typeof(GameplayInitPhase)
+                    typeof(GameplayInitPhase),
+                    typeof(BattleDuelPhase)
                 }
             }
         };

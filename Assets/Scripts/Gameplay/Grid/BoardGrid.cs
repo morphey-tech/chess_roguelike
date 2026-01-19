@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Project.Core.Core.Grid;
 
 namespace Project.Gameplay.Gameplay.Grid
@@ -42,6 +43,17 @@ namespace Project.Gameplay.Gameplay.Grid
         public BoardCell GetBoardCell(GridPosition position)
         {
             return _cells[position.Row, position.Column];
+        }
+
+        public IEnumerable<BoardCell> AllCells()
+        {
+            for (int r = 0; r < Height; r++)
+            {
+                for (int c = 0; c < Width; c++)
+                {
+                    yield return _cells[r, c];
+                }
+            }
         }
     }
 }
