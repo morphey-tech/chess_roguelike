@@ -8,5 +8,10 @@ namespace Project.Core.Core.Configs.Figure
     {
         [JsonProperty("content")]
         public FigureConfig[] Figures { get; set; }
+
+        public FigureConfig GetBy(string id)
+        {
+            return Array.Find(Figures, f => f.Id == id);
+        }
     }
 }

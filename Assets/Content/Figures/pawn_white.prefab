@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 700778397425556649}
   - component: {fileID: 6533899885431309447}
+  - component: {fileID: 3018979080851452577}
   m_Layer: 7
   m_Name: pawn_white
   m_TagString: Untagged
@@ -57,6 +58,27 @@ MonoBehaviour:
   _hitShake: 0.1
   _highlightRenderer: {fileID: 7937594608164196725}
   _highlightColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+--- !u!65 &3018979080851452577
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 740290869039254118}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.6, y: 0.6, z: 1}
+  m_Center: {x: 0, y: 0, z: 0.5}
 --- !u!1 &7960741123304759449
 GameObject:
   m_ObjectHideFlags: 0

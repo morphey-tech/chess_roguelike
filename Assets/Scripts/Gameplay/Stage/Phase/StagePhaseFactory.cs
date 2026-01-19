@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Project.Core.Core.Configs.Stage;
 using Project.Core.Core.Logging;
@@ -14,7 +15,7 @@ namespace Project.Gameplay.Gameplay.Stage.Phase
         private readonly ILogService _logService;
 
         [Inject]
-        public StagePhaseFactory(
+        private StagePhaseFactory(
             IObjectResolver resolver,
             IFiguresSpawnProviderFactory spawnProviderFactory,
             FigureSpawnService figureSpawnService,
@@ -28,22 +29,27 @@ namespace Project.Gameplay.Gameplay.Stage.Phase
 
         public List<IStagePhase> CreatePhasesForStage(StageConfig stageConfig)
         {
-            List<IStagePhase> phases = new()
-            {
-                _resolver.Resolve<BoardSpawnPhase>()
-            };
+            List<IStagePhase> phases = new();
+            Type[] pipeline = StagePipelineConfig.GetPipeline(stageConfig.Type);
 
-            IFiguresSpawnProvider provider = _spawnProviderFactory.Create(stageConfig.Type);
-            phases.Add(new FiguresSpawnPhase(_figureSpawnService, provider, _logService));
-
-            if (stageConfig.Type == StageType.Duel)
+            foreach (Type phaseType in pipeline)
             {
-                phases.Add(_resolver.Resolve<PreparePlacementPhase>());
+                IStagePhase phase = CreatePhase(phaseType, stageConfig);
+                phases.Add(phase);
             }
 
-            phases.Add(_resolver.Resolve<GameplayInitPhase>());
-
             return phases;
+        }
+
+        private IStagePhase CreatePhase(Type phaseType, StageConfig stageConfig)
+        {
+            if (phaseType == typeof(FiguresSpawnPhase))
+            {
+                IFiguresSpawnProvider provider = _spawnProviderFactory.Create(stageConfig.Type);
+                return new FiguresSpawnPhase(_figureSpawnService, provider, _logService);
+            }
+
+            return (IStagePhase)_resolver.Resolve(phaseType);
         }
     }
 }

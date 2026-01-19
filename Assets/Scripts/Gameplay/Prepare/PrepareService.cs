@@ -12,16 +12,10 @@ using VContainer;
 
 namespace Project.Gameplay.Gameplay.Prepare
 {
-    /// <summary>
-    /// Orchestrates the Prepare phase.
-    /// - Subscribed to input
-    /// - Holds temporary PrepareState
-    /// - Updates RunState (single source of truth)
-    /// - No Unity dependencies
-    /// </summary>
     public sealed class PrepareService : IDisposable
     {
         private readonly FigureSpawnService _figureSpawnService;
+        private readonly IPreparePresenter _preparePresenter;
         private readonly IPublisher<PreparePhaseCompletedMessage> _completedPublisher;
         private readonly ILogger<PrepareService> _logger;
         private readonly IDisposable _subscriptions;
@@ -30,10 +24,12 @@ namespace Project.Gameplay.Gameplay.Prepare
         private IPreparePlacementRules? _rules;
         private PlayerRunStateModel _runState;
         private BoardGrid _grid;
+        private string? _previousSelectedId;
 
         [Inject]
         public PrepareService(
             FigureSpawnService figureSpawnService,
+            IPreparePresenter preparePresenter,
             ISubscriber<HandFigureClickedMessage> handFigureClickedSubscriber,
             ISubscriber<CellClickedMessage> cellClickedSubscriber,
             ISubscriber<CancelRequestedMessage> cancelSubscriber,
@@ -41,6 +37,7 @@ namespace Project.Gameplay.Gameplay.Prepare
             ILogService logService)
         {
             _figureSpawnService = figureSpawnService;
+            _preparePresenter = preparePresenter;
             _completedPublisher = completedPublisher;
             _logger = logService.CreateLogger<PrepareService>();
 
@@ -53,19 +50,33 @@ namespace Project.Gameplay.Gameplay.Prepare
             _logger.Info("PrepareService created");
         }
 
-        public void Start(PlayerRunStateModel runState, BoardGrid grid, IPreparePlacementRules rules)
+        public async UniTask Start(PlayerRunStateModel runState, BoardGrid grid, IPreparePlacementRules rules)
         {
             _runState = runState;
             _grid = grid;
             _rules = rules;
 
-            // Create temporary phase state from units in hand
             _state = new PrepareState(runState.FiguresInHand);
             _state.Start();
 
             _logger.Info($"Prepare started: {runState.FiguresInHand.Count} figures in hand");
 
-            // If no figures to place, complete immediately
+            await SpawnPrepareZoneAsync();
+        }
+
+        private async UniTask SpawnPrepareZoneAsync()
+        {
+            var figures = _runState.FiguresInHand;
+            int totalCount = figures.Count;
+            
+            for (int i = 0; i < totalCount; i++)
+            {
+                FigureState fig = figures[i];
+                await _preparePresenter.CreateSlotWithFigureAsync(i, totalCount, fig.Id, fig.TypeId);
+            }
+
+            _logger.Info($"Spawned {totalCount} figures in prepare zone");
+
             if (_state.IsCompleted)
             {
                 _logger.Info("No figures to place, completing immediately");
@@ -81,12 +92,13 @@ namespace Project.Gameplay.Gameplay.Prepare
             }
 
             _state.Complete();
+            _preparePresenter.Clear();
             _logger.Info("Prepare completed");
             _completedPublisher.Publish(new PreparePhaseCompletedMessage(_runState.FiguresOnBoard.Count));
 
-            // Clear phase state
             _state = null;
             _rules = null;
+            _previousSelectedId = null;
         }
 
         private void OnHandFigureClicked(HandFigureClickedMessage message)
@@ -96,7 +108,16 @@ namespace Project.Gameplay.Gameplay.Prepare
                 return;
             }
 
+            // Deselect previous
+            if (_previousSelectedId != null)
+            {
+                _preparePresenter.SetSelected(_previousSelectedId, false);
+            }
+
             _state.Select(message.FigureId);
+            _previousSelectedId = message.FigureId;
+            _preparePresenter.SetSelected(message.FigureId, true);
+
             FigureState? selected = _state.GetSelectedFigure(_runState);
             if (selected != null)
             {
@@ -133,6 +154,8 @@ namespace Project.Gameplay.Gameplay.Prepare
                 return;
             }
 
+            string figureId = state.Id;
+
             Figure figure = await _figureSpawnService.SpawnAsync(_grid, pos, state.TypeId, Team.Player);
             if (figure == null)
             {
@@ -140,16 +163,17 @@ namespace Project.Gameplay.Gameplay.Prepare
                 return;
             }
 
-            // Update RunState (single source of truth)
-            _runState.PlaceOnBoard(state.Id, pos);
+            _preparePresenter.RemoveFigure(figureId);
+            _previousSelectedId = null;
+
+            _runState.PlaceOnBoard(figureId, pos);
             
-            // Update phase state
-            _state.OnPlaced(state.Id);
+            _state.OnPlaced(figureId);
             _logger.Info($"Placed {state.TypeId} at ({pos.Row}, {pos.Column})");
 
             if (_state.IsCompleted)
             {
-                _logger.Info("All units placed");
+                _logger.Info("All figures placed");
                 Complete();
             }
         }
@@ -164,8 +188,15 @@ namespace Project.Gameplay.Gameplay.Prepare
             {
                 return;
             }
+
+            if (_previousSelectedId != null)
+            {
+                _preparePresenter.SetSelected(_previousSelectedId, false);
+            }
+
             _logger.Debug("Selection cancelled");
             _state.ClearSelection();
+            _previousSelectedId = null;
         }
 
         void IDisposable.Dispose()

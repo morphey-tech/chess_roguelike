@@ -14,10 +14,12 @@ namespace Project.Unity.Unity.World
         [Header("Корневые контейнеры для спавна")]
         [SerializeField] private Transform _boardRoot;
         [SerializeField] private Transform _figureRoot;
+        [SerializeField] private Transform _prepareRoot;
         [SerializeField] private Transform _effectsRoot;
 
         Transform IWorldRoot.BoardRoot => _boardRoot != null ? _boardRoot : transform;
         Transform IWorldRoot.FigureRoot => _figureRoot != null ? _figureRoot : transform;
+        Transform IWorldRoot.PrepareRoot => _prepareRoot != null ? _prepareRoot : transform;
         Transform IWorldRoot.EffectsRoot => _effectsRoot != null ? _effectsRoot : transform;
         
         public T? GetObjectByType<T>(bool includeInactive = false)

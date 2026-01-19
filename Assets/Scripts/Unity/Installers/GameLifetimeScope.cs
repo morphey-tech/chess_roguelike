@@ -79,6 +79,9 @@ namespace Project.Unity.Unity.Installers
             builder.Register<FigurePresenter>(Lifetime.Singleton)
                 .As<IFigurePresenter>();
 
+            builder.Register<PreparePresenter>(Lifetime.Singleton)
+                .As<IPreparePresenter>();
+
             // Unity-side input handlers
             builder.Register<HandFigureClickHandler>(Lifetime.Singleton)
                 .AsImplementedInterfaces()

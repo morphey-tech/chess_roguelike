@@ -10,6 +10,7 @@ namespace Project.Core.Core.World
     {
         Transform BoardRoot { get; }
         Transform FigureRoot { get; }
+        Transform PrepareRoot { get; }
         Transform EffectsRoot { get; }
     }
 }
