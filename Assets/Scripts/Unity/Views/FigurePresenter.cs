@@ -56,13 +56,10 @@ namespace Project.Unity.Unity.Views
 
             Vector3 worldPos = GetCellTopPosition(pos);
 
-            // Rotation based on team
-            Quaternion rotation = Quaternion.Euler(-90f, 0f, 0f);
-
             GameObject figureGO = await _assetService.InstantiateAsync(
                 config.AssetKey,
                 worldPos,
-                rotation,
+                Quaternion.identity,
                 _worldRoot.FigureRoot);
 
             if (figureGO == null)

@@ -145,11 +145,10 @@ namespace Project.Unity.Unity.Views
                 return null;
             }
 
-            Quaternion rotation = Quaternion.Euler(-90f, 0f, 0f);
             return await _assetService.InstantiateAsync(
                 figureConfig.AssetKey,
                 slotPosition,
-                rotation,
+                Quaternion.identity,
                 _worldRoot.PrepareRoot);
         }
     }
