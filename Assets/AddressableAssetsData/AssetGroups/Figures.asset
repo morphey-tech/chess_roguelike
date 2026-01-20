@@ -15,6 +15,51 @@ MonoBehaviour:
   m_GroupName: Figures
   m_GUID: d0f300d672abddf4c92f307c11433933
   m_SerializeEntries:
+  - m_GUID: 0a23640137759494999b4ac5beee43ba
+    m_Address: pawn_black_figure
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0d5be7191af437d49bf9ff0e71f3c3c6
+    m_Address: queen_white_figure
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1156b73985f22bc419136a1ed4c98d77
+    m_Address: rook_black_figure
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 808962a4a434452448f8a9b285eb7cb2
+    m_Address: knight_black_figure
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 990f2427855553841913efd1497eb31c
+    m_Address: bishop_white_figure
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9b60b5ea801f43646ae96bbee1a13209
+    m_Address: bishop_black_figure
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a494ef0a7dcbbbd4bbc517d5c34a8f88
+    m_Address: queen_black_figure
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cd67beaf4ad9270468c0200acb96de75
+    m_Address: rook_white_figure
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d81f865aee92de9449d5ab0b47e66f3f
+    m_Address: knight_white_figure
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f633b20e89673ae41b7f5645e337cd58
     m_Address: pawn_white_figure
     m_ReadOnly: 0

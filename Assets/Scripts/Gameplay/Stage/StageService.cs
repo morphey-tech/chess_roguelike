@@ -79,27 +79,48 @@ namespace Project.Gameplay.Gameplay.Stage
             Stage currentStage = _runHolder.Current?.CurrentStage;
             BoardCell fromCell = currentStage?.Grid.GetBoardCell(message.From);
             BoardCell toCell = currentStage?.Grid.GetBoardCell(message.To);
-            Figure figure = fromCell?.OccupiedBy;
+            Figure attacker = fromCell?.OccupiedBy;
 
-            if (figure == null)
+            if (attacker == null)
             {
                 _logger.Error("No figure at source position!");
                 return;
             }
 
-            Figure targetFigure = toCell?.OccupiedBy;
-            if (targetFigure != null)
+            Figure defender = toCell?.OccupiedBy;
+            if (defender != null)
             {
-                _logger.Info($"Capturing {targetFigure.Team} figure {targetFigure.Id}");
-                toCell.RemoveFigure();
-                _figurePresenter.RemoveFigure(targetFigure.Id);
-                _deathPublisher.Publish(new FigureDeathMessage(targetFigure.Id, targetFigure.Team));
+                // Combat!
+                int damage = attacker.Stats.Attack;
+                bool defenderDied = defender.Stats.TakeDamage(damage);
+                
+                _logger.Info($"{attacker} attacks {defender} for {damage} damage. HP: {defender.Stats.CurrentHp}/{defender.Stats.MaxHp}");
+                
+                // Play attack animation
+                _figurePresenter.PlayAttack(attacker.Id, message.To);
+                _figurePresenter.PlayDamageEffect(defender.Id);
+
+                if (defenderDied)
+                {
+                    _logger.Info($"{defender} died!");
+                    toCell.RemoveFigure();
+                    _figurePresenter.RemoveFigure(defender.Id);
+                    _deathPublisher.Publish(new FigureDeathMessage(defender.Id, defender.Team));
+                    
+                    // Move to the empty cell
+                    _movementService.MoveFigure(message.From, message.To);
+                    _figurePresenter.MoveFigure(attacker.Id, message.To);
+                }
+                // If defender survives - attacker doesn't move
+            }
+            else
+            {
+                // Simple move to empty cell
+                _movementService.MoveFigure(message.From, message.To);
+                _figurePresenter.MoveFigure(attacker.Id, message.To);
             }
 
-            _movementService.MoveFigure(message.From, message.To);
-            _figurePresenter.MoveFigure(figure.Id, message.To);
-            _logger.Info($"Figure {figure.Id} moved successfully");
-
+            _logger.Info($"Turn completed for {attacker}");
             _turnSystem.EndTurn();
         }
 

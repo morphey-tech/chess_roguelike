@@ -1,0 +1,29 @@
+{
+  "content": [
+    {
+      "id": "pawn_stats",
+      "max_hp": 3,
+      "attack": 1
+    },
+    {
+      "id": "knight_stats",
+      "max_hp": 4,
+      "attack": 2
+    },
+    {
+      "id": "bishop_stats",
+      "max_hp": 4,
+      "attack": 2
+    },
+    {
+      "id": "rook_stats",
+      "max_hp": 6,
+      "attack": 3
+    },
+    {
+      "id": "queen_stats",
+      "max_hp": 8,
+      "attack": 4
+    }
+  ]
+}

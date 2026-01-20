@@ -84,13 +84,6 @@ namespace Project.Gameplay.Gameplay.Figures
 
             BoardCell fromCell = _grid.GetBoardCell(from);
             BoardCell toCell = _grid.GetBoardCell(to);
-
-            if (!toCell.IsFree)
-            {
-                _logger.Warning($"Cannot move: cell ({to.Row},{to.Column}) is occupied");
-                return;
-            }
-
             Figure figure = fromCell.OccupiedBy;
             if (figure == null)
             {

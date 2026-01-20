@@ -9,6 +9,8 @@ namespace Project.Gameplay.Gameplay.Figures
         void MoveFigure(int figureId, GridPosition to);
         void RemoveFigure(int figureId);
         void PlayAttack(int figureId, GridPosition target);
+        void PlayDamageEffect(int figureId);
+        void PlayDeathEffect(int figureId);
         void Clear();
     }
 }

@@ -3,9 +3,9 @@
     {
       "id": "default",
       "figures": [
-        "pawn",
-        "pawn",
-        "pawn"
+        "pawn_white_default",
+        "knight_white_default",
+        "rook_white_default"
       ]
     }
   ]

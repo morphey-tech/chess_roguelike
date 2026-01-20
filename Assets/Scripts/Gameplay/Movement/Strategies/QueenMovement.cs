@@ -39,6 +39,8 @@ namespace Project.Gameplay.Gameplay.Movement.Strategies
                     }
                     else
                     {
+                        if (cell.OccupiedBy?.Team != figure.Team)
+                            yield return to;
                         break;
                     }
                 }
@@ -51,17 +53,13 @@ namespace Project.Gameplay.Gameplay.Movement.Strategies
             int dc = to.Column - from.Column;
 
             if (dr == 0 && dc == 0)
-            {
                 return false;
-            }
 
             bool isStraight = dr == 0 || dc == 0;
             bool isDiagonal = Math.Abs(dr) == Math.Abs(dc);
 
             if (!isStraight && !isDiagonal)
-            {
                 return false;
-            }
 
             int stepR = dr == 0 ? 0 : (dr > 0 ? 1 : -1);
             int stepC = dc == 0 ? 0 : (dc > 0 ? 1 : -1);
@@ -70,14 +68,16 @@ namespace Project.Gameplay.Gameplay.Movement.Strategies
             while (current.Row != to.Row || current.Column != to.Column)
             {
                 if (!grid.IsInside(current) || !grid.GetBoardCell(current).IsFree)
-                {
                     return false;
-                }
-
                 current = new GridPosition(current.Row + stepR, current.Column + stepC);
             }
 
-            return grid.IsInside(to) && grid.GetBoardCell(to).IsFree;
+            return grid.IsInside(to) && CanOccupy(figure, grid.GetBoardCell(to));
+        }
+
+        private static bool CanOccupy(Figure figure, BoardCell cell)
+        {
+            return cell.IsFree || (cell.OccupiedBy != null && cell.OccupiedBy.Team != figure.Team);
         }
     }
 }

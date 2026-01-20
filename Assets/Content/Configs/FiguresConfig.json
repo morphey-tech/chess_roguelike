@@ -1,10 +1,74 @@
 {
   "content": [
     {
-      "id": "pawn",
+      "id": "pawn_white_default",
       "asset_key": "pawn_white_figure",
       "behaviour_id": "none",
-      "movement_id": "pawn"
+      "movement_id": "pawn",
+      "stats_id": "pawn_stats"
+    },
+    {
+      "id": "pawn_black_default",
+      "asset_key": "pawn_black_figure",
+      "behaviour_id": "none",
+      "movement_id": "pawn",
+      "stats_id": "pawn_stats"
+    },
+    {
+      "id": "knight_white_default",
+      "asset_key": "knight_white_figure",
+      "behaviour_id": "none",
+      "movement_id": "knight",
+      "stats_id": "knight_stats"
+    },
+    {
+      "id": "knight_black_default",
+      "asset_key": "knight_black_figure",
+      "behaviour_id": "none",
+      "movement_id": "knight",
+      "stats_id": "knight_stats"
+    },
+    {
+      "id": "bishop_white_default",
+      "asset_key": "bishop_white_figure",
+      "behaviour_id": "none",
+      "movement_id": "bishop",
+      "stats_id": "bishop_stats"
+    },
+    {
+      "id": "bishop_black_default",
+      "asset_key": "bishop_black_figure",
+      "behaviour_id": "none",
+      "movement_id": "bishop",
+      "stats_id": "bishop_stats"
+    },
+    {
+      "id": "rook_white_default",
+      "asset_key": "rook_white_figure",
+      "behaviour_id": "none",
+      "movement_id": "rook",
+      "stats_id": "rook_stats"
+    },
+    {
+      "id": "rook_black_default",
+      "asset_key": "rook_black_figure",
+      "behaviour_id": "none",
+      "movement_id": "rook",
+      "stats_id": "rook_stats"
+    },
+    {
+      "id": "queen_white_default",
+      "asset_key": "queen_white_figure",
+      "behaviour_id": "none",
+      "movement_id": "queen",
+      "stats_id": "queen_stats"
+    },
+    {
+      "id": "queen_black_default",
+      "asset_key": "queen_black_figure",
+      "behaviour_id": "none",
+      "movement_id": "queen",
+      "stats_id": "queen_stats"
     }
   ]
 }

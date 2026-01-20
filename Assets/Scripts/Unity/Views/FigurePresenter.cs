@@ -145,6 +145,80 @@ namespace Project.Unity.Unity.Views
             }
         }
 
+        public void PlayDamageEffect(int figureId)
+        {
+            if (!_figures.TryGetValue(figureId, out GameObject figureGO))
+                return;
+
+            // Always use simple flash effect (works with any shader)
+            PlaySimpleDamageEffect(figureGO).Forget();
+        }
+
+        public void PlayDeathEffect(int figureId)
+        {
+            if (_figureViews.TryGetValue(figureId, out IFigureView view))
+            {
+                view.PlayDeathAsync().Forget();
+            }
+        }
+
+        private static readonly int ColorId = Shader.PropertyToID("_Color");
+
+        private async UniTaskVoid PlaySimpleDamageEffect(GameObject figureGO)
+        {
+            if (figureGO == null) return;
+
+            Renderer[] renderers = figureGO.GetComponentsInChildren<Renderer>();
+            if (renderers.Length == 0)
+            {
+                _logger.Warning($"No renderers found on {figureGO.name}");
+                return;
+            }
+
+            // Store original materials and create flash instances
+            var originalMaterials = new List<(Renderer r, Material[] originals)>();
+            Color flashColor = Color.red;
+            
+            foreach (Renderer r in renderers)
+            {
+                if (r == null) continue;
+                originalMaterials.Add((r, r.materials));
+            }
+
+            const int flashDelayMs = 80;
+            const int flashCount = 2;
+
+            for (int i = 0; i < flashCount && figureGO != null; i++)
+            {
+                // Flash ON - set color to red/white
+                foreach (var (r, _) in originalMaterials)
+                {
+                    if (r == null) continue;
+                    foreach (Material mat in r.materials)
+                    {
+                        if (mat.HasProperty(ColorId))
+                            mat.SetColor(ColorId, flashColor);
+                    }
+                }
+                
+                await UniTask.Delay(flashDelayMs);
+                if (figureGO == null) return;
+                
+                // Flash OFF - restore original color (assuming it was close to white/wood)
+                foreach (var (r, _) in originalMaterials)
+                {
+                    if (r == null) continue;
+                    foreach (Material mat in r.materials)
+                    {
+                        if (mat.HasProperty(ColorId))
+                            mat.SetColor(ColorId, Color.white);
+                    }
+                }
+                
+                await UniTask.Delay(flashDelayMs);
+            }
+        }
+
         public void Clear()
         {
             foreach (GameObject figure in _figures.Values)

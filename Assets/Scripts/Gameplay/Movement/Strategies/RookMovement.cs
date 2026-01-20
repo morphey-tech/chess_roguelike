@@ -21,14 +21,12 @@ namespace Project.Gameplay.Gameplay.Movement.Strategies
         {
             foreach ((int dr, int dc) in Directions)
             {
-                for (int i = 1; i < 20; i++) // Max distance
+                for (int i = 1; i < 20; i++)
                 {
                     GridPosition to = new(from.Row + dr * i, from.Column + dc * i);
 
                     if (!grid.IsInside(to))
-                    {
                         break;
-                    }
 
                     BoardCell cell = grid.GetBoardCell(to);
                     
@@ -38,6 +36,9 @@ namespace Project.Gameplay.Gameplay.Movement.Strategies
                     }
                     else
                     {
+                        // Can capture enemy, then stop
+                        if (cell.OccupiedBy?.Team != figure.Team)
+                            yield return to;
                         break;
                     }
                 }
@@ -50,28 +51,28 @@ namespace Project.Gameplay.Gameplay.Movement.Strategies
             int dc = to.Column - from.Column;
 
             if (dr != 0 && dc != 0)
-            {
                 return false;
-            }
             if (dr == 0 && dc == 0)
-            {
                 return false;
-            }
 
             int stepR = dr == 0 ? 0 : (dr > 0 ? 1 : -1);
             int stepC = dc == 0 ? 0 : (dc > 0 ? 1 : -1);
 
+            // Check path is clear (excluding destination)
             GridPosition current = new(from.Row + stepR, from.Column + stepC);
             while (current.Row != to.Row || current.Column != to.Column)
             {
                 if (!grid.IsInside(current) || !grid.GetBoardCell(current).IsFree)
-                {
                     return false;
-                }
                 current = new GridPosition(current.Row + stepR, current.Column + stepC);
             }
 
-            return grid.IsInside(to) && grid.GetBoardCell(to).IsFree;
+            return grid.IsInside(to) && CanOccupy(figure, grid.GetBoardCell(to));
+        }
+
+        private static bool CanOccupy(Figure figure, BoardCell cell)
+        {
+            return cell.IsFree || (cell.OccupiedBy != null && cell.OccupiedBy.Team != figure.Team);
         }
     }
 }

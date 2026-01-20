@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Movement.Strategies;
 
 namespace Project.Gameplay.Gameplay.Movement
@@ -11,17 +12,34 @@ namespace Project.Gameplay.Gameplay.Movement
     {
         private readonly Dictionary<string, IMovementStrategy> _strategies;
         private readonly IMovementStrategy _fallback;
+        private readonly ILogger<MovementStrategyFactory> _logger;
 
-        private MovementStrategyFactory(IEnumerable<IMovementStrategy> strategies)
+        public MovementStrategyFactory(
+            IEnumerable<IMovementStrategy> strategies,
+            ILogService logService)
         {
             _strategies = strategies.ToDictionary(s => s.Id);
             _fallback = new PawnMovement();
+            _logger = logService.CreateLogger<MovementStrategyFactory>();
+            
+            _logger.Info($"Registered strategies: {string.Join(", ", _strategies.Keys)}");
         }
 
         public IMovementStrategy Get(string movementId)
         {
-            return string.IsNullOrEmpty(movementId) 
-                ? _fallback : _strategies.GetValueOrDefault(movementId, _fallback);
+            if (string.IsNullOrEmpty(movementId))
+            {
+                _logger.Warning($"Empty movementId, using fallback pawn");
+                return _fallback;
+            }
+
+            if (_strategies.TryGetValue(movementId, out var strategy))
+            {
+                return strategy;
+            }
+
+            _logger.Warning($"Unknown movementId '{movementId}', using fallback pawn");
+            return _fallback;
         }
     }
 }

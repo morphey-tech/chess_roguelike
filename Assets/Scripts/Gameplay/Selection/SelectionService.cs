@@ -80,15 +80,19 @@ namespace Project.Gameplay.Gameplay.Selection
             {
                 if (clickedCell.IsFree)
                 {
+                    // Move to empty cell
                     TryMove(_selectedCell.Position, position);
                     ClearSelection();
                 }
                 else if (clickedCell.OccupiedBy?.Team == _turnSystem.CurrentTeam)
                 {
+                    // Select another friendly figure
                     Select(clickedCell);
                 }
                 else
                 {
+                    // Attack enemy figure
+                    TryMove(_selectedCell.Position, position);
                     ClearSelection();
                 }
             }

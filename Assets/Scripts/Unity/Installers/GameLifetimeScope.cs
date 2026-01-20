@@ -140,7 +140,7 @@ namespace Project.Unity.Unity.Installers
 
             // Movement strategies
             builder.Register<MovementStrategyFactory>(Lifetime.Singleton)
-                .WithParameter(new List<IMovementStrategy>
+                .WithParameter<IEnumerable<IMovementStrategy>>(new IMovementStrategy[]
                 {
                     new PawnMovement(),
                     new KnightMovement(),

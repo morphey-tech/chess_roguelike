@@ -17,5 +17,8 @@ namespace Project.Core.Core.Configs.Figure
         
         [JsonProperty("movement_id")]
         public string MovementId { get; set; }
+        
+        [JsonProperty("stats_id")]
+        public string StatsId { get; set; }
     }
 }

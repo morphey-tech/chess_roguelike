@@ -26,7 +26,7 @@ namespace Project.Gameplay.Gameplay.Movement.Strategies
             foreach ((int dr, int dc) in Directions)
             {
                 GridPosition to = new(from.Row + dr, from.Column + dc);
-                if (grid.IsInside(to) && grid.GetBoardCell(to).IsFree)
+                if (grid.IsInside(to) && CanOccupy(figure, grid.GetBoardCell(to)))
                 {
                     yield return to;
                 }
@@ -43,7 +43,13 @@ namespace Project.Gameplay.Gameplay.Movement.Strategies
                 return false;
             }
             
-            return grid.IsInside(to) && grid.GetBoardCell(to).IsFree;
+            return grid.IsInside(to) && CanOccupy(figure, grid.GetBoardCell(to));
+        }
+
+        private static bool CanOccupy(Figure figure, BoardCell cell)
+        {
+            // Can move to empty cell or capture enemy
+            return cell.IsFree || (cell.OccupiedBy != null && cell.OccupiedBy.Team != figure.Team);
         }
     }
 }
