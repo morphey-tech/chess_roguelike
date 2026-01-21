@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using Project.Core.Core.Assets;
 using Project.Core.Core.Configs.Cells;
 using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
@@ -9,6 +8,7 @@ using Project.Gameplay.Gameplay.Board;
 using Project.Gameplay.Gameplay.Board.Appear;
 using Project.Gameplay.Gameplay.Board.Appear.Strategies;
 using Project.Gameplay.Gameplay.Configs;
+using Project.Gameplay.Presentations;
 using UnityEngine;
 
 namespace Project.Unity.Unity.Views
@@ -17,29 +17,30 @@ namespace Project.Unity.Unity.Views
     /// Unity implementation of IBoardView.
     /// Effects are delegated to IBoardCellView components on prefabs.
     /// </summary>
+    
     public sealed class BoardPresenter : IBoardPresenter
     {
-        private readonly IAssetService _assetService;
+        private readonly PresentationManager _presentationManager;
         private readonly IWorldRoot _worldRoot;
         private readonly ConfigProvider _configProvider;
         private readonly BoardAppearAnimationFactory _animationFactory;
         private readonly ILogger<BoardPresenter> _logger;
 
-        private readonly Dictionary<GridPosition, GameObject> _cells = new();
+        private readonly Dictionary<GridPosition, EntityLink> _cells = new();
         private readonly Dictionary<GridPosition, IBoardCellView> _cellVisuals = new();
-        private readonly List<GameObject> _cellsList = new();
+        private readonly List<EntityLink> _cellsList = new();
         private CellConfigRepository _cellConfigCache;
 
         private const float CellSize = 1f;
 
         public BoardPresenter(
-            IAssetService assetService,
+            PresentationManager presentationManager,
             IWorldRoot worldRoot,
             ConfigProvider configProvider,
             BoardAppearAnimationFactory animationFactory,
             ILogService logService)
         {
-            _assetService = assetService;
+            _presentationManager = presentationManager;
             _worldRoot = worldRoot;
             _configProvider = configProvider;
             _animationFactory = animationFactory;
@@ -48,7 +49,7 @@ namespace Project.Unity.Unity.Views
             _logger.Info("UnityBoardView created");
         }
 
-        public async void CreateCell(GridPosition pos, string skinId)
+        public async void CreateCell(int id, GridPosition pos, string skinId)
         {
             _cellConfigCache ??= await _configProvider.Get<CellConfigRepository>("cells_conf");
 
@@ -65,7 +66,8 @@ namespace Project.Unity.Unity.Views
                 0f,
                 pos.Row * CellSize);
 
-            GameObject cell = await _assetService.InstantiateAsync(
+            EntityLink cell = await _presentationManager.SpawnView(
+                id,
                 cellConfig.AssetKey,
                 worldPos,
                 Quaternion.identity,
@@ -92,12 +94,12 @@ namespace Project.Unity.Unity.Views
 
         public void DestroyCell(GridPosition pos)
         {
-            if (_cells.TryGetValue(pos, out GameObject cell))
+            if (_cells.TryGetValue(pos, out EntityLink cell))
             {
                 _cells.Remove(pos);
                 _cellVisuals.Remove(pos);
                 _cellsList.Remove(cell);
-                Object.Destroy(cell);
+                _presentationManager.Destroy(cell.EntityId);
                 _logger.Debug($"Cell destroyed at ({pos.Row}, {pos.Column})");
             }
         }
@@ -140,10 +142,10 @@ namespace Project.Unity.Unity.Views
 
         public void Clear()
         {
-            foreach (GameObject cell in _cells.Values)
+            foreach (EntityLink cell in _cells.Values)
             {
                 if (cell != null)
-                    Object.Destroy(cell);
+                    _presentationManager.Destroy(cell.EntityId);
             }
             _cells.Clear();
             _cellVisuals.Clear();

@@ -9,6 +9,7 @@ using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.Gameplay.Grid;
+using Project.Gameplay.Presentations;
 using VContainer;
 
 namespace Project.Gameplay.Gameplay.Figures
@@ -20,9 +21,9 @@ namespace Project.Gameplay.Gameplay.Figures
         private readonly IPublisher<FigureSpawnedMessage> _spawnedPublisher;
         private readonly ILogger<FigureSpawnService> _logger;
         
-        private FigureConfigRepository _figureConfigCache;
-        private StatsConfigRepository _statsConfigCache;
-        private PassiveConfigRepository _passiveConfigCache;
+        private FigureConfigRepository? _figureConfigCache;
+        private StatsConfigRepository? _statsConfigCache;
+        private PassiveConfigRepository? _passiveConfigCache;
 
         [Inject]
         private FigureSpawnService(
@@ -37,7 +38,7 @@ namespace Project.Gameplay.Gameplay.Figures
             _logger = logService.CreateLogger<FigureSpawnService>();
         }
 
-        public async UniTask<Figure> SpawnAsync(BoardGrid grid, GridPosition position, string figureTypeId, Team team)
+        public async UniTask<Figure?> SpawnAsync(BoardGrid grid, GridPosition position, string figureTypeId, Team team)
         {
             BoardCell cell = grid.GetBoardCell(position);
 
@@ -62,7 +63,7 @@ namespace Project.Gameplay.Gameplay.Figures
                 ? new FigureStats(statsConfig.MaxHp, statsConfig.Attack, statsConfig.AttackRange)
                 : new FigureStats(1, 1, 1);
 
-            Figure figure = new(figureTypeId, movementId, attackId, stats, team);
+            Figure figure = new(IdGetter.MakeId(), figureTypeId, movementId, attackId, stats, team);
             
             if (figureConfig?.Passives != null)
             {
@@ -71,7 +72,7 @@ namespace Project.Gameplay.Gameplay.Figures
                     PassiveConfig passiveConfig = Array.Find(_passiveConfigCache.Passives, p => p.Id == passiveId);
                     if (passiveConfig != null)
                     {
-                        IPassive passive = PassiveFactory.Create(passiveConfig);
+                        IPassive? passive = PassiveFactory.Create(passiveConfig);
                         figure.AddPassive(passive);
                     }
                 }

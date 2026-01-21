@@ -18,6 +18,7 @@ using Project.Gameplay.Gameplay.Selection;
 using Project.Gameplay.Gameplay.Stage;
 using Project.Gameplay.Gameplay.Stage.Phase;
 using Project.Gameplay.Gameplay.Turn;
+using Project.Gameplay.Presentations;
 using Project.Unity.Unity.Bootstrap;
 using Project.Unity.Unity.Views;
 using Project.Unity.Unity.World;
@@ -42,9 +43,16 @@ namespace Project.Unity.Unity.Installers
             ConfigureMessagePipe(builder);
             ConfigureInput(builder);
             ConfigureCollectors(builder);
+            ConfigurePresentations(builder);
             ConfigureViews(builder);
             ConfigureServices(builder);
             builder.RegisterBuildCallback(OnContainerBuilt);
+        }
+
+        private void ConfigurePresentations(IContainerBuilder builder)
+        {
+            builder.Register<PresentationManager>(Lifetime.Singleton)
+                .As<PresentationManager>();
         }
 
         private void ConfigureMessagePipe(IContainerBuilder builder)

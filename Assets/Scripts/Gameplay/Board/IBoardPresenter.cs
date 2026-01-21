@@ -8,7 +8,7 @@ namespace Project.Gameplay.Gameplay.Board
     /// </summary>
     public interface IBoardPresenter
     {
-        void CreateCell(GridPosition pos, string skinId);
+        void CreateCell(int id, GridPosition pos, string skinId);
         void DestroyCell(GridPosition pos);
 
         void PlayAppear(GridPosition pos);

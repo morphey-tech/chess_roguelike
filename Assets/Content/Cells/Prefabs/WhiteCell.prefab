@@ -188,6 +188,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5891876457319257473}
   - component: {fileID: 5954411633879373137}
+  - component: {fileID: 5130977969902270394}
   - component: {fileID: 1417268932744069436}
   m_Layer: 6
   m_Name: WhiteCell
@@ -234,6 +235,18 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.9, y: 0.25, z: 0.9}
   m_Center: {x: 0, y: -0.1, z: 0}
+--- !u!114 &5130977969902270394
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9026925232284595385}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19829e90c0b64a9d82ec5ae053be1c66, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Gameplay::Project.Gameplay.Presentations.EntityLink
 --- !u!114 &1417268932744069436
 MonoBehaviour:
   m_ObjectHideFlags: 0

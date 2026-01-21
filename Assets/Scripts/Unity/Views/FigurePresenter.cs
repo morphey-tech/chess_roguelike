@@ -8,6 +8,8 @@ using Project.Core.Core.Physics;
 using Project.Core.Core.World;
 using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.Gameplay.Figures;
+using Project.Gameplay.Presentations;
+using Project.Unity.Presentations;
 using UnityEngine;
 
 namespace Project.Unity.Unity.Views
@@ -18,7 +20,7 @@ namespace Project.Unity.Unity.Views
     /// </summary>
     public sealed class FigurePresenter : IFigurePresenter
     {
-        private readonly IAssetService _assetService;
+        private readonly PresentationManager _presentationManager;
         private readonly IWorldRoot _worldRoot;
         private readonly ConfigProvider _configProvider;
         private readonly ILogger<FigurePresenter> _logger;
@@ -29,12 +31,12 @@ namespace Project.Unity.Unity.Views
         private FigureConfigRepository? _figureConfigCache;
 
         public FigurePresenter(
-            IAssetService assetService,
+            PresentationManager presentationManager,
             IWorldRoot worldRoot,
             ConfigProvider configProvider,
             ILogService logService)
         {
-            _assetService = assetService;
+            _presentationManager = presentationManager;
             _worldRoot = worldRoot;
             _configProvider = configProvider;
             _logger = logService.CreateLogger<FigurePresenter>();
@@ -55,29 +57,31 @@ namespace Project.Unity.Unity.Views
             }
 
             Vector3 worldPos = GetCellTopPosition(pos);
-
-            GameObject figureGO = await _assetService.InstantiateAsync(
+            
+            EntityLink entityLink = await _presentationManager.SpawnView(
+                figureId,
                 config.AssetKey,
                 worldPos,
                 Quaternion.identity,
                 _worldRoot.FigureRoot);
 
-            if (figureGO == null)
+            if (entityLink == null)
             {
                 _logger.Error($"Failed to instantiate figure {figureId}");
                 return;
             }
 
-            _figures[figureId] = figureGO;
+            _figures[figureId] = entityLink.gameObject;
             _positions[figureId] = pos;
 
+            var spawnPresenter = entityLink.GetComponent<FigureSpawnPresenter>();
+            if(spawnPresenter != null)
+                spawnPresenter.PlaySpawnAsync().Forget();
+                
             // Cache visual component if exists
-            IFigureView view = figureGO.GetComponent<IFigureView>();
+            var view = entityLink.GetComponent<IFigureView>();
             if (view != null)
-            {
                 _figureViews[figureId] = view;
-                view.PlaySpawnAsync().Forget();
-            }
 
             _logger.Info($"Figure {figureId} ({typeId}) created at ({pos.Row}, {pos.Column}), team: {team}");
         }
@@ -132,7 +136,8 @@ namespace Project.Unity.Unity.Views
             _figures.Remove(figureId);
             _figureViews.Remove(figureId);
             _positions.Remove(figureId);
-            Object.Destroy(figureGO);
+            
+            _presentationManager.Destroy(figureId);
             _logger.Debug($"Figure {figureId} removed");
         }
 

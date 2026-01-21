@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using Project.Gameplay.Presentations;
 using UnityEngine;
 
 namespace Project.Gameplay.Gameplay.Board.Appear.Strategies
@@ -10,21 +11,21 @@ namespace Project.Gameplay.Gameplay.Board.Appear.Strategies
     {
         public string Id => "wave";
 
-        public async UniTask Appear(IReadOnlyList<GameObject> cells)
+        public async UniTask Appear(IReadOnlyList<EntityLink> cells)
         {
-            IReadOnlyList<GameObject> ordered =
+            IReadOnlyList<EntityLink> ordered =
                 cells.OrderBy(c => 
                         c.transform.position.x + c.transform.position.z)
                     .ToList();
 
-            foreach (GameObject cell in ordered)
+            foreach (EntityLink cell in ordered)
             {
                 Animate(cell);
                 await UniTask.Delay(25);
             }
         }
 
-        private static void Animate(GameObject cell)
+        private static void Animate(EntityLink cell)
         {
             Transform t = cell.transform;
             t.localScale = Vector3.zero;

@@ -19,11 +19,9 @@ namespace Project.Gameplay.Gameplay.Figures
 
         public async UniTask<IReadOnlyList<FigureSpawnEntry>> BuildAsync(StageContext context)
         {
-            DuelStageConfigRepository repo =
-                await _configProvider.Get<DuelStageConfigRepository>("duels_conf");
+            DuelStageConfigRepository repo = await _configProvider.Get<DuelStageConfigRepository>("duels_conf");
 
-            DuelStageConfig config =
-                Array.Find(repo.Configs, c => c.Id == context.StageConfig.TypeConfigId);
+            DuelStageConfig config = Array.Find(repo.Configs, c => c.Id == context.StageConfig.TypeConfigId);
 
             if (config == null)
             {
