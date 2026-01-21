@@ -1,0 +1,34 @@
+{
+  "content": [
+    {
+      "id": "lifesteal_50",
+      "type": "lifesteal",
+      "params": { "percent": 0.5 }
+    },
+    {
+      "id": "lifesteal_25",
+      "type": "lifesteal",
+      "params": { "percent": 0.25 }
+    },
+    {
+      "id": "execute_30",
+      "type": "execute",
+      "params": { "threshold": 0.3, "multiplier": 2.0 }
+    },
+    {
+      "id": "crit_20",
+      "type": "critical",
+      "params": { "chance": 0.2, "multiplier": 2.0 }
+    },
+    {
+      "id": "crit_50_3x",
+      "type": "critical",
+      "params": { "chance": 0.5, "multiplier": 3.0 }
+    },
+    {
+      "id": "thorns_25",
+      "type": "thorns",
+      "params": { "percent": 0.25 }
+    }
+  ]
+}

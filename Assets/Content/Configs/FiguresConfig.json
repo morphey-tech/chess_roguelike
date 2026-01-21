@@ -5,70 +5,90 @@
       "asset_key": "pawn_white_figure",
       "behaviour_id": "none",
       "movement_id": "pawn",
-      "stats_id": "pawn_stats"
+      "attack_id": "simple",
+      "stats_id": "pawn_stats",
+      "passives": []
     },
     {
       "id": "pawn_black_default",
       "asset_key": "pawn_black_figure",
       "behaviour_id": "none",
       "movement_id": "pawn",
-      "stats_id": "pawn_stats"
+      "attack_id": "simple",
+      "stats_id": "pawn_stats",
+      "passives": []
     },
     {
       "id": "knight_white_default",
       "asset_key": "knight_white_figure",
       "behaviour_id": "none",
       "movement_id": "knight",
-      "stats_id": "knight_stats"
+      "attack_id": "simple",
+      "stats_id": "knight_stats",
+      "passives": ["crit_20"]
     },
     {
       "id": "knight_black_default",
       "asset_key": "knight_black_figure",
       "behaviour_id": "none",
       "movement_id": "knight",
-      "stats_id": "knight_stats"
+      "attack_id": "simple",
+      "stats_id": "knight_stats",
+      "passives": ["crit_20"]
     },
     {
       "id": "bishop_white_default",
       "asset_key": "bishop_white_figure",
       "behaviour_id": "none",
       "movement_id": "bishop",
-      "stats_id": "bishop_stats"
+      "attack_id": "ranged",
+      "stats_id": "bishop_stats",
+      "passives": ["lifesteal_25"]
     },
     {
       "id": "bishop_black_default",
       "asset_key": "bishop_black_figure",
       "behaviour_id": "none",
       "movement_id": "bishop",
-      "stats_id": "bishop_stats"
+      "attack_id": "ranged",
+      "stats_id": "bishop_stats",
+      "passives": ["lifesteal_25"]
     },
     {
       "id": "rook_white_default",
       "asset_key": "rook_white_figure",
       "behaviour_id": "none",
       "movement_id": "rook",
-      "stats_id": "rook_stats"
+      "attack_id": "simple",
+      "stats_id": "rook_stats",
+      "passives": ["execute_30"]
     },
     {
       "id": "rook_black_default",
       "asset_key": "rook_black_figure",
       "behaviour_id": "none",
       "movement_id": "rook",
-      "stats_id": "rook_stats"
+      "attack_id": "simple",
+      "stats_id": "rook_stats",
+      "passives": ["execute_30"]
     },
     {
       "id": "queen_white_default",
       "asset_key": "queen_white_figure",
       "behaviour_id": "none",
       "movement_id": "queen",
-      "stats_id": "queen_stats"
+      "attack_id": "simple",
+      "stats_id": "queen_stats",
+      "passives": ["lifesteal_50", "execute_30"]
     },
     {
       "id": "queen_black_default",
       "asset_key": "queen_black_figure",
       "behaviour_id": "none",
       "movement_id": "queen",
-      "stats_id": "queen_stats"
+      "attack_id": "simple",
+      "stats_id": "queen_stats",
+      "passives": ["lifesteal_50", "execute_30"]
     }
   ]
 }

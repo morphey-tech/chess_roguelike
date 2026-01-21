@@ -14,5 +14,8 @@ namespace Project.Core.Core.Configs.Stats
         
         [JsonProperty("attack")]
         public int Attack { get; set; }
+        
+        [JsonProperty("attack_range")]
+        public int AttackRange { get; set; } = 1;
     }
 }

@@ -3,27 +3,32 @@
     {
       "id": "pawn_stats",
       "max_hp": 3,
-      "attack": 1
+      "attack": 1,
+      "attack_range": 1
     },
     {
       "id": "knight_stats",
       "max_hp": 4,
-      "attack": 2
+      "attack": 2,
+      "attack_range": 1
     },
     {
       "id": "bishop_stats",
       "max_hp": 4,
-      "attack": 2
+      "attack": 2,
+      "attack_range": 7
     },
     {
       "id": "rook_stats",
       "max_hp": 6,
-      "attack": 3
+      "attack": 3,
+      "attack_range": 7
     },
     {
       "id": "queen_stats",
       "max_hp": 8,
-      "attack": 4
+      "attack": 4,
+      "attack_range": 7
     }
   ]
 }
