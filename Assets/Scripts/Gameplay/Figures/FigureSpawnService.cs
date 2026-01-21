@@ -2,19 +2,17 @@ using System;
 using Cysharp.Threading.Tasks;
 using MessagePipe;
 using Project.Core.Core.Configs.Figure;
+using Project.Core.Core.Configs.Passive;
 using Project.Core.Core.Configs.Stats;
 using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
+using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.Gameplay.Grid;
 using VContainer;
 
 namespace Project.Gameplay.Gameplay.Figures
 {
-    /// <summary>
-    /// Spawns figures on the board.
-    /// Loads config to get movementId and stats.
-    /// </summary>
     public sealed class FigureSpawnService
     {
         private readonly ConfigProvider _configProvider;
@@ -24,6 +22,7 @@ namespace Project.Gameplay.Gameplay.Figures
         
         private FigureConfigRepository _figureConfigCache;
         private StatsConfigRepository _statsConfigCache;
+        private PassiveConfigRepository _passiveConfigCache;
 
         [Inject]
         private FigureSpawnService(
@@ -48,27 +47,43 @@ namespace Project.Gameplay.Gameplay.Figures
                 return null;
             }
 
-            // Load configs
             _figureConfigCache ??= await _configProvider.Get<FigureConfigRepository>("figures_conf");
             _statsConfigCache ??= await _configProvider.Get<StatsConfigRepository>("stats_conf");
+            _passiveConfigCache ??= await _configProvider.Get<PassiveConfigRepository>("passives_conf");
             
             FigureConfig figureConfig = Array.Find(_figureConfigCache.Figures, f => f.Id == figureTypeId);
             string movementId = figureConfig?.MovementId ?? "pawn";
+            string attackId = figureConfig?.AttackId ?? "simple";
             
-            // Load stats
-            string statsId = figureConfig?.StatsId ?? figureTypeId; // Default to figure id
+            string statsId = figureConfig?.StatsId ?? figureTypeId;
             StatsConfig statsConfig = Array.Find(_statsConfigCache.Configs, s => s.Id == statsId);
             
             FigureStats stats = statsConfig != null 
-                ? new FigureStats(statsConfig.MaxHp, statsConfig.Attack)
-                : new FigureStats(1, 1); // Default stats
+                ? new FigureStats(statsConfig.MaxHp, statsConfig.Attack, statsConfig.AttackRange)
+                : new FigureStats(1, 1, 1);
 
-            Figure figure = new(figureTypeId, movementId, stats, team);
+            Figure figure = new(figureTypeId, movementId, attackId, stats, team);
+            
+            if (figureConfig?.Passives != null)
+            {
+                foreach (string passiveId in figureConfig.Passives)
+                {
+                    PassiveConfig passiveConfig = Array.Find(_passiveConfigCache.Passives, p => p.Id == passiveId);
+                    if (passiveConfig != null)
+                    {
+                        IPassive passive = PassiveFactory.Create(passiveConfig);
+                        figure.AddPassive(passive);
+                    }
+                }
+                
+                if (figure.Passives.Count > 0)
+                    _logger.Debug($"{figure} passives: {string.Join(", ", figureConfig.Passives)}");
+            }
+            
             cell.PlaceFigure(figure);
-
             await _figurePresenter.CreateFigure(figure.Id, figure.TypeId, position, team);
             
-            _logger.Info($"Spawned {figure} HP:{stats.CurrentHp}/{stats.MaxHp} ATK:{stats.Attack} at ({position.Row}, {position.Column})");
+            _logger.Info($"Spawned {figure} HP:{stats.CurrentHp}/{stats.MaxHp} ATK:{stats.Attack} RNG:{stats.AttackRange}");
             _spawnedPublisher.Publish(new FigureSpawnedMessage(figure, position));
 
             return figure;

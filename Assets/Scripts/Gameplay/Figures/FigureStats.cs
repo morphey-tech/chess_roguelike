@@ -1,3 +1,5 @@
+using System;
+
 namespace Project.Gameplay.Gameplay.Figures
 {
     public class FigureStats
@@ -6,13 +8,19 @@ namespace Project.Gameplay.Gameplay.Figures
         public int CurrentHp { get; private set; }
         public int Attack { get; }
         
+        /// <summary>
+        /// Attack range in cells. 1 = melee (adjacent cells only).
+        /// </summary>
+        public int AttackRange { get; }
+        
         public bool IsDead => CurrentHp <= 0;
 
-        public FigureStats(int maxHp, int attack)
+        public FigureStats(int maxHp, int attack, int attackRange = 1)
         {
             MaxHp = maxHp;
             CurrentHp = maxHp;
             Attack = attack;
+            AttackRange = Math.Max(1, attackRange);
         }
 
         /// <summary>
@@ -26,7 +34,7 @@ namespace Project.Gameplay.Gameplay.Figures
 
         public void Heal(int amount)
         {
-            CurrentHp = System.Math.Min(CurrentHp + amount, MaxHp);
+            CurrentHp = Math.Min(CurrentHp + amount, MaxHp);
         }
     }
 }

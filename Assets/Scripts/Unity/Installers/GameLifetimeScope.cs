@@ -2,9 +2,12 @@ using System.Collections.Generic;
 using LiteUI.UI.Service;
 using MessagePipe;
 using Project.Core.Core.World;
+using Project.Gameplay.Gameplay.Attack;
+using Project.Gameplay.Gameplay.Attack.Strategies;
 using Project.Gameplay.Gameplay.Board;
 using Project.Gameplay.Gameplay.Board.Appear;
 using Project.Gameplay.Gameplay.Board.Appear.Strategies;
+using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Input;
 using Project.Gameplay.Gameplay.Movement;
@@ -149,6 +152,17 @@ namespace Project.Unity.Unity.Installers
                     new QueenMovement()
                 });
 
+            // Attack strategies
+            builder.Register<AttackStrategyFactory>(Lifetime.Singleton)
+                .WithParameter<IEnumerable<IAttackStrategy>>(new IAttackStrategy[]
+                {
+                    new SimpleAttack(),
+                    new RangedAttack()
+                }); 
+
+            // Combat resolver (passives come from figures)
+            builder.Register<CombatResolver>(Lifetime.Singleton);
+
             // Pure gameplay services
             builder.Register<BoardSpawnService>(Lifetime.Singleton);
             builder.Register<FigureSpawnService>(Lifetime.Singleton);
@@ -166,7 +180,7 @@ namespace Project.Unity.Unity.Installers
             resolver.Resolve<HandFigureClickHandler>();
 
             // Инжектим MonoSceneBootstrap
-            MonoSceneBootstrap bootstrap = _worldObjectCollector.GetObjectByType<MonoSceneBootstrap>();
+            MonoSceneBootstrap? bootstrap = _worldObjectCollector.GetObjectByType<MonoSceneBootstrap>();
             if (bootstrap != null)
             {
                 resolver.Inject(bootstrap);
