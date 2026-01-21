@@ -67,7 +67,7 @@ namespace Project.Gameplay.Gameplay.Figures
             Figure figure = new(IdGetter.MakeId(), figureTypeId, movementId, stats, team);
             cell.PlaceFigure(figure);
 
-            await _figurePresenter.CreateFigure(figure.Id, figure.TypeId, position, team);
+            await _figurePresenter.CreateFigure(figure, figure.TypeId, position, team);
             
             _logger.Info($"Spawned {figure} HP:{stats.CurrentHp}/{stats.MaxHp} ATK:{stats.Attack} at ({position.Row}, {position.Column})");
             _spawnedPublisher.Publish(new FigureSpawnedMessage(figure, position));

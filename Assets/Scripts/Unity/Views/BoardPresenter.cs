@@ -4,6 +4,7 @@ using Project.Core.Core.Configs.Cells;
 using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
 using Project.Core.Core.World;
+using Project.Gameplay;
 using Project.Gameplay.Gameplay.Board;
 using Project.Gameplay.Gameplay.Board.Appear;
 using Project.Gameplay.Gameplay.Board.Appear.Strategies;
@@ -49,7 +50,7 @@ namespace Project.Unity.Unity.Views
             _logger.Info("UnityBoardView created");
         }
 
-        public async void CreateCell(int id, GridPosition pos, string skinId)
+        public async void CreateCell(Entity entity, GridPosition pos, string skinId)
         {
             _cellConfigCache ??= await _configProvider.Get<CellConfigRepository>("cells_conf");
 
@@ -67,7 +68,7 @@ namespace Project.Unity.Unity.Views
                 pos.Row * CellSize);
 
             EntityLink cell = await _presentationManager.SpawnView(
-                id,
+                entity,
                 cellConfig.AssetKey,
                 worldPos,
                 Quaternion.identity,
@@ -119,15 +120,7 @@ namespace Project.Unity.Unity.Views
                 visual.PlayHitAsync().Forget();
             }
         }
-
-        public void Highlight(GridPosition pos, bool enabled)
-        {
-            if (_cellVisuals.TryGetValue(pos, out IBoardCellView visual))
-            {
-                visual.SetHighlight(enabled);
-            }
-        }
-
+        
         public async UniTask PlayBoardAppearAsync(string strategyId)
         {
             await UniTask.Yield(); // Wait for all cells to instantiate

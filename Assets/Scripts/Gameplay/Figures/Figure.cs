@@ -1,16 +1,14 @@
 namespace Project.Gameplay.Gameplay.Figures
 {
-    public class Figure
+    public class Figure : Entity
     {
-        public int Id { get; } 
         public string TypeId { get; }
         public string MovementId { get; }
         public FigureStats Stats { get; }
         public Team Team { get; }
 
-        public Figure(int id, string typeId, string movementId, FigureStats stats, Team team)
+        public Figure(int id, string typeId, string movementId, FigureStats stats, Team team) : base(id)
         {
-            Id = id;
             TypeId = typeId;
             MovementId = movementId;
             Stats = stats;

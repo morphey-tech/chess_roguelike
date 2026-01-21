@@ -12,7 +12,7 @@ namespace Project.Gameplay.Presentations
     
     private readonly List<IPresenter> _presenterBuffer = new();
 
-    public void InitEntity(int entId, GameObject instance)
+    public void InitEntity(Entity entity, GameObject instance)
     {
       // наверн заменю потом Id на структуру Entity шоб держать там ещё поле Gen для понимания в какой раз этот айдишник юзается
       /*if(!entity.Unpack(_world, out var entId))
@@ -23,7 +23,7 @@ namespace Project.Gameplay.Presentations
         if(!instance.TryGetComponent(out EntityLink link))
           link = instance.AddComponent<EntityLink>();
           
-        link.Init(entId, this);
+        link.Init(entity, this);
         link.Map = this;
         
         _presenterBuffer.Clear();
@@ -44,7 +44,7 @@ namespace Project.Gameplay.Presentations
         }
 
         instance.SetActive(true);
-        _presentationsList.Add(entId, link);
+        _presentationsList.Add(entity.Id, link);
       }
       catch (Exception e)
       {

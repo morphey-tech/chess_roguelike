@@ -9,6 +9,7 @@ namespace Project.Gameplay.Gameplay.Figures
 {
     public class MovementService
     {
+        public BoardGrid Grid => _grid;
         private readonly MovementStrategyFactory _strategyFactory;
         private readonly ILogger<MovementService> _logger;
         private BoardGrid _grid;

@@ -1,6 +1,11 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using MessagePipe;
+using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
+using Project.Gameplay.Components;
+using Project.Gameplay.Gameplay.Board;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Run;
@@ -129,9 +134,11 @@ namespace Project.Gameplay.Gameplay.Stage
             if (message.Figure != null)
             {
                 _logger.Info($"Figure {message.Figure.Id} selected at ({message.Position.Row}, {message.Position.Column})");
+                HighlightPositions(_movementService.GetAvailableMoves(message.Figure, message.Position));
             }
             else
             {
+                HighlightPositions(default);
                 _logger.Debug("Selection cleared");
             }
         }
@@ -144,6 +151,22 @@ namespace Project.Gameplay.Gameplay.Stage
         void IDisposable.Dispose()
         {
             _subscriptions?.Dispose();
+        }
+
+        private void HighlightPositions(IEnumerable<GridPosition> positions)
+        {
+            // костыли вы мои костыли. Дайте я вас сейчас расцелую... Дорогие мои костыли, мы ещё, мы ещё повоююем...
+            foreach (var boardCell in _movementService.Grid.AllCells())
+            {
+                bool highlight = positions?.Any(p =>  boardCell.Position.Column == p.Column && boardCell.Position.Row == p.Row) ?? false;
+                if (highlight)
+                    boardCell.EnsureComponent(new HighlightComponentTag());
+                else
+                    boardCell.Del<HighlightComponentTag>();
+
+            }
+
+         
         }
     }
 }

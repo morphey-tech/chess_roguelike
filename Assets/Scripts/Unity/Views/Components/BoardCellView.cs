@@ -21,7 +21,6 @@ namespace Project.Unity.Unity.Views.Components
         
         [Header("Highlight")]
         [SerializeField] private Renderer _renderer;
-        [SerializeField] private Color _highlightColor = new(1f, 1f, 0.5f, 1f);
         [SerializeField] private Color _moveTargetColor = new(0.5f, 1f, 0.5f, 1f);
         [SerializeField] private Color _attackTargetColor = new(1f, 0.5f, 0.5f, 1f);
         
@@ -54,15 +53,7 @@ namespace Project.Unity.Unity.Views.Components
                 .DOShakePosition(_hitDuration, _hitShake)
                 .AsyncWaitForCompletion();
         }
-
-        public void SetHighlight(bool enabled)
-        {
-            if (_material != null)
-            {
-                _material.color = enabled ? _highlightColor : _originalColor;
-            }
-        }
-
+        
         public void SetMoveTarget(bool enabled)
         {
             if (_material != null)

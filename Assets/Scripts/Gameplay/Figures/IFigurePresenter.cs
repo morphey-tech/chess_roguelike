@@ -5,7 +5,7 @@ namespace Project.Gameplay.Gameplay.Figures
 {
     public interface IFigurePresenter
     {
-        UniTask CreateFigure(int figureId, string typeId, GridPosition pos, Team team);
+        UniTask CreateFigure(Entity entity, string typeId, GridPosition pos, Team team);
         void MoveFigure(int figureId, GridPosition to);
         void RemoveFigure(int figureId);
         void PlayAttack(int figureId, GridPosition target);

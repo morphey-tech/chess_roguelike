@@ -4,18 +4,16 @@ using Project.Gameplay.Gameplay.Figures;
 
 namespace Project.Gameplay.Gameplay.Grid
 {
-    public class BoardCell : IGridCell
+    public class BoardCell : Entity, IGridCell
     {
-        public int Id { get;}
         public GridPosition Position { get; }
         public Figure? OccupiedBy { get; private set; }
         public CellEffectContainer Effects { get; }
 
         public bool IsFree => OccupiedBy == null;
 
-        public BoardCell(int id, GridPosition position)
+        public BoardCell(int id, GridPosition position) : base(id)
         {
-            Id = id;
             Position = position;
             Effects = new CellEffectContainer();
         }

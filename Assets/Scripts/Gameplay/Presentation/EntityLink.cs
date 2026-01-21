@@ -9,13 +9,20 @@ namespace Project.Gameplay.Presentations
   
   public class EntityLink : MonoBehaviour
   {
-    public int EntityId { get; private set; }
+    public int EntityId => _entity.Id;
+    
+    private Entity _entity;
     public PresentationManagerInstances Map { get; set; }
 
-    public void Init(int id, PresentationManagerInstances map)
+    public void Init(Entity entity, PresentationManagerInstances map)
     {
-      EntityId = id;
+      _entity = entity;
       Map = map;
+    }
+
+    public Entity GetEntity()
+    {
+      return _entity;
     }
   }
 }

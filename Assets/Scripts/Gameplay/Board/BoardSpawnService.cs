@@ -4,6 +4,7 @@ using Project.Core.Core.Configs.Boards;
 using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Configs;
+using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Presentations;
 using VContainer;
 
@@ -15,6 +16,7 @@ namespace Project.Gameplay.Gameplay.Board
     /// </summary>
     public sealed class BoardSpawnService
     {
+        public IBoardPresenter BoardPresenter => _boardPresenter;
         private readonly ConfigProvider _configProvider;
         private readonly IBoardPresenter _boardPresenter;
         private readonly ILogger<BoardSpawnService> _logger;
@@ -30,27 +32,16 @@ namespace Project.Gameplay.Gameplay.Board
             _logger = logService.CreateLogger<BoardSpawnService>();
         }
 
-        public async UniTask SpawnAsync(string boardId)
+        public async UniTask<BoardGrid> SpawnAsync(string boardId)
         {
             _logger.Info($"Spawning board {boardId}");
 
             BoardConfigRepository repo = await _configProvider.Get<BoardConfigRepository>("boards_conf");
             BoardConfig board = repo.GetBy(boardId) ?? throw new Exception($"Board '{boardId}' not found");
-
-            _boardPresenter.Clear();
             
+            BoardGrid grid = new(board.Width, board.Height);
             char[,] map = board.GetBoard2D();
-
-            for (int r = 0; r < board.Height; r++)
-            {
-                for (int c = 0; c < board.Width; c++)
-                {
-                    int entId = IdGetter.MakeId();
-                    char symbol = map[r, c];
-                    string skinId = symbol.ToString();
-                    _boardPresenter.CreateCell(entId, new GridPosition(r, c), skinId);
-                }
-            }
+            MakeBoardView(grid, map);
 
             if (!string.IsNullOrEmpty(board.AppearStrategyId))
             {
@@ -58,6 +49,23 @@ namespace Project.Gameplay.Gameplay.Board
             }
 
             _logger.Info("Board created");
+            return grid;
+        }
+
+        private void MakeBoardView(BoardGrid grid, char[,] map)
+        {
+            _boardPresenter.Clear();
+            for (var r = 0; r < grid.Height; r++)
+            {
+                for (var c = 0; c < grid.Width; c++)
+                {
+                    var gridPosition = new GridPosition(r, c);
+                    var cell = grid.GetBoardCell(gridPosition);
+                    var symbol = map[r, c];
+                    var skinId = symbol.ToString();
+                    _boardPresenter.CreateCell(cell, gridPosition, skinId);
+                }
+            }
         }
     }
 }

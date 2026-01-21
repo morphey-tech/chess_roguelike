@@ -10,7 +10,6 @@ namespace Project.Gameplay.Gameplay.Board
     {
         UniTask PlayAppearAsync();
         UniTask PlayHitAsync();
-        void SetHighlight(bool enabled);
         void SetMoveTarget(bool enabled);
         void SetAttackTarget(bool enabled);
     }

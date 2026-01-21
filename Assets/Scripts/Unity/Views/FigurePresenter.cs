@@ -6,6 +6,7 @@ using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
 using Project.Core.Core.Physics;
 using Project.Core.Core.World;
+using Project.Gameplay;
 using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Presentations;
@@ -44,7 +45,7 @@ namespace Project.Unity.Unity.Views
             _logger.Info("FigurePresenter created");
         }
 
-        public async UniTask CreateFigure(int figureId, string typeId, GridPosition pos, Team team)
+        public async UniTask CreateFigure(Entity entity, string typeId, GridPosition pos, Team team)
         {
             _figureConfigCache ??= await _configProvider.Get<FigureConfigRepository>("figures_conf");
 
@@ -59,7 +60,7 @@ namespace Project.Unity.Unity.Views
             Vector3 worldPos = GetCellTopPosition(pos);
             
             EntityLink entityLink = await _presentationManager.SpawnView(
-                figureId,
+                entity,
                 config.AssetKey,
                 worldPos,
                 Quaternion.identity,
@@ -67,12 +68,12 @@ namespace Project.Unity.Unity.Views
 
             if (entityLink == null)
             {
-                _logger.Error($"Failed to instantiate figure {figureId}");
+                _logger.Error($"Failed to instantiate figure {entity}");
                 return;
             }
 
-            _figures[figureId] = entityLink.gameObject;
-            _positions[figureId] = pos;
+            _figures[entity.Id] = entityLink.gameObject;
+            _positions[entity.Id] = pos;
 
             var spawnPresenter = entityLink.GetComponent<FigureSpawnPresenter>();
             if(spawnPresenter != null)
@@ -81,9 +82,9 @@ namespace Project.Unity.Unity.Views
             // Cache visual component if exists
             var view = entityLink.GetComponent<IFigureView>();
             if (view != null)
-                _figureViews[figureId] = view;
+                _figureViews[entity.Id] = view;
 
-            _logger.Info($"Figure {figureId} ({typeId}) created at ({pos.Row}, {pos.Column}), team: {team}");
+            _logger.Info($"Figure {entity} ({typeId}) created at ({pos.Row}, {pos.Column}), team: {team}");
         }
 
         public void MoveFigure(int figureId, GridPosition to)
