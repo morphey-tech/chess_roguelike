@@ -11,10 +11,6 @@ namespace Project.Unity.Unity.Views.Components
     /// </summary>
     public class FigureView : MonoBehaviour, IFigureView
     {
-        [Header("Spawn")]
-        [SerializeField] private float _spawnDuration = 0.3f;
-        [SerializeField] private Ease _spawnEase = Ease.OutBack;
-        
         [Header("Movement")]
         [SerializeField] private float _moveDuration = 0.25f;
         [SerializeField] private Ease _moveEase = Ease.InOutQuad;
@@ -46,18 +42,7 @@ namespace Project.Unity.Unity.Views.Components
                 _originalColor = _material.color;
             }
         }
-
-        public async UniTask PlaySpawnAsync()
-        {
-            Vector3 targetScale = transform.localScale;
-            transform.localScale = Vector3.zero;
-            
-            await transform
-                .DOScale(targetScale, _spawnDuration)
-                .SetEase(_spawnEase)
-                .AsyncWaitForCompletion();
-        }
-
+        
         public async UniTask PlayMoveAsync(Vector3 targetPosition)
         {
             await transform

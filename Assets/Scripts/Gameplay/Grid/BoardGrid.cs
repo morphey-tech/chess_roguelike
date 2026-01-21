@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Project.Core.Core.Grid;
+using Project.Gameplay.Presentations;
 
 namespace Project.Gameplay.Gameplay.Grid
 {
@@ -21,8 +22,7 @@ namespace Project.Gameplay.Gameplay.Grid
             {
                 for (int c = 0; c < width; c++)
                 {
-                    _cells[r, c] =
-                        new BoardCell(new GridPosition(r, c));
+                    _cells[r, c] = new BoardCell(IdGetter.MakeId(), new GridPosition(r, c));
                 }
             }
         }

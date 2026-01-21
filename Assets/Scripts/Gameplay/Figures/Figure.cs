@@ -2,16 +2,15 @@ namespace Project.Gameplay.Gameplay.Figures
 {
     public class Figure
     {
-        private static int _nextId;
-
-        public int Id { get; } = ++_nextId;
+        public int Id { get; } 
         public string TypeId { get; }
         public string MovementId { get; }
         public FigureStats Stats { get; }
         public Team Team { get; }
 
-        public Figure(string typeId, string movementId, FigureStats stats, Team team)
+        public Figure(int id, string typeId, string movementId, FigureStats stats, Team team)
         {
+            Id = id;
             TypeId = typeId;
             MovementId = movementId;
             Stats = stats;

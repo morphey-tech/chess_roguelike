@@ -9,7 +9,6 @@ namespace Project.Gameplay.Gameplay.Figures
     /// </summary>
     public interface IFigureView
     {
-        UniTask PlaySpawnAsync();
         UniTask PlayMoveAsync(Vector3 targetPosition);
         UniTask PlayAttackAsync(Vector3 targetPosition);
         UniTask PlayDeathAsync();

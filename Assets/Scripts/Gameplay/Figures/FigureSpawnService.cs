@@ -7,6 +7,7 @@ using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.Gameplay.Grid;
+using Project.Gameplay.Presentations;
 using VContainer;
 
 namespace Project.Gameplay.Gameplay.Figures
@@ -63,7 +64,7 @@ namespace Project.Gameplay.Gameplay.Figures
                 ? new FigureStats(statsConfig.MaxHp, statsConfig.Attack)
                 : new FigureStats(1, 1); // Default stats
 
-            Figure figure = new(figureTypeId, movementId, stats, team);
+            Figure figure = new(IdGetter.MakeId(), figureTypeId, movementId, stats, team);
             cell.PlaceFigure(figure);
 
             await _figurePresenter.CreateFigure(figure.Id, figure.TypeId, position, team);
