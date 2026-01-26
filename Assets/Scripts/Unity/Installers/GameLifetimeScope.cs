@@ -168,7 +168,8 @@ namespace Project.Unity.Unity.Installers
                     new RangedAttack()
                 }); 
 
-            // Combat resolver (passives come from figures)
+            // Combat system
+            builder.Register<PassiveTriggerService>(Lifetime.Singleton);
             builder.Register<CombatResolver>(Lifetime.Singleton);
 
             // Pure gameplay services

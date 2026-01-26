@@ -1,58 +1,64 @@
-using System.Collections.Generic;
-using System.Linq;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Attack;
+using Project.Gameplay.Gameplay.Combat.Contexts;
 
 namespace Project.Gameplay.Gameplay.Combat
 {
     public sealed class CombatResolver
     {
+        private readonly PassiveTriggerService _passives;
         private readonly ILogger<CombatResolver> _logger;
 
-        public CombatResolver(ILogService logService)
+        public CombatResolver(PassiveTriggerService passives, ILogService logService)
         {
+            _passives = passives;
             _logger = logService.CreateLogger<CombatResolver>();
         }
 
         public CombatResult Resolve(HitContext context)
         {
-            List<IPassive> attackerPassives = context.Attacker.Passives.OrderBy(p => p.Priority).ToList();
-            List<IPassive> defenderPassives = context.Target.Passives.OrderBy(p => p.Priority).ToList();
-
-            foreach (IPassive passive in attackerPassives)
-                passive.OnPreDamage(context);
-            
-            context.FinalDamage = (int)(context.BaseDamage * context.DamageMultiplier);
-            
-            int totalDamage = 0;
-            for (int i = 0; i < context.HitCount && !context.Target.Stats.IsDead; i++)
+            var before = new BeforeHitContext
             {
-                int hitDamage = i == 0 ? context.FinalDamage : context.FinalDamage / context.HitCount;
-                context.TargetDied = context.Target.Stats.TakeDamage(hitDamage);
-                totalDamage += hitDamage;
+                Attacker = context.Attacker,
+                Target = context.Target,
+                BaseDamage = context.BaseDamage
+            };
+
+            _passives.TriggerBeforeHit(context.Attacker, context.Target, before);
+
+            int finalDamage = (int)(before.BaseDamage * before.DamageMultiplier) + before.BonusDamage;
+            bool died = context.Target.Stats.TakeDamage(finalDamage);
+
+            var after = new AfterHitContext
+            {
+                Attacker = context.Attacker,
+                Target = context.Target,
+                DamageDealt = finalDamage,
+                TargetDied = died,
+                WasCritical = before.IsCritical
+            };
+
+            _passives.TriggerAfterHit(context.Attacker, context.Target, after);
+
+            if (died)
+            {
+                _passives.TriggerKill(context.Attacker, context.Target);
+                _passives.TriggerDeath(context.Target, context.Attacker);
             }
-            
-            context.FinalDamage = totalDamage;
-            
-            foreach (IPassive passive in attackerPassives)
-                passive.OnPostDamage(context);
-            
-            foreach (IPassive passive in defenderPassives)
-                passive.OnPostDamage(context);
-            
+
             bool attackerMoves = context.AttackerMovesOnKill 
-                && context.TargetDied 
+                && died 
                 && AttackUtils.GetDistance(context.AttackerPosition, context.TargetPosition) == 1;
-            
-            _logger.Info($"Combat: {context.Attacker} -> {context.Target}, DMG:{totalDamage}, Died:{context.TargetDied}, Heal:{context.HealedAmount}, Crit:{context.IsCritical}");
+
+            _logger.Info($"Combat: {context.Attacker} -> {context.Target}, DMG:{finalDamage}, Died:{died}, Heal:{after.HealedAmount}, Crit:{before.IsCritical}");
 
             return new CombatResult
             {
-                DamageDealt = totalDamage,
-                TargetDied = context.TargetDied,
-                HealedAmount = context.HealedAmount,
+                DamageDealt = finalDamage,
+                TargetDied = died,
+                HealedAmount = after.HealedAmount,
                 AttackerMoves = attackerMoves,
-                WasCritical = context.IsCritical
+                WasCritical = before.IsCritical
             };
         }
     }

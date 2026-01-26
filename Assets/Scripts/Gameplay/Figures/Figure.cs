@@ -1,9 +1,6 @@
 using System.Collections.Generic;
 using Project.Gameplay.Gameplay.Combat;
 
-using System.Collections.Generic;
-using Project.Gameplay.Gameplay.Combat;
-
 namespace Project.Gameplay.Gameplay.Figures
 {
     public class Figure

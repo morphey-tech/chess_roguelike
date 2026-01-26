@@ -1,6 +1,9 @@
+using Project.Gameplay.Gameplay.Combat.Contexts;
+using Project.Gameplay.Gameplay.Combat.Triggers;
+
 namespace Project.Gameplay.Gameplay.Combat.Passives
 {
-    public sealed class ThornsPassive : IPassive
+    public sealed class ThornsPassive : IPassive, IOnAfterHit
     {
         public string Id { get; }
         public int Priority => 200;
@@ -13,14 +16,14 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
             _reflectPercent = reflectPercent;
         }
 
-        public void OnPreDamage(HitContext context) { }
-
-        public void OnPostDamage(HitContext context)
+        public void OnAfterHit(AfterHitContext context)
         {
-            int reflectDamage = (int)(context.FinalDamage * _reflectPercent);
-            if (reflectDamage > 0)
+            // Only trigger when this figure is the TARGET
+            if (context.Target.Passives.Contains(this))
             {
-                context.Attacker.Stats.TakeDamage(reflectDamage);
+                int reflect = (int)(context.DamageDealt * _reflectPercent);
+                if (reflect > 0)
+                    context.Attacker.Stats.TakeDamage(reflect);
             }
         }
     }

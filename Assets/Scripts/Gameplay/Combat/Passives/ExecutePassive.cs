@@ -1,6 +1,9 @@
+using Project.Gameplay.Gameplay.Combat.Contexts;
+using Project.Gameplay.Gameplay.Combat.Triggers;
+
 namespace Project.Gameplay.Gameplay.Combat.Passives
 {
-    public sealed class ExecutePassive : IPassive
+    public sealed class ExecutePassive : IPassive, IOnBeforeHit
     {
         public string Id { get; }
         public int Priority => 10;
@@ -15,15 +18,11 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
             _damageMultiplier = damageMultiplier;
         }
 
-        public void OnPreDamage(HitContext context)
+        public void OnBeforeHit(BeforeHitContext context)
         {
             float hpPercent = (float)context.Target.Stats.CurrentHp / context.Target.Stats.MaxHp;
             if (hpPercent <= _hpThreshold)
-            {
                 context.DamageMultiplier *= _damageMultiplier;
-            }
         }
-
-        public void OnPostDamage(HitContext context) { }
     }
 }
