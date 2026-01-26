@@ -35,6 +35,8 @@ namespace Project.Gameplay.Gameplay.Movement.Strategies
                         continue;
                     
                     yield return result;
+                    if(!result.IsFree)
+                        break;
                 }
             }
         }

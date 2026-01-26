@@ -26,14 +26,16 @@ namespace Project.Gameplay.Gameplay.Movement.Strategies
                 {
                     GridPosition to = new(from.Row + dr * i, from.Column + dc * i);
                     if (!grid.IsInside(to))
-                        continue;
+                        break;
 
                     var cell = grid.GetBoardCell(to);
                     var result = new MovementStrategyResult(figure, to, true, cell.OccupiedBy);
                     if (!result.CanOccupy()) 
-                        continue;
+                        break;
                     
                     yield return result;
+                    if(!result.IsFree)
+                        break;
                 }
             }
         }

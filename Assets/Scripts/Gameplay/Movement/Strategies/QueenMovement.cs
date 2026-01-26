@@ -35,7 +35,7 @@ namespace Project.Gameplay.Gameplay.Movement.Strategies
                     var cell = grid.GetBoardCell(to);
                     var result = new MovementStrategyResult(figure, to, true, cell.OccupiedBy);
                     if (!result.CanOccupy()) 
-                        continue;
+                        break;
                     
                     yield return result;
                     break;
