@@ -1,0 +1,39 @@
+{
+  "conditions": [
+    {
+      "id": "always",
+      "type": "always",
+      "params": {}
+    },
+    {
+      "id": "melee_range",
+      "type": "enemy_in_range",
+      "params": { "range": 1 }
+    },
+    {
+      "id": "archer_range",
+      "type": "enemy_in_range",
+      "params": { "range": 7 }
+    },
+    {
+      "id": "bishop_range",
+      "type": "enemy_in_range",
+      "params": { "range": 7 }
+    },
+    {
+      "id": "enemy_adjacent",
+      "type": "enemy_adjacent",
+      "params": {}
+    },
+    {
+      "id": "target_is_enemy",
+      "type": "target_is_enemy",
+      "params": {}
+    },
+    {
+      "id": "target_is_empty",
+      "type": "target_is_empty",
+      "params": {}
+    }
+  ]
+}

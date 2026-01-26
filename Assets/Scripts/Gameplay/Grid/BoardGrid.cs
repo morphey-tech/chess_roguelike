@@ -55,5 +55,33 @@ namespace Project.Gameplay.Gameplay.Grid
                 }
             }
         }
+
+        public BoardCell FindFigure(Figures.Figure figure)
+        {
+            foreach (var cell in AllCells())
+            {
+                if (cell.OccupiedBy == figure)
+                    return cell;
+            }
+            return null;
+        }
+
+        public IEnumerable<Figures.Figure> GetAllFigures()
+        {
+            foreach (var cell in AllCells())
+            {
+                if (cell.OccupiedBy != null)
+                    yield return cell.OccupiedBy;
+            }
+        }
+
+        public IEnumerable<Figures.Figure> GetFiguresByTeam(Figures.Team team)
+        {
+            foreach (var cell in AllCells())
+            {
+                if (cell.OccupiedBy?.Team == team)
+                    yield return cell.OccupiedBy;
+            }
+        }
     }
 }

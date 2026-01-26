@@ -24,6 +24,9 @@ namespace Project.Core.Core.Configs.Figure
         [JsonProperty("stats_id")]
         public string StatsId { get; set; }
         
+        [JsonProperty("turn_pattern_set_id")]
+        public string TurnPatternSetId { get; set; }
+        
         [JsonProperty("passives")]
         public string[] Passives { get; set; } = Array.Empty<string>();
     }

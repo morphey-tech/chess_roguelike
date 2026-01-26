@@ -9,6 +9,7 @@ using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.Gameplay.Grid;
+using Project.Gameplay.Gameplay.Turn;
 using Project.Gameplay.Presentations;
 using VContainer;
 
@@ -18,22 +19,25 @@ namespace Project.Gameplay.Gameplay.Figures
     {
         private readonly ConfigProvider _configProvider;
         private readonly IFigurePresenter _figurePresenter;
+        private readonly TurnPatternFactory _turnPatternFactory;
         private readonly IPublisher<FigureSpawnedMessage> _spawnedPublisher;
         private readonly ILogger<FigureSpawnService> _logger;
         
-        private FigureConfigRepository? _figureConfigCache;
-        private StatsConfigRepository? _statsConfigCache;
-        private PassiveConfigRepository? _passiveConfigCache;
+        private FigureConfigRepository _figureConfigCache;
+        private StatsConfigRepository _statsConfigCache;
+        private PassiveConfigRepository _passiveConfigCache;
 
         [Inject]
         private FigureSpawnService(
             ConfigProvider configProvider,
             IFigurePresenter figurePresenter,
+            TurnPatternFactory turnPatternFactory,
             IPublisher<FigureSpawnedMessage> spawnedPublisher,
             ILogService logService)
         {
             _configProvider = configProvider;
             _figurePresenter = figurePresenter;
+            _turnPatternFactory = turnPatternFactory;
             _spawnedPublisher = spawnedPublisher;
             _logger = logService.CreateLogger<FigureSpawnService>();
         }
@@ -52,6 +56,8 @@ namespace Project.Gameplay.Gameplay.Figures
             _statsConfigCache ??= await _configProvider.Get<StatsConfigRepository>("stats_conf");
             _passiveConfigCache ??= await _configProvider.Get<PassiveConfigRepository>("passives_conf");
             
+            await _turnPatternFactory.InitializeAsync();
+            
             FigureConfig figureConfig = Array.Find(_figureConfigCache.Figures, f => f.Id == figureTypeId);
             string movementId = figureConfig?.MovementId ?? "pawn";
             string attackId = figureConfig?.AttackId ?? "simple";
@@ -63,7 +69,18 @@ namespace Project.Gameplay.Gameplay.Figures
                 ? new FigureStats(statsConfig.MaxHp, statsConfig.Attack, statsConfig.AttackRange)
                 : new FigureStats(1, 1, 1);
 
-            Figure figure = new(IdGetter.MakeId(), figureTypeId, movementId, attackId, stats, team);
+            string turnPatternSetId = figureConfig?.TurnPatternSetId ?? "melee_default";
+            Figure figure = new(IdGetter.MakeId(), figureTypeId, movementId, attackId, turnPatternSetId, stats, team);
+            
+            try
+            {
+                TurnPatternSet patternSet = _turnPatternFactory.CreatePatternSet(turnPatternSetId);
+                figure.SetTurnPatternSet(patternSet);
+            }
+            catch (Exception e)
+            {
+                _logger.Warning($"Failed to create turn pattern set '{turnPatternSetId}' for {figure}: {e.Message}");
+            }
             
             if (figureConfig?.Passives != null)
             {
