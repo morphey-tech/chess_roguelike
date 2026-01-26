@@ -1,6 +1,6 @@
 namespace Project.Gameplay.Components
 {
-    public class HighlightComponentTag : IEntityComponent
+    public class HighlightTag : IEntityComponent
     {
         
     }

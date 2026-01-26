@@ -9,6 +9,7 @@ namespace Project.Unity.Presentations
         [Header("Highlight")]
         [SerializeField] private Renderer _renderer;
         [SerializeField] private Color _highlightColor = new(1f, 1f, 0.5f, 1f);
+        [SerializeField] private Color _attackTargetColor = new(1f, 0.5f, 0.5f, 1f);
         
         private EntityLink _link;
         private Color _originalColor;
@@ -27,13 +28,30 @@ namespace Project.Unity.Presentations
                 return;
             
             var entity = _link.GetEntity();
-            SetHighlight(entity.Exists<HighlightComponentTag>());
+            if(entity.Exists<HighlightTag>())
+                SetHighlight();
+            else if(entity.Exists<AttackHighlightTag>())
+                SetAttackHighlight();
+            else
+                SetDefault();
         }
         
-        private void SetHighlight(bool enabled)
+        private void SetDefault()
         {
             if (_material != null)
-                _material.color = enabled ? _highlightColor : _originalColor;
+                _material.color = _originalColor;
+        }
+        
+        private void SetHighlight()
+        {
+            if (_material != null)
+                _material.color = _highlightColor;
+        }
+        
+        private void SetAttackHighlight()
+        {
+            if (_material != null)
+                _material.color = _attackTargetColor;
         }
     }
 }

@@ -265,9 +265,7 @@ MonoBehaviour:
   _hitDuration: 0.15
   _hitShake: 0.05
   _renderer: {fileID: 0}
-  _highlightColor: {r: 1, g: 1, b: 0.5, a: 1}
   _moveTargetColor: {r: 0.5, g: 1, b: 0.5, a: 1}
-  _attackTargetColor: {r: 1, g: 0.5, b: 0.5, a: 1}
 --- !u!114 &-6279174553144545158
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -281,4 +279,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity::Project.Unity.Presentations.CellHighlightPresenter
   _renderer: {fileID: 8318344406310446554}
-  _highlightColor: {r: 1, g: 1, b: 0.5, a: 1}
+  _highlightColor: {r: 0.5, g: 1, b: 0.5, a: 1}
+  _attackTargetColor: {r: 1, g: 0.5, b: 0.5, a: 1}

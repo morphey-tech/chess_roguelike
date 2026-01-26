@@ -12,6 +12,7 @@ using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Run;
 using Project.Gameplay.Gameplay.Selection;
 using Project.Gameplay.Gameplay.Turn;
+using Project.Gameplay.Movement;
 using VContainer;
 using VContainer.Unity;
 
@@ -171,17 +172,26 @@ namespace Project.Gameplay.Gameplay.Stage
             _subscriptions?.Dispose();
         }
 
-        private void HighlightPositions(IEnumerable<GridPosition> positions)
+        private void HighlightPositions(IEnumerable<MovementStrategyResult> positions)
         {
             // костыли вы мои костыли. Дайте я вас сейчас расцелую... Дорогие мои костыли, мы ещё, мы ещё повоююем...
             foreach (var boardCell in _movementService.Grid.AllCells())
             {
-                bool highlight = positions?.Any(p =>  boardCell.Position.Column == p.Column && boardCell.Position.Row == p.Row) ?? false;
-                if (highlight)
-                    boardCell.EnsureComponent(new HighlightComponentTag());
-                else
-                    boardCell.Del<HighlightComponentTag>();
+                var strategyResult = positions?.FirstOrDefault(p =>
+                    boardCell.Position.Column == p.Position.Column && boardCell.Position.Row == p.Position.Row) ?? MovementStrategyResult.MakeEmpty();
 
+                if (!strategyResult.CanOccupy())
+                {
+                    boardCell.Del<HighlightTag>();
+                    boardCell.Del<AttackHighlightTag>();
+                }
+                else
+                {
+                    if (strategyResult.IsFree)
+                        boardCell.EnsureComponent(new HighlightTag());
+                    else
+                        boardCell.EnsureComponent(new AttackHighlightTag());
+                }
             }
 
          

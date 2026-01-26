@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
+using Project.Gameplay.Movement;
 
 namespace Project.Gameplay.Gameplay.Movement.Strategies
 {
@@ -17,43 +18,36 @@ namespace Project.Gameplay.Gameplay.Movement.Strategies
             (-1, 0), (1, 0), (0, -1), (0, 1)
         };
 
-        public IEnumerable<GridPosition> GetAvailableMoves(Figure figure, GridPosition from, BoardGrid grid)
+        public IEnumerable<MovementStrategyResult> GetAvailableMoves(Figure figure, GridPosition from, BoardGrid grid)
         {
             foreach ((int dr, int dc) in Directions)
             {
                 for (int i = 1; i < 20; i++)
                 {
                     GridPosition to = new(from.Row + dr * i, from.Column + dc * i);
-
                     if (!grid.IsInside(to))
-                        break;
+                        continue;
 
-                    BoardCell cell = grid.GetBoardCell(to);
+                    var cell = grid.GetBoardCell(to);
+                    var result = new MovementStrategyResult(figure, to, true, cell.OccupiedBy);
+                    if (!result.CanOccupy()) 
+                        continue;
                     
-                    if (cell.IsFree)
-                    {
-                        yield return to;
-                    }
-                    else
-                    {
-                        // Can capture enemy, then stop
-                        if (cell.OccupiedBy?.Team != figure.Team)
-                            yield return to;
-                        break;
-                    }
+                    yield return result;
                 }
             }
         }
 
-        public bool CanMove(Figure figure, GridPosition from, GridPosition to, BoardGrid grid)
+        public MovementStrategyResult GetFor(Figure figure, GridPosition from, GridPosition to, BoardGrid grid)
         {
             int dr = to.Row - from.Row;
             int dc = to.Column - from.Column;
 
             if (dr != 0 && dc != 0)
-                return false;
+                 return MovementStrategyResult.MakeUnreachable(figure, to, null);
+            
             if (dr == 0 && dc == 0)
-                return false;
+                 return MovementStrategyResult.MakeUnreachable(figure, to, null);
 
             int stepR = dr == 0 ? 0 : (dr > 0 ? 1 : -1);
             int stepC = dc == 0 ? 0 : (dc > 0 ? 1 : -1);
@@ -62,17 +56,21 @@ namespace Project.Gameplay.Gameplay.Movement.Strategies
             GridPosition current = new(from.Row + stepR, from.Column + stepC);
             while (current.Row != to.Row || current.Column != to.Column)
             {
-                if (!grid.IsInside(current) || !grid.GetBoardCell(current).IsFree)
-                    return false;
+                if(!grid.IsInside(current))
+                    return MovementStrategyResult.MakeUnreachable(figure, to, null);
+                
+                var tempCell = grid.GetBoardCell(current);
+                if (!tempCell.IsFree)
+                    return new MovementStrategyResult(figure, current, false, tempCell.OccupiedBy);
+                
                 current = new GridPosition(current.Row + stepR, current.Column + stepC);
             }
+            
+            if(!grid.IsInside(to))
+                return MovementStrategyResult.MakeUnreachable(figure, to, null);
 
-            return grid.IsInside(to) && CanOccupy(figure, grid.GetBoardCell(to));
-        }
-
-        private static bool CanOccupy(Figure figure, BoardCell cell)
-        {
-            return cell.IsFree || (cell.OccupiedBy != null && cell.OccupiedBy.Team != figure.Team);
+            var cell = grid.GetBoardCell(to);
+            return new MovementStrategyResult(figure, to, true, cell.OccupiedBy);
         }
     }
 }
