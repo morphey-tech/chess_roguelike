@@ -1,44 +1,34 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using Cysharp.Threading.Tasks;
 using MessagePipe;
 using Project.Core.Core.Logging;
-using Project.Gameplay.Gameplay.Attack;
-using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Run;
 using Project.Gameplay.Gameplay.Selection;
 using Project.Gameplay.Gameplay.Turn;
+using Project.Gameplay.Gameplay.Turn.Conditions;
+using Project.Gameplay.Gameplay.Turn.Steps;
 using VContainer;
 using VContainer.Unity;
 
 namespace Project.Gameplay.Gameplay.Stage
 {
-    /// <summary>
-    /// Handles stage events: figure movement, selection, turn changes.
-    /// Stage flow (board spawn, figure spawn) is handled by Stage itself.
-    /// No Unity dependencies - visualization through IFigureView.
-    /// </summary>
     public class StageService : IStartable, IDisposable
     {
         private readonly RunHolder _runHolder;
-        private readonly MovementService _movementService;
-        private readonly AttackStrategyFactory _attackFactory;
-        private readonly CombatResolver _combatResolver;
+        private readonly TurnPatternResolver _patternResolver;
         private readonly TurnSystem _turnSystem;
-        private readonly IFigurePresenter _figurePresenter;
-        private readonly IPublisher<FigureDeathMessage> _deathPublisher;
         private readonly ILogger<StageService> _logger;
         private readonly IDisposable _subscriptions;
 
         [Inject]
         private StageService(
             RunHolder runHolder,
-            MovementService movementService,
-            AttackStrategyFactory attackFactory,
-            CombatResolver combatResolver,
+            TurnPatternResolver patternResolver,
             TurnSystem turnSystem,
-            IFigurePresenter figurePresenter,
-            IPublisher<FigureDeathMessage> deathPublisher,
             ISubscriber<FigureSpawnedMessage> figureSpawnedSubscriber,
             ISubscriber<MoveRequestedMessage> moveSubscriber,
             ISubscriber<FigureSelectedMessage> selectionSubscriber,
@@ -46,12 +36,8 @@ namespace Project.Gameplay.Gameplay.Stage
             ILogService logService)
         {
             _runHolder = runHolder;
-            _movementService = movementService;
-            _attackFactory = attackFactory;
-            _combatResolver = combatResolver;
+            _patternResolver = patternResolver;
             _turnSystem = turnSystem;
-            _figurePresenter = figurePresenter;
-            _deathPublisher = deathPublisher;
             _logger = logService.CreateLogger<StageService>();
 
             DisposableBagBuilder bag = DisposableBag.CreateBuilder();
@@ -78,68 +64,61 @@ namespace Project.Gameplay.Gameplay.Stage
         {
             _logger.Info($"Move requested: ({message.From.Row},{message.From.Column}) -> ({message.To.Row},{message.To.Column})");
 
-            if (!_movementService.CanMove(message.From, message.To))
-            {
-                _logger.Debug("Move rejected by MovementService");
-                return;
-            }
-
             Stage currentStage = _runHolder.Current?.CurrentStage;
             BoardGrid grid = currentStage?.Grid;
             BoardCell fromCell = grid?.GetBoardCell(message.From);
-            BoardCell toCell = grid?.GetBoardCell(message.To);
-            Figure attacker = fromCell?.OccupiedBy;
+            Figure actor = fromCell?.OccupiedBy;
 
-            if (attacker == null)
+            if (actor == null)
             {
                 _logger.Error("No figure at source position!");
                 return;
             }
 
-            Figure defender = toCell?.OccupiedBy;
-            if (defender != null)
+            if (actor.TurnPatternSet == null)
             {
-                // 1. Get attack strategy and create hit context
-                IAttackStrategy attackStrategy = _attackFactory.Get(attacker.AttackId);
-                HitContext hitContext = attackStrategy.CreateHitContext(attacker, defender, message.From, message.To, grid);
-                
-                // 2. Resolve combat through effect pipeline
-                CombatResult result = _combatResolver.Resolve(hitContext);
-                
-                _logger.Info($"{attacker} [{attackStrategy.Id}] attacks {defender} for {result.DamageDealt} damage. HP: {defender.Stats.CurrentHp}/{defender.Stats.MaxHp}");
-                
-                if (result.HealedAmount > 0)
-                {
-                    _logger.Info($"{attacker} healed for {result.HealedAmount}. HP: {attacker.Stats.CurrentHp}/{attacker.Stats.MaxHp}");
-                }
-                
-                // Play attack animation
-                _figurePresenter.PlayAttack(attacker.Id, message.To);
-                _figurePresenter.PlayDamageEffect(defender.Id);
-
-                if (result.TargetDied)
-                {
-                    _logger.Info($"{defender} died!");
-                    toCell.RemoveFigure();
-                    _figurePresenter.RemoveFigure(defender.Id);
-                    _deathPublisher.Publish(new FigureDeathMessage(defender.Id, defender.Team));
-                }
-
-                // Move based on combat result
-                if (result.AttackerMoves)
-                {
-                    _movementService.MoveFigure(message.From, message.To);
-                    _figurePresenter.MoveFigure(attacker.Id, message.To);
-                }
-            }
-            else
-            {
-                // Simple move to empty cell
-                _movementService.MoveFigure(message.From, message.To);
-                _figurePresenter.MoveFigure(attacker.Id, message.To);
+                _logger.Error($"Figure {actor} has no TurnPatternSet!");
+                return;
             }
 
-            _logger.Info($"Turn completed for {attacker}");
+            List<Figure> enemies = grid.GetFiguresByTeam(actor.Team == Team.Player ? Team.Enemy : Team.Player)
+                .ToList();
+
+            var selectionContext = new TurnSelectionContext
+            {
+                Actor = actor,
+                Grid = grid,
+                ActorPosition = message.From,
+                TargetPosition = message.To,
+                Enemies = enemies
+            };
+
+            ITurnStep step = _patternResolver.Resolve(actor, actor.TurnPatternSet, selectionContext);
+
+            if (step == null)
+            {
+                _logger.Debug($"No valid pattern for {actor}");
+                return;
+            }
+
+            var stepContext = new TurnStepContext
+            {
+                Actor = actor,
+                Grid = grid,
+                From = message.From,
+                To = message.To
+            };
+
+            ExecuteTurnAsync(actor, step, stepContext).Forget();
+        }
+
+        private async UniTaskVoid ExecuteTurnAsync(Figure actor, ITurnStep step, TurnStepContext context)
+        {
+            _logger.Info($"{actor} executing pattern step: {step.Id}");
+            
+            await step.ExecuteAsync(context);
+            
+            _logger.Info($"Turn completed for {actor}");
             _turnSystem.EndTurn();
         }
 

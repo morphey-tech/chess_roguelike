@@ -1,4 +1,6 @@
 using Cysharp.Threading.Tasks;
+using MessagePipe;
+using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Attack;
 using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Figures;
@@ -13,17 +15,23 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
         private readonly AttackStrategyFactory _attackFactory;
         private readonly CombatResolver _combatResolver;
         private readonly IFigurePresenter _figurePresenter;
+        private readonly IPublisher<FigureDeathMessage> _deathPublisher;
+        private readonly ILogger<AttackStep> _logger;
 
         public AttackStep(
             string id,
             AttackStrategyFactory attackFactory,
             CombatResolver combatResolver,
-            IFigurePresenter figurePresenter)
+            IFigurePresenter figurePresenter,
+            IPublisher<FigureDeathMessage> deathPublisher,
+            ILogger<AttackStep> logger)
         {
             Id = id;
             _attackFactory = attackFactory;
             _combatResolver = combatResolver;
             _figurePresenter = figurePresenter;
+            _deathPublisher = deathPublisher;
+            _logger = logger;
         }
 
         public UniTask ExecuteAsync(TurnStepContext context)
@@ -48,6 +56,11 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
 
             CombatResult result = _combatResolver.Resolve(hitContext);
 
+            _logger.Info($"{context.Actor} [{attackStrategy.Id}] attacks {defender} for {result.DamageDealt} damage. HP: {defender.Stats.CurrentHp}/{defender.Stats.MaxHp}");
+
+            if (result.HealedAmount > 0)
+                _logger.Info($"{context.Actor} healed for {result.HealedAmount}");
+
             _figurePresenter.PlayAttack(context.Actor.Id, context.To);
             _figurePresenter.PlayDamageEffect(defender.Id);
 
@@ -56,8 +69,10 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
 
             if (result.TargetDied)
             {
+                _logger.Info($"{defender} died!");
                 targetCell.RemoveFigure();
                 _figurePresenter.RemoveFigure(defender.Id);
+                _deathPublisher.Publish(new FigureDeathMessage(defender.Id, defender.Team));
             }
 
             return UniTask.CompletedTask;
