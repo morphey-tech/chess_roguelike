@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: Configs
   m_GUID: d5bda6645f02ab1428bf65697a591e97
   m_SerializeEntries:
+  - m_GUID: 19ee1977348a3874594de9469b142e6a
+    m_Address: turn_pattern_sets_conf
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2d3dff0a4d4d428f95399db492d577d2
     m_Address: suites_conf
     m_ReadOnly: 0
@@ -30,6 +35,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 71a38210a05b9e541ae35b7db82fd859
+    m_Address: turn_patterns_conf
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 75a89f9811af4340b39e0e64beed6c64
     m_Address: stages_conf
     m_ReadOnly: 0
@@ -37,6 +47,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7c60432051cc6c44dbdc057d23564b51
     m_Address: boards_conf
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8054c6f82aee7f24f81b70bc4e904c43
+    m_Address: conditions_conf
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

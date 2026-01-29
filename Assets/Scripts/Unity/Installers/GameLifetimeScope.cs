@@ -18,6 +18,8 @@ using Project.Gameplay.Gameplay.Selection;
 using Project.Gameplay.Gameplay.Stage;
 using Project.Gameplay.Gameplay.Stage.Phase;
 using Project.Gameplay.Gameplay.Turn;
+using Project.Gameplay.Gameplay.Turn.Conditions;
+using Project.Gameplay.Gameplay.Turn.Conditions.Impl;
 using Project.Gameplay.Presentations;
 using Project.Unity.Unity.Bootstrap;
 using Project.Unity.Unity.Views;
@@ -168,8 +170,24 @@ namespace Project.Unity.Unity.Installers
                     new RangedAttack()
                 }); 
 
-            // Combat resolver (passives come from figures)
+            // Combat system
+            builder.Register<PassiveTriggerService>(Lifetime.Singleton);
             builder.Register<CombatResolver>(Lifetime.Singleton);
+
+            // Turn pattern system
+            builder.Register<ConditionRegistry>(Lifetime.Singleton)
+                .WithParameter<IEnumerable<ITurnCondition>>(new ITurnCondition[]
+                {
+                    new AlwaysTrueCondition(),
+                    new EnemyInRangeCondition(),
+                    new EnemyAdjacentCondition(),
+                    new HasTargetCondition(),
+                    new TargetIsEnemyCondition(),
+                    new TargetIsEmptyCondition()
+                });
+            builder.Register<TurnStepFactory>(Lifetime.Singleton);
+            builder.Register<TurnPatternFactory>(Lifetime.Singleton);
+            builder.Register<TurnPatternResolver>(Lifetime.Singleton);
 
             // Pure gameplay services
             builder.Register<BoardSpawnService>(Lifetime.Singleton);

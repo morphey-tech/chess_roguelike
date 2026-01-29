@@ -1,6 +1,9 @@
+using Project.Gameplay.Gameplay.Combat.Contexts;
+using Project.Gameplay.Gameplay.Combat.Triggers;
+
 namespace Project.Gameplay.Gameplay.Combat.Passives
 {
-    public sealed class CriticalPassive : IPassive
+    public sealed class CriticalPassive : IPassive, IOnBeforeHit
     {
         public string Id { get; }
         public int Priority => 5;
@@ -15,7 +18,7 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
             _critMultiplier = critMultiplier;
         }
 
-        public void OnPreDamage(HitContext context)
+        public void OnBeforeHit(BeforeHitContext context)
         {
             if (UnityEngine.Random.value <= _critChance)
             {
@@ -23,7 +26,5 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
                 context.IsCritical = true;
             }
         }
-
-        public void OnPostDamage(HitContext context) { }
     }
 }
