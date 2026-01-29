@@ -47,6 +47,7 @@ namespace Project.Gameplay.Gameplay.Stage
             ISubscriber<FigureSpawnedMessage> figureSpawnedSubscriber,
             ISubscriber<MoveRequestedMessage> moveSubscriber,
             ISubscriber<FigureSelectedMessage> selectionSubscriber,
+            ISubscriber<FigureDeselectedMessage> figureDeselectedSubscriber,
             ISubscriber<TurnChangedMessage> turnSubscriber,
             ILogService logService)
         {
@@ -63,6 +64,7 @@ namespace Project.Gameplay.Gameplay.Stage
             figureSpawnedSubscriber.Subscribe(OnFigureSpawned).AddTo(bag);
             moveSubscriber.Subscribe(OnMoveRequested).AddTo(bag);
             selectionSubscriber.Subscribe(OnFigureSelected).AddTo(bag);
+            figureDeselectedSubscriber.Subscribe(OnFigureDeselected).AddTo(bag);
             turnSubscriber.Subscribe(OnTurnChanged).AddTo(bag);
             _subscriptions = bag.Build();
 
@@ -154,12 +156,18 @@ namespace Project.Gameplay.Gameplay.Stage
             {
                 _logger.Info($"Figure {message.Figure.Id} selected at ({message.Position.Row}, {message.Position.Column})");
                 HighlightPositions(_movementService.GetAvailableMoves(message.Figure, message.Position));
+                message.Figure.EnsureComponent(new SelectTag());
             }
             else
             {
                 HighlightPositions(default);
                 _logger.Debug("Selection cleared");
             }
+        }
+        
+        private void OnFigureDeselected(FigureDeselectedMessage message)
+        {
+            message.Figure.Del<SelectTag>();
         }
 
         private void OnTurnChanged(TurnChangedMessage message)
@@ -171,7 +179,7 @@ namespace Project.Gameplay.Gameplay.Stage
         {
             _subscriptions?.Dispose();
         }
-
+        
         private void HighlightPositions(IEnumerable<MovementStrategyResult> positions)
         {
             // костыли вы мои костыли. Дайте я вас сейчас расцелую... Дорогие мои костыли, мы ещё, мы ещё повоююем...
@@ -193,8 +201,6 @@ namespace Project.Gameplay.Gameplay.Stage
                         boardCell.EnsureComponent(new AttackHighlightTag());
                 }
             }
-
-         
         }
     }
 }

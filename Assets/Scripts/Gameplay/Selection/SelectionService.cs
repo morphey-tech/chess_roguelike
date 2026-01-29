@@ -14,6 +14,7 @@ namespace Project.Gameplay.Gameplay.Selection
     {
         private readonly TurnSystem _turnSystem;
         private readonly IPublisher<FigureSelectedMessage> _figureSelectedPublisher;
+        private readonly IPublisher<FigureDeselectedMessage> _figureDeselectedPublisher;
         private readonly IPublisher<MoveRequestedMessage> _moveRequestedPublisher;
         private readonly ILogger<SelectionService> _logger;
         private readonly IDisposable _subscriptions;
@@ -32,11 +33,13 @@ namespace Project.Gameplay.Gameplay.Selection
             ISubscriber<CellClickedMessage> cellClickedSubscriber,
             ISubscriber<CancelRequestedMessage> cancelSubscriber,
             IPublisher<FigureSelectedMessage> figureSelectedPublisher,
+            IPublisher<FigureDeselectedMessage> figureDeselectedPublisher,
             IPublisher<MoveRequestedMessage> moveRequestedPublisher,
             ILogService logService)
         {
             _turnSystem = turnSystem;
             _figureSelectedPublisher = figureSelectedPublisher;
+            _figureDeselectedPublisher = figureDeselectedPublisher;
             _moveRequestedPublisher = moveRequestedPublisher;
             _logger = logService.CreateLogger<SelectionService>();
 
@@ -76,6 +79,9 @@ namespace Project.Gameplay.Gameplay.Selection
             bool hasFigure = clickedCell.OccupiedBy != null;
             _logger.Debug($"Cell has figure: {hasFigure}, IsFree: {clickedCell.IsFree}");
 
+            if (SelectedFigure != null)
+                Deselect(SelectedFigure);
+            
             if (HasSelection)
             {
                 if (clickedCell.IsFree)
@@ -114,6 +120,11 @@ namespace Project.Gameplay.Gameplay.Selection
             _selectedCell = cell;
             _logger.Debug($"Selected figure at ({cell.Position.Row},{cell.Position.Column})");
             _figureSelectedPublisher.Publish(new FigureSelectedMessage(cell.OccupiedBy, cell.Position));
+        }
+
+        private void Deselect(Figure figure)
+        {
+            _figureDeselectedPublisher.Publish(new FigureDeselectedMessage(figure));  
         }
 
         public void ClearSelection()
