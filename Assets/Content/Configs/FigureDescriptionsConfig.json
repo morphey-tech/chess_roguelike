@@ -1,0 +1,84 @@
+{
+  "content": [
+    {
+      "id": "pawn",
+      "movement_id": "pawn",
+      "attack_id": "simple",
+      "stats_id": "pawn_stats",
+      "turn_patterns_id": "melee_default",
+      "passives": []
+    },
+    {
+      "id": "knight",
+      "movement_id": "knight",
+      "attack_id": "simple",
+      "stats_id": "knight_stats",
+      "turn_patterns_id": "melee_default",
+      "passives": ["crit_20"]
+    },
+    {
+      "id": "bishop",
+      "movement_id": "bishop",
+      "attack_id": "ranged",
+      "stats_id": "bishop_stats",
+      "turn_patterns_id": "ranged_default",
+      "passives": ["lifesteal_25"]
+    },
+    {
+      "id": "rook",
+      "movement_id": "rook",
+      "attack_id": "simple",
+      "stats_id": "rook_stats",
+      "turn_patterns_id": "melee_default",
+      "passives": ["execute_30"]
+    },
+    {
+      "id": "queen",
+      "movement_id": "queen",
+      "attack_id": "simple",
+      "stats_id": "queen_stats",
+      "turn_patterns_id": "melee_default",
+      "passives": ["lifesteal_50", "execute_30"]
+    },
+    {
+      "id": "brutal",
+      "movement_id": "pawn",
+      "attack_id": "simple",
+      "stats_id": "brutal_stats",
+      "turn_patterns_id": "melee_default",
+      "passives": ["push_brutal"]
+    },
+    {
+      "id": "slippery",
+      "movement_id": "knight",
+      "attack_id": "simple",
+      "stats_id": "slippery_stats",
+      "turn_patterns_id": "melee_default",
+      "passives": ["retreat_slippery"]
+    },
+    {
+      "id": "tank",
+      "movement_id": "rook",
+      "attack_id": "simple",
+      "stats_id": "tank_stats",
+      "turn_patterns_id": "melee_default",
+      "passives": ["fortify_tank"]
+    },
+    {
+      "id": "splash",
+      "movement_id": "pawn",
+      "attack_id": "splash",
+      "stats_id": "splash_stats",
+      "turn_patterns_id": "melee_default",
+      "passives": []
+    },
+    {
+      "id": "pierce",
+      "movement_id": "rook",
+      "attack_id": "pierce",
+      "stats_id": "pierce_stats",
+      "turn_patterns_id": "melee_default",
+      "passives": []
+    }
+  ]
+}

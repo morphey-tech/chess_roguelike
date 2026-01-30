@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Project.Core.Core.Configs.Turn;
@@ -17,8 +16,8 @@ namespace Project.Gameplay.Gameplay.Turn
         private readonly ConditionRegistry _conditionRegistry;
         private readonly ILogger<TurnPatternFactory> _logger;
 
-        private TurnPatternConfigRepository _patternConfigs;
-        private TurnPatternSetConfigRepository _setConfigs;
+        private TurnPatternDescriptionConfigRepository _descriptionConfigs;
+        private TurnPatternsConfigRepository _patternsConfigs;
         private ConditionConfigRepository _conditionConfigs;
         private bool _initialized;
 
@@ -39,8 +38,8 @@ namespace Project.Gameplay.Gameplay.Turn
             if (_initialized) return;
 
             _conditionConfigs = await _configProvider.Get<ConditionConfigRepository>("conditions_conf");
-            _patternConfigs = await _configProvider.Get<TurnPatternConfigRepository>("turn_patterns_conf");
-            _setConfigs = await _configProvider.Get<TurnPatternSetConfigRepository>("turn_pattern_sets_conf");
+            _descriptionConfigs = await _configProvider.Get<TurnPatternDescriptionConfigRepository>("turn_pattern_descriptions_conf");
+            _patternsConfigs = await _configProvider.Get<TurnPatternsConfigRepository>("turn_patterns_conf");
 
             foreach (var condConfig in _conditionConfigs.Conditions)
             {
@@ -53,27 +52,27 @@ namespace Project.Gameplay.Gameplay.Turn
 
         public TurnPattern CreatePattern(string patternId)
         {
-            TurnPatternConfig config = Array.Find(_patternConfigs.Patterns, p => p.Id == patternId);
+            TurnPatternDescriptionConfig config = Array.Find(_descriptionConfigs.Descriptions, p => p.Id == patternId);
             if (config == null)
-                throw new Exception($"Unknown pattern: {patternId}");
+                throw new Exception($"Unknown pattern description: {patternId}");
 
             return CreatePatternFromConfig(config);
         }
 
         public TurnPatternSet CreatePatternSet(string setId)
         {
-            TurnPatternSetConfig setConfig = Array.Find(_setConfigs.Sets, s => s.Id == setId);
-            if (setConfig == null)
-                throw new Exception($"Unknown pattern set: {setId}");
+            TurnPatternsConfig config = Array.Find(_patternsConfigs.Patterns, s => s.Id == setId);
+            if (config == null)
+                throw new Exception($"Unknown turn patterns: {setId}");
 
-            var patterns = setConfig.PatternIds
+            var patterns = config.PatternIds
                 .Select(CreatePattern)
                 .ToList();
 
             return new TurnPatternSet(setId, patterns);
         }
 
-        private TurnPattern CreatePatternFromConfig(TurnPatternConfig config)
+        private TurnPattern CreatePatternFromConfig(TurnPatternDescriptionConfig config)
         {
             ConditionPreset preset = _conditionRegistry.GetPreset(config.ConditionId);
 

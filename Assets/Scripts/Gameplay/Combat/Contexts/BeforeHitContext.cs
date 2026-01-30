@@ -11,5 +11,6 @@ namespace Project.Gameplay.Gameplay.Combat.Contexts
         public int BonusDamage { get; set; }
         public bool IsCritical { get; set; }
         public bool CanRetreat { get; set; }
+        public bool TargetMovedThisTurn { get; set; }
     }
 }

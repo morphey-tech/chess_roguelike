@@ -14,10 +14,4 @@ namespace Project.Core.Core.Configs.Turn
         [JsonProperty("params")]
         public Dictionary<string, object> Params { get; set; }
     }
-
-    public sealed class ConditionConfigRepository
-    {
-        [JsonProperty("conditions")]
-        public ConditionConfig[] Conditions { get; set; }
-    }
 }

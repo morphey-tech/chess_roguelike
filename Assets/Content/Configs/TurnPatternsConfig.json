@@ -1,37 +1,16 @@
 {
-  "patterns": [
+  "content": [
     {
-      "id": "melee_attack",
-      "priority": 100,
-      "condition_id": "target_is_enemy",
-      "steps": [
-        { "type": "attack" },
-        { "type": "move_to_killed" }
-      ]
+      "id": "melee_default",
+      "pattern_ids": ["melee_attack", "move_only"]
     },
     {
-      "id": "ranged_attack",
-      "priority": 100,
-      "condition_id": "target_is_enemy",
-      "steps": [
-        { "type": "attack" }
-      ]
+      "id": "ranged_default",
+      "pattern_ids": ["ranged_attack", "move_only"]
     },
     {
-      "id": "move_only",
-      "priority": 10,
-      "condition_id": "target_is_empty",
-      "steps": [
-        { "type": "move" }
-      ]
-    },
-    {
-      "id": "archer_knife",
-      "priority": 150,
-      "condition_id": "enemy_adjacent",
-      "steps": [
-        { "type": "attack" }
-      ]
+      "id": "archer_set",
+      "pattern_ids": ["archer_knife", "ranged_attack", "move_only"]
     }
   ]
 }

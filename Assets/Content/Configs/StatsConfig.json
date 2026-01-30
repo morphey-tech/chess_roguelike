@@ -29,6 +29,36 @@
       "max_hp": 8,
       "attack": 4,
       "attack_range": 7
+    },
+    {
+      "id": "brutal_stats",
+      "max_hp": 7,
+      "attack": 2,
+      "attack_range": 1
+    },
+    {
+      "id": "slippery_stats",
+      "max_hp": 5,
+      "attack": 2,
+      "attack_range": 1
+    },
+    {
+      "id": "tank_stats",
+      "max_hp": 9,
+      "attack": 2,
+      "attack_range": 1
+    },
+    {
+      "id": "splash_stats",
+      "max_hp": 6,
+      "attack": 1,
+      "attack_range": 1
+    },
+    {
+      "id": "pierce_stats",
+      "max_hp": 6,
+      "attack": 3,
+      "attack_range": 1
     }
   ]
 }

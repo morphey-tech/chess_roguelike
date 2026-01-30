@@ -1,12 +1,9 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using Project.Core.Core.Assets;
-using Project.Core.Core.Configs.Figure;
 using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
 using Project.Core.Core.Physics;
 using Project.Core.Core.World;
-using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Presentations;
 using Project.Unity.Presentations;
@@ -14,76 +11,56 @@ using UnityEngine;
 
 namespace Project.Unity.Unity.Views
 {
-    /// <summary>
-    /// Unity implementation of IFigurePresenter.
-    /// Effects are delegated to IFigureView components on prefabs.
-    /// </summary>
     public sealed class FigurePresenter : IFigurePresenter
     {
         private readonly PresentationManager _presentationManager;
         private readonly IWorldRoot _worldRoot;
-        private readonly ConfigProvider _configProvider;
         private readonly ILogger<FigurePresenter> _logger;
 
         private readonly Dictionary<int, GameObject> _figures = new();
         private readonly Dictionary<int, IFigureView> _figureViews = new();
         private readonly Dictionary<int, GridPosition> _positions = new();
-        private FigureConfigRepository? _figureConfigCache;
 
         public FigurePresenter(
             PresentationManager presentationManager,
             IWorldRoot worldRoot,
-            ConfigProvider configProvider,
             ILogService logService)
         {
             _presentationManager = presentationManager;
             _worldRoot = worldRoot;
-            _configProvider = configProvider;
             _logger = logService.CreateLogger<FigurePresenter>();
-
             _logger.Info("FigurePresenter created");
         }
 
-        public async UniTask CreateFigure(int figureId, string typeId, GridPosition pos, Team team)
+        public async UniTask CreateFigure(Figure figure, string assetKey, GridPosition pos, Team team)
         {
-            _figureConfigCache ??= await _configProvider.Get<FigureConfigRepository>("figures_conf");
-
-            FigureConfig config = System.Array.Find(_figureConfigCache.Figures, f => f.Id == typeId);
-
-            if (config == null)
-            {
-                _logger.Error($"No config found for figure type '{typeId}'");
-                return;
-            }
-
             Vector3 worldPos = GetCellTopPosition(pos);
             
             EntityLink entityLink = await _presentationManager.SpawnView(
-                figureId,
-                config.AssetKey,
+                figure.Id,
+                assetKey,
                 worldPos,
                 Quaternion.identity,
                 _worldRoot.FigureRoot);
 
             if (entityLink == null)
             {
-                _logger.Error($"Failed to instantiate figure {figureId}");
+                _logger.Error($"Failed to instantiate figure {figure}");
                 return;
             }
 
-            _figures[figureId] = entityLink.gameObject;
-            _positions[figureId] = pos;
+            _figures[figure.Id] = entityLink.gameObject;
+            _positions[figure.Id] = pos;
 
             var spawnPresenter = entityLink.GetComponent<FigureSpawnPresenter>();
-            if(spawnPresenter != null)
+            if (spawnPresenter != null)
                 spawnPresenter.PlaySpawnAsync().Forget();
                 
-            // Cache visual component if exists
             var view = entityLink.GetComponent<IFigureView>();
             if (view != null)
-                _figureViews[figureId] = view;
+                _figureViews[figure.Id] = view;
 
-            _logger.Info($"Figure {figureId} ({typeId}) created at ({pos.Row}, {pos.Column}), team: {team}");
+            _logger.Info($"Figure {figure} created at ({pos.Row}, {pos.Column}), team: {team}");
         }
 
         public void MoveFigure(int figureId, GridPosition to)
@@ -106,7 +83,6 @@ namespace Project.Unity.Unity.Views
             }
 
             _positions[figureId] = to;
-
             _logger.Info($"Figure {figureId} moved to ({to.Row}, {to.Column})");
         }
 
@@ -155,7 +131,6 @@ namespace Project.Unity.Unity.Views
             if (!_figures.TryGetValue(figureId, out GameObject figureGO))
                 return;
 
-            // Always use simple flash effect (works with any shader)
             PlaySimpleDamageEffect(figureGO).Forget();
         }
 
@@ -180,7 +155,6 @@ namespace Project.Unity.Unity.Views
                 return;
             }
 
-            // Store original materials and create flash instances
             var originalMaterials = new List<(Renderer r, Material[] originals)>();
             Color flashColor = Color.red;
             
@@ -195,7 +169,6 @@ namespace Project.Unity.Unity.Views
 
             for (int i = 0; i < flashCount && figureGO != null; i++)
             {
-                // Flash ON - set color to red/white
                 foreach (var (r, _) in originalMaterials)
                 {
                     if (r == null) continue;
@@ -209,7 +182,6 @@ namespace Project.Unity.Unity.Views
                 await UniTask.Delay(flashDelayMs);
                 if (figureGO == null) return;
                 
-                // Flash OFF - restore original color (assuming it was close to white/wood)
                 foreach (var (r, _) in originalMaterials)
                 {
                     if (r == null) continue;
@@ -234,7 +206,6 @@ namespace Project.Unity.Unity.Views
             _figures.Clear();
             _figureViews.Clear();
             _positions.Clear();
-            _figureConfigCache = null;
 
             _logger.Debug("Figures cleared");
         }

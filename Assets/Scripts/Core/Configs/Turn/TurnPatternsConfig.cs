@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 
 namespace Project.Core.Core.Configs.Turn
 {
-    public sealed class TurnPatternSetConfig
+    public sealed class TurnPatternsConfig
     {
         [JsonProperty("id")]
         public string Id { get; set; }
@@ -11,9 +11,9 @@ namespace Project.Core.Core.Configs.Turn
         public string[] PatternIds { get; set; }
     }
 
-    public sealed class TurnPatternSetConfigRepository
+    public class TurnPatternsConfigRepository
     {
-        [JsonProperty("sets")]
-        public TurnPatternSetConfig[] Sets { get; set; }
+        [JsonProperty("content")]
+        public TurnPatternsConfig[] Patterns { get; set; }
     }
 }

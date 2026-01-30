@@ -133,6 +133,7 @@ namespace Project.Unity.Unity.Installers
                 .AsSelf();
 
             // Figures spawn providers
+            builder.Register<SpawnPatternParser>(Lifetime.Singleton);
             builder.Register<DuelFiguresSpawnProvider>(Lifetime.Singleton);
             builder.Register<EmptyFiguresSpawnProvider>(Lifetime.Singleton);
             builder.Register<IFiguresSpawnProviderFactory, FiguresSpawnProviderFactory>(Lifetime.Singleton);
@@ -167,7 +168,9 @@ namespace Project.Unity.Unity.Installers
                 .WithParameter<IEnumerable<IAttackStrategy>>(new IAttackStrategy[]
                 {
                     new SimpleAttack(),
-                    new RangedAttack()
+                    new RangedAttack(),
+                    new SplashAttack(),
+                    new PierceAttack()
                 }); 
 
             // Combat system

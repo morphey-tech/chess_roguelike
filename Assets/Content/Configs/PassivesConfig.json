@@ -29,6 +29,21 @@
       "id": "thorns_25",
       "type": "thorns",
       "params": { "percent": 0.25 }
+    },
+    {
+      "id": "push_brutal",
+      "type": "push_on_hit",
+      "params": { "bonus_damage": 1 }
+    },
+    {
+      "id": "retreat_slippery",
+      "type": "retreat_on_no_kill",
+      "params": { "distance": 1 }
+    },
+    {
+      "id": "fortify_tank",
+      "type": "fortify",
+      "params": { "reduction": 1 }
     }
   ]
 }

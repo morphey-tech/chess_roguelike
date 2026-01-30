@@ -1,11 +1,31 @@
 {
   "content": [
     {
+      "id": "duel_tutorial_1",
+      "spawn_pattern_id": "tutorial_1"
+    },
+    {
+      "id": "duel_tutorial_2",
+      "spawn_pattern_id": "tutorial_2"
+    },
+    {
+      "id": "duel_level_1",
+      "spawn_pattern_id": "level_1"
+    },
+    {
+      "id": "duel_level_2",
+      "spawn_pattern_id": "level_2"
+    },
+    {
+      "id": "duel_boss_1",
+      "spawn_pattern_id": "boss_1"
+    },
+    {
       "id": "duel_0",
       "enemies": [
-        { "typeId": "queen_black_default", "row": 7, "column": 3 },
-        { "typeId": "pawn_black_default", "row": 7, "column": 4 },
-        { "typeId": "bishop_black_default", "row": 6, "column": 3 }
+        { "typeId": "queen_enemy", "row": 7, "column": 3 },
+        { "typeId": "pawn_enemy", "row": 7, "column": 4 },
+        { "typeId": "bishop_enemy", "row": 6, "column": 3 }
       ]
     }
   ]

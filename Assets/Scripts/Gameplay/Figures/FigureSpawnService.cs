@@ -24,6 +24,7 @@ namespace Project.Gameplay.Gameplay.Figures
         private readonly ILogger<FigureSpawnService> _logger;
         
         private FigureConfigRepository _figureConfigCache;
+        private FigureDescriptionConfigRepository _descriptionConfigCache;
         private StatsConfigRepository _statsConfigCache;
         private PassiveConfigRepository _passiveConfigCache;
 
@@ -42,7 +43,7 @@ namespace Project.Gameplay.Gameplay.Figures
             _logger = logService.CreateLogger<FigureSpawnService>();
         }
 
-        public async UniTask<Figure?> SpawnAsync(BoardGrid grid, GridPosition position, string figureTypeId, Team team)
+        public async UniTask<Figure> SpawnAsync(BoardGrid grid, GridPosition position, string figureId, Team team)
         {
             BoardCell cell = grid.GetBoardCell(position);
 
@@ -53,55 +54,73 @@ namespace Project.Gameplay.Gameplay.Figures
             }
 
             _figureConfigCache ??= await _configProvider.Get<FigureConfigRepository>("figures_conf");
+            _descriptionConfigCache ??= await _configProvider.Get<FigureDescriptionConfigRepository>("figure_descriptions_conf");
             _statsConfigCache ??= await _configProvider.Get<StatsConfigRepository>("stats_conf");
             _passiveConfigCache ??= await _configProvider.Get<PassiveConfigRepository>("passives_conf");
             
             await _turnPatternFactory.InitializeAsync();
+
+            FigureConfig figureConfig = Array.Find(_figureConfigCache.Figures, f => f.Id == figureId);
+            if (figureConfig == null)
+            {
+                _logger.Error($"Figure config not found: {figureId}");
+                return null;
+            }
+
+            FigureDescriptionConfig description = Array.Find(
+                _descriptionConfigCache.Descriptions, 
+                d => d.Id == figureConfig.DescriptionId);
             
-            FigureConfig figureConfig = Array.Find(_figureConfigCache.Figures, f => f.Id == figureTypeId);
-            string movementId = figureConfig?.MovementId ?? "pawn";
-            string attackId = figureConfig?.AttackId ?? "simple";
-            
-            string statsId = figureConfig?.StatsId ?? figureTypeId;
-            StatsConfig statsConfig = Array.Find(_statsConfigCache.Configs, s => s.Id == statsId);
-            
+            if (description == null)
+            {
+                _logger.Error($"Description not found: {figureConfig.DescriptionId}");
+                return null;
+            }
+
+            StatsConfig statsConfig = Array.Find(_statsConfigCache.Configs, s => s.Id == description.StatsId);
             FigureStats stats = statsConfig != null 
                 ? new FigureStats(statsConfig.MaxHp, statsConfig.Attack, statsConfig.AttackRange)
-                : new FigureStats(1, 1, 1);
+                : new FigureStats(1, 1);
 
-            string turnPatternSetId = figureConfig?.TurnPatternSetId ?? "melee_default";
-            Figure figure = new(IdGetter.MakeId(), figureTypeId, movementId, attackId, turnPatternSetId, stats, team);
-            
-            try
+            Figure figure = new(
+                IdGetter.MakeId(), 
+                figureId,
+                description.MovementId, 
+                description.AttackId, 
+                description.TurnPatternsId,
+                stats, 
+                team);
+
+            if (description.Passives != null)
             {
-                TurnPatternSet patternSet = _turnPatternFactory.CreatePatternSet(turnPatternSetId);
-                figure.SetTurnPatternSet(patternSet);
-            }
-            catch (Exception e)
-            {
-                _logger.Warning($"Failed to create turn pattern set '{turnPatternSetId}' for {figure}: {e.Message}");
-            }
-            
-            if (figureConfig?.Passives != null)
-            {
-                foreach (string passiveId in figureConfig.Passives)
+                foreach (string passiveId in description.Passives)
                 {
                     PassiveConfig passiveConfig = Array.Find(_passiveConfigCache.Passives, p => p.Id == passiveId);
                     if (passiveConfig != null)
                     {
-                        IPassive? passive = PassiveFactory.Create(passiveConfig);
+                        IPassive passive = PassiveFactory.Create(passiveConfig);
                         figure.AddPassive(passive);
                     }
                 }
                 
                 if (figure.Passives.Count > 0)
-                    _logger.Debug($"{figure} passives: {string.Join(", ", figureConfig.Passives)}");
+                    _logger.Debug($"{figure} passives: {string.Join(", ", description.Passives)}");
             }
-            
+
+            try
+            {
+                TurnPatternSet patternSet = _turnPatternFactory.CreatePatternSet(description.TurnPatternsId);
+                figure.SetTurnPatternSet(patternSet);
+            }
+            catch (Exception e)
+            {
+                _logger.Warning($"Failed to create turn patterns '{description.TurnPatternsId}': {e.Message}");
+            }
+
             cell.PlaceFigure(figure);
-            await _figurePresenter.CreateFigure(figure.Id, figure.TypeId, position, team);
+            await _figurePresenter.CreateFigure(figure, figureConfig.AssetKey, position, team);
             
-            _logger.Info($"Spawned {figure} HP:{stats.CurrentHp}/{stats.MaxHp} ATK:{stats.Attack} RNG:{stats.AttackRange}");
+            _logger.Info($"Spawned {figure} [{description.Id}] HP:{stats.CurrentHp}/{stats.MaxHp} ATK:{stats.Attack}");
             _spawnedPublisher.Publish(new FigureSpawnedMessage(figure, position));
 
             return figure;

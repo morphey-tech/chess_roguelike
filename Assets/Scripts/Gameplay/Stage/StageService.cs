@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using MessagePipe;
+using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
+using Project.Gameplay.Gameplay.Board;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Run;
@@ -19,6 +21,8 @@ namespace Project.Gameplay.Gameplay.Stage
     public class StageService : IStartable, IDisposable
     {
         private readonly RunHolder _runHolder;
+        private readonly MovementService _movementService;
+        private readonly IBoardPresenter _boardPresenter;
         private readonly TurnPatternResolver _patternResolver;
         private readonly TurnSystem _turnSystem;
         private readonly ILogger<StageService> _logger;
@@ -27,6 +31,8 @@ namespace Project.Gameplay.Gameplay.Stage
         [Inject]
         private StageService(
             RunHolder runHolder,
+            MovementService movementService,
+            IBoardPresenter boardPresenter,
             TurnPatternResolver patternResolver,
             TurnSystem turnSystem,
             ISubscriber<FigureSpawnedMessage> figureSpawnedSubscriber,
@@ -36,6 +42,8 @@ namespace Project.Gameplay.Gameplay.Stage
             ILogService logService)
         {
             _runHolder = runHolder;
+            _movementService = movementService;
+            _boardPresenter = boardPresenter;
             _patternResolver = patternResolver;
             _turnSystem = turnSystem;
             _logger = logService.CreateLogger<StageService>();
@@ -81,8 +89,7 @@ namespace Project.Gameplay.Gameplay.Stage
                 return;
             }
 
-            List<Figure> enemies = grid.GetFiguresByTeam(actor.Team == Team.Player ? Team.Enemy : Team.Player)
-                .ToList();
+            List<Figure> enemies = grid.GetFiguresByTeam(actor.Team == Team.Player ? Team.Enemy : Team.Player).ToList();
 
             var selectionContext = new TurnSelectionContext
             {
@@ -114,7 +121,7 @@ namespace Project.Gameplay.Gameplay.Stage
 
         private async UniTaskVoid ExecuteTurnAsync(Figure actor, ITurnStep step, TurnStepContext context)
         {
-            _logger.Info($"{actor} executing pattern step: {step.Id}");
+            _logger.Info($"{actor} executing pattern: {step.Id}");
             
             await step.ExecuteAsync(context);
             
@@ -127,9 +134,11 @@ namespace Project.Gameplay.Gameplay.Stage
             if (message.Figure != null)
             {
                 _logger.Info($"Figure {message.Figure.Id} selected at ({message.Position.Row}, {message.Position.Column})");
+                HighlightPositions(_movementService.GetAvailableMoves(message.Figure, message.Position));
             }
             else
             {
+                HighlightPositions(null);
                 _logger.Debug("Selection cleared");
             }
         }
@@ -137,6 +146,17 @@ namespace Project.Gameplay.Gameplay.Stage
         private void OnTurnChanged(TurnChangedMessage message)
         {
             _logger.Info($"Turn {message.TurnNumber}: {message.CurrentTeam}'s turn");
+        }
+
+        private void HighlightPositions(IEnumerable<GridPosition> positions)
+        {
+            HashSet<GridPosition> highlightSet = positions?.ToHashSet() ?? new HashSet<GridPosition>();
+            
+            foreach (BoardCell boardCell in _movementService.Grid.AllCells())
+            {
+                bool highlight = highlightSet.Contains(boardCell.Position);
+                _boardPresenter.Highlight(boardCell.Position, highlight);
+            }
         }
 
         void IDisposable.Dispose()

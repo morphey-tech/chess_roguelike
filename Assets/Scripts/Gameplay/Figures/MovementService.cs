@@ -9,6 +9,8 @@ namespace Project.Gameplay.Gameplay.Figures
 {
     public class MovementService
     {
+        public BoardGrid Grid => _grid;
+        
         private readonly MovementStrategyFactory _strategyFactory;
         private readonly ILogger<MovementService> _logger;
         private BoardGrid _grid;
@@ -60,6 +62,17 @@ namespace Project.Gameplay.Gameplay.Figures
             if (figure == null)
             {
                 _logger.Warning($"No figure at ({from.Row},{from.Column})");
+                return false;
+            }
+
+            return CanMove(figure, from, to);
+        }
+
+        public bool CanMove(Figure figure, GridPosition from, GridPosition to)
+        {
+            if (_grid == null)
+            {
+                _logger.Error("Grid not set!");
                 return false;
             }
 

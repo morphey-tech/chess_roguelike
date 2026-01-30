@@ -1,104 +1,124 @@
 {
   "content": [
     {
-      "id": "pawn_white_default",
+      "id": "pawn_player",
+      "alias": "p",
       "asset_key": "pawn_white_figure",
-      "behaviour_id": "none",
-      "movement_id": "pawn",
-      "attack_id": "simple",
-      "stats_id": "pawn_stats",
-      "turn_pattern_set_id": "melee_default",
-      "passives": []
+      "description_id": "pawn"
     },
     {
-      "id": "pawn_black_default",
+      "id": "pawn_enemy",
+      "alias": "P",
       "asset_key": "pawn_black_figure",
-      "behaviour_id": "none",
-      "movement_id": "pawn",
-      "attack_id": "simple",
-      "stats_id": "pawn_stats",
-      "turn_pattern_set_id": "melee_default",
-      "passives": []
+      "description_id": "pawn"
     },
     {
-      "id": "knight_white_default",
+      "id": "knight_player",
+      "alias": "k",
       "asset_key": "knight_white_figure",
-      "behaviour_id": "none",
-      "movement_id": "knight",
-      "attack_id": "simple",
-      "stats_id": "knight_stats",
-      "turn_pattern_set_id": "melee_default",
-      "passives": ["crit_20"]
+      "description_id": "knight"
     },
     {
-      "id": "knight_black_default",
+      "id": "knight_enemy",
+      "alias": "K",
       "asset_key": "knight_black_figure",
-      "behaviour_id": "none",
-      "movement_id": "knight",
-      "attack_id": "simple",
-      "stats_id": "knight_stats",
-      "turn_pattern_set_id": "melee_default",
-      "passives": ["crit_20"]
+      "description_id": "knight"
     },
     {
-      "id": "bishop_white_default",
+      "id": "bishop_player",
+      "alias": "b",
       "asset_key": "bishop_white_figure",
-      "behaviour_id": "none",
-      "movement_id": "bishop",
-      "attack_id": "ranged",
-      "stats_id": "bishop_stats",
-      "turn_pattern_set_id": "ranged_default",
-      "passives": ["lifesteal_25"]
+      "description_id": "bishop"
     },
     {
-      "id": "bishop_black_default",
+      "id": "bishop_enemy",
+      "alias": "B",
       "asset_key": "bishop_black_figure",
-      "behaviour_id": "none",
-      "movement_id": "bishop",
-      "attack_id": "ranged",
-      "stats_id": "bishop_stats",
-      "turn_pattern_set_id": "ranged_default",
-      "passives": ["lifesteal_25"]
+      "description_id": "bishop"
     },
     {
-      "id": "rook_white_default",
+      "id": "rook_player",
+      "alias": "r",
       "asset_key": "rook_white_figure",
-      "behaviour_id": "none",
-      "movement_id": "rook",
-      "attack_id": "simple",
-      "stats_id": "rook_stats",
-      "turn_pattern_set_id": "melee_default",
-      "passives": ["execute_30"]
+      "description_id": "rook"
     },
     {
-      "id": "rook_black_default",
+      "id": "rook_enemy",
+      "alias": "R",
       "asset_key": "rook_black_figure",
-      "behaviour_id": "none",
-      "movement_id": "rook",
-      "attack_id": "simple",
-      "stats_id": "rook_stats",
-      "turn_pattern_set_id": "melee_default",
-      "passives": ["execute_30"]
+      "description_id": "rook"
     },
     {
-      "id": "queen_white_default",
+      "id": "queen_player",
+      "alias": "q",
       "asset_key": "queen_white_figure",
-      "behaviour_id": "none",
-      "movement_id": "queen",
-      "attack_id": "simple",
-      "stats_id": "queen_stats",
-      "turn_pattern_set_id": "melee_default",
-      "passives": ["lifesteal_50", "execute_30"]
+      "description_id": "queen"
     },
     {
-      "id": "queen_black_default",
+      "id": "queen_enemy",
+      "alias": "Q",
       "asset_key": "queen_black_figure",
-      "behaviour_id": "none",
-      "movement_id": "queen",
-      "attack_id": "simple",
-      "stats_id": "queen_stats",
-      "turn_pattern_set_id": "melee_default",
-      "passives": ["lifesteal_50", "execute_30"]
+      "description_id": "queen"
+    },
+    {
+      "id": "brutal_player",
+      "alias": "1",
+      "asset_key": "pawn_white_figure",
+      "description_id": "brutal"
+    },
+    {
+      "id": "brutal_enemy",
+      "alias": "!",
+      "asset_key": "pawn_black_figure",
+      "description_id": "brutal"
+    },
+    {
+      "id": "slippery_player",
+      "alias": "2",
+      "asset_key": "knight_white_figure",
+      "description_id": "slippery"
+    },
+    {
+      "id": "slippery_enemy",
+      "alias": "@",
+      "asset_key": "knight_black_figure",
+      "description_id": "slippery"
+    },
+    {
+      "id": "tank_player",
+      "alias": "3",
+      "asset_key": "rook_white_figure",
+      "description_id": "tank"
+    },
+    {
+      "id": "tank_enemy",
+      "alias": "#",
+      "asset_key": "rook_black_figure",
+      "description_id": "tank"
+    },
+    {
+      "id": "splash_player",
+      "alias": "4",
+      "asset_key": "pawn_white_figure",
+      "description_id": "splash"
+    },
+    {
+      "id": "splash_enemy",
+      "alias": "$",
+      "asset_key": "pawn_black_figure",
+      "description_id": "splash"
+    },
+    {
+      "id": "pierce_player",
+      "alias": "5",
+      "asset_key": "bishop_white_figure",
+      "description_id": "pierce"
+    },
+    {
+      "id": "pierce_enemy",
+      "alias": "%",
+      "asset_key": "bishop_black_figure",
+      "description_id": "pierce"
     }
   ]
 }

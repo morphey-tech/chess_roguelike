@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
@@ -20,5 +21,8 @@ namespace Project.Gameplay.Gameplay.Combat
         public int HealedAmount { get; set; }
         public bool IsCritical { get; set; }
         public bool TargetDied { get; set; }
+        
+        public List<Figure> AdditionalTargets { get; set; } = new();
+        public float AdditionalDamageMultiplier { get; set; } = 1f;
     }
 }
