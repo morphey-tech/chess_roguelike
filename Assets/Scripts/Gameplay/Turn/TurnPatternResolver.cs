@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Figures;
-using Project.Gameplay.Gameplay.Turn.Conditions;
 using Project.Gameplay.Gameplay.Turn.Steps;
 
 namespace Project.Gameplay.Gameplay.Turn
@@ -16,7 +15,7 @@ namespace Project.Gameplay.Gameplay.Turn
             _logger = logService.CreateLogger<TurnPatternResolver>();
         }
 
-        public ITurnStep Resolve(Figure actor, TurnPatternSet patternSet, TurnSelectionContext context)
+        public ITurnStep Resolve(Figure actor, TurnPatternSet patternSet, ActionContext context)
         {
             if (patternSet == null || patternSet.Patterns.Count == 0)
             {

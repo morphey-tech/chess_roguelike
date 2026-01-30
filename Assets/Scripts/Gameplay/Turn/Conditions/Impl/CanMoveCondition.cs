@@ -7,18 +7,15 @@ namespace Project.Gameplay.Gameplay.Turn.Conditions.Impl
     {
         public string Type => "can_move";
 
-        public bool Evaluate(TurnSelectionContext context, ConditionParams parameters)
+        public bool Evaluate(ActionContext context, ConditionParams parameters)
         {
-            if (!context.TargetPosition.HasValue)
-                return false;
-
             if (context.MovementService == null)
                 return false;
 
             return context.MovementService.CanMove(
                 context.Actor, 
                 context.ActorPosition, 
-                context.TargetPosition.Value);
+                context.To);
         }
     }
 }

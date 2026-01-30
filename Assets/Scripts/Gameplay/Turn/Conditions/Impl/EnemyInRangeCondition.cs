@@ -6,7 +6,7 @@ namespace Project.Gameplay.Gameplay.Turn.Conditions.Impl
     {
         public string Type => "enemy_in_range";
 
-        public bool Evaluate(TurnSelectionContext context, ConditionParams parameters)
+        public bool Evaluate(ActionContext context, ConditionParams parameters)
         {
             int range = parameters.GetInt("range", context.Actor.Stats.AttackRange);
 

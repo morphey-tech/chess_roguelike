@@ -16,5 +16,15 @@ namespace Project.Gameplay.Gameplay.Combat.Contexts
         public bool TargetDied { get; set; }
         public int HealedAmount { get; set; }
         public bool WasCritical { get; set; }
+        
+        /// <summary>
+        /// If a passive moves the attacker, set this to the new position.
+        /// </summary>
+        public GridPosition? AttackerMovedTo { get; set; }
+        
+        /// <summary>
+        /// If set, the attacker should get a bonus move with this max distance.
+        /// </summary>
+        public int? BonusMoveDistance { get; set; }
     }
 }

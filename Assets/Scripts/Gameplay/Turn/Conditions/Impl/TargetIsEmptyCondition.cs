@@ -4,12 +4,9 @@ namespace Project.Gameplay.Gameplay.Turn.Conditions.Impl
     {
         public string Type => "target_is_empty";
 
-        public bool Evaluate(TurnSelectionContext context, ConditionParams parameters)
+        public bool Evaluate(ActionContext context, ConditionParams parameters)
         {
-            if (!context.TargetPosition.HasValue)
-                return false;
-
-            var cell = context.Grid.GetBoardCell(context.TargetPosition.Value);
+            var cell = context.Grid.GetBoardCell(context.To);
             return cell != null && cell.OccupiedBy == null;
         }
     }

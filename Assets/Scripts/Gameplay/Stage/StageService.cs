@@ -11,19 +11,24 @@ using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Run;
 using Project.Gameplay.Gameplay.Selection;
 using Project.Gameplay.Gameplay.Turn;
-using Project.Gameplay.Gameplay.Turn.Conditions;
-using Project.Gameplay.Gameplay.Turn.Steps;
+using Project.Gameplay.Gameplay.Turn.BonusMove;
+using Project.Gameplay.Gameplay.Turn.Execution;
 using VContainer;
 using VContainer.Unity;
 
 namespace Project.Gameplay.Gameplay.Stage
 {
+    /// <summary>
+    /// Stage coordinator - listens to events and delegates to appropriate services.
+    /// Does NOT contain game logic, only orchestration.
+    /// </summary>
     public class StageService : IStartable, IDisposable
     {
         private readonly RunHolder _runHolder;
-        private readonly MovementService _movementService;
+        private readonly ITurnExecutor _turnExecutor;
+        private readonly IBonusMoveController _bonusMoveController;
         private readonly IBoardPresenter _boardPresenter;
-        private readonly TurnPatternResolver _patternResolver;
+        private readonly MovementService _movementService;
         private readonly TurnSystem _turnSystem;
         private readonly ILogger<StageService> _logger;
         private readonly IDisposable _subscriptions;
@@ -31,9 +36,10 @@ namespace Project.Gameplay.Gameplay.Stage
         [Inject]
         private StageService(
             RunHolder runHolder,
-            MovementService movementService,
+            ITurnExecutor turnExecutor,
+            IBonusMoveController bonusMoveController,
             IBoardPresenter boardPresenter,
-            TurnPatternResolver patternResolver,
+            MovementService movementService,
             TurnSystem turnSystem,
             ISubscriber<FigureSpawnedMessage> figureSpawnedSubscriber,
             ISubscriber<MoveRequestedMessage> moveSubscriber,
@@ -42,9 +48,10 @@ namespace Project.Gameplay.Gameplay.Stage
             ILogService logService)
         {
             _runHolder = runHolder;
-            _movementService = movementService;
+            _turnExecutor = turnExecutor;
+            _bonusMoveController = bonusMoveController;
             _boardPresenter = boardPresenter;
-            _patternResolver = patternResolver;
+            _movementService = movementService;
             _turnSystem = turnSystem;
             _logger = logService.CreateLogger<StageService>();
 
@@ -65,16 +72,29 @@ namespace Project.Gameplay.Gameplay.Stage
 
         private void OnFigureSpawned(FigureSpawnedMessage message)
         {
-            _logger.Info($"Figure {message.Figure.Id} spawned at ({message.Position.Row}, {message.Position.Column})");
+            _logger.Debug($"Figure {message.Figure.Id} spawned at ({message.Position.Row}, {message.Position.Column})");
         }
 
         private void OnMoveRequested(MoveRequestedMessage message)
         {
             _logger.Info($"Move requested: ({message.From.Row},{message.From.Column}) -> ({message.To.Row},{message.To.Column})");
 
-            Stage currentStage = _runHolder.Current?.CurrentStage;
-            BoardGrid grid = currentStage?.Grid;
-            BoardCell fromCell = grid?.GetBoardCell(message.From);
+            // Handle bonus move if active
+            if (_bonusMoveController.IsActive)
+            {
+                if (_bonusMoveController.TryExecute(message.To))
+                {
+                    ClearHighlights();
+                    _turnSystem.EndTurn();
+                }
+                return;
+            }
+
+            // Get current stage context
+            BoardGrid grid = GetCurrentGrid();
+            if (grid == null) return;
+
+            BoardCell fromCell = grid.GetBoardCell(message.From);
             Figure actor = fromCell?.OccupiedBy;
 
             if (actor == null)
@@ -83,63 +103,47 @@ namespace Project.Gameplay.Gameplay.Stage
                 return;
             }
 
-            if (actor.TurnPatternSet == null)
-            {
-                _logger.Error($"Figure {actor} has no TurnPatternSet!");
-                return;
-            }
-
-            List<Figure> enemies = grid.GetFiguresByTeam(actor.Team == Team.Player ? Team.Enemy : Team.Player).ToList();
-
-            var selectionContext = new TurnSelectionContext
-            {
-                Actor = actor,
-                Grid = grid,
-                ActorPosition = message.From,
-                TargetPosition = message.To,
-                Enemies = enemies,
-                MovementService = _movementService
-            };
-
-            ITurnStep step = _patternResolver.Resolve(actor, actor.TurnPatternSet, selectionContext);
-
-            if (step == null)
-            {
-                _logger.Debug($"No valid pattern for {actor}");
-                return;
-            }
-
-            var stepContext = new TurnStepContext
-            {
-                Actor = actor,
-                Grid = grid,
-                From = message.From,
-                To = message.To
-            };
-
-            ExecuteTurnAsync(actor, step, stepContext).Forget();
+            // Execute the turn
+            ExecuteTurnAsync(actor, message.From, message.To, grid).Forget();
         }
 
-        private async UniTaskVoid ExecuteTurnAsync(Figure actor, ITurnStep step, TurnStepContext context)
+        private async UniTaskVoid ExecuteTurnAsync(Figure actor, GridPosition from, GridPosition to, BoardGrid grid)
         {
-            _logger.Info($"{actor} executing pattern: {step.Id}");
-            
-            await step.ExecuteAsync(context);
-            
+            TurnExecutionResult result = await _turnExecutor.ExecuteAsync(actor, from, to, grid);
+
+            if (!result.Success)
+            {
+                _logger.Debug($"Turn execution failed for {actor}");
+                return;
+            }
+
+            // Check if bonus move was granted
+            if (result.BonusMoveDistance.HasValue && result.BonusMoveDistance.Value > 0)
+            {
+                _logger.Info($"{actor} gets bonus move! Max distance: {result.BonusMoveDistance.Value}");
+                _bonusMoveController.Start(actor, result.ActorFinalPosition, result.BonusMoveDistance.Value);
+                HighlightPositions(_bonusMoveController.GetAvailablePositions());
+                return;
+            }
+
             _logger.Info($"Turn completed for {actor}");
             _turnSystem.EndTurn();
         }
 
         private void OnFigureSelected(FigureSelectedMessage message)
         {
+            // Don't change highlights during bonus move
+            if (_bonusMoveController.IsActive)
+                return;
+
             if (message.Figure != null)
             {
-                _logger.Info($"Figure {message.Figure.Id} selected at ({message.Position.Row}, {message.Position.Column})");
+                _logger.Debug($"Figure {message.Figure.Id} selected at ({message.Position.Row}, {message.Position.Column})");
                 HighlightPositions(_movementService.GetAvailableMoves(message.Figure, message.Position));
             }
             else
             {
-                HighlightPositions(null);
+                ClearHighlights();
                 _logger.Debug("Selection cleared");
             }
         }
@@ -147,17 +151,36 @@ namespace Project.Gameplay.Gameplay.Stage
         private void OnTurnChanged(TurnChangedMessage message)
         {
             _logger.Info($"Turn {message.TurnNumber}: {message.CurrentTeam}'s turn");
+            
+            // Cancel any pending bonus move on turn change
+            if (_bonusMoveController.IsActive)
+            {
+                _bonusMoveController.Cancel();
+                ClearHighlights();
+            }
+        }
+
+        private BoardGrid GetCurrentGrid()
+        {
+            return _runHolder.Current?.CurrentStage?.Grid;
         }
 
         private void HighlightPositions(IEnumerable<GridPosition> positions)
         {
+            BoardGrid grid = GetCurrentGrid();
+            if (grid == null) return;
+
             HashSet<GridPosition> highlightSet = positions?.ToHashSet() ?? new HashSet<GridPosition>();
             
-            foreach (BoardCell boardCell in _movementService.Grid.AllCells())
+            foreach (BoardCell cell in grid.AllCells())
             {
-                bool highlight = highlightSet.Contains(boardCell.Position);
-                _boardPresenter.Highlight(boardCell.Position, highlight);
+                _boardPresenter.Highlight(cell.Position, highlightSet.Contains(cell.Position));
             }
+        }
+
+        private void ClearHighlights()
+        {
+            HighlightPositions(null);
         }
 
         void IDisposable.Dispose()

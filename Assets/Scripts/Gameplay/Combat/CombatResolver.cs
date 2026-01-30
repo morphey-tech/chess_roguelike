@@ -1,6 +1,8 @@
+using System.Collections.Generic;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Attack;
 using Project.Gameplay.Gameplay.Combat.Contexts;
+using Project.Gameplay.Gameplay.Figures;
 
 namespace Project.Gameplay.Gameplay.Combat
 {
@@ -33,6 +35,9 @@ namespace Project.Gameplay.Gameplay.Combat
             {
                 Attacker = context.Attacker,
                 Target = context.Target,
+                AttackerPosition = context.AttackerPosition,
+                TargetPosition = context.TargetPosition,
+                Grid = context.Grid,
                 DamageDealt = finalDamage,
                 TargetDied = died,
                 WasCritical = before.IsCritical
@@ -52,14 +57,55 @@ namespace Project.Gameplay.Gameplay.Combat
 
             _logger.Info($"Combat: {context.Attacker} -> {context.Target}, DMG:{finalDamage}, Died:{died}, Heal:{after.HealedAmount}, Crit:{before.IsCritical}");
 
+            // Process additional targets (splash, pierce, etc.)
+            List<AdditionalTargetResult> additionalResults = ProcessAdditionalTargets(context);
+
             return new CombatResult
             {
                 DamageDealt = finalDamage,
                 TargetDied = died,
                 HealedAmount = after.HealedAmount,
                 AttackerMoves = attackerMoves,
-                WasCritical = before.IsCritical
+                WasCritical = before.IsCritical,
+                AdditionalResults = additionalResults,
+                AttackerMovedTo = after.AttackerMovedTo,
+                BonusMoveDistance = after.BonusMoveDistance
             };
+        }
+
+        private List<AdditionalTargetResult> ProcessAdditionalTargets(HitContext context)
+        {
+            var results = new List<AdditionalTargetResult>();
+            
+            if (context.AdditionalTargets == null || context.AdditionalTargets.Count == 0)
+                return results;
+
+            int additionalDamage = (int)(context.BaseDamage * context.AdditionalDamageMultiplier);
+
+            foreach (Figure target in context.AdditionalTargets)
+            {
+                if (target == null || target.Stats.CurrentHp <= 0)
+                    continue;
+
+                bool targetDied = target.Stats.TakeDamage(additionalDamage);
+                
+                _logger.Info($"Splash/AoE: {context.Attacker} -> {target}, DMG:{additionalDamage}, Died:{targetDied}");
+
+                if (targetDied)
+                {
+                    _passives.TriggerKill(context.Attacker, target);
+                    _passives.TriggerDeath(target, context.Attacker);
+                }
+
+                results.Add(new AdditionalTargetResult
+                {
+                    Target = target,
+                    DamageDealt = additionalDamage,
+                    Died = targetDied
+                });
+            }
+
+            return results;
         }
     }
 }

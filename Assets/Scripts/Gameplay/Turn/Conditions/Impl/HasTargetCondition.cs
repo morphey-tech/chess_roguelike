@@ -4,9 +4,10 @@ namespace Project.Gameplay.Gameplay.Turn.Conditions.Impl
     {
         public string Type => "has_target";
 
-        public bool Evaluate(TurnSelectionContext context, ConditionParams parameters)
+        public bool Evaluate(ActionContext context, ConditionParams parameters)
         {
-            return context.TargetPosition.HasValue;
+            // In ActionContext, To is always set
+            return true;
         }
     }
 }

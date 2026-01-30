@@ -34,7 +34,7 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
             _logger = logger;
         }
 
-        public UniTask ExecuteAsync(TurnStepContext context)
+        public UniTask ExecuteAsync(ActionContext context)
         {
             BoardCell targetCell = context.Grid.GetBoardCell(context.To);
             Figure defender = targetCell?.OccupiedBy;
@@ -73,6 +73,42 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
                 targetCell.RemoveFigure();
                 _figurePresenter.RemoveFigure(defender.Id);
                 _deathPublisher.Publish(new FigureDeathMessage(defender.Id, defender.Team));
+            }
+
+            // Process additional targets (splash, pierce, etc.)
+            if (result.AdditionalResults != null)
+            {
+                foreach (AdditionalTargetResult additionalResult in result.AdditionalResults)
+                {
+                    Figure additionalTarget = additionalResult.Target;
+                    
+                    _figurePresenter.PlayDamageEffect(additionalTarget.Id);
+                    _logger.Info($"Splash hit {additionalTarget} for {additionalResult.DamageDealt} damage");
+
+                    if (additionalResult.Died)
+                    {
+                        _logger.Info($"{additionalTarget} died from splash!");
+                        BoardCell additionalCell = context.Grid.FindFigure(additionalTarget);
+                        additionalCell?.RemoveFigure();
+                        _figurePresenter.RemoveFigure(additionalTarget.Id);
+                        _deathPublisher.Publish(new FigureDeathMessage(additionalTarget.Id, additionalTarget.Team));
+                    }
+                }
+            }
+
+            // Handle attacker movement from passives (e.g., auto-retreat for AI)
+            if (result.AttackerMovedTo.HasValue)
+            {
+                _logger.Info($"{context.Actor} retreated to ({result.AttackerMovedTo.Value.Row}, {result.AttackerMovedTo.Value.Column})");
+                _figurePresenter.MoveFigure(context.Actor.Id, result.AttackerMovedTo.Value);
+                context.From = result.AttackerMovedTo.Value;
+            }
+
+            // Request bonus move if passive triggered it (e.g., slippery)
+            if (result.BonusMoveDistance.HasValue)
+            {
+                _logger.Info($"{context.Actor} gets bonus move with distance {result.BonusMoveDistance.Value}");
+                context.BonusMoveDistance = result.BonusMoveDistance.Value;
             }
 
             return UniTask.CompletedTask;

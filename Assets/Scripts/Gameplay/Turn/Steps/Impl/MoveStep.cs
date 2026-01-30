@@ -18,7 +18,7 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
             _figurePresenter = figurePresenter;
         }
 
-        public UniTask ExecuteAsync(TurnStepContext context)
+        public UniTask ExecuteAsync(ActionContext context)
         {
             if (!_movementService.CanMove(context.From, context.To))
                 return UniTask.CompletedTask;

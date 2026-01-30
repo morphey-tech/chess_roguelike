@@ -25,7 +25,7 @@ namespace Project.Gameplay.Gameplay.Turn
             Step = step;
         }
 
-        public bool Evaluate(TurnSelectionContext context)
+        public bool Evaluate(ActionContext context)
         {
             return Condition.Evaluate(context, ConditionParams);
         }

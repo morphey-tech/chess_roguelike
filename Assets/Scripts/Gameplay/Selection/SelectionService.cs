@@ -6,6 +6,7 @@ using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Input.Messages;
 using Project.Gameplay.Gameplay.Turn;
+using Project.Gameplay.Gameplay.Turn.BonusMove;
 using VContainer;
 
 namespace Project.Gameplay.Gameplay.Selection
@@ -13,6 +14,7 @@ namespace Project.Gameplay.Gameplay.Selection
     public class SelectionService : IDisposable
     {
         private readonly TurnSystem _turnSystem;
+        private readonly IBonusMoveController _bonusMoveController;
         private readonly IPublisher<FigureSelectedMessage> _figureSelectedPublisher;
         private readonly IPublisher<MoveRequestedMessage> _moveRequestedPublisher;
         private readonly ILogger<SelectionService> _logger;
@@ -29,6 +31,7 @@ namespace Project.Gameplay.Gameplay.Selection
         [Inject]
         private SelectionService(
             TurnSystem turnSystem,
+            IBonusMoveController bonusMoveController,
             ISubscriber<CellClickedMessage> cellClickedSubscriber,
             ISubscriber<CancelRequestedMessage> cancelSubscriber,
             IPublisher<FigureSelectedMessage> figureSelectedPublisher,
@@ -36,6 +39,7 @@ namespace Project.Gameplay.Gameplay.Selection
             ILogService logService)
         {
             _turnSystem = turnSystem;
+            _bonusMoveController = bonusMoveController;
             _figureSelectedPublisher = figureSelectedPublisher;
             _moveRequestedPublisher = moveRequestedPublisher;
             _logger = logService.CreateLogger<SelectionService>();
@@ -69,6 +73,13 @@ namespace Project.Gameplay.Gameplay.Selection
             if (!_grid.IsInside(position))
             {
                 _logger.Debug($"Position ({position.Row}, {position.Column}) is outside grid {_grid.Width}x{_grid.Height}");
+                return;
+            }
+
+            // Handle bonus move mode - no selection needed, just click to move
+            if (_bonusMoveController.IsActive)
+            {
+                HandleBonusMoveClick(position);
                 return;
             }
 
@@ -107,6 +118,13 @@ namespace Project.Gameplay.Gameplay.Selection
                     _logger.Debug($"Cannot select: IsFree={clickedCell.IsFree}, Team={clickedCell.OccupiedBy?.Team}, CurrentTeam={_turnSystem.CurrentTeam}");
                 }
             }
+        }
+
+        private void HandleBonusMoveClick(GridPosition position)
+        {
+            GridPosition from = _bonusMoveController.From;
+            _logger.Debug($"Bonus move: requesting move from ({from.Row},{from.Column}) to ({position.Row},{position.Column})");
+            _moveRequestedPublisher.Publish(new MoveRequestedMessage(from, position));
         }
 
         private void Select(BoardCell cell)

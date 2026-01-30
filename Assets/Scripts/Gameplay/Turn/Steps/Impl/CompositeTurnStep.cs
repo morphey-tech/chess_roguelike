@@ -16,7 +16,7 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
             _steps = steps.ToList();
         }
 
-        public async UniTask ExecuteAsync(TurnStepContext context)
+        public async UniTask ExecuteAsync(ActionContext context)
         {
             foreach (ITurnStep step in _steps)
             {

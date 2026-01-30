@@ -18,8 +18,10 @@ using Project.Gameplay.Gameplay.Selection;
 using Project.Gameplay.Gameplay.Stage;
 using Project.Gameplay.Gameplay.Stage.Phase;
 using Project.Gameplay.Gameplay.Turn;
+using Project.Gameplay.Gameplay.Turn.BonusMove;
 using Project.Gameplay.Gameplay.Turn.Conditions;
 using Project.Gameplay.Gameplay.Turn.Conditions.Impl;
+using Project.Gameplay.Gameplay.Turn.Execution;
 using Project.Gameplay.Presentations;
 using Project.Unity.Unity.Bootstrap;
 using Project.Unity.Unity.Views;
@@ -192,6 +194,12 @@ namespace Project.Unity.Unity.Installers
             builder.Register<TurnStepFactory>(Lifetime.Singleton);
             builder.Register<TurnPatternFactory>(Lifetime.Singleton);
             builder.Register<TurnPatternResolver>(Lifetime.Singleton);
+            
+            // Turn execution
+            builder.Register<TurnExecutor>(Lifetime.Singleton)
+                .As<ITurnExecutor>();
+            builder.Register<BonusMoveController>(Lifetime.Singleton)
+                .As<IBonusMoveController>();
 
             // Pure gameplay services
             builder.Register<BoardSpawnService>(Lifetime.Singleton);
