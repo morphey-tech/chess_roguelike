@@ -20,7 +20,7 @@
     {
       "id": "move_only",
       "priority": 10,
-      "condition_id": "target_is_empty",
+      "condition_id": "can_move",
       "steps": [
         { "type": "move" }
       ]

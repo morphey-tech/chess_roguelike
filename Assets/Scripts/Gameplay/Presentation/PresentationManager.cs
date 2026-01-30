@@ -24,6 +24,20 @@ namespace Project.Gameplay.Presentations
       return go.GetComponent<EntityLink>();
     }
 
+    /// <summary>
+    /// Instantiates an asset as a child of the given parent transform.
+    /// </summary>
+    public async UniTask<GameObject> InstantiateAsChild(AssetKey assetKey, Transform parent)
+    {
+      var go = await _assetService.InstantiateAsync(assetKey, Vector3.zero, Quaternion.identity, parent);
+      if (go != null)
+      {
+        go.transform.localPosition = Vector3.zero;
+        go.transform.localRotation = Quaternion.identity;
+      }
+      return go;
+    }
+
     public void Destroy(int id)
     {
       Instances.DestroyView(id);

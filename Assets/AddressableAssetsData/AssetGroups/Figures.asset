@@ -16,54 +16,130 @@ MonoBehaviour:
   m_GUID: d0f300d672abddf4c92f307c11433933
   m_SerializeEntries:
   - m_GUID: 0a23640137759494999b4ac5beee43ba
-    m_Address: pawn_black_figure
+    m_Address: pawn_black_view
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - figures
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 0d5be7191af437d49bf9ff0e71f3c3c6
-    m_Address: queen_white_figure
+    m_Address: queen_white_view
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - figures
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 1156b73985f22bc419136a1ed4c98d77
-    m_Address: rook_black_figure
+    m_Address: rook_black_view
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - figures
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1d99f23fe171e6441a8f65e2082447f7
+    m_Address: figure_controller
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - figures
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3f69c7cd2a7eec449af6c4ac03196b28
+    m_Address: pawn_splash_white_view
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - figures
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 440e9cd6743efd94b888274e025bbcc9
+    m_Address: pawn_brutal_black_view
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - figures
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 76dbed087fd79574ba2a5dbbcd2819a3
+    m_Address: pawn_pierce_black_view
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - figures
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7bb07102a24dc2c45a68d4f7cc8237ad
+    m_Address: pawn_slippery_black_view
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - figures
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 808962a4a434452448f8a9b285eb7cb2
-    m_Address: knight_black_figure
+    m_Address: knight_black_view
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - figures
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 92644b3cea6d81047a8fbd0a7b01c6a7
+    m_Address: pawn_slippery_white_view
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - figures
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 947cc16457cb5e7409e552b3120b726b
+    m_Address: pawn_splash_black_view
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - figures
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 990f2427855553841913efd1497eb31c
-    m_Address: bishop_white_figure
+    m_Address: bishop_white_view
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - figures
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9b60b5ea801f43646ae96bbee1a13209
-    m_Address: bishop_black_figure
+    m_Address: bishop_black_view
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - figures
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a494ef0a7dcbbbd4bbc517d5c34a8f88
-    m_Address: queen_black_figure
+    m_Address: queen_black_view
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - figures
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bbb49129b42a6e442acd95bed42361d4
+    m_Address: pawn_tank_white_view
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - figures
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c527bac8816c1bc47ae861f31f653bc8
+    m_Address: pawn_tank_black_view
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - figures
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cb9a7592120686440b74c9fa8079d0fd
+    m_Address: pawn_pierce_white_view
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - figures
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cd67beaf4ad9270468c0200acb96de75
-    m_Address: rook_white_figure
+    m_Address: rook_white_view
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - figures
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d09ed658546e1894cab2ba6caefecec3
+    m_Address: pawn_brutal_white_view
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - figures
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d81f865aee92de9449d5ab0b47e66f3f
-    m_Address: knight_white_figure
+    m_Address: knight_white_view
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - figures
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f633b20e89673ae41b7f5645e337cd58
-    m_Address: pawn_white_figure
+    m_Address: pawn_white_view
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - figures
     FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 619719904bd153b4fb62260efbf16a67, type: 2}

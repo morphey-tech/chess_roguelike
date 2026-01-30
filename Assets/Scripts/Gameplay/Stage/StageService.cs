@@ -97,7 +97,8 @@ namespace Project.Gameplay.Gameplay.Stage
                 Grid = grid,
                 ActorPosition = message.From,
                 TargetPosition = message.To,
-                Enemies = enemies
+                Enemies = enemies,
+                MovementService = _movementService
             };
 
             ITurnStep step = _patternResolver.Resolve(actor, actor.TurnPatternSet, selectionContext);

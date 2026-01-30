@@ -39,15 +39,14 @@ namespace Project.Gameplay.Gameplay.Board
 
             _boardPresenter.Clear();
             
-            char[,] map = board.GetBoard2D();
+            string[,] map = board.GetBoard2D();
 
             for (int r = 0; r < board.Height; r++)
             {
                 for (int c = 0; c < board.Width; c++)
                 {
                     int entId = IdGetter.MakeId();
-                    char symbol = map[r, c];
-                    string skinId = symbol.ToString();
+                    string skinId = map[r, c];
                     _boardPresenter.CreateCell(entId, new GridPosition(r, c), skinId);
                 }
             }

@@ -32,31 +32,42 @@ namespace Project.Unity.Unity.Views
             _logger.Info("FigurePresenter created");
         }
 
-        public async UniTask CreateFigure(Figure figure, string assetKey, GridPosition pos, Team team)
+        private const string FigureControllerAssetKey = "figure_controller";
+
+        public async UniTask CreateFigure(Figure figure, string viewAssetKey, GridPosition pos, Team team)
         {
             Vector3 worldPos = GetCellTopPosition(pos);
             
-            EntityLink entityLink = await _presentationManager.SpawnView(
+            // Spawn controller prefab
+            EntityLink controllerLink = await _presentationManager.SpawnView(
                 figure.Id,
-                assetKey,
+                FigureControllerAssetKey,
                 worldPos,
                 Quaternion.identity,
                 _worldRoot.FigureRoot);
 
-            if (entityLink == null)
+            if (controllerLink == null)
             {
-                _logger.Error($"Failed to instantiate figure {figure}");
+                _logger.Error($"Failed to instantiate figure controller for {figure}");
                 return;
             }
 
-            _figures[figure.Id] = entityLink.gameObject;
+            GameObject controller = controllerLink.gameObject;
+            _figures[figure.Id] = controller;
             _positions[figure.Id] = pos;
 
-            var spawnPresenter = entityLink.GetComponent<FigureSpawnPresenter>();
+            // Spawn view as child of controller
+            GameObject viewGO = await _presentationManager.InstantiateAsChild(viewAssetKey, controller.transform);
+            if (viewGO == null)
+            {
+                _logger.Warning($"Failed to instantiate view '{viewAssetKey}' for {figure}");
+            }
+
+            var spawnPresenter = controllerLink.GetComponent<FigureSpawnPresenter>();
             if (spawnPresenter != null)
                 spawnPresenter.PlaySpawnAsync().Forget();
                 
-            var view = entityLink.GetComponent<IFigureView>();
+            var view = controllerLink.GetComponent<IFigureView>();
             if (view != null)
                 _figureViews[figure.Id] = view;
 

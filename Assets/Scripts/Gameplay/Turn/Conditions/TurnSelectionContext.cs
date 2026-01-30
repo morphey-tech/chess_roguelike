@@ -12,5 +12,6 @@ namespace Project.Gameplay.Gameplay.Turn.Conditions
         public GridPosition ActorPosition { get; set; }
         public GridPosition? TargetPosition { get; set; }
         public List<Figure> Enemies { get; set; }
+        public MovementService MovementService { get; set; }
     }
 }

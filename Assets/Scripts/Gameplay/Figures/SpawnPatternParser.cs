@@ -4,6 +4,7 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using Project.Core.Core.Configs.Figure;
 using Project.Core.Core.Configs.Stage;
+using Project.Core.Core.Infrastructure;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Configs;
 using VContainer;
@@ -43,17 +44,21 @@ namespace Project.Gameplay.Gameplay.Figures
         private List<EnemySpawnData> ParsePattern(SpawnPatternConfig pattern)
         {
             var result = new List<EnemySpawnData>();
+            int totalRows = pattern.Rows.Length;
 
-            for (int row = 0; row < pattern.Rows.Length; row++)
+            for (int row = 0; row < totalRows; row++)
             {
-                string rowStr = pattern.Rows[row];
-                for (int col = 0; col < rowStr.Length; col++)
+                List<string> aliases = BracketNotationParser.ParseRow(pattern.Rows[row]);
+                
+                // Invert row index so that visual top in config = top of the board in game
+                int gameRow = (totalRows - 1) - row;
+                
+                for (int col = 0; col < aliases.Count; col++)
                 {
-                    char c = rowStr[col];
-                    if (c == '.')
+                    string alias = aliases[col];
+                    if (alias == ".")
                         continue;
 
-                    string alias = c.ToString();
                     if (!_aliasToFigure.TryGetValue(alias, out FigureConfig figure))
                     {
                         _logger.Warning($"Unknown alias '{alias}' at ({row}, {col})");
@@ -63,7 +68,7 @@ namespace Project.Gameplay.Gameplay.Figures
                     result.Add(new EnemySpawnData
                     {
                         TypeId = figure.Id,
-                        Row = row,
+                        Row = gameRow,
                         Column = col
                     });
                 }

@@ -50,7 +50,7 @@
     },
     {
       "id": "slippery",
-      "movement_id": "knight",
+      "movement_id": "pawn",
       "attack_id": "simple",
       "stats_id": "slippery_stats",
       "turn_patterns_id": "melee_default",
@@ -58,7 +58,7 @@
     },
     {
       "id": "tank",
-      "movement_id": "rook",
+      "movement_id": "pawn",
       "attack_id": "simple",
       "stats_id": "tank_stats",
       "turn_patterns_id": "melee_default",
@@ -74,7 +74,7 @@
     },
     {
       "id": "pierce",
-      "movement_id": "rook",
+      "movement_id": "pawn",
       "attack_id": "pierce",
       "stats_id": "pierce_stats",
       "turn_patterns_id": "melee_default",

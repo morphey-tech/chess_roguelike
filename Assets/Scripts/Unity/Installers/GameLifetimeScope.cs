@@ -186,7 +186,8 @@ namespace Project.Unity.Unity.Installers
                     new EnemyAdjacentCondition(),
                     new HasTargetCondition(),
                     new TargetIsEnemyCondition(),
-                    new TargetIsEmptyCondition()
+                    new TargetIsEmptyCondition(),
+                    new CanMoveCondition()
                 });
             builder.Register<TurnStepFactory>(Lifetime.Singleton);
             builder.Register<TurnPatternFactory>(Lifetime.Singleton);

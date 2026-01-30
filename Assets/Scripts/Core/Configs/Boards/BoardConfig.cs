@@ -1,5 +1,6 @@
 using System;
 using Newtonsoft.Json;
+using Project.Core.Core.Infrastructure;
 
 namespace Project.Core.Core.Configs.Boards
 {
@@ -21,24 +22,12 @@ namespace Project.Core.Core.Configs.Boards
         [JsonProperty("appear_id")]
         public string AppearStrategyId { get; set; }
         
-        public char[,] GetBoard2D()
+        /// <summary>
+        /// Parses board data from bracket notation format like "[W][B][W][B]" into 2D array.
+        /// </summary>
+        public string[,] GetBoard2D()
         {
-            char[,] board2D = new char[Height, Width];
-            for (int i = 0; i < Height; i++)
-            {
-                string row = Board[i];
-                if (row.Length != Width)
-                {
-                    throw new Exception($"Row {i} length {row.Length} does not match board width {Width}");
-                }
-
-                for (int j = 0; j < Width; j++)
-                {
-                    board2D[i, j] = row[j];
-                }
-            }
-
-            return board2D;
+            return BracketNotationParser.ParseRows(Board, Width, Height);
         }
     }
 }

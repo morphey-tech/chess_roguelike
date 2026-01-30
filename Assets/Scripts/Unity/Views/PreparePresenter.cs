@@ -31,6 +31,7 @@ namespace Project.Unity.Unity.Views
         private const float CellSize = 1f;
         private const float SlotOffsetZ = -2f;
         private const int MaxSlots = 8;
+        private const string FigureControllerAssetKey = "figure_controller";
 
         //TODO: имеются тут дебаговые вещицы ... пока так
         public PreparePresenter(
@@ -145,11 +146,37 @@ namespace Project.Unity.Unity.Views
                 return null;
             }
 
-            return await _assetService.InstantiateAsync(
-                figureConfig.AssetKey,
+            // Spawn controller prefab
+            GameObject controller = await _assetService.InstantiateAsync(
+                FigureControllerAssetKey,
                 slotPosition,
                 Quaternion.identity,
                 _worldRoot.PrepareRoot);
+
+            if (controller == null)
+            {
+                _logger.Error($"Failed to instantiate figure controller for {figureTypeId}");
+                return null;
+            }
+
+            // Spawn view as child of controller
+            GameObject view = await _assetService.InstantiateAsync(
+                figureConfig.AssetKey,
+                Vector3.zero,
+                Quaternion.identity,
+                controller.transform);
+
+            if (view != null)
+            {
+                view.transform.localPosition = Vector3.zero;
+                view.transform.localRotation = Quaternion.identity;
+            }
+            else
+            {
+                _logger.Warning($"Failed to instantiate view '{figureConfig.AssetKey}' for {figureTypeId}");
+            }
+
+            return controller;
         }
     }
 }
