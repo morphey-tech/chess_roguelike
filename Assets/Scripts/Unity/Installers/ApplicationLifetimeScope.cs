@@ -1,4 +1,5 @@
 using Project.Core.Core.Logging;
+using Project.Core.Window;
 using Project.Gameplay.Gameplay.Assets;
 using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.Gameplay.Logging;
@@ -55,6 +56,9 @@ namespace Project.Unity.Unity.Installers
             builder.Register<SceneTransitionService>(Lifetime.Singleton);
             builder.Register<SceneService>(Lifetime.Singleton)
                 .AsImplementedInterfaces();
+
+            builder.Register<UI>(Lifetime.Singleton);
+
         }
     }
 }
