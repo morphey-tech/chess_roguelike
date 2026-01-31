@@ -43,8 +43,10 @@ namespace Project.Gameplay.Gameplay.Stage
             TurnSystem turnSystem,
             ISubscriber<FigureSpawnedMessage> figureSpawnedSubscriber,
             ISubscriber<MoveRequestedMessage> moveSubscriber,
+            ISubscriber<AttackRequestedMessage> attackSubscriber,
             ISubscriber<FigureSelectedMessage> selectionSubscriber,
             ISubscriber<TurnChangedMessage> turnSubscriber,
+            ISubscriber<BonusMoveCompletedMessage> bonusMoveCompletedSubscriber,
             ILogService logService)
         {
             _runHolder = runHolder;
@@ -58,8 +60,10 @@ namespace Project.Gameplay.Gameplay.Stage
             DisposableBagBuilder bag = DisposableBag.CreateBuilder();
             figureSpawnedSubscriber.Subscribe(OnFigureSpawned).AddTo(bag);
             moveSubscriber.Subscribe(OnMoveRequested).AddTo(bag);
+            attackSubscriber.Subscribe(OnAttackRequested).AddTo(bag);
             selectionSubscriber.Subscribe(OnFigureSelected).AddTo(bag);
             turnSubscriber.Subscribe(OnTurnChanged).AddTo(bag);
+            bonusMoveCompletedSubscriber.Subscribe(OnBonusMoveCompleted).AddTo(bag);
             _subscriptions = bag.Build();
 
             _logger.Info("StageService created");
@@ -77,24 +81,28 @@ namespace Project.Gameplay.Gameplay.Stage
 
         private void OnMoveRequested(MoveRequestedMessage message)
         {
-            _logger.Info($"Move requested: ({message.From.Row},{message.From.Column}) -> ({message.To.Row},{message.To.Column})");
-
-            // Handle bonus move if active
             if (_bonusMoveController.IsActive)
-            {
-                if (_bonusMoveController.TryExecute(message.To))
-                {
-                    ClearHighlights();
-                    _turnSystem.EndTurn();
-                }
                 return;
-            }
 
-            // Get current stage context
+            _logger.Info($"Move: ({message.From.Row},{message.From.Column}) -> ({message.To.Row},{message.To.Column})");
+            TryExecuteTurn(message.From, message.To);
+        }
+
+        private void OnAttackRequested(AttackRequestedMessage message)
+        {
+            if (_bonusMoveController.IsActive)
+                return;
+
+            _logger.Info($"Attack: ({message.From.Row},{message.From.Column}) -> ({message.To.Row},{message.To.Column})");
+            TryExecuteTurn(message.From, message.To);
+        }
+
+        private void TryExecuteTurn(GridPosition from, GridPosition to)
+        {
             BoardGrid grid = GetCurrentGrid();
             if (grid == null) return;
 
-            BoardCell fromCell = grid.GetBoardCell(message.From);
+            BoardCell fromCell = grid.GetBoardCell(from);
             Figure actor = fromCell?.OccupiedBy;
 
             if (actor == null)
@@ -103,8 +111,14 @@ namespace Project.Gameplay.Gameplay.Stage
                 return;
             }
 
-            // Execute the turn
-            ExecuteTurnAsync(actor, message.From, message.To, grid).Forget();
+            ExecuteTurnAsync(actor, from, to, grid).Forget();
+        }
+
+        private void OnBonusMoveCompleted(BonusMoveCompletedMessage message)
+        {
+            _logger.Info($"Bonus move completed for {message.Actor}");
+            ClearHighlights();
+            _turnSystem.EndTurn();
         }
 
         private async UniTaskVoid ExecuteTurnAsync(Figure actor, GridPosition from, GridPosition to, BoardGrid grid)
@@ -121,7 +135,7 @@ namespace Project.Gameplay.Gameplay.Stage
             if (result.BonusMoveDistance.HasValue && result.BonusMoveDistance.Value > 0)
             {
                 _logger.Info($"{actor} gets bonus move! Max distance: {result.BonusMoveDistance.Value}");
-                _bonusMoveController.Start(actor, result.ActorFinalPosition, result.BonusMoveDistance.Value);
+                _bonusMoveController.Start(actor, result.ActorFinalPosition, result.BonusMoveDistance.Value, grid);
                 HighlightPositions(_bonusMoveController.GetAvailablePositions());
                 return;
             }

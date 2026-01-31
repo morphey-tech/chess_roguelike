@@ -1,33 +1,16 @@
-using Project.Gameplay.Gameplay.Turn.Conditions;
-using Project.Gameplay.Gameplay.Turn.Steps;
+using System.Collections.Generic;
 
 namespace Project.Gameplay.Gameplay.Turn
 {
     public sealed class TurnPattern
     {
         public string Id { get; }
-        public int Priority { get; }
-        public ITurnCondition Condition { get; }
-        public ConditionParams ConditionParams { get; }
-        public ITurnStep Step { get; }
+        public List<TurnPatternDescription> Patterns { get; }
 
-        public TurnPattern(
-            string id,
-            int priority,
-            ITurnCondition condition,
-            ConditionParams conditionParams,
-            ITurnStep step)
+        public TurnPattern(string id, List<TurnPatternDescription> patterns)
         {
             Id = id;
-            Priority = priority;
-            Condition = condition;
-            ConditionParams = conditionParams ?? ConditionParams.Empty;
-            Step = step;
-        }
-
-        public bool Evaluate(ActionContext context)
-        {
-            return Condition.Evaluate(context, ConditionParams);
+            Patterns = patterns ?? new List<TurnPatternDescription>();
         }
     }
 }

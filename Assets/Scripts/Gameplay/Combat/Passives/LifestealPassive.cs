@@ -1,8 +1,12 @@
 using Project.Gameplay.Gameplay.Combat.Contexts;
 using Project.Gameplay.Gameplay.Combat.Triggers;
+using Project.Gameplay.Gameplay.Figures;
 
 namespace Project.Gameplay.Gameplay.Combat.Passives
 {
+    /// <summary>
+    /// Heal for a percentage of damage dealt. Only triggers when the owner attacks.
+    /// </summary>
     public sealed class LifestealPassive : IPassive, IOnAfterHit
     {
         public string Id { get; }
@@ -16,16 +20,17 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
             _percent = percent;
         }
 
-        public void OnAfterHit(AfterHitContext context)
+        public void OnAfterHit(Figure owner, AfterHitContext context)
         {
-            if (context.Attacker != context.Target) // only for attacker
+            // Only trigger when the owner is the attacker
+            if (owner != context.Attacker)
+                return;
+
+            int heal = (int)(context.DamageDealt * _percent);
+            if (heal > 0)
             {
-                int heal = (int)(context.DamageDealt * _percent);
-                if (heal > 0)
-                {
-                    context.Attacker.Stats.Heal(heal);
-                    context.HealedAmount += heal;
-                }
+                context.Attacker.Stats.Heal(heal);
+                context.HealedAmount += heal;
             }
         }
     }

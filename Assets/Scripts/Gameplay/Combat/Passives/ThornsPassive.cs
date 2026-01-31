@@ -1,8 +1,12 @@
 using Project.Gameplay.Gameplay.Combat.Contexts;
 using Project.Gameplay.Gameplay.Combat.Triggers;
+using Project.Gameplay.Gameplay.Figures;
 
 namespace Project.Gameplay.Gameplay.Combat.Passives
 {
+    /// <summary>
+    /// Reflect damage back to attacker. Only triggers when the owner is being attacked (is the target).
+    /// </summary>
     public sealed class ThornsPassive : IPassive, IOnAfterHit
     {
         public string Id { get; }
@@ -16,15 +20,15 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
             _reflectPercent = reflectPercent;
         }
 
-        public void OnAfterHit(AfterHitContext context)
+        public void OnAfterHit(Figure owner, AfterHitContext context)
         {
-            // Only trigger when this figure is the TARGET
-            if (context.Target.Passives.Contains(this))
-            {
-                int reflect = (int)(context.DamageDealt * _reflectPercent);
-                if (reflect > 0)
-                    context.Attacker.Stats.TakeDamage(reflect);
-            }
+            // Only trigger when the owner is the target (being attacked)
+            if (owner != context.Target)
+                return;
+
+            int reflect = (int)(context.DamageDealt * _reflectPercent);
+            if (reflect > 0)
+                context.Attacker.Stats.TakeDamage(reflect);
         }
     }
 }

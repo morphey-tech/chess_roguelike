@@ -109,8 +109,8 @@ namespace Project.Gameplay.Gameplay.Figures
 
             try
             {
-                TurnPatternSet patternSet = _turnPatternFactory.CreatePatternSet(description.TurnPatternsId);
-                figure.SetTurnPatternSet(patternSet);
+                TurnPattern pattern = _turnPatternFactory.CreatePatternSet(description.TurnPatternsId);
+                figure.SetTurnPatternSet(pattern);
             }
             catch (Exception e)
             {

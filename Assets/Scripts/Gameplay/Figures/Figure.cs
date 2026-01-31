@@ -14,7 +14,7 @@ namespace Project.Gameplay.Gameplay.Figures
         public FigureStats Stats { get; }
         public Team Team { get; }
         public List<IPassive> Passives { get; } = new();
-        public TurnPatternSet TurnPatternSet { get; private set; }
+        public TurnPattern TurnPattern { get; private set; }
 
         public Figure(int id, string typeId, string movementId, string attackId, string turnPatternsId, FigureStats stats, Team team)
         {
@@ -27,9 +27,9 @@ namespace Project.Gameplay.Gameplay.Figures
             Team = team;
         }
 
-        public void SetTurnPatternSet(TurnPatternSet patternSet)
+        public void SetTurnPatternSet(TurnPattern pattern)
         {
-            TurnPatternSet = patternSet;
+            TurnPattern = pattern;
         }
 
         public void AddPassive(IPassive? passive)

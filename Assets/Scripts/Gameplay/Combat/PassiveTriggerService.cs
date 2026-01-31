@@ -10,14 +10,14 @@ namespace Project.Gameplay.Gameplay.Combat
     {
         public void TriggerBeforeHit(Figure attacker, Figure target, BeforeHitContext context)
         {
-            Execute<IOnBeforeHit>(attacker, p => p.OnBeforeHit(context));
-            Execute<IOnBeforeHit>(target, p => p.OnBeforeHit(context));
+            ExecuteWithOwner<IOnBeforeHit>(attacker, (p, owner) => p.OnBeforeHit(owner, context));
+            ExecuteWithOwner<IOnBeforeHit>(target, (p, owner) => p.OnBeforeHit(owner, context));
         }
 
         public void TriggerAfterHit(Figure attacker, Figure target, AfterHitContext context)
         {
-            Execute<IOnAfterHit>(attacker, p => p.OnAfterHit(context));
-            Execute<IOnAfterHit>(target, p => p.OnAfterHit(context));
+            ExecuteWithOwner<IOnAfterHit>(attacker, (p, owner) => p.OnAfterHit(owner, context));
+            ExecuteWithOwner<IOnAfterHit>(target, (p, owner) => p.OnAfterHit(owner, context));
         }
 
         public void TriggerKill(Figure killer, Figure victim)
@@ -53,6 +53,15 @@ namespace Project.Gameplay.Gameplay.Combat
             {
                 if (passive is TTrigger trigger)
                     action(trigger);
+            }
+        }
+
+        private void ExecuteWithOwner<TTrigger>(Figure owner, Action<TTrigger, Figure> action)
+        {
+            foreach (IPassive passive in owner.Passives.OrderBy(p => p.Priority))
+            {
+                if (passive is TTrigger trigger)
+                    action(trigger, owner);
             }
         }
     }

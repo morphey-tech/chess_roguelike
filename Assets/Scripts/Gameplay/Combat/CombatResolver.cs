@@ -29,7 +29,13 @@ namespace Project.Gameplay.Gameplay.Combat
             _passives.TriggerBeforeHit(context.Attacker, context.Target, before);
 
             int finalDamage = (int)(before.BaseDamage * before.DamageMultiplier) + before.BonusDamage;
+            
+            _logger.Debug($"Damage calc: Base={before.BaseDamage}, Mult={before.DamageMultiplier}, Bonus={before.BonusDamage} => Final={finalDamage}");
+            _logger.Debug($"Target HP before: {context.Target.Stats.CurrentHp}/{context.Target.Stats.MaxHp}");
+            
             bool died = context.Target.Stats.TakeDamage(finalDamage);
+            
+            _logger.Debug($"Target HP after: {context.Target.Stats.CurrentHp}/{context.Target.Stats.MaxHp}, Died={died}");
 
             var after = new AfterHitContext
             {

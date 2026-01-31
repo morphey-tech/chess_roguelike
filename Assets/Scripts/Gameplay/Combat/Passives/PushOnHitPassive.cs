@@ -1,12 +1,14 @@
 using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Combat.Contexts;
 using Project.Gameplay.Gameplay.Combat.Triggers;
+using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
 
 namespace Project.Gameplay.Gameplay.Combat.Passives
 {
     /// <summary>
     /// Брутал: толкает цель после удара. Если некуда толкнуть - +N урона.
+    /// Only triggers when the owner attacks.
     /// </summary>
     public sealed class PushOnHitPassive : IPassive, IOnAfterHit
     {
@@ -21,8 +23,12 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
             _bonusDamageIfBlocked = bonusDamageIfBlocked;
         }
 
-        public void OnAfterHit(AfterHitContext context)
+        public void OnAfterHit(Figure owner, AfterHitContext context)
         {
+            // Only trigger when the owner is the attacker
+            if (owner != context.Attacker)
+                return;
+
             if (context.TargetDied || context.Target == null || context.Grid == null)
                 return;
 

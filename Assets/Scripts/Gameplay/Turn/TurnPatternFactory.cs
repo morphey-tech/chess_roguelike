@@ -50,7 +50,7 @@ namespace Project.Gameplay.Gameplay.Turn
             _logger.Info("TurnPatternFactory initialized");
         }
 
-        public TurnPattern CreatePattern(string patternId)
+        public TurnPatternDescription CreatePattern(string patternId)
         {
             TurnPatternDescriptionConfig config = Array.Find(_descriptionConfigs.Descriptions, p => p.Id == patternId);
             if (config == null)
@@ -59,7 +59,7 @@ namespace Project.Gameplay.Gameplay.Turn
             return CreatePatternFromConfig(config);
         }
 
-        public TurnPatternSet CreatePatternSet(string setId)
+        public TurnPattern CreatePatternSet(string setId)
         {
             TurnPatternsConfig config = Array.Find(_patternsConfigs.Patterns, s => s.Id == setId);
             if (config == null)
@@ -69,10 +69,10 @@ namespace Project.Gameplay.Gameplay.Turn
                 .Select(CreatePattern)
                 .ToList();
 
-            return new TurnPatternSet(setId, patterns);
+            return new TurnPattern(setId, patterns);
         }
 
-        private TurnPattern CreatePatternFromConfig(TurnPatternDescriptionConfig config)
+        private TurnPatternDescription CreatePatternFromConfig(TurnPatternDescriptionConfig config)
         {
             ConditionPreset preset = _conditionRegistry.GetPreset(config.ConditionId);
 
@@ -84,7 +84,7 @@ namespace Project.Gameplay.Gameplay.Turn
                 ? _stepFactory.CreateStep(config.Steps[0], config.Id)
                 : _stepFactory.CreateComposite(config.Id, config.Steps);
 
-            return new TurnPattern(
+            return new TurnPatternDescription(
                 config.Id,
                 config.Priority,
                 preset.Condition,

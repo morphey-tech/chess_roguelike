@@ -1,8 +1,12 @@
 using Project.Gameplay.Gameplay.Combat.Contexts;
 using Project.Gameplay.Gameplay.Combat.Triggers;
+using Project.Gameplay.Gameplay.Figures;
 
 namespace Project.Gameplay.Gameplay.Combat.Passives
 {
+    /// <summary>
+    /// Chance to deal critical hit. Only triggers when the owner attacks.
+    /// </summary>
     public sealed class CriticalPassive : IPassive, IOnBeforeHit
     {
         public string Id { get; }
@@ -18,8 +22,12 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
             _critMultiplier = critMultiplier;
         }
 
-        public void OnBeforeHit(BeforeHitContext context)
+        public void OnBeforeHit(Figure owner, BeforeHitContext context)
         {
+            // Only trigger when the owner is attacking
+            if (owner != context.Attacker)
+                return;
+
             if (UnityEngine.Random.value <= _critChance)
             {
                 context.DamageMultiplier *= _critMultiplier;

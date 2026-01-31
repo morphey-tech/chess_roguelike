@@ -46,7 +46,7 @@ namespace Project.Gameplay.Gameplay.Turn
             {
                 "move" => new MoveStep(stepId, _movementService, _figurePresenter),
                 "attack" => new AttackStep(stepId, _attackFactory, _combatResolver, _figurePresenter, _deathPublisher, _logService.CreateLogger<AttackStep>()),
-                "move_to_killed" => new MoveToKilledTargetStep(_movementService, _figurePresenter),
+                "move_to_killed" => new MoveToKilledTargetStep(_movementService, _figurePresenter, _logService),
                 "composite" => CreateComposite(stepId, config.Steps),
                 _ => throw new Exception($"Unknown step type: {config.Type}")
             };

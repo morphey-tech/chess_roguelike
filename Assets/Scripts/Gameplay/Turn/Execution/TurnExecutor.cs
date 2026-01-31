@@ -17,7 +17,7 @@ namespace Project.Gameplay.Gameplay.Turn.Execution
         private readonly ILogger<TurnExecutor> _logger;
 
         [Inject]
-        public TurnExecutor(
+        private TurnExecutor(
             TurnPatternResolver patternResolver,
             MovementService movementService,
             ILogService logService)
@@ -29,17 +29,16 @@ namespace Project.Gameplay.Gameplay.Turn.Execution
 
         public async UniTask<TurnExecutionResult> ExecuteAsync(Figure actor, GridPosition from, GridPosition to, BoardGrid grid)
         {
-            if (actor.TurnPatternSet == null)
+            if (actor.TurnPattern == null)
             {
                 _logger.Error($"Figure {actor} has no TurnPatternSet!");
                 return TurnExecutionResult.Failed;
             }
 
-            // Build unified action context
             Team enemyTeam = actor.Team == Team.Player ? Team.Enemy : Team.Player;
             List<Figure> enemies = grid.GetFiguresByTeam(enemyTeam).ToList();
 
-            var context = new ActionContext
+            ActionContext context = new()
             {
                 Actor = actor,
                 Grid = grid,
@@ -49,8 +48,7 @@ namespace Project.Gameplay.Gameplay.Turn.Execution
                 MovementService = _movementService
             };
 
-            // Resolve which step to execute
-            ITurnStep step = _patternResolver.Resolve(actor, actor.TurnPatternSet, context);
+            ITurnStep step = _patternResolver.Resolve(actor, actor.TurnPattern, context);
 
             if (step == null)
             {
@@ -58,15 +56,12 @@ namespace Project.Gameplay.Gameplay.Turn.Execution
                 return TurnExecutionResult.Failed;
             }
 
-            // Execute the step
             _logger.Info($"{actor} executing pattern: {step.Id}");
             await step.ExecuteAsync(context);
 
-            // Build result
-            // Actor's final position is tracked in context.From (updated by steps)
             GridPosition finalPosition = context.From;
             
-            var result = new TurnExecutionResult
+            TurnExecutionResult result = new()
             {
                 Success = true,
                 ActorFinalPosition = finalPosition,

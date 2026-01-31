@@ -15,15 +15,15 @@ namespace Project.Gameplay.Gameplay.Turn
             _logger = logService.CreateLogger<TurnPatternResolver>();
         }
 
-        public ITurnStep Resolve(Figure actor, TurnPatternSet patternSet, ActionContext context)
+        public ITurnStep Resolve(Figure actor, TurnPattern pattern, ActionContext context)
         {
-            if (patternSet == null || patternSet.Patterns.Count == 0)
+            if (pattern == null || pattern.Patterns.Count == 0)
             {
                 _logger.Warning($"No patterns for {actor}, returning null");
                 return null;
             }
 
-            List<TurnPattern> validPatterns = patternSet.Patterns
+            List<TurnPatternDescription> validPatterns = pattern.Patterns
                 .Where(p => p.Evaluate(context))
                 .OrderByDescending(p => p.Priority)
                 .ToList();
@@ -34,7 +34,7 @@ namespace Project.Gameplay.Gameplay.Turn
                 return null;
             }
 
-            TurnPattern chosen = validPatterns.First();
+            TurnPatternDescription chosen = validPatterns.First();
             _logger.Debug($"{actor} chose pattern '{chosen.Id}' (priority {chosen.Priority})");
 
             return chosen.Step;

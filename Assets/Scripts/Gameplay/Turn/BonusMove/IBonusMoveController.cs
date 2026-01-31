@@ -1,11 +1,14 @@
+using System.Collections.Generic;
 using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Figures;
+using Project.Gameplay.Gameplay.Grid;
 
 namespace Project.Gameplay.Gameplay.Turn.BonusMove
 {
     /// <summary>
     /// Controls bonus move state - when a figure gets an extra move after action.
     /// Examples: retreat after attack, jump after kill, chain moves.
+    /// Handles its own click events when active.
     /// </summary>
     public interface IBonusMoveController
     {
@@ -16,7 +19,7 @@ namespace Project.Gameplay.Gameplay.Turn.BonusMove
         /// <summary>
         /// Starts bonus move mode for the given actor.
         /// </summary>
-        void Start(Figure actor, GridPosition from, int maxDistance);
+        void Start(Figure actor, GridPosition from, int maxDistance, BoardGrid grid);
         
         /// <summary>
         /// Attempts to handle a move as a bonus move.
@@ -32,6 +35,6 @@ namespace Project.Gameplay.Gameplay.Turn.BonusMove
         /// <summary>
         /// Gets available positions for the current bonus move.
         /// </summary>
-        System.Collections.Generic.IEnumerable<GridPosition> GetAvailablePositions();
+        IEnumerable<GridPosition> GetAvailablePositions();
     }
 }
