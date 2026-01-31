@@ -61,70 +61,34 @@
       "description_id": "queen"
     },
     {
-      "id": "brutal_white",
-      "alias": "brw",
-      "asset_key": "pawn_white_view",
-      "description_id": "brutal"
+      "id": "brutal",
+      "alias": "br",
+      "asset_key": "brutal_figure_view",
+      "description_id": "pusher"
     },
     {
-      "id": "slippery_white",
-      "alias": "slw",
-      "asset_key": "pawn_white_view",
+      "id": "slippery",
+      "alias": "sl",
+      "asset_key": "slippery_figure_view",
       "description_id": "slippery"
     },
     {
-      "id": "tank_white",
-      "alias": "tnw",
-      "asset_key": "pawn_white_view",
+      "id": "tank",
+      "alias": "tn",
+      "asset_key": "tank_figure_view",
       "description_id": "tank"
     },
     {
-      "id": "splash_white",
-      "alias": "spw",
-      "asset_key": "pawn_white_view",
+      "id": "splash",
+      "alias": "sp",
+      "asset_key": "splash_figure_view",
       "description_id": "splash"
     },
     {
-      "id": "pierce_white",
-      "alias": "prw",
-      "asset_key": "pawn_white_view",
+      "id": "pierce",
+      "alias": "pr",
+      "asset_key": "pierce_figure_view",
       "description_id": "pierce"
-    },
-    {
-      "id": "brutal_black",
-      "alias": "brb",
-      "asset_key": "pawn_black_view",
-      "description_id": "brutal"
-    },
-    {
-      "id": "slippery_black",
-      "alias": "slb",
-      "asset_key": "pawn_black_view",
-      "description_id": "slippery"
-    },
-    {
-      "id": "tank_black",
-      "alias": "tnb",
-      "asset_key": "pawn_black_view",
-      "description_id": "tank"
-    },
-    {
-      "id": "splash_black",
-      "alias": "spb",
-      "asset_key": "pawn_black_view",
-      "description_id": "splash"
-    },
-    {
-      "id": "pierce_black",
-      "alias": "prb",
-      "asset_key": "pawn_black_view",
-      "description_id": "pierce"
-    },
-    {
-      "id": "pusher_white",
-      "alias": "phw",
-      "asset_key": "pawn_white_view",
-      "description_id": "push"
     }
   ]
 }
