@@ -63,6 +63,13 @@ namespace Project.Gameplay.Gameplay.Combat
 
             _logger.Info($"Combat: {context.Attacker} -> {context.Target}, DMG:{finalDamage}, Died:{died}, Heal:{after.HealedAmount}, Crit:{before.IsCritical}");
 
+            // Check if target died from passive bonus damage (e.g., push blocked)
+            if (!died && after.BonusDamageDealt > 0 && context.Target.Stats.IsDead)
+            {
+                died = true;
+                _logger.Info($"Target died from bonus damage ({after.BonusDamageDealt})");
+            }
+
             // Process additional targets (splash, pierce, etc.)
             List<AdditionalTargetResult> additionalResults = ProcessAdditionalTargets(context);
 
@@ -75,7 +82,9 @@ namespace Project.Gameplay.Gameplay.Combat
                 WasCritical = before.IsCritical,
                 AdditionalResults = additionalResults,
                 AttackerMovedTo = after.AttackerMovedTo,
-                BonusMoveDistance = after.BonusMoveDistance
+                BonusMoveDistance = after.BonusMoveDistance,
+                TargetPushedTo = after.TargetPushedTo,
+                BonusDamageDealt = after.BonusDamageDealt
             };
         }
 

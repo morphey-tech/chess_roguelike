@@ -119,6 +119,12 @@
       "alias": "prb",
       "asset_key": "pawn_black_view",
       "description_id": "pierce"
+    },
+    {
+      "id": "pusher_white",
+      "alias": "phw",
+      "asset_key": "pawn_white_view",
+      "description_id": "push"
     }
   ]
 }

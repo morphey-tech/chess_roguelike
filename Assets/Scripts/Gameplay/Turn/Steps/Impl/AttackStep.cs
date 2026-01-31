@@ -96,6 +96,19 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
                 }
             }
 
+            // Handle target being pushed by passive (e.g., brutal)
+            if (result.TargetPushedTo.HasValue && !result.TargetDied)
+            {
+                _logger.Info($"{defender} pushed to ({result.TargetPushedTo.Value.Row}, {result.TargetPushedTo.Value.Column})");
+                _figurePresenter.MoveFigure(defender.Id, result.TargetPushedTo.Value);
+            }
+            
+            // Log bonus damage from passives
+            if (result.BonusDamageDealt > 0)
+            {
+                _logger.Info($"{defender} took {result.BonusDamageDealt} bonus damage from passives. HP: {defender.Stats.CurrentHp}/{defender.Stats.MaxHp}");
+            }
+
             // Handle attacker movement from passives (e.g., auto-retreat for AI)
             if (result.AttackerMovedTo.HasValue)
             {

@@ -41,14 +41,6 @@
       "passives": ["lifesteal_50", "execute_30"]
     },
     {
-      "id": "brutal",
-      "movement_id": "pawn",
-      "attack_id": "simple",
-      "stats_id": "brutal_stats",
-      "turn_patterns_id": "melee_default",
-      "passives": ["push_brutal"]
-    },
-    {
       "id": "slippery",
       "movement_id": "pawn",
       "attack_id": "simple",
@@ -79,6 +71,14 @@
       "stats_id": "pierce_stats",
       "turn_patterns_id": "melee_default",
       "passives": []
+    },
+    {
+      "id": "push",
+      "movement_id": "pawn",
+      "attack_id": "simple",
+      "stats_id": "pusher_stats",
+      "turn_patterns_id": "melee_default",
+      "passives": ["push_on_hit"]
     }
   ]
 }

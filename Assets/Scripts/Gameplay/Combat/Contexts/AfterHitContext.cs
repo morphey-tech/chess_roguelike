@@ -26,5 +26,15 @@ namespace Project.Gameplay.Gameplay.Combat.Contexts
         /// If set, the attacker should get a bonus move with this max distance.
         /// </summary>
         public int? BonusMoveDistance { get; set; }
+        
+        /// <summary>
+        /// If a passive pushes the target, set this to the new position.
+        /// </summary>
+        public GridPosition? TargetPushedTo { get; set; }
+        
+        /// <summary>
+        /// Additional damage dealt by passives (e.g., push blocked damage).
+        /// </summary>
+        public int BonusDamageDealt { get; set; }
     }
 }

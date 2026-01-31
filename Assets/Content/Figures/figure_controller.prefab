@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: -8354830629548974188}
   - component: {fileID: 6533899885431309447}
   - component: {fileID: -1993780159180671554}
+  - component: {fileID: 7214919308847508600}
   m_Layer: 7
   m_Name: figure_controller
   m_TagString: Untagged
@@ -104,3 +105,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity::Project.Unity.Presentations.FigureSpawnPresenter
   _spawnDuration: 0.3
   _spawnEase: 27
+--- !u!114 &7214919308847508600
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 740290869039254118}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 332e3bd131476eb439dadbe6e9e2723c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity::Project.Unity.Presentations.FigureSelectPresenter
+  _highlightObject: {fileID: 0}

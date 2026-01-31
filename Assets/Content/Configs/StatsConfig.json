@@ -59,6 +59,12 @@
       "max_hp": 6,
       "attack": 3,
       "attack_range": 1
+    },
+    {
+      "id": "pusher_stats",
+      "max_hp": 5,
+      "attack": 1,
+      "attack_range" : 1
     }
   ]
 }

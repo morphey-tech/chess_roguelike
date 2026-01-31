@@ -27,6 +27,16 @@ namespace Project.Gameplay.Gameplay.Combat
         /// Used for mechanics like "slippery" where player chooses where to retreat.
         /// </summary>
         public int? BonusMoveDistance { get; set; }
+        
+        /// <summary>
+        /// If a passive pushed the target (e.g., brutal), this is the new position.
+        /// </summary>
+        public GridPosition? TargetPushedTo { get; set; }
+        
+        /// <summary>
+        /// Additional damage dealt by passives (e.g., push blocked damage).
+        /// </summary>
+        public int BonusDamageDealt { get; set; }
     }
 
     public struct AdditionalTargetResult
