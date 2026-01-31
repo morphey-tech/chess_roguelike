@@ -11,7 +11,8 @@
         "MessagePipe",
         "MessagePipe.VContainer",
         "LiteUI",
-        "DOTween.Modules"
+        "DOTween.Modules",
+        "ShapesRuntime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

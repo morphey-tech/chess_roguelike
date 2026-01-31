@@ -1,25 +1,23 @@
 using Project.Gameplay.Components;
 using Project.Gameplay.Presentations;
+using Shapes;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Project.Unity.Presentations
 {
     public class CellHighlightPresenter : MonoBehaviour, IPresenter
     {
+        [FormerlySerializedAs("_renderer")]
         [Header("Highlight")]
-        [SerializeField] private Renderer _renderer;
-        [SerializeField] private Color _highlightColor = new(1f, 1f, 0.5f, 1f);
-        [SerializeField] private Color _attackTargetColor = new(1f, 0.5f, 0.5f, 1f);
-        
-        private EntityLink _link;
-        private Color _originalColor;
-        private Material _material;
+        [SerializeField] private GameObject _highlightRenderer;
+        [SerializeField] private GameObject _attackRenderer;
 
+        private EntityLink _link;
+        
         public void Init(EntityLink link)
         {
             _link = link; 
-            _material = _renderer.material;
-            _originalColor = _material.color;
         }
 
         private void Update()
@@ -38,20 +36,20 @@ namespace Project.Unity.Presentations
         
         private void SetDefault()
         {
-            if (_material != null)
-                _material.color = _originalColor;
+            _highlightRenderer.gameObject.SetActive(false);
+            _attackRenderer.gameObject.SetActive(false);
         }
         
         private void SetHighlight()
         {
-            if (_material != null)
-                _material.color = _highlightColor;
+            _highlightRenderer.gameObject.SetActive(true);
+            _attackRenderer.gameObject.SetActive(false);
         }
         
         private void SetAttackHighlight()
         {
-            if (_material != null)
-                _material.color = _attackTargetColor;
+            _highlightRenderer.gameObject.SetActive(false);
+            _attackRenderer.gameObject.SetActive(true);
         }
     }
 }
