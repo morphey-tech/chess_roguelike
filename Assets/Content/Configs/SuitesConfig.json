@@ -3,10 +3,10 @@
     {
       "id": "default",
       "figures": [
-        "splash_white",
-        "pierce_white",
-        "slippery_white",
-        "pusher_white"
+        "splash",
+        "pierce",
+        "slippery",
+        "brutal"
       ]
     }
   ]

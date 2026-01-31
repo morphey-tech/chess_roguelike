@@ -21,6 +21,7 @@ namespace Project.Gameplay.Gameplay.Figures
         private readonly IFigurePresenter _figurePresenter;
         private readonly TurnPatternFactory _turnPatternFactory;
         private readonly IPublisher<FigureSpawnedMessage> _spawnedPublisher;
+        private readonly IObjectResolver _objectResolver;
         private readonly ILogger<FigureSpawnService> _logger;
         
         private FigureConfigRepository _figureConfigCache;
@@ -34,6 +35,7 @@ namespace Project.Gameplay.Gameplay.Figures
             IFigurePresenter figurePresenter,
             TurnPatternFactory turnPatternFactory,
             IPublisher<FigureSpawnedMessage> spawnedPublisher,
+            IObjectResolver objectResolver,
             ILogService logService)
         {
             _configProvider = configProvider;
@@ -90,6 +92,7 @@ namespace Project.Gameplay.Gameplay.Figures
                 description.TurnPatternsId,
                 stats, 
                 team);
+            _objectResolver.Inject(figure.View);
 
             if (description.Passives != null)
             {
