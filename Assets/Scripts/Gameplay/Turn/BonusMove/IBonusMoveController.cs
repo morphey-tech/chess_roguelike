@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
+using Project.Gameplay.Movement;
 
 namespace Project.Gameplay.Gameplay.Turn.BonusMove
 {
@@ -35,6 +36,6 @@ namespace Project.Gameplay.Gameplay.Turn.BonusMove
         /// <summary>
         /// Gets available positions for the current bonus move.
         /// </summary>
-        IEnumerable<GridPosition> GetAvailablePositions();
+        IEnumerable<MovementStrategyResult> GetAvailablePositions();
     }
 }

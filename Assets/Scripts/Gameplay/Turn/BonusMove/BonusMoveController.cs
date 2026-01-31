@@ -123,10 +123,12 @@ namespace Project.Gameplay.Gameplay.Turn.BonusMove
             }
         }
 
-        public IEnumerable<GridPosition> GetAvailablePositions()
+        public IEnumerable<MovementStrategyResult> GetAvailablePositions()
         {
             if (!IsActive || _grid == null)
+            {
                 yield break;
+            }
 
             foreach (MovementStrategyResult moveResult in _movementService.GetAvailableMoves(_actor, _from))
             {
@@ -137,7 +139,7 @@ namespace Project.Gameplay.Gameplay.Turn.BonusMove
                     // Only free cells - no attacks during bonus move
                     if (moveResult.IsFree)
                     {
-                        yield return pos;
+                        yield return moveResult;
                     }
                 }
             }

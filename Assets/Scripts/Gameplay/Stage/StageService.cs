@@ -189,19 +189,6 @@ namespace Project.Gameplay.Gameplay.Stage
             return _runHolder.Current?.CurrentStage?.Grid;
         }
 
-        private void HighlightPositions(IEnumerable<GridPosition> positions)
-        {
-            BoardGrid grid = GetCurrentGrid();
-            if (grid == null) return;
-
-            HashSet<GridPosition> highlightSet = positions?.ToHashSet() ?? new HashSet<GridPosition>();
-            
-            foreach (BoardCell cell in grid.AllCells())
-            {
-                _boardPresenter.Highlight(cell.Position, highlightSet.Contains(cell.Position));
-            }
-        }
-
         private void ClearHighlights()
         {
             HighlightPositions(null);
