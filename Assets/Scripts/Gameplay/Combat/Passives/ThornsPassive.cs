@@ -1,4 +1,5 @@
 using Project.Gameplay.Gameplay.Combat.Contexts;
+using Project.Gameplay.Gameplay.Combat.Effects.Impl;
 using Project.Gameplay.Gameplay.Combat.Triggers;
 using Project.Gameplay.Gameplay.Figures;
 
@@ -22,13 +23,15 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
 
         public void OnAfterHit(Figure owner, AfterHitContext context)
         {
-            // Only trigger when the owner is the target (being attacked)
             if (owner != context.Target)
                 return;
 
             int reflect = (int)(context.DamageDealt * _reflectPercent);
             if (reflect > 0)
+            {
                 context.Attacker.Stats.TakeDamage(reflect);
+                context.Effects.Add(new ThornsReflectEffect(context.Attacker, reflect));
+            }
         }
     }
 }

@@ -1,6 +1,6 @@
-using System.Collections.Generic;
 using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Combat;
+using Project.Gameplay.Gameplay.Combat.Effects.Impl;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
 
@@ -26,7 +26,20 @@ namespace Project.Gameplay.Gameplay.Attack.Strategies
 
         public HitContext CreateHitContext(Figure attacker, Figure defender, GridPosition attackerPos, GridPosition defenderPos, BoardGrid grid)
         {
-            List<Figure> additionalTargets = new();
+            var context = new HitContext
+            {
+                Attacker = attacker,
+                Target = defender,
+                AttackerPosition = attackerPos,
+                TargetPosition = defenderPos,
+                Grid = grid,
+                BaseDamage = attacker.Stats.Attack,
+                HitType = HitType.Melee,
+                AttackerMovesOnKill = true
+            };
+
+            // Find up to 2 adjacent enemies and add splash effects
+            int splashDamage = attacker.Stats.Attack;
             
             GridPosition[] adjacentOffsets = {
                 new(-1, 0), new(1, 0), new(0, -1), new(0, 1),
@@ -44,25 +57,12 @@ namespace Project.Gameplay.Gameplay.Attack.Strategies
                 BoardCell cell = grid.GetBoardCell(adjacent);
                 if (cell.OccupiedBy != null && cell.OccupiedBy.Team != attacker.Team && cell.OccupiedBy != defender)
                 {
-                    additionalTargets.Add(cell.OccupiedBy);
+                    context.Effects.Add(new SplashDamageEffect(attacker, cell.OccupiedBy, splashDamage));
                     found++;
                 }
             }
 
-            return new HitContext
-            {
-                Attacker = attacker,
-                Target = defender,
-                AttackerPosition = attackerPos,
-                TargetPosition = defenderPos,
-                Grid = grid,
-                BaseDamage = attacker.Stats.Attack,
-                HitType = HitType.Melee,
-                AttackerMovesOnKill = true,
-                HitCount = 1,
-                AdditionalTargets = additionalTargets,
-                AdditionalDamageMultiplier = 1f
-            };
+            return context;
         }
     }
 }

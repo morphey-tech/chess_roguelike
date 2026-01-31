@@ -36,8 +36,7 @@ namespace Project.Gameplay.Gameplay.Attack.Strategies
                 Grid = grid,
                 BaseDamage = attacker.Stats.Attack,
                 HitType = HitType.Melee,
-                AttackerMovesOnKill = true,
-                HitCount = 1
+                AttackerMovesOnKill = true
             };
         }
     }

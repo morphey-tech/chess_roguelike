@@ -1,4 +1,5 @@
 using Project.Gameplay.Gameplay.Combat.Contexts;
+using Project.Gameplay.Gameplay.Combat.Effects.Impl;
 using Project.Gameplay.Gameplay.Combat.Triggers;
 using Project.Gameplay.Gameplay.Figures;
 
@@ -22,7 +23,6 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
 
         public void OnAfterHit(Figure owner, AfterHitContext context)
         {
-            // Only trigger when the owner is the attacker
             if (owner != context.Attacker)
                 return;
 
@@ -30,7 +30,7 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
             if (heal > 0)
             {
                 context.Attacker.Stats.Heal(heal);
-                context.HealedAmount += heal;
+                context.Effects.Add(new HealEffect(context.Attacker, heal));
             }
         }
     }

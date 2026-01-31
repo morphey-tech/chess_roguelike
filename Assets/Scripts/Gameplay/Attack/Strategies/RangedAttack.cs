@@ -36,8 +36,7 @@ namespace Project.Gameplay.Gameplay.Attack.Strategies
                 Grid = grid,
                 BaseDamage = attacker.Stats.Attack,
                 HitType = HitType.Ranged,
-                AttackerMovesOnKill = false,
-                HitCount = 1
+                AttackerMovesOnKill = false
             };
         }
     }

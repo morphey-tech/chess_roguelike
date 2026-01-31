@@ -16,6 +16,7 @@ namespace Project.Gameplay.Gameplay.Turn
         private readonly MovementService _movementService;
         private readonly AttackStrategyFactory _attackFactory;
         private readonly CombatResolver _combatResolver;
+        private readonly PassiveTriggerService _passives;
         private readonly IFigurePresenter _figurePresenter;
         private readonly IPublisher<FigureDeathMessage> _deathPublisher;
         private readonly ILogService _logService;
@@ -24,6 +25,7 @@ namespace Project.Gameplay.Gameplay.Turn
             MovementService movementService,
             AttackStrategyFactory attackFactory,
             CombatResolver combatResolver,
+            PassiveTriggerService passives,
             IFigurePresenter figurePresenter,
             IPublisher<FigureDeathMessage> deathPublisher,
             ILogService logService)
@@ -31,6 +33,7 @@ namespace Project.Gameplay.Gameplay.Turn
             _movementService = movementService;
             _attackFactory = attackFactory;
             _combatResolver = combatResolver;
+            _passives = passives;
             _figurePresenter = figurePresenter;
             _deathPublisher = deathPublisher;
             _logService = logService;
@@ -45,7 +48,7 @@ namespace Project.Gameplay.Gameplay.Turn
             return config.Type switch
             {
                 "move" => new MoveStep(stepId, _movementService, _figurePresenter),
-                "attack" => new AttackStep(stepId, _attackFactory, _combatResolver, _figurePresenter, _deathPublisher, _logService.CreateLogger<AttackStep>()),
+                "attack" => new AttackStep(stepId, _attackFactory, _combatResolver, _passives, _figurePresenter, _deathPublisher, _logService.CreateLogger<AttackStep>()),
                 "move_to_killed" => new MoveToKilledTargetStep(_movementService, _figurePresenter, _logService),
                 "composite" => CreateComposite(stepId, config.Steps),
                 _ => throw new Exception($"Unknown step type: {config.Type}")

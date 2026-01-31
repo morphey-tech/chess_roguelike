@@ -1,5 +1,7 @@
 using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Combat.Contexts;
+using Project.Gameplay.Gameplay.Combat.Effects;
+using Project.Gameplay.Gameplay.Combat.Effects.Impl;
 using Project.Gameplay.Gameplay.Combat.Triggers;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
@@ -26,7 +28,6 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
 
         public void OnAfterHit(Figure owner, AfterHitContext context)
         {
-            // Only trigger when the owner is the attacker
             if (owner != context.Attacker)
             {
                 Debug.Log($"[PushOnHit] Skipped: owner={owner} is not attacker={context.Attacker}");
@@ -44,7 +45,7 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
             
             if (!attackerPos.IsValid || !targetPos.IsValid)
             {
-                Debug.Log($"[PushOnHit] Skipped: invalid positions. Attacker=({attackerPos.Row},{attackerPos.Column}), Target=({targetPos.Row},{targetPos.Column})");
+                Debug.Log($"[PushOnHit] Skipped: invalid positions");
                 return;
             }
 
@@ -60,30 +61,30 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
                 BoardCell pushCell = context.Grid.GetBoardCell(pushTo);
                 if (pushCell.IsFree)
                 {
-                    // Move in grid
+                    // Move in grid (state change)
                     BoardCell fromCell = context.Grid.GetBoardCell(targetPos);
                     fromCell.RemoveFigure();
                     pushCell.PlaceFigure(context.Target);
                     
-                    // Signal for visual update
-                    context.TargetPushedTo = pushTo;
+                    // Add effect for visual update
+                    context.Effects.Add(new PushEffect(context.Target, pushTo));
                     Debug.Log($"[PushOnHit] {context.Target} pushed to ({pushTo.Row},{pushTo.Column})");
                     return;
                 }
                 else
                 {
-                    Debug.Log($"[PushOnHit] Push blocked: cell ({pushTo.Row},{pushTo.Column}) occupied by {pushCell.OccupiedBy}");
+                    Debug.Log($"[PushOnHit] Push blocked: cell occupied by {pushCell.OccupiedBy}");
                 }
             }
             else
             {
-                Debug.Log($"[PushOnHit] Push blocked: position ({pushTo.Row},{pushTo.Column}) outside grid");
+                Debug.Log($"[PushOnHit] Push blocked: position outside grid");
             }
 
             // Push blocked - deal bonus damage
             context.Target.Stats.TakeDamage(_bonusDamageIfBlocked);
-            context.BonusDamageDealt += _bonusDamageIfBlocked;
-            Debug.Log($"[PushOnHit] {context.Target} takes {_bonusDamageIfBlocked} bonus damage (push blocked). HP: {context.Target.Stats.CurrentHp}");
+            context.Effects.Add(new BonusDamageEffect(context.Target, _bonusDamageIfBlocked, "push blocked"));
+            Debug.Log($"[PushOnHit] {context.Target} takes {_bonusDamageIfBlocked} bonus damage (push blocked)");
         }
     }
 }

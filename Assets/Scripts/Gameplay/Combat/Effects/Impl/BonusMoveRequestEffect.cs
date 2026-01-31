@@ -1,0 +1,37 @@
+using Cysharp.Threading.Tasks;
+using Project.Gameplay.Gameplay.Figures;
+
+namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
+{
+    /// <summary>
+    /// REQUESTS a bonus move for the attacker (e.g., slippery passive).
+    /// 
+    /// IMPORTANT: This is a DECLARATION, not EXECUTION.
+    /// - This effect only sets ActionContext.BonusMoveDistance
+    /// - TurnSystem decides whether to grant the bonus move
+    /// - DO NOT put actual movement logic here
+    /// 
+    /// The actual move will be handled by subsequent turn steps.
+    /// </summary>
+    public sealed class BonusMoveRequestEffect : ICombatEffect
+    {
+        public CombatEffectPhase Phase => CombatEffectPhase.BonusActions;
+        public int OrderInPhase => 0;
+
+        private readonly Figure _figure;
+        private readonly int _distance;
+
+        public BonusMoveRequestEffect(Figure figure, int distance)
+        {
+            _figure = figure;
+            _distance = distance;
+        }
+
+        public UniTask ApplyAsync(CombatEffectContext context)
+        {
+            context.Logger.Info($"{_figure} gets bonus move with distance {_distance}");
+            context.ActionContext.BonusMoveDistance = _distance;
+            return UniTask.CompletedTask;
+        }
+    }
+}

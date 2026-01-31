@@ -1,6 +1,6 @@
-using System.Collections.Generic;
 using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Combat;
+using Project.Gameplay.Gameplay.Combat.Effects.Impl;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
 
@@ -35,14 +35,28 @@ namespace Project.Gameplay.Gameplay.Attack.Strategies
 
         public HitContext CreateHitContext(Figure attacker, Figure defender, GridPosition attackerPos, GridPosition defenderPos, BoardGrid grid)
         {
-            List<Figure> piercedTargets = new();
-            
+            var context = new HitContext
+            {
+                Attacker = attacker,
+                Target = defender,
+                AttackerPosition = attackerPos,
+                TargetPosition = defenderPos,
+                Grid = grid,
+                BaseDamage = attacker.Stats.Attack,
+                HitType = HitType.Ranged,
+                AttackerMovesOnKill = false
+            };
+
+            // Calculate pierce direction
             int dirRow = defenderPos.Row - attackerPos.Row;
             int dirCol = defenderPos.Column - attackerPos.Column;
             
             if (dirRow != 0) dirRow = dirRow > 0 ? 1 : -1;
             if (dirCol != 0) dirCol = dirCol > 0 ? 1 : -1;
 
+            int pierceDamage = (int)(attacker.Stats.Attack * _pierceDamagePercent);
+
+            // Find targets behind the primary target and add pierce effects
             GridPosition current = defenderPos;
             for (int i = 0; i < _maxPierceCount; i++)
             {
@@ -54,24 +68,11 @@ namespace Project.Gameplay.Gameplay.Attack.Strategies
                 BoardCell cell = grid.GetBoardCell(current);
                 if (cell.OccupiedBy != null && cell.OccupiedBy.Team != attacker.Team)
                 {
-                    piercedTargets.Add(cell.OccupiedBy);
+                    context.Effects.Add(new PierceDamageEffect(attacker, cell.OccupiedBy, pierceDamage));
                 }
             }
 
-            return new HitContext
-            {
-                Attacker = attacker,
-                Target = defender,
-                AttackerPosition = attackerPos,
-                TargetPosition = defenderPos,
-                Grid = grid,
-                BaseDamage = attacker.Stats.Attack,
-                HitType = HitType.Ranged,
-                AttackerMovesOnKill = false,
-                HitCount = 1,
-                AdditionalTargets = piercedTargets,
-                AdditionalDamageMultiplier = _pierceDamagePercent
-            };
+            return context;
         }
     }
 }

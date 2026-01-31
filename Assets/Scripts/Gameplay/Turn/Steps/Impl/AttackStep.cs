@@ -1,8 +1,11 @@
+using System.Collections.Generic;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using MessagePipe;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Attack;
 using Project.Gameplay.Gameplay.Combat;
+using Project.Gameplay.Gameplay.Combat.Effects;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
 
@@ -14,6 +17,7 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
 
         private readonly AttackStrategyFactory _attackFactory;
         private readonly CombatResolver _combatResolver;
+        private readonly PassiveTriggerService _passives;
         private readonly IFigurePresenter _figurePresenter;
         private readonly IPublisher<FigureDeathMessage> _deathPublisher;
         private readonly ILogger<AttackStep> _logger;
@@ -22,6 +26,7 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
             string id,
             AttackStrategyFactory attackFactory,
             CombatResolver combatResolver,
+            PassiveTriggerService passives,
             IFigurePresenter figurePresenter,
             IPublisher<FigureDeathMessage> deathPublisher,
             ILogger<AttackStep> logger)
@@ -29,23 +34,24 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
             Id = id;
             _attackFactory = attackFactory;
             _combatResolver = combatResolver;
+            _passives = passives;
             _figurePresenter = figurePresenter;
             _deathPublisher = deathPublisher;
             _logger = logger;
         }
 
-        public UniTask ExecuteAsync(ActionContext context)
+        public async UniTask ExecuteAsync(ActionContext context)
         {
             BoardCell targetCell = context.Grid.GetBoardCell(context.To);
             Figure defender = targetCell?.OccupiedBy;
 
             if (defender == null || defender.Team == context.Actor.Team)
-                return UniTask.CompletedTask;
+                return;
 
             IAttackStrategy attackStrategy = _attackFactory.Get(context.Actor.AttackId);
             
             if (!attackStrategy.CanAttack(context.Actor, context.From, context.To, context.Grid))
-                return UniTask.CompletedTask;
+                return;
 
             HitContext hitContext = attackStrategy.CreateHitContext(
                 context.Actor, 
@@ -53,78 +59,57 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
                 context.From, 
                 context.To, 
                 context.Grid);
+            
+            hitContext.AttackId = attackStrategy.Id;
 
             CombatResult result = _combatResolver.Resolve(hitContext);
 
-            _logger.Info($"{context.Actor} [{attackStrategy.Id}] attacks {defender} for {result.DamageDealt} damage. HP: {defender.Stats.CurrentHp}/{defender.Stats.MaxHp}");
+            var effectContext = new CombatEffectContext(
+                context,
+                context.Grid,
+                _figurePresenter,
+                _deathPublisher,
+                _passives,
+                _logger);
 
-            if (result.HealedAmount > 0)
-                _logger.Info($"{context.Actor} healed for {result.HealedAmount}");
+            // Apply all effects, including any dynamically added ones
+            await ApplyEffectsAsync(result.Effects, effectContext);
+        }
 
-            _figurePresenter.PlayAttack(context.Actor.Id, context.To);
-            _figurePresenter.PlayDamageEffect(defender.Id);
+        private async UniTask ApplyEffectsAsync(IEnumerable<ICombatEffect> effects, CombatEffectContext context)
+        {
+            var queue = new Queue<ICombatEffect>(effects);
+            int effectIndex = 0;
 
-            context.LastDamageDealt = result.DamageDealt;
-            context.LastAttackKilledTarget = result.TargetDied;
+            _logger.Debug($"=== Effect Pipeline Start ({queue.Count} effects) ===");
 
-            if (result.TargetDied)
+            while (queue.Count > 0)
             {
-                _logger.Info($"{defender} died!");
-                targetCell.RemoveFigure();
-                _figurePresenter.RemoveFigure(defender.Id);
-                _deathPublisher.Publish(new FigureDeathMessage(defender.Id, defender.Team));
-            }
+                ICombatEffect effect = queue.Dequeue();
+                
+                _logger.Debug($"[{effectIndex++}] {effect.GetType().Name} (Phase: {effect.Phase}, Order: {effect.OrderInPhase})");
+                
+                await effect.ApplyAsync(context);
 
-            // Process additional targets (splash, pierce, etc.)
-            if (result.AdditionalResults != null)
-            {
-                foreach (AdditionalTargetResult additionalResult in result.AdditionalResults)
+                // Process any effects added during Apply (e.g., KillEffect from DealDamageEffect)
+                if (context.PendingEffects.Count > 0)
                 {
-                    Figure additionalTarget = additionalResult.Target;
+                    // Sort pending effects by Phase, then OrderInPhase
+                    var sorted = context.PendingEffects
+                        .OrderBy(e => e.Phase)
+                        .ThenBy(e => e.OrderInPhase)
+                        .ToList();
                     
-                    _figurePresenter.PlayDamageEffect(additionalTarget.Id);
-                    _logger.Info($"Splash hit {additionalTarget} for {additionalResult.DamageDealt} damage");
-
-                    if (additionalResult.Died)
+                    foreach (var pending in sorted)
                     {
-                        _logger.Info($"{additionalTarget} died from splash!");
-                        BoardCell additionalCell = context.Grid.FindFigure(additionalTarget);
-                        additionalCell?.RemoveFigure();
-                        _figurePresenter.RemoveFigure(additionalTarget.Id);
-                        _deathPublisher.Publish(new FigureDeathMessage(additionalTarget.Id, additionalTarget.Team));
+                        _logger.Debug($"  + Queued: {pending.GetType().Name} (Phase: {pending.Phase})");
+                        queue.Enqueue(pending);
                     }
+                    context.PendingEffects.Clear();
                 }
             }
-
-            // Handle target being pushed by passive (e.g., brutal)
-            if (result.TargetPushedTo.HasValue && !result.TargetDied)
-            {
-                _logger.Info($"{defender} pushed to ({result.TargetPushedTo.Value.Row}, {result.TargetPushedTo.Value.Column})");
-                _figurePresenter.MoveFigure(defender.Id, result.TargetPushedTo.Value);
-            }
             
-            // Log bonus damage from passives
-            if (result.BonusDamageDealt > 0)
-            {
-                _logger.Info($"{defender} took {result.BonusDamageDealt} bonus damage from passives. HP: {defender.Stats.CurrentHp}/{defender.Stats.MaxHp}");
-            }
-
-            // Handle attacker movement from passives (e.g., auto-retreat for AI)
-            if (result.AttackerMovedTo.HasValue)
-            {
-                _logger.Info($"{context.Actor} retreated to ({result.AttackerMovedTo.Value.Row}, {result.AttackerMovedTo.Value.Column})");
-                _figurePresenter.MoveFigure(context.Actor.Id, result.AttackerMovedTo.Value);
-                context.From = result.AttackerMovedTo.Value;
-            }
-
-            // Request bonus move if passive triggered it (e.g., slippery)
-            if (result.BonusMoveDistance.HasValue)
-            {
-                _logger.Info($"{context.Actor} gets bonus move with distance {result.BonusMoveDistance.Value}");
-                context.BonusMoveDistance = result.BonusMoveDistance.Value;
-            }
-
-            return UniTask.CompletedTask;
+            _logger.Debug($"=== Effect Pipeline Complete ===");
         }
     }
 }
