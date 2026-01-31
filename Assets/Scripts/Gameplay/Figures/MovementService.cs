@@ -3,6 +3,7 @@ using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Movement;
+using Project.Gameplay.Movement;
 using VContainer;
 
 namespace Project.Gameplay.Gameplay.Figures
@@ -30,7 +31,7 @@ namespace Project.Gameplay.Gameplay.Figures
             _logger.Debug($"Grid set: {grid.Width}x{grid.Height}");
         }
 
-        public IEnumerable<GridPosition> GetAvailableMoves(Figure figure, GridPosition from)
+        public IEnumerable<MovementStrategyResult> GetAvailableMoves(Figure figure, GridPosition from)
         {
             if (_grid == null)
             {
@@ -39,7 +40,7 @@ namespace Project.Gameplay.Gameplay.Figures
             }
 
             IMovementStrategy strategy = _strategyFactory.Get(figure.MovementId);
-            foreach (GridPosition move in strategy.GetAvailableMoves(figure, from, _grid))
+            foreach (MovementStrategyResult move in strategy.GetAvailableMoves(figure, from, _grid))
             {
                 yield return move;
             }
@@ -77,14 +78,14 @@ namespace Project.Gameplay.Gameplay.Figures
             }
 
             IMovementStrategy strategy = _strategyFactory.Get(figure.MovementId);
-            bool canMove = strategy.CanMove(figure, from, to, _grid);
+            var strategyResult = strategy.GetFor(figure, from, to, _grid);
 
-            if (!canMove)
+            if (!strategyResult.CanOccupy())
             {
                 _logger.Debug($"Move rejected by {strategy.Id} strategy");
             }
 
-            return canMove;
+            return strategyResult.CanOccupy();
         }
 
         public void MoveFigure(GridPosition from, GridPosition to)

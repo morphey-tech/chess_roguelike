@@ -14,6 +14,7 @@ namespace Project.Gameplay.Gameplay.Selection
     {
         private readonly TurnSystem _turnSystem;
         private readonly IPublisher<FigureSelectedMessage> _figureSelectedPublisher;
+        private readonly IPublisher<FigureDeselectedMessage> _figureDeselectedPublisher;
         private readonly IPublisher<MoveRequestedMessage> _moveRequestedPublisher;
         private readonly IPublisher<AttackRequestedMessage> _attackRequestedPublisher;
         private readonly ILogger<SelectionService> _logger;
@@ -33,12 +34,14 @@ namespace Project.Gameplay.Gameplay.Selection
             ISubscriber<CellClickedMessage> cellClickedSubscriber,
             ISubscriber<CancelRequestedMessage> cancelSubscriber,
             IPublisher<FigureSelectedMessage> figureSelectedPublisher,
+            IPublisher<FigureDeselectedMessage> figureDeselectedPublisher,
             IPublisher<MoveRequestedMessage> moveRequestedPublisher,
             IPublisher<AttackRequestedMessage> attackRequestedPublisher,
             ILogService logService)
         {
             _turnSystem = turnSystem;
             _figureSelectedPublisher = figureSelectedPublisher;
+            _figureDeselectedPublisher = figureDeselectedPublisher;
             _moveRequestedPublisher = moveRequestedPublisher;
             _attackRequestedPublisher = attackRequestedPublisher;
             _logger = logService.CreateLogger<SelectionService>();
@@ -74,6 +77,10 @@ namespace Project.Gameplay.Gameplay.Selection
 
             _logger.Debug($"Cell ({position.Row},{position.Column}) clicked, intent: {intent}");
 
+            // Deselect current figure before switching
+            if (SelectedFigure != null && intent == CellClickIntent.SelectFigure)
+                Deselect(SelectedFigure);
+
             switch (intent)
             {
                 case CellClickIntent.SelectFigure:
@@ -81,11 +88,13 @@ namespace Project.Gameplay.Gameplay.Selection
                     break;
 
                 case CellClickIntent.Move:
+                    Deselect(SelectedFigure);
                     RequestMove(_selectedCell.Position, position);
                     ClearSelection();
                     break;
 
                 case CellClickIntent.Attack:
+                    Deselect(SelectedFigure);
                     RequestAttack(_selectedCell.Position, position);
                     ClearSelection();
                     break;
@@ -127,6 +136,11 @@ namespace Project.Gameplay.Gameplay.Selection
             _selectedCell = cell;
             _logger.Debug($"Selected {cell.OccupiedBy} at ({cell.Position.Row},{cell.Position.Column})");
             _figureSelectedPublisher.Publish(new FigureSelectedMessage(cell.OccupiedBy, cell.Position));
+        }
+
+        private void Deselect(Figure figure)
+        {
+            _figureDeselectedPublisher.Publish(new FigureDeselectedMessage(figure));  
         }
 
         public void ClearSelection()

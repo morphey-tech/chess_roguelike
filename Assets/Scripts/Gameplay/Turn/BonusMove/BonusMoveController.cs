@@ -6,6 +6,7 @@ using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Input.Messages;
+using Project.Gameplay.Movement;
 using VContainer;
 
 namespace Project.Gameplay.Gameplay.Turn.BonusMove
@@ -127,16 +128,16 @@ namespace Project.Gameplay.Gameplay.Turn.BonusMove
             if (!IsActive || _grid == null)
                 yield break;
 
-            foreach (GridPosition move in _movementService.GetAvailableMoves(_actor, _from))
+            foreach (MovementStrategyResult moveResult in _movementService.GetAvailableMoves(_actor, _from))
             {
-                int distance = Math.Abs(move.Row - _from.Row) + Math.Abs(move.Column - _from.Column);
+                GridPosition pos = moveResult.Position;
+                int distance = Math.Abs(pos.Row - _from.Row) + Math.Abs(pos.Column - _from.Column);
                 if (distance <= _maxDistance)
                 {
                     // Only free cells - no attacks during bonus move
-                    BoardCell cell = _grid.GetBoardCell(move);
-                    if (cell.IsFree)
+                    if (moveResult.IsFree)
                     {
-                        yield return move;
+                        yield return pos;
                     }
                 }
             }

@@ -17,10 +17,10 @@ namespace Project.Gameplay.Presentations
       Instances = new PresentationManagerInstances();
     }
     
-    public async UniTask<EntityLink> SpawnView(int id, AssetKey assetKey, Vector3 pos, Quaternion rot, Transform root)
+    public async UniTask<EntityLink> SpawnView(Entity entity, AssetKey assetKey, Vector3 pos, Quaternion rot, Transform root)
     {
       var go = await _assetService.InstantiateAsync(assetKey, pos, rot, root);
-      Instances.InitEntity(id, go);
+      Instances.InitEntity(entity, go);
       return go.GetComponent<EntityLink>();
     }
 

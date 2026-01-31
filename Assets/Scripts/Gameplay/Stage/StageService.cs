@@ -5,6 +5,7 @@ using Cysharp.Threading.Tasks;
 using MessagePipe;
 using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
+using Project.Gameplay.Components;
 using Project.Gameplay.Gameplay.Board;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
@@ -13,6 +14,7 @@ using Project.Gameplay.Gameplay.Selection;
 using Project.Gameplay.Gameplay.Turn;
 using Project.Gameplay.Gameplay.Turn.BonusMove;
 using Project.Gameplay.Gameplay.Turn.Execution;
+using Project.Gameplay.Movement;
 using VContainer;
 using VContainer.Unity;
 
@@ -45,6 +47,7 @@ namespace Project.Gameplay.Gameplay.Stage
             ISubscriber<MoveRequestedMessage> moveSubscriber,
             ISubscriber<AttackRequestedMessage> attackSubscriber,
             ISubscriber<FigureSelectedMessage> selectionSubscriber,
+            ISubscriber<FigureDeselectedMessage> figureDeselectedSubscriber,
             ISubscriber<TurnChangedMessage> turnSubscriber,
             ISubscriber<BonusMoveCompletedMessage> bonusMoveCompletedSubscriber,
             ILogService logService)
@@ -62,6 +65,7 @@ namespace Project.Gameplay.Gameplay.Stage
             moveSubscriber.Subscribe(OnMoveRequested).AddTo(bag);
             attackSubscriber.Subscribe(OnAttackRequested).AddTo(bag);
             selectionSubscriber.Subscribe(OnFigureSelected).AddTo(bag);
+            figureDeselectedSubscriber.Subscribe(OnFigureDeselected).AddTo(bag);
             turnSubscriber.Subscribe(OnTurnChanged).AddTo(bag);
             bonusMoveCompletedSubscriber.Subscribe(OnBonusMoveCompleted).AddTo(bag);
             _subscriptions = bag.Build();
@@ -154,12 +158,18 @@ namespace Project.Gameplay.Gameplay.Stage
             {
                 _logger.Debug($"Figure {message.Figure.Id} selected at ({message.Position.Row}, {message.Position.Column})");
                 HighlightPositions(_movementService.GetAvailableMoves(message.Figure, message.Position));
+                message.Figure.EnsureComponent(new SelectTag());
             }
             else
             {
                 ClearHighlights();
                 _logger.Debug("Selection cleared");
             }
+        }
+        
+        private void OnFigureDeselected(FigureDeselectedMessage message)
+        {
+            message.Figure.Del<SelectTag>();
         }
 
         private void OnTurnChanged(TurnChangedMessage message)
@@ -200,6 +210,29 @@ namespace Project.Gameplay.Gameplay.Stage
         void IDisposable.Dispose()
         {
             _subscriptions?.Dispose();
+        }
+        
+        private void HighlightPositions(IEnumerable<MovementStrategyResult> positions)
+        {
+            // костыли вы мои костыли. Дайте я вас сейчас расцелую... Дорогие мои костыли, мы ещё, мы ещё повоююем...
+            foreach (var boardCell in _movementService.Grid.AllCells())
+            {
+                var strategyResult = positions?.FirstOrDefault(p =>
+                    boardCell.Position.Column == p.Position.Column && boardCell.Position.Row == p.Position.Row) ?? MovementStrategyResult.MakeEmpty();
+
+                if (!strategyResult.CanOccupy())
+                {
+                    boardCell.Del<HighlightTag>();
+                    boardCell.Del<AttackHighlightTag>();
+                }
+                else
+                {
+                    if (strategyResult.IsFree)
+                        boardCell.EnsureComponent(new HighlightTag());
+                    else
+                        boardCell.EnsureComponent(new AttackHighlightTag());
+                }
+            }
         }
     }
 }

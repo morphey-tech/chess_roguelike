@@ -23,19 +23,22 @@ namespace Project.Gameplay.Gameplay.Run
         private readonly StageFactory _stageFactory;
         private readonly StagePhaseFactory _phaseFactory;
         private readonly PlayerRunStateService _runStateService;
+        private readonly BoardSpawnService _boardSpawnService;
 
         public Run(
             RunConfig config, 
             ConfigProvider configProvider,
             StageFactory stageFactory, 
             StagePhaseFactory phaseFactory, 
-            PlayerRunStateService runStateService)
+            PlayerRunStateService runStateService,
+            BoardSpawnService boardSpawnService)
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
             _configProvider = configProvider ?? throw new ArgumentNullException(nameof(configProvider));
             _stageFactory = stageFactory ?? throw new ArgumentNullException(nameof(stageFactory));
             _phaseFactory = phaseFactory ?? throw new ArgumentNullException(nameof(phaseFactory));
             _runStateService = runStateService ?? throw new ArgumentNullException(nameof(runStateService));
+            _boardSpawnService = boardSpawnService ?? throw new ArgumentNullException(nameof(boardSpawnService));
         }
 
         public void Begin()
@@ -57,8 +60,8 @@ namespace Project.Gameplay.Gameplay.Run
         {
             StageConfig stageConfig = await LoadStageConfig();
             BoardConfig boardConfig = await LoadBoardConfig(stageConfig);
-            
-            BoardGrid grid = new(boardConfig.Width, boardConfig.Height);
+
+            var grid = await _boardSpawnService.SpawnAsync(boardConfig.Id);
             List<IStagePhase> phases = _phaseFactory.CreatePhasesForStage(stageConfig);
             CurrentStage = _stageFactory.Create(stageConfig, grid, _runStateService.Current!, phases);
             await CurrentStage.BeginAsync();

@@ -1,4 +1,5 @@
 using Project.Core.Core.Configs.Run;
+using Project.Gameplay.Gameplay.Board;
 using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.Gameplay.Save.Service;
 using Project.Gameplay.Gameplay.Stage;
@@ -13,18 +14,21 @@ namespace Project.Gameplay.Gameplay.Run
         private readonly StageFactory _stageFactory;
         private readonly StagePhaseFactory _phaseFactory;
         private readonly PlayerRunStateService _runStateService;
+        private readonly BoardSpawnService _boardSpawnService;
 
         [Inject]
         private RunFactory(
             ConfigProvider configProvider, 
             StageFactory stageFactory,
             StagePhaseFactory phaseFactory, 
-            PlayerRunStateService runStateService)
+            PlayerRunStateService runStateService,
+            BoardSpawnService boardSpawnService)
         {
             _configProvider = configProvider;
             _stageFactory = stageFactory;
             _phaseFactory = phaseFactory;
             _runStateService = runStateService;
+            _boardSpawnService = boardSpawnService;
         }
 
         public Run Create(RunConfig config)
@@ -34,7 +38,8 @@ namespace Project.Gameplay.Gameplay.Run
                 _configProvider, 
                 _stageFactory, 
                 _phaseFactory, 
-                _runStateService);
+                _runStateService,
+                _boardSpawnService);
         }
     }
 }

@@ -3,6 +3,7 @@ using System;
 using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
+using Project.Gameplay.Movement;
 
 namespace Project.Gameplay.Gameplay.Movement.Strategies
 {
@@ -21,18 +22,25 @@ namespace Project.Gameplay.Gameplay.Movement.Strategies
             ( 2, -1), ( 2, 1)
         };
 
-        public IEnumerable<GridPosition> GetAvailableMoves(Figure figure, GridPosition from, BoardGrid grid)
+        public IEnumerable<MovementStrategyResult> GetAvailableMoves(Figure figure, GridPosition from, BoardGrid grid)
         {
             foreach ((int dr, int dc) in Offsets)
             {
                 GridPosition to = new(from.Row + dr, from.Column + dc);
+
+                if (!grid.IsInside(to))
+                   continue;
                 
-                if (grid.IsInside(to) && CanOccupy(figure, grid.GetBoardCell(to)))
-                    yield return to;
+                var cell = grid.GetBoardCell(to);
+                var result = new MovementStrategyResult(figure, to, true, cell.OccupiedBy);
+                if (!result.CanOccupy()) 
+                    continue;
+                
+                yield return result;
             }
         }
 
-        public bool CanMove(Figure figure, GridPosition from, GridPosition to, BoardGrid grid)
+        public MovementStrategyResult GetFor(Figure figure, GridPosition from, GridPosition to, BoardGrid grid)
         {
             int dr = Math.Abs(to.Row - from.Row);
             int dc = Math.Abs(to.Column - from.Column);
@@ -40,16 +48,13 @@ namespace Project.Gameplay.Gameplay.Movement.Strategies
             bool isLShape = (dr == 2 && dc == 1) || (dr == 1 && dc == 2);
 
             if (!isLShape)
-            {
-                return false;
-            }
+                return MovementStrategyResult.MakeUnreachable(figure, to, null);
+            
+            if(!grid.IsInside(to))
+                return MovementStrategyResult.MakeUnreachable(figure, to, null);
 
-            return grid.IsInside(to) && CanOccupy(figure, grid.GetBoardCell(to));
-        }
-
-        private static bool CanOccupy(Figure figure, BoardCell cell)
-        {
-            return cell.IsFree || (cell.OccupiedBy != null && cell.OccupiedBy.Team != figure.Team);
+            var cell = grid.GetBoardCell(to);
+            return new MovementStrategyResult(figure, to, true, cell.OccupiedBy);
         }
     }
 }

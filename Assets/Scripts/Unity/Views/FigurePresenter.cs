@@ -4,6 +4,8 @@ using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
 using Project.Core.Core.Physics;
 using Project.Core.Core.World;
+using Project.Gameplay;
+using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Presentations;
 using Project.Unity.Presentations;
@@ -40,7 +42,7 @@ namespace Project.Unity.Unity.Views
             
             // Spawn controller prefab
             EntityLink controllerLink = await _presentationManager.SpawnView(
-                figure.Id,
+                figure,
                 FigureControllerAssetKey,
                 worldPos,
                 Quaternion.identity,
@@ -71,7 +73,7 @@ namespace Project.Unity.Unity.Views
             if (view != null)
                 _figureViews[figure.Id] = view;
 
-            _logger.Info($"Figure {figure} created at ({pos.Row}, {pos.Column}), team: {team}");
+            _logger.Info($"Figure {figure} ({viewAssetKey}) created at ({pos.Row}, {pos.Column}), team: {team}");
         }
 
         public void MoveFigure(int figureId, GridPosition to)

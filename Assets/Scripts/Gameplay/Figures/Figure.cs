@@ -4,9 +4,8 @@ using Project.Gameplay.Gameplay.Turn;
 
 namespace Project.Gameplay.Gameplay.Figures
 {
-    public class Figure
+    public class Figure : Entity
     {
-        public int Id { get; } 
         public string TypeId { get; }
         public string MovementId { get; }
         public string AttackId { get; }
@@ -16,9 +15,9 @@ namespace Project.Gameplay.Gameplay.Figures
         public List<IPassive> Passives { get; } = new();
         public TurnPattern TurnPattern { get; private set; }
 
-        public Figure(int id, string typeId, string movementId, string attackId, string turnPatternsId, FigureStats stats, Team team)
+        public Figure(int id, string typeId, string movementId, string attackId,
+            string turnPatternsId, FigureStats stats, Team team) : base(id)
         {
-            Id = id;
             TypeId = typeId;
             MovementId = movementId;
             AttackId = attackId;

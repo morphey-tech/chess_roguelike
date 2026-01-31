@@ -8,12 +8,11 @@ namespace Project.Gameplay.Gameplay.Board
     /// </summary>
     public interface IBoardPresenter
     {
-        void CreateCell(int id, GridPosition pos, string skinId);
+        void CreateCell(Entity entity, GridPosition pos, string skinId);
         void DestroyCell(GridPosition pos);
 
         void PlayAppear(GridPosition pos);
         void PlayHit(GridPosition pos);
-        void Highlight(GridPosition pos, bool enabled);
         
         // Board-wide operations
         UniTask PlayBoardAppearAsync(string strategyId);
