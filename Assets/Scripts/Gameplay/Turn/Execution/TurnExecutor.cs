@@ -48,6 +48,9 @@ namespace Project.Gameplay.Gameplay.Turn.Execution
                 MovementService = _movementService
             };
 
+            // DEBUG: Verify ActionContext is fresh
+            _logger.Info($"[DEBUG] NEW ActionContext for {actor.Id}: BonusMoveDistance={context.BonusMoveDistance?.ToString() ?? "null"} (should be null)");
+
             ITurnStep step = _patternResolver.Resolve(actor, actor.TurnPattern, context);
 
             if (step == null)
@@ -58,6 +61,9 @@ namespace Project.Gameplay.Gameplay.Turn.Execution
 
             _logger.Info($"{actor} executing pattern: {step.Id}");
             await step.ExecuteAsync(context);
+            
+            // DEBUG: Check after step execution
+            _logger.Info($"[DEBUG] AFTER step for {actor.Id}: BonusMoveDistance={context.BonusMoveDistance?.ToString() ?? "null"}");
 
             GridPosition finalPosition = context.From;
             

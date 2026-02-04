@@ -14,31 +14,34 @@ namespace Project.Gameplay.Gameplay.Turn.BonusMove
 {
     public sealed class BonusMoveController : IBonusMoveController, IDisposable
     {
+        public Figure? Actor { get; private set; }
+        
+        public bool IsActive => Actor != null;
+        public GridPosition From => _from;
+        
         private readonly MovementService _movementService;
         private readonly IFigurePresenter _figurePresenter;
+        private readonly IPublisher<BonusMoveStartedMessage> _startedPublisher;
         private readonly IPublisher<BonusMoveCompletedMessage> _completedPublisher;
         private readonly ILogger<BonusMoveController> _logger;
         private readonly IDisposable _subscriptions;
 
-        private Figure _actor;
         private GridPosition _from;
         private int _maxDistance;
         private BoardGrid _grid;
 
-        public bool IsActive => _actor != null;
-        public Figure Actor => _actor;
-        public GridPosition From => _from;
-
         [Inject]
-        public BonusMoveController(
+        private BonusMoveController(
             MovementService movementService,
             IFigurePresenter figurePresenter,
             ISubscriber<CellClickedMessage> cellClickedSubscriber,
+            IPublisher<BonusMoveStartedMessage> startedPublisher,
             IPublisher<BonusMoveCompletedMessage> completedPublisher,
             ILogService logService)
         {
             _movementService = movementService;
             _figurePresenter = figurePresenter;
+            _startedPublisher = startedPublisher;
             _completedPublisher = completedPublisher;
             _logger = logService.CreateLogger<BonusMoveController>();
 
@@ -57,20 +60,22 @@ namespace Project.Gameplay.Gameplay.Turn.BonusMove
 
             _logger.Debug($"Bonus move click: ({message.Position.Row},{message.Position.Column})");
             
+            Figure actor = Actor;
             if (TryExecute(message.Position))
             {
-                _completedPublisher.Publish(new BonusMoveCompletedMessage(_actor));
+                _completedPublisher.Publish(new BonusMoveCompletedMessage(actor));
             }
         }
 
         public void Start(Figure actor, GridPosition from, int maxDistance, BoardGrid grid)
         {
-            _actor = actor;
+            Actor = actor;
             _from = from;
             _maxDistance = maxDistance;
             _grid = grid;
             
             _logger.Info($"Bonus move started for {actor} from ({from.Row},{from.Column}), max distance: {maxDistance}");
+            _startedPublisher.Publish(new BonusMoveStartedMessage(actor));
         }
 
         public bool TryExecute(GridPosition to)
@@ -81,7 +86,6 @@ namespace Project.Gameplay.Gameplay.Turn.BonusMove
                 return false;
             }
 
-            // Validate distance
             int distance = Math.Abs(to.Row - _from.Row) + Math.Abs(to.Column - _from.Column);
             if (distance > _maxDistance)
             {
@@ -89,8 +93,6 @@ namespace Project.Gameplay.Gameplay.Turn.BonusMove
                 return false;
             }
 
-            // CRITICAL: Bonus move is movement only - target cell must be FREE
-            // (no attacks allowed during bonus move)
             BoardCell targetCell = _grid.GetBoardCell(to);
             if (!targetCell.IsFree)
             {
@@ -98,18 +100,15 @@ namespace Project.Gameplay.Gameplay.Turn.BonusMove
                 return false;
             }
 
-            // Validate move is legal (path, etc.)
-            if (!_movementService.CanMove(_actor, _from, to))
+            if (!_movementService.CanMove(Actor, _from, to))
             {
                 _logger.Debug($"Bonus move rejected: invalid move to ({to.Row},{to.Column})");
                 return false;
             }
 
-            // Execute the move
             _movementService.MoveFigure(_from, to);
-            _figurePresenter.MoveFigureAsync(_actor.Id, to).Forget();
-            
-            _logger.Info($"{_actor} bonus moved to ({to.Row},{to.Column})");
+            _figurePresenter.MoveFigureAsync(Actor.Id, to).Forget();
+            _logger.Info($"{Actor} bonus moved to ({to.Row},{to.Column})");
             
             Clear();
             return true;
@@ -119,8 +118,10 @@ namespace Project.Gameplay.Gameplay.Turn.BonusMove
         {
             if (IsActive)
             {
-                _logger.Info($"Bonus move cancelled for {_actor}");
+                Figure actor = Actor;
+                _logger.Info($"Bonus move cancelled for {actor}");
                 Clear();
+                _completedPublisher.Publish(new BonusMoveCompletedMessage(actor));
             }
         }
 
@@ -131,13 +132,12 @@ namespace Project.Gameplay.Gameplay.Turn.BonusMove
                 yield break;
             }
 
-            foreach (MovementStrategyResult moveResult in _movementService.GetAvailableMoves(_actor, _from))
+            foreach (MovementStrategyResult moveResult in _movementService.GetAvailableMoves(Actor, _from))
             {
                 GridPosition pos = moveResult.Position;
                 int distance = Math.Abs(pos.Row - _from.Row) + Math.Abs(pos.Column - _from.Column);
                 if (distance <= _maxDistance)
                 {
-                    // Only free cells - no attacks during bonus move
                     if (moveResult.IsFree)
                     {
                         yield return moveResult;
@@ -148,7 +148,7 @@ namespace Project.Gameplay.Gameplay.Turn.BonusMove
 
         private void Clear()
         {
-            _actor = null;
+            Actor = null;
             _from = default;
             _maxDistance = 0;
             _grid = null;

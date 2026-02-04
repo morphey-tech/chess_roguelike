@@ -127,6 +127,8 @@ namespace Project.Gameplay.Gameplay.Stage
 
         private async UniTaskVoid ExecuteTurnAsync(Figure actor, GridPosition from, GridPosition to, BoardGrid grid)
         {
+            _logger.Info($"[DEBUG] ExecuteTurnAsync START: actor={actor.Id}, BonusMoveController.IsActive={_bonusMoveController.IsActive}");
+            
             TurnExecutionResult result = await _turnExecutor.ExecuteAsync(actor, from, to, grid);
 
             if (!result.Success)
@@ -135,16 +137,18 @@ namespace Project.Gameplay.Gameplay.Stage
                 return;
             }
 
+            _logger.Info($"[DEBUG] ExecuteTurnAsync RESULT: actor={actor.Id}, BonusMoveDistance={result.BonusMoveDistance?.ToString() ?? "null"}");
+
             // Check if bonus move was granted
             if (result.BonusMoveDistance.HasValue && result.BonusMoveDistance.Value > 0)
             {
-                _logger.Info($"{actor} gets bonus move! Max distance: {result.BonusMoveDistance.Value}");
+                _logger.Info($"[DEBUG] STARTING BONUS MOVE for {actor.Id}! Distance: {result.BonusMoveDistance.Value}");
                 _bonusMoveController.Start(actor, result.ActorFinalPosition, result.BonusMoveDistance.Value, grid);
                 HighlightPositions(_bonusMoveController.GetAvailablePositions());
                 return;
             }
 
-            _logger.Info($"Turn completed for {actor}");
+            _logger.Info($"Turn completed for {actor}, no bonus move");
             _turnSystem.EndTurn();
         }
 

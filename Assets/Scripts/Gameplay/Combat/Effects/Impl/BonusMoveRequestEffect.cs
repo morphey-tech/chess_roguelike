@@ -28,7 +28,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
 
         public void Apply(CombatEffectContext context)
         {
-            context.Logger.Info($"{_figure} gets bonus move with distance {_distance}");
+            context.Logger.Info($"[DEBUG] BonusMoveRequestEffect.Apply: figure={_figure.Id}, distance={_distance}, ActionContext.Actor={context.ActionContext.Actor.Id}");
             context.ActionContext.BonusMoveDistance = _distance;
         }
     }

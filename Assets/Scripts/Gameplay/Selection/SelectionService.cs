@@ -6,6 +6,7 @@ using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Input.Messages;
 using Project.Gameplay.Gameplay.Turn;
+using Project.Gameplay.Gameplay.Turn.BonusMove;
 using VContainer;
 
 namespace Project.Gameplay.Gameplay.Selection
@@ -22,9 +23,9 @@ namespace Project.Gameplay.Gameplay.Selection
 
         private BoardGrid _grid;
         private BoardCell? _selectedCell;
-        private bool _isActive;
+        private bool _bonusMoveInProgress;
 
-        public bool IsActive => _isActive;
+        public bool IsActive { get; private set; }
         public bool HasSelection => _selectedCell != null;
         public Figure SelectedFigure => _selectedCell?.OccupiedBy;
 
@@ -33,6 +34,9 @@ namespace Project.Gameplay.Gameplay.Selection
             TurnSystem turnSystem,
             ISubscriber<CellClickedMessage> cellClickedSubscriber,
             ISubscriber<CancelRequestedMessage> cancelSubscriber,
+            ISubscriber<BonusMoveStartedMessage> bonusMoveStartedSubscriber,
+            ISubscriber<BonusMoveCompletedMessage> bonusMoveCompletedSubscriber,
+            ISubscriber<TurnChangedMessage> turnChangedSubscriber,
             IPublisher<FigureSelectedMessage> figureSelectedPublisher,
             IPublisher<FigureDeselectedMessage> figureDeselectedPublisher,
             IPublisher<MoveRequestedMessage> moveRequestedPublisher,
@@ -49,35 +53,62 @@ namespace Project.Gameplay.Gameplay.Selection
             DisposableBagBuilder bag = DisposableBag.CreateBuilder();
             cellClickedSubscriber.Subscribe(OnCellClicked).AddTo(bag);
             cancelSubscriber.Subscribe(_ => ClearSelection()).AddTo(bag);
+            bonusMoveStartedSubscriber.Subscribe(OnBonusMoveStarted).AddTo(bag);
+            bonusMoveCompletedSubscriber.Subscribe(OnBonusMoveCompleted).AddTo(bag);
+            turnChangedSubscriber.Subscribe(OnTurnChanged).AddTo(bag);
             _subscriptions = bag.Build();
             
             _logger.Info("SelectionService created");
         }
 
+        private void OnTurnChanged(TurnChangedMessage message)
+        {
+            _bonusMoveInProgress = false;
+            ClearSelection();
+        }
+
+        private void OnBonusMoveStarted(BonusMoveStartedMessage message)
+        {
+            _bonusMoveInProgress = true;
+            ClearSelection();
+            _logger.Debug($"Bonus move started for {message.Actor}, selection disabled");
+        }
+
+        private void OnBonusMoveCompleted(BonusMoveCompletedMessage message)
+        {
+            _bonusMoveInProgress = false;
+            _logger.Debug($"Bonus move completed for {message.Actor}, selection enabled");
+        }
+
         public void Configure(BoardGrid grid)
         {
             _grid = grid;
-            _isActive = true;
+            IsActive = true;
             ClearSelection();
             _logger.Info("SelectionService activated");
         }
 
         private void OnCellClicked(CellClickedMessage message)
         {
-            if (!_isActive)
+            if (!IsActive)
+            {
                 return;
+            }
+            if (_bonusMoveInProgress)
+            {
+                return;
+            }
 
             GridPosition position = message.Position;
-
             if (!_grid.IsInside(position))
+            {
                 return;
+            }
 
             BoardCell clickedCell = _grid.GetBoardCell(position);
             CellClickIntent intent = ResolveIntent(clickedCell);
-
             _logger.Debug($"Cell ({position.Row},{position.Column}) clicked, intent: {intent}");
 
-            // Deselect current figure before switching
             if (SelectedFigure != null && intent == CellClickIntent.SelectFigure)
                 Deselect(SelectedFigure);
 
@@ -112,12 +143,14 @@ namespace Project.Gameplay.Gameplay.Selection
             {
                 return IsFriendly(cell) ? CellClickIntent.SelectFigure : CellClickIntent.None;
             }
-
             if (cell.IsFree)
+            {
                 return CellClickIntent.Move;
-
+            }
             if (IsFriendly(cell))
+            {
                 return CellClickIntent.SelectFigure;
+            }
 
             return CellClickIntent.Attack;
         }
@@ -146,8 +179,9 @@ namespace Project.Gameplay.Gameplay.Selection
         public void ClearSelection()
         {
             if (_selectedCell != null)
+            {
                 _logger.Debug("Selection cleared");
-
+            }
             _selectedCell = null;
             _figureSelectedPublisher.Publish(new FigureSelectedMessage(null, default));
         }
