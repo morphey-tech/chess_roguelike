@@ -73,7 +73,7 @@
       "passives": []
     },
     {
-      "id": "push",
+      "id": "pusher",
       "movement_id": "pawn",
       "attack_id": "simple",
       "stats_id": "pusher_stats",

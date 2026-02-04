@@ -64,6 +64,10 @@ namespace Project.Unity.Unity.Views
             {
                 _logger.Warning($"Failed to instantiate view '{viewAssetKey}' for {figure}");
             }
+            
+            var selectPresenter = controllerLink.GetComponent<FigureSelectPresenter>();
+            if (selectPresenter != null)
+                selectPresenter.InitSelecting();
 
             var spawnPresenter = controllerLink.GetComponent<FigureSpawnPresenter>();
             if (spawnPresenter != null)
