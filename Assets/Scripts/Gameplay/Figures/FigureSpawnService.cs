@@ -92,7 +92,6 @@ namespace Project.Gameplay.Gameplay.Figures
                 description.TurnPatternsId,
                 stats, 
                 team);
-            _objectResolver.Inject(figure.View);
 
             if (description.Passives != null)
             {
