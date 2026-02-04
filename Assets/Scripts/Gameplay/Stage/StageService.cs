@@ -34,6 +34,8 @@ namespace Project.Gameplay.Gameplay.Stage
         private readonly TurnSystem _turnSystem;
         private readonly ILogger<StageService> _logger;
         private readonly IDisposable _subscriptions;
+        
+        private bool _bonusMoveInProgress;
 
         [Inject]
         private StageService(
@@ -49,6 +51,7 @@ namespace Project.Gameplay.Gameplay.Stage
             ISubscriber<FigureSelectedMessage> selectionSubscriber,
             ISubscriber<FigureDeselectedMessage> figureDeselectedSubscriber,
             ISubscriber<TurnChangedMessage> turnSubscriber,
+            ISubscriber<BonusMoveStartedMessage> bonusMoveStartedSubscriber,
             ISubscriber<BonusMoveCompletedMessage> bonusMoveCompletedSubscriber,
             ILogService logService)
         {
@@ -67,6 +70,7 @@ namespace Project.Gameplay.Gameplay.Stage
             selectionSubscriber.Subscribe(OnFigureSelected).AddTo(bag);
             figureDeselectedSubscriber.Subscribe(OnFigureDeselected).AddTo(bag);
             turnSubscriber.Subscribe(OnTurnChanged).AddTo(bag);
+            bonusMoveStartedSubscriber.Subscribe(OnBonusMoveStarted).AddTo(bag);
             bonusMoveCompletedSubscriber.Subscribe(OnBonusMoveCompleted).AddTo(bag);
             _subscriptions = bag.Build();
 
@@ -118,8 +122,15 @@ namespace Project.Gameplay.Gameplay.Stage
             ExecuteTurnAsync(actor, from, to, grid).Forget();
         }
 
+        private void OnBonusMoveStarted(BonusMoveStartedMessage message)
+        {
+            _bonusMoveInProgress = true;
+            _logger.Debug($"Bonus move started for {message.Actor}");
+        }
+
         private void OnBonusMoveCompleted(BonusMoveCompletedMessage message)
         {
+            _bonusMoveInProgress = false;
             _logger.Info($"Bonus move completed for {message.Actor}");
             ClearHighlights();
             _turnSystem.EndTurn();
@@ -155,7 +166,8 @@ namespace Project.Gameplay.Gameplay.Stage
         private void OnFigureSelected(FigureSelectedMessage message)
         {
             // Don't change highlights during bonus move
-            if (_bonusMoveController.IsActive)
+            // Using our flag to avoid race conditions with BonusMoveController.Clear()
+            if (_bonusMoveInProgress)
                 return;
 
             if (message.Figure != null)
@@ -179,6 +191,9 @@ namespace Project.Gameplay.Gameplay.Stage
         private void OnTurnChanged(TurnChangedMessage message)
         {
             _logger.Info($"Turn {message.TurnNumber}: {message.CurrentTeam}'s turn");
+            
+            // Reset bonus move flag as safety measure
+            _bonusMoveInProgress = false;
             
             // Cancel any pending bonus move on turn change
             if (_bonusMoveController.IsActive)

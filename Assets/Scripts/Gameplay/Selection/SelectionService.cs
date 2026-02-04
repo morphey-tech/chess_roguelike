@@ -180,6 +180,12 @@ namespace Project.Gameplay.Gameplay.Selection
         {
             if (_selectedCell != null)
             {
+                // Deselect the figure first to remove SelectTag
+                Figure figure = _selectedCell.OccupiedBy;
+                if (figure != null)
+                {
+                    Deselect(figure);
+                }
                 _logger.Debug("Selection cleared");
             }
             _selectedCell = null;
