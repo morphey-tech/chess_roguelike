@@ -8,9 +8,18 @@ using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Combat.Effects;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
+using Project.Gameplay.Gameplay.Visual;
 
 namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
 {
+    /// <summary>
+    /// Executes attack action.
+    /// 
+    /// PIPELINE:
+    /// 1. Domain: CombatResolver creates effects (no visuals)
+    /// 2. Domain: Effects apply game logic, queue visual commands via IVisualCommandSink
+    /// 3. Visual: VisualPipeline plays all animations
+    /// </summary>
     public sealed class AttackStep : ITurnStep
     {
         public string Id { get; }
@@ -18,7 +27,7 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
         private readonly AttackStrategyFactory _attackFactory;
         private readonly CombatResolver _combatResolver;
         private readonly PassiveTriggerService _passives;
-        private readonly IFigurePresenter _figurePresenter;
+        private readonly VisualPipeline _visualPipeline;
         private readonly IPublisher<FigureDeathMessage> _deathPublisher;
         private readonly ILogger<AttackStep> _logger;
 
@@ -27,7 +36,7 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
             AttackStrategyFactory attackFactory,
             CombatResolver combatResolver,
             PassiveTriggerService passives,
-            IFigurePresenter figurePresenter,
+            VisualPipeline visualPipeline,
             IPublisher<FigureDeathMessage> deathPublisher,
             ILogger<AttackStep> logger)
         {
@@ -35,7 +44,7 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
             _attackFactory = attackFactory;
             _combatResolver = combatResolver;
             _passives = passives;
-            _figurePresenter = figurePresenter;
+            _visualPipeline = visualPipeline;
             _deathPublisher = deathPublisher;
             _logger = logger;
         }
@@ -62,21 +71,25 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
             
             hitContext.AttackId = attackStrategy.Id;
 
+            // === DOMAIN PHASE ===
             CombatResult result = _combatResolver.Resolve(hitContext);
 
-            var effectContext = new CombatEffectContext(
+            using VisualScope scope = _visualPipeline.BeginScope();
+            CombatEffectContext effectContext = new(
                 context,
                 context.Grid,
-                _figurePresenter,
                 _deathPublisher,
                 _passives,
+                scope,
                 _logger);
 
-            // Apply all effects, including any dynamically added ones
-            await ApplyEffectsAsync(result.Effects, effectContext);
+            ApplyEffects(result.Effects, effectContext);
+
+            // === VISUAL PHASE ===
+            await scope.PlayAsync();
         }
 
-        private async UniTask ApplyEffectsAsync(IEnumerable<ICombatEffect> effects, CombatEffectContext context)
+        private void ApplyEffects(IEnumerable<ICombatEffect> effects, CombatEffectContext context)
         {
             var queue = new Queue<ICombatEffect>(effects);
             int effectIndex = 0;
@@ -89,18 +102,16 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
                 
                 _logger.Debug($"[{effectIndex++}] {effect.GetType().Name} (Phase: {effect.Phase}, Order: {effect.OrderInPhase})");
                 
-                await effect.ApplyAsync(context);
+                effect.Apply(context);
 
-                // Process any effects added during Apply (e.g., KillEffect from DealDamageEffect)
                 if (context.PendingEffects.Count > 0)
                 {
-                    // Sort pending effects by Phase, then OrderInPhase
                     var sorted = context.PendingEffects
                         .OrderBy(e => e.Phase)
                         .ThenBy(e => e.OrderInPhase)
                         .ToList();
                     
-                    foreach (var pending in sorted)
+                    foreach (ICombatEffect? pending in sorted)
                     {
                         _logger.Debug($"  + Queued: {pending.GetType().Name} (Phase: {pending.Phase})");
                         queue.Enqueue(pending);
@@ -109,7 +120,7 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
                 }
             }
             
-            _logger.Debug($"=== Effect Pipeline Complete ===");
+            _logger.Debug("=== Effect Pipeline Complete ===");
         }
     }
 }

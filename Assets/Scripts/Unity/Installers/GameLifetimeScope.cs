@@ -22,6 +22,8 @@ using Project.Gameplay.Gameplay.Turn.BonusMove;
 using Project.Gameplay.Gameplay.Turn.Conditions;
 using Project.Gameplay.Gameplay.Turn.Conditions.Impl;
 using Project.Gameplay.Gameplay.Turn.Execution;
+using Project.Gameplay.Gameplay.Visual;
+using Project.Gameplay.Gameplay.Visual.Commands;
 using Project.Gameplay.Presentations;
 using Project.Unity.Unity.Bootstrap;
 using Project.Unity.Unity.Views;
@@ -93,6 +95,12 @@ namespace Project.Unity.Unity.Installers
 
             builder.Register<FigurePresenter>(Lifetime.Singleton)
                 .As<IFigurePresenter>();
+
+            // Visual command pipeline
+            builder.Register<PresenterProvider>(Lifetime.Singleton)
+                .As<IPresenterProvider>();
+            builder.Register<VisualCommandExecutor>(Lifetime.Singleton);
+            builder.Register<VisualPipeline>(Lifetime.Singleton);
 
             builder.Register<PreparePresenter>(Lifetime.Singleton)
                 .As<IPreparePresenter>();

@@ -1,10 +1,11 @@
-using Cysharp.Threading.Tasks;
 using Project.Gameplay.Gameplay.Figures;
+using Project.Gameplay.Gameplay.Visual.Commands.Contexts;
+using Project.Gameplay.Gameplay.Visual.Commands.Impl;
 
 namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
 {
     /// <summary>
-    /// Logs bonus damage from passives (e.g., push blocked damage).
+    /// Queues bonus damage visual from passives (e.g., push blocked damage).
     /// Note: actual damage is already applied during passive execution.
     /// </summary>
     public sealed class BonusDamageEffect : ICombatEffect
@@ -23,13 +24,14 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
             _source = source;
         }
 
-        public UniTask ApplyAsync(CombatEffectContext context)
+        public void Apply(CombatEffectContext context)
         {
             if (_bonusDamage > 0)
             {
+                var visualCtx = new DamageVisualContext(_target.Id, _bonusDamage, damageType: _source);
+                context.Visuals.Enqueue(new DamageCommand(visualCtx));
                 context.Logger.Info($"{_target} took {_bonusDamage} bonus damage from {_source}. HP: {_target.Stats.CurrentHp}/{_target.Stats.MaxHp}");
             }
-            return UniTask.CompletedTask;
         }
     }
 }

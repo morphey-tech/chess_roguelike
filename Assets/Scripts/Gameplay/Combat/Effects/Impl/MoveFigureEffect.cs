@@ -1,11 +1,12 @@
-using Cysharp.Threading.Tasks;
 using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Figures;
+using Project.Gameplay.Gameplay.Visual.Commands.Contexts;
+using Project.Gameplay.Gameplay.Visual.Commands.Impl;
 
 namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
 {
     /// <summary>
-    /// Moves the attacker to a new position (e.g., retreat after attack).
+    /// Queues move visual command for a figure (e.g., retreat after attack).
     /// Note: grid state is already updated during passive execution.
     /// </summary>
     public sealed class MoveFigureEffect : ICombatEffect
@@ -24,17 +25,19 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
             _updateActionContextFrom = updateActionContextFrom;
         }
 
-        public UniTask ApplyAsync(CombatEffectContext context)
+        public void Apply(CombatEffectContext context)
         {
             context.Logger.Info($"{_figure} moved to ({_newPosition.Row}, {_newPosition.Column})");
-            context.FigurePresenter.MoveFigure(_figure.Id, _newPosition);
             
+            // Visual: Queue move command
+            var visualCtx = new MoveVisualContext(_figure.Id, _newPosition);
+            context.Visuals.Enqueue(new MoveCommand(visualCtx));
+            
+            // Domain: Update context if needed
             if (_updateActionContextFrom)
             {
                 context.ActionContext.From = _newPosition;
             }
-            
-            return UniTask.CompletedTask;
         }
     }
 }

@@ -1,4 +1,3 @@
-using Cysharp.Threading.Tasks;
 using Project.Gameplay.Gameplay.Figures;
 
 namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
@@ -27,11 +26,10 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
             _distance = distance;
         }
 
-        public UniTask ApplyAsync(CombatEffectContext context)
+        public void Apply(CombatEffectContext context)
         {
             context.Logger.Info($"{_figure} gets bonus move with distance {_distance}");
             context.ActionContext.BonusMoveDistance = _distance;
-            return UniTask.CompletedTask;
         }
     }
 }

@@ -1,6 +1,7 @@
-using Cysharp.Threading.Tasks;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
+using Project.Gameplay.Gameplay.Visual.Commands.Contexts;
+using Project.Gameplay.Gameplay.Visual.Commands.Impl;
 
 namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
 {
@@ -24,19 +25,20 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
             _damage = damage;
         }
 
-        public UniTask ApplyAsync(CombatEffectContext context)
+        public void Apply(CombatEffectContext context)
         {
             if (_target == null || _target.Stats.CurrentHp <= 0)
-                return UniTask.CompletedTask;
+                return;
 
-            // Apply damage
+            // Domain: Apply damage
             bool died = _target.Stats.TakeDamage(_damage);
             
-            // Visual
-            context.FigurePresenter.PlayDamageEffect(_target.Id);
+            // Visual: Queue damage effect
+            var visualCtx = new DamageVisualContext(_target.Id, _damage, damageType: "pierce");
+            context.Visuals.Enqueue(new DamageCommand(visualCtx));
             context.Logger.Info($"Pierce hit {_target} for {_damage} damage. HP: {_target.Stats.CurrentHp}/{_target.Stats.MaxHp}");
 
-            // If died, add KillEffect
+            // Domain: If died, add KillEffect
             if (died)
             {
                 context.Passives.TriggerKill(_attacker, _target);
@@ -45,8 +47,6 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
                 BoardCell cell = context.Grid.FindFigure(_target);
                 context.PendingEffects.Add(new KillEffect(_target, cell, "pierce"));
             }
-
-            return UniTask.CompletedTask;
         }
     }
 }

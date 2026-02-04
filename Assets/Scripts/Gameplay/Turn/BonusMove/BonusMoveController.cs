@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using MessagePipe;
 using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
@@ -106,7 +107,7 @@ namespace Project.Gameplay.Gameplay.Turn.BonusMove
 
             // Execute the move
             _movementService.MoveFigure(_from, to);
-            _figurePresenter.MoveFigure(_actor.Id, to);
+            _figurePresenter.MoveFigureAsync(_actor.Id, to).Forget();
             
             _logger.Info($"{_actor} bonus moved to ({to.Row},{to.Column})");
             

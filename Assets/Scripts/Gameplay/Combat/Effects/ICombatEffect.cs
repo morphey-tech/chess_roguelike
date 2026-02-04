@@ -1,10 +1,14 @@
-using Cysharp.Threading.Tasks;
-
 namespace Project.Gameplay.Gameplay.Combat.Effects
 {
     /// <summary>
     /// Represents a single effect produced by combat (damage, heal, push, etc.)
     /// Effects are created during combat resolution and applied sequentially by AttackStep.
+    /// 
+    /// DESIGN RULES:
+    /// - Effects are SYNCHRONOUS (no async) - they only mutate domain state
+    /// - Effects queue visual commands via context.Visuals.Enqueue()
+    /// - Visuals are executed AFTER all effects complete
+    /// - This ensures predictable ordering and no race conditions
     /// </summary>
     public interface ICombatEffect
     {
@@ -21,8 +25,11 @@ namespace Project.Gameplay.Gameplay.Combat.Effects
         int OrderInPhase { get; }
         
         /// <summary>
-        /// Apply this effect: update visuals, publish events, modify context.
+        /// Apply this effect synchronously.
+        /// - Mutate domain state (HP, position, etc.)
+        /// - Queue visual commands via context.Visuals.Enqueue()
+        /// - Add follow-up effects via context.AddEffect()
         /// </summary>
-        UniTask ApplyAsync(CombatEffectContext context);
+        void Apply(CombatEffectContext context);
     }
 }

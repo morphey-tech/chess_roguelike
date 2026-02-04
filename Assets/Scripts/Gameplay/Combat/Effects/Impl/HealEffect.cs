@@ -1,10 +1,11 @@
-using Cysharp.Threading.Tasks;
 using Project.Gameplay.Gameplay.Figures;
+using Project.Gameplay.Gameplay.Visual.Commands.Contexts;
+using Project.Gameplay.Gameplay.Visual.Commands.Impl;
 
 namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
 {
     /// <summary>
-    /// Logs healing that occurred during combat (e.g., from lifesteal).
+    /// Queues heal visual command.
     /// Note: actual healing is already applied during passive execution.
     /// 
     /// FLEXIBILITY: If heal needs to happen before thorns/secondary damage,
@@ -31,13 +32,15 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
             OrderInPhase = orderInPhase;
         }
 
-        public UniTask ApplyAsync(CombatEffectContext context)
+        public void Apply(CombatEffectContext context)
         {
             if (_healedAmount > 0)
             {
+                // Visual: Queue heal effect
+                var visualCtx = new HealVisualContext(_target.Id, _healedAmount);
+                context.Visuals.Enqueue(new HealCommand(visualCtx));
                 context.Logger.Info($"{_target} healed for {_healedAmount}. HP: {_target.Stats.CurrentHp}/{_target.Stats.MaxHp}");
             }
-            return UniTask.CompletedTask;
         }
     }
 }

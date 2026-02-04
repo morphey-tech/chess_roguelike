@@ -1,11 +1,12 @@
-using Cysharp.Threading.Tasks;
 using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Figures;
+using Project.Gameplay.Gameplay.Visual.Commands.Contexts;
+using Project.Gameplay.Gameplay.Visual.Commands.Impl;
 
 namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
 {
     /// <summary>
-    /// Visual effect for pushing a figure to a new position.
+    /// Queues push visual command for a figure.
     /// Note: grid state is already updated during passive execution.
     /// </summary>
     public sealed class PushEffect : ICombatEffect
@@ -14,19 +15,21 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
         public int OrderInPhase => 0;
 
         private readonly Figure _target;
-        private readonly GridPosition _newPosition;
+        private readonly GridPosition _fromPosition;
+        private readonly GridPosition _toPosition;
 
-        public PushEffect(Figure target, GridPosition newPosition)
+        public PushEffect(Figure target, GridPosition fromPosition, GridPosition toPosition)
         {
             _target = target;
-            _newPosition = newPosition;
+            _fromPosition = fromPosition;
+            _toPosition = toPosition;
         }
 
-        public UniTask ApplyAsync(CombatEffectContext context)
+        public void Apply(CombatEffectContext context)
         {
-            context.Logger.Info($"{_target} pushed to ({_newPosition.Row}, {_newPosition.Column})");
-            context.FigurePresenter.MoveFigure(_target.Id, _newPosition);
-            return UniTask.CompletedTask;
+            context.Logger.Info($"{_target} pushed from ({_fromPosition.Row}, {_fromPosition.Column}) to ({_toPosition.Row}, {_toPosition.Column})");
+            var visualCtx = new PushVisualContext(_target.Id, _fromPosition, _toPosition);
+            context.Visuals.Enqueue(new PushCommand(visualCtx));
         }
     }
 }

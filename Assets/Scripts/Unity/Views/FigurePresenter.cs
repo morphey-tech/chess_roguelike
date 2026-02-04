@@ -15,6 +15,14 @@ namespace Project.Unity.Unity.Views
 {
     public sealed class FigurePresenter : IFigurePresenter
     {
+        private const string FigureControllerAssetKey = "figure_controller";
+        private const int MoveAnimationDurationMs = 300;
+        private const int AttackAnimationDurationMs = 200;
+        private const int DamageFlashDurationMs = 160;
+        private const int HealEffectDurationMs = 300;
+        private const int DeathAnimationDurationMs = 500;
+        private const int PushAnimationDurationMs = 200;
+        
         private readonly PresentationManager _presentationManager;
         private readonly IWorldRoot _worldRoot;
         private readonly ILogger<FigurePresenter> _logger;
@@ -33,8 +41,6 @@ namespace Project.Unity.Unity.Views
             _logger = logService.CreateLogger<FigurePresenter>();
             _logger.Info("FigurePresenter created");
         }
-
-        private const string FigureControllerAssetKey = "figure_controller";
 
         public async UniTask CreateFigure(Figure figure, string viewAssetKey, GridPosition pos, Team team)
         {
@@ -80,7 +86,7 @@ namespace Project.Unity.Unity.Views
             _logger.Info($"Figure {figure} ({viewAssetKey}) created at ({pos.Row}, {pos.Column}), team: {team}");
         }
 
-        public void MoveFigure(int figureId, GridPosition to)
+        public async UniTask MoveFigureAsync(int figureId, GridPosition to)
         {
             if (!_figures.TryGetValue(figureId, out GameObject figureGO))
             {
@@ -92,35 +98,28 @@ namespace Project.Unity.Unity.Views
 
             if (_figureViews.TryGetValue(figureId, out IFigureView view))
             {
-                view.PlayMoveAsync(newWorldPos).Forget();
+                await view.PlayMoveAsync(newWorldPos);
             }
             else
             {
                 figureGO.transform.position = newWorldPos;
+                await UniTask.Delay(MoveAnimationDurationMs);
             }
 
             _positions[figureId] = to;
             _logger.Info($"Figure {figureId} moved to ({to.Row}, {to.Column})");
         }
 
-        public void RemoveFigure(int figureId)
+        public async UniTask RemoveFigureAsync(int figureId)
         {
             if (!_figures.TryGetValue(figureId, out GameObject figureGO))
                 return;
 
             if (_figureViews.TryGetValue(figureId, out IFigureView view))
             {
-                PlayDeathAndDestroy(figureId, figureGO, view).Forget();
+                await view.PlayDeathAsync();
             }
-            else
-            {
-                CleanupFigure(figureId, figureGO);
-            }
-        }
-
-        private async UniTaskVoid PlayDeathAndDestroy(int figureId, GameObject figureGO, IFigureView view)
-        {
-            await view.PlayDeathAsync();
+            
             CleanupFigure(figureId, figureGO);
         }
 
@@ -134,34 +133,72 @@ namespace Project.Unity.Unity.Views
             _logger.Debug($"Figure {figureId} removed");
         }
 
-        public void PlayAttack(int figureId, GridPosition target)
+        public async UniTask PlayAttackAsync(int figureId, GridPosition target)
         {
             if (_figureViews.TryGetValue(figureId, out IFigureView view))
             {
                 Vector3 targetPos = GetCellTopPosition(target);
-                view.PlayAttackAsync(targetPos).Forget();
+                await view.PlayAttackAsync(targetPos);
+            }
+            else
+            {
+                await UniTask.Delay(AttackAnimationDurationMs);
             }
         }
 
-        public void PlayDamageEffect(int figureId)
+        public async UniTask PlayDamageEffectAsync(int figureId)
         {
             if (!_figures.TryGetValue(figureId, out GameObject figureGO))
                 return;
 
-            PlaySimpleDamageEffect(figureGO).Forget();
+            await PlaySimpleDamageEffect(figureGO);
         }
 
-        public void PlayDeathEffect(int figureId)
+        public async UniTask PlayHealEffectAsync(int figureId)
+        {
+            if (!_figures.TryGetValue(figureId, out GameObject figureGO))
+                return;
+
+            await PlaySimpleHealEffect(figureGO);
+        }
+
+        public async UniTask PlayDeathEffectAsync(int figureId)
         {
             if (_figureViews.TryGetValue(figureId, out IFigureView view))
             {
-                view.PlayDeathAsync().Forget();
+                await view.PlayDeathAsync();
             }
+            else
+            {
+                await UniTask.Delay(DeathAnimationDurationMs);
+            }
+        }
+
+        public async UniTask PlayPushEffectAsync(int figureId, GridPosition from, GridPosition to)
+        {
+            if (!_figures.TryGetValue(figureId, out GameObject figureGO))
+                return;
+
+            Vector3 newWorldPos = GetCellTopPosition(to);
+
+            if (_figureViews.TryGetValue(figureId, out IFigureView view))
+            {
+                // Could have a special push animation, for now use move
+                await view.PlayMoveAsync(newWorldPos);
+            }
+            else
+            {
+                figureGO.transform.position = newWorldPos;
+                await UniTask.Delay(PushAnimationDurationMs);
+            }
+
+            _positions[figureId] = to;
+            _logger.Info($"Figure {figureId} pushed from ({from.Row}, {from.Column}) to ({to.Row}, {to.Column})");
         }
 
         private static readonly int ColorId = Shader.PropertyToID("_Color");
 
-        private async UniTaskVoid PlaySimpleDamageEffect(GameObject figureGO)
+        private async UniTask PlaySimpleDamageEffect(GameObject figureGO)
         {
             if (figureGO == null) return;
 
@@ -200,6 +237,46 @@ namespace Project.Unity.Unity.Views
                 if (figureGO == null) return;
                 
                 foreach (var (r, _) in originalMaterials)
+                {
+                    if (r == null) continue;
+                    foreach (Material mat in r.materials)
+                    {
+                        if (mat.HasProperty(ColorId))
+                            mat.SetColor(ColorId, Color.white);
+                    }
+                }
+                
+                await UniTask.Delay(flashDelayMs);
+            }
+        }
+
+        private async UniTask PlaySimpleHealEffect(GameObject figureGO)
+        {
+            if (figureGO == null) return;
+
+            Renderer[] renderers = figureGO.GetComponentsInChildren<Renderer>();
+            if (renderers.Length == 0) return;
+
+            Color healColor = Color.green;
+            const int flashDelayMs = 100;
+            const int flashCount = 2;
+
+            for (int i = 0; i < flashCount && figureGO != null; i++)
+            {
+                foreach (Renderer r in renderers)
+                {
+                    if (r == null) continue;
+                    foreach (Material mat in r.materials)
+                    {
+                        if (mat.HasProperty(ColorId))
+                            mat.SetColor(ColorId, healColor);
+                    }
+                }
+                
+                await UniTask.Delay(flashDelayMs);
+                if (figureGO == null) return;
+                
+                foreach (Renderer r in renderers)
                 {
                     if (r == null) continue;
                     foreach (Material mat in r.materials)

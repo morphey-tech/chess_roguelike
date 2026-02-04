@@ -1,10 +1,11 @@
-using Cysharp.Threading.Tasks;
 using Project.Gameplay.Gameplay.Figures;
+using Project.Gameplay.Gameplay.Visual.Commands.Contexts;
+using Project.Gameplay.Gameplay.Visual.Commands.Impl;
 
 namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
 {
     /// <summary>
-    /// Visual effect for thorns damage reflection.
+    /// Queues thorns damage reflection visual.
     /// Note: actual damage is already applied during passive execution.
     /// </summary>
     public sealed class ThornsReflectEffect : ICombatEffect
@@ -21,11 +22,12 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
             _reflectedDamage = reflectedDamage;
         }
 
-        public UniTask ApplyAsync(CombatEffectContext context)
+        public void Apply(CombatEffectContext context)
         {
-            context.FigurePresenter.PlayDamageEffect(_attacker.Id);
+            // Visual: Queue damage effect on attacker
+            var visualCtx = new DamageVisualContext(_attacker.Id, _reflectedDamage, damageType: "thorns");
+            context.Visuals.Enqueue(new DamageCommand(visualCtx));
             context.Logger.Info($"{_attacker} takes {_reflectedDamage} thorns damage. HP: {_attacker.Stats.CurrentHp}/{_attacker.Stats.MaxHp}");
-            return UniTask.CompletedTask;
         }
     }
 }

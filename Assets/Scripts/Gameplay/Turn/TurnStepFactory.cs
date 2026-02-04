@@ -8,6 +8,7 @@ using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Turn.Steps;
 using Project.Gameplay.Gameplay.Turn.Steps.Impl;
+using Project.Gameplay.Gameplay.Visual;
 
 namespace Project.Gameplay.Gameplay.Turn
 {
@@ -17,7 +18,7 @@ namespace Project.Gameplay.Gameplay.Turn
         private readonly AttackStrategyFactory _attackFactory;
         private readonly CombatResolver _combatResolver;
         private readonly PassiveTriggerService _passives;
-        private readonly IFigurePresenter _figurePresenter;
+        private readonly VisualPipeline _visualPipeline;
         private readonly IPublisher<FigureDeathMessage> _deathPublisher;
         private readonly ILogService _logService;
 
@@ -26,7 +27,7 @@ namespace Project.Gameplay.Gameplay.Turn
             AttackStrategyFactory attackFactory,
             CombatResolver combatResolver,
             PassiveTriggerService passives,
-            IFigurePresenter figurePresenter,
+            VisualPipeline visualPipeline,
             IPublisher<FigureDeathMessage> deathPublisher,
             ILogService logService)
         {
@@ -34,7 +35,7 @@ namespace Project.Gameplay.Gameplay.Turn
             _attackFactory = attackFactory;
             _combatResolver = combatResolver;
             _passives = passives;
-            _figurePresenter = figurePresenter;
+            _visualPipeline = visualPipeline;
             _deathPublisher = deathPublisher;
             _logService = logService;
         }
@@ -47,9 +48,9 @@ namespace Project.Gameplay.Gameplay.Turn
 
             return config.Type switch
             {
-                "move" => new MoveStep(stepId, _movementService, _figurePresenter),
-                "attack" => new AttackStep(stepId, _attackFactory, _combatResolver, _passives, _figurePresenter, _deathPublisher, _logService.CreateLogger<AttackStep>()),
-                "move_to_killed" => new MoveToKilledTargetStep(_movementService, _figurePresenter, _logService),
+                "move" => new MoveStep(stepId, _movementService, _visualPipeline),
+                "attack" => new AttackStep(stepId, _attackFactory, _combatResolver, _passives, _visualPipeline, _deathPublisher, _logService.CreateLogger<AttackStep>()),
+                "move_to_killed" => new MoveToKilledTargetStep(_movementService, _visualPipeline, _logService),
                 "composite" => CreateComposite(stepId, config.Steps),
                 _ => throw new Exception($"Unknown step type: {config.Type}")
             };

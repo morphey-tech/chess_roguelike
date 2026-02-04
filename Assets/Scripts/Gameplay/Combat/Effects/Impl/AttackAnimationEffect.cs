@@ -1,11 +1,12 @@
-using Cysharp.Threading.Tasks;
 using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Figures;
+using Project.Gameplay.Gameplay.Visual.Commands.Contexts;
+using Project.Gameplay.Gameplay.Visual.Commands.Impl;
 
 namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
 {
     /// <summary>
-    /// Plays attack animation on the attacker.
+    /// Queues attack animation command.
     /// </summary>
     public sealed class AttackAnimationEffect : ICombatEffect
     {
@@ -23,11 +24,11 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
             _attackId = attackId;
         }
 
-        public UniTask ApplyAsync(CombatEffectContext context)
+        public void Apply(CombatEffectContext context)
         {
-            context.FigurePresenter.PlayAttack(_attacker.Id, _targetPosition);
+            var visualCtx = new AttackVisualContext(_attacker.Id, _targetPosition, _attackId);
+            context.Visuals.Enqueue(new AttackCommand(visualCtx));
             context.Logger.Info($"{_attacker} [{_attackId}] attacks");
-            return UniTask.CompletedTask;
         }
     }
 }
