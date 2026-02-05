@@ -62,7 +62,7 @@ namespace Project.Gameplay.Gameplay.Run
             BoardConfig boardConfig = await LoadBoardConfig(stageConfig);
 
             var grid = await _boardSpawnService.SpawnAsync(boardConfig.Id);
-            List<IStagePhase> phases = _phaseFactory.CreatePhasesForStage(stageConfig);
+            List<IStagePhase> phases = await _phaseFactory.CreatePhasesForStageAsync(stageConfig);
             CurrentStage = _stageFactory.Create(stageConfig, grid, _runStateService.Current!, phases);
             await CurrentStage.BeginAsync();
         }

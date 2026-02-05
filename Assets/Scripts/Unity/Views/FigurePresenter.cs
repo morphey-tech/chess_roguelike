@@ -61,10 +61,14 @@ namespace Project.Unity.Unity.Views
             }
 
             GameObject controller = controllerLink.gameObject;
+            
+            // IMMEDIATELY hide to prevent flicker - before any other operations
+            controller.transform.localScale = Vector3.zero;
+            
             _figures[figure.Id] = controller;
             _positions[figure.Id] = pos;
 
-            // Spawn view as child of controller
+            // Spawn view as child of controller (still hidden because parent scale is 0)
             GameObject viewGO = await _presentationManager.InstantiateAsChild(viewAssetKey, controller.transform);
             if (viewGO == null)
             {
@@ -74,14 +78,22 @@ namespace Project.Unity.Unity.Views
             var selectPresenter = controllerLink.GetComponent<FigureSelectPresenter>();
             if (selectPresenter != null)
                 selectPresenter.InitSelecting();
-
-            var spawnPresenter = controllerLink.GetComponent<FigureSpawnPresenter>();
-            if (spawnPresenter != null)
-                spawnPresenter.PlaySpawnAsync().Forget();
                 
             var view = controllerLink.GetComponent<IFigureView>();
             if (view != null)
                 _figureViews[figure.Id] = view;
+
+            // NOW play spawn animation (scale from 0 to 1)
+            var spawnPresenter = controllerLink.GetComponent<FigureSpawnPresenter>();
+            if (spawnPresenter != null)
+            {
+                spawnPresenter.PlaySpawnAsync().Forget();
+            }
+            else
+            {
+                // No spawn presenter - just set scale to 1
+                controller.transform.localScale = Vector3.one;
+            }
 
             _logger.Info($"Figure {figure} ({viewAssetKey}) created at ({pos.Row}, {pos.Column}), team: {team}");
         }

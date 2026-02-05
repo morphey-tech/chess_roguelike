@@ -9,15 +9,9 @@ namespace Project.Gameplay.Presentations
   public class PresentationManagerInstances : IPresentationsMap
   {
     private readonly Dictionary<int, EntityLink> _presentationsList = new();
-    
-    private readonly List<IPresenter> _presenterBuffer = new();
 
     public void InitEntity(Entity entity, GameObject instance)
     {
-      // наверн заменю потом Id на структуру Entity шоб держать там ещё поле Gen для понимания в какой раз этот айдишник юзается
-      /*if(!entity.Unpack(_world, out var entId))
-        return;*/
-
       try
       {
         if(!instance.TryGetComponent(out EntityLink link))
@@ -26,20 +20,23 @@ namespace Project.Gameplay.Presentations
         link.Init(entity, this);
         link.Map = this;
         
-        _presenterBuffer.Clear();
-        instance.GetComponentsInChildren(includeInactive:true, _presenterBuffer);
+        // Create new list each time to avoid race conditions during parallel spawning
+        List<IPresenter> presenters = new List<IPresenter>();
+        instance.GetComponentsInChildren(includeInactive:true, presenters);
+        
+        Debug.Log($"[PresentationManagerInstances] InitEntity {instance.name}: found {presenters.Count} presenters");
+        
+        foreach (IPresenter presenter in presenters)
         {
-          foreach (var presenter in _presenterBuffer)
+          try
           {
-            try
-            {
-              ((MonoBehaviour)presenter).enabled = true;
-              presenter.Init(link);
-            }
-            catch (Exception e)
-            {
-            //  _logger.Exception(e);
-            }
+            ((MonoBehaviour)presenter).enabled = true;
+            presenter.Init(link);
+            Debug.Log($"[PresentationManagerInstances] Initialized presenter {presenter.GetType().Name} on {instance.name}");
+          }
+          catch (Exception e)
+          {
+            Debug.LogError($"[PresentationManagerInstances] Failed to init presenter: {e.Message}");
           }
         }
 
@@ -48,7 +45,7 @@ namespace Project.Gameplay.Presentations
       }
       catch (Exception e)
       {
-      //  _logger.Exception(new Exception($"Exception while spawning presentation: {asset}", e));
+        Debug.LogError($"[PresentationManagerInstances] InitEntity failed: {e.Message}");
       }
     }
 

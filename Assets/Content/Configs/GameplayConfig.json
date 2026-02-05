@@ -1,0 +1,5 @@
+{
+  "hideEnemiesDuringPrepare": true,
+  "figureSpawnDuration": 0.3,
+  "prepareSlotSpawnDelay": 0.05
+}

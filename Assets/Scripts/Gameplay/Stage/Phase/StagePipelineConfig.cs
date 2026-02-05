@@ -13,8 +13,8 @@ namespace Project.Gameplay.Gameplay.Stage.Phase
                 StageType.Duel, new[]
                 {
                     typeof(BoardSpawnPhase),
-                    typeof(FiguresSpawnPhase),
-                    typeof(PreparePlacementPhase),
+                    typeof(PreparePlacementPhase),  // Player places figures first
+                    typeof(FiguresSpawnPhase),       // Enemies spawn after player is ready
                     typeof(GameplayInitPhase),
                     typeof(BattleDuelPhase)
                 }

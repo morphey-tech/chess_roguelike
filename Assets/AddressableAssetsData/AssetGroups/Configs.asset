@@ -15,80 +15,101 @@ MonoBehaviour:
   m_GroupName: Configs
   m_GUID: d5bda6645f02ab1428bf65697a591e97
   m_SerializeEntries:
+  - m_GUID: 29b7da3d075af6446987422230eb2f18
+    m_Address: gameplay_conf
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - configs
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2d3dff0a4d4d428f95399db492d577d2
     m_Address: suites_conf
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - configs
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3489d7399eb8403697b0c6bae94657c6
     m_Address: figures_conf
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - configs
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 42bf2a48d2a64b038584eb1f8c7b6e17
     m_Address: stats_conf
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - configs
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4d6e23e9b6365d4489fd0c8f413b91e2
     m_Address: spawn_patterns_conf
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - configs
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 71a38210a05b9e541ae35b7db82fd859
     m_Address: turn_patterns_conf
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - configs
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 75a89f9811af4340b39e0e64beed6c64
     m_Address: stages_conf
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - configs
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7c60432051cc6c44dbdc057d23564b51
     m_Address: boards_conf
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - configs
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8054c6f82aee7f24f81b70bc4e904c43
     m_Address: conditions_conf
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - configs
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 817ca298577143b4bd44135544c40d67
     m_Address: runs_conf
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - configs
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b50dfd490fa9473588ba8e1f40b936ad
     m_Address: duels_conf
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - configs
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: bcae791c0df0580419a40b88dc299341
     m_Address: cells_conf
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - configs
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c2e620b9989a8cb4f81d612d9f12022a
     m_Address: player_conf
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - configs
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d65a552683d47384ba5498395ca5521c
     m_Address: passives_conf
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - configs
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: df6c64e4b98c22f499b605ccd6bfa21c
     m_Address: figure_descriptions_conf
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - configs
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e334b493a4f610845b1921b168524e4d
     m_Address: turn_pattern_descriptions_conf
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - configs
     FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 619719904bd153b4fb62260efbf16a67, type: 2}

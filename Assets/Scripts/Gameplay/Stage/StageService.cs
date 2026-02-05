@@ -148,8 +148,14 @@ namespace Project.Gameplay.Gameplay.Stage
         private void HighlightPositions(IEnumerable<MovementStrategyResult> positions)
         {
             if (_movementService.Grid == null)
+            {
+                _logger.Warning("HighlightPositions: Grid is null");
                 return;
+            }
 
+            int highlightCount = 0;
+            int attackCount = 0;
+            
             foreach (var boardCell in _movementService.Grid.AllCells())
             {
                 var strategyResult = positions?.FirstOrDefault(p =>
@@ -163,11 +169,19 @@ namespace Project.Gameplay.Gameplay.Stage
                 else
                 {
                     if (strategyResult.IsFree)
+                    {
                         boardCell.EnsureComponent(new HighlightTag());
+                        highlightCount++;
+                    }
                     else
+                    {
                         boardCell.EnsureComponent(new AttackHighlightTag());
+                        attackCount++;
+                    }
                 }
             }
+            
+            _logger.Info($"HighlightPositions: Added {highlightCount} move highlights, {attackCount} attack highlights");
         }
     }
 }

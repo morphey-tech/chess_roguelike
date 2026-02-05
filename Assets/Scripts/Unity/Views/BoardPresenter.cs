@@ -124,7 +124,7 @@ namespace Project.Unity.Unity.Views
         public async UniTask PlayBoardAppearAsync(string strategyId)
         {
             await UniTask.Yield(); // Wait for all cells to instantiate
-
+            
             IBoardAppearAnimationStrategy strategy = _animationFactory.Get(strategyId);
             _logger.Info($"Playing board appear: {strategy.Id}");
 

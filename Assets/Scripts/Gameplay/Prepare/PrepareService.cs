@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using MessagePipe;
 using Project.Core.Core.Grid;
@@ -61,21 +62,25 @@ namespace Project.Gameplay.Gameplay.Prepare
 
             _logger.Info($"Prepare started: {runState.FiguresInHand.Count} figures in hand");
 
-            await SpawnPrepareZoneAsync();
+            // Preload configs while showing prepare zone animation
+            // This prevents delay on first figure placement
+            UniTask preloadTask = _figureSpawnService.PreloadConfigsAsync();
+            UniTask spawnTask = SpawnPrepareZoneAsync();
+            
+            await UniTask.WhenAll(preloadTask, spawnTask);
         }
 
         private async UniTask SpawnPrepareZoneAsync()
         {
-            var figures = _runState.FiguresInHand;
-            int totalCount = figures.Count;
-            
-            for (int i = 0; i < totalCount; i++)
+            // Build data for presenter (domain doesn't know about visual timing)
+            List<PrepareZoneFigureData> figureDataList = new List<PrepareZoneFigureData>();
+            foreach (FigureState fig in _runState.FiguresInHand)
             {
-                FigureState fig = figures[i];
-                await _preparePresenter.CreateSlotWithFigureAsync(i, totalCount, fig.Id, fig.TypeId);
+                figureDataList.Add(new PrepareZoneFigureData(fig.Id, fig.TypeId));
             }
 
-            _logger.Info($"Spawned {totalCount} figures in prepare zone");
+            // Presenter handles all visual spawning with its own timing
+            await _preparePresenter.SpawnPrepareZoneAsync(figureDataList);
 
             if (_state.IsCompleted)
             {
@@ -155,21 +160,24 @@ namespace Project.Gameplay.Gameplay.Prepare
             }
 
             string figureId = state.Id;
+            string figureTypeId = state.TypeId;
+            
+            // IMMEDIATELY remove from prepare zone and clear selection
+            // This prevents ghost figures during async spawn
+            _preparePresenter.RemoveFigure(figureId);
+            _state.OnPlaced(figureId);
+            _previousSelectedId = null;
 
-            Figure figure = await _figureSpawnService.SpawnAsync(_grid, pos, state.TypeId, Team.Player);
+            // Now spawn on board (may take time on first call due to config loading)
+            Figure figure = await _figureSpawnService.SpawnAsync(_grid, pos, figureTypeId, Team.Player);
             if (figure == null)
             {
                 _logger.Error("Failed to spawn figure");
                 return;
             }
 
-            _preparePresenter.RemoveFigure(figureId);
-            _previousSelectedId = null;
-
             _runState.PlaceOnBoard(figureId, pos);
-            
-            _state.OnPlaced(figureId);
-            _logger.Info($"Placed {state.TypeId} at ({pos.Row}, {pos.Column})");
+            _logger.Info($"Placed {figureTypeId} at ({pos.Row}, {pos.Column})");
 
             if (_state.IsCompleted)
             {

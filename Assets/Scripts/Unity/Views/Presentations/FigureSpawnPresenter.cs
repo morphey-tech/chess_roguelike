@@ -17,11 +17,10 @@ namespace Project.Unity.Presentations
 
         public async UniTaskVoid PlaySpawnAsync()
         {
-            var targetScale = transform.localScale;
-            transform.localScale = Vector3.zero;
-            
+            // Scale is already 0 (set by FigurePresenter before this is called)
+            // Animate to full scale
             await transform
-                .DOScale(targetScale, _spawnDuration)
+                .DOScale(Vector3.one, _spawnDuration)
                 .SetEase(_spawnEase)
                 .AsyncWaitForCompletion();
         }

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using Project.Core.Core.Assets;
 using Project.Core.Core.Configs.Cells;
 using Project.Core.Core.Configs.Figure;
@@ -14,6 +15,7 @@ namespace Project.Unity.Unity.Views
     /// <summary>
     /// Unity implementation of IPreparePresenter.
     /// Spawns slots and figures in PrepareRoot.
+    /// Handles all visual timing internally.
     /// </summary>
     public sealed class PreparePresenter : IPreparePresenter
     {
@@ -24,16 +26,21 @@ namespace Project.Unity.Unity.Views
 
         private readonly Dictionary<string, GameObject> _figures = new();
         private readonly List<GameObject> _slots = new();
+        private readonly Dictionary<int, Vector3> _slotPositions = new();
         
-        private CellConfigRepository? _cellConfigCache;
-        private int _totalFigures;
+        private CellConfigRepository _cellConfigCache;
 
         private const float CellSize = 1f;
         private const float SlotOffsetZ = -2f;
         private const int MaxSlots = 8;
         private const string FigureControllerAssetKey = "figure_controller";
+        
+        // Animation settings
+        private const float SpawnDuration = 0.3f;
+        private const Ease SpawnEase = Ease.OutBack;
+        private const int SlotSpawnDelayMs = 50;
+        private const int FigureSpawnDelayMs = 80;
 
-        //TODO: имеются тут дебаговые вещицы ... пока так
         public PreparePresenter(
             IAssetService assetService,
             IWorldRoot worldRoot,
@@ -46,29 +53,53 @@ namespace Project.Unity.Unity.Views
             _logger = logService.CreateLogger<PreparePresenter>();
         }
 
-        public async UniTask CreateSlotWithFigureAsync(int index, int totalCount, string figureId, string figureTypeId)
+        public async UniTask SpawnPrepareZoneAsync(IReadOnlyList<PrepareZoneFigureData> figures)
         {
-            Vector3 slotPos = CalculateSlotPosition(index, totalCount);
+            int totalCount = figures.Count;
             
-            GameObject slot = await SpawnSlotAsync(slotPos);
-            if (slot != null)
+            // First: spawn all slots with animation delay
+            for (int i = 0; i < totalCount; i++)
             {
-                _slots.Add(slot);
-            }
-
-            GameObject figure = await SpawnFigureAsync(figureTypeId, slotPos);
-            if (figure != null)
-            {
-                _figures[figureId] = figure;
-                HandFigureMarker marker = figure.GetComponent<HandFigureMarker>();
-                if (marker == null)
+                Vector3 slotPos = CalculateSlotPosition(i, totalCount);
+                _slotPositions[i] = slotPos;
+                
+                GameObject slot = await SpawnSlotAsync(slotPos);
+                if (slot != null)
                 {
-                    marker = figure.AddComponent<HandFigureMarker>();
+                    _slots.Add(slot);
                 }
-                marker.Initialize(figureId);
+                
+                if (i < totalCount - 1)
+                    await UniTask.Delay(SlotSpawnDelayMs);
+            }
+            
+            _logger.Debug($"Spawned {totalCount} slots");
+            
+            // Second: spawn figures on slots with animation delay
+            for (int i = 0; i < totalCount; i++)
+            {
+                PrepareZoneFigureData figData = figures[i];
+                
+                if (!_slotPositions.TryGetValue(i, out Vector3 slotPos))
+                    continue;
+
+                GameObject figure = await SpawnFigureAsync(figData.FigureTypeId, slotPos);
+                if (figure != null)
+                {
+                    _figures[figData.FigureId] = figure;
+                    HandFigureMarker marker = figure.GetComponent<HandFigureMarker>();
+                    if (marker == null)
+                    {
+                        marker = figure.AddComponent<HandFigureMarker>();
+                    }
+                    marker.Initialize(figData.FigureId);
+                }
+                
+                if (i < totalCount - 1)
+                    await UniTask.Delay(FigureSpawnDelayMs);
             }
 
-            _logger.Debug($"Created slot {index}/{totalCount} with figure {figureTypeId} (id={figureId})");
+            _logger.Info($"Spawned {totalCount} figures in prepare zone");
         }
 
         public void RemoveFigure(string figureId)
@@ -101,6 +132,7 @@ namespace Project.Unity.Unity.Views
                 if (slot != null) Object.Destroy(slot);
             }
             _slots.Clear();
+            _slotPositions.Clear();
 
             _logger.Debug("Prepare zone cleared");
         }
@@ -127,11 +159,22 @@ namespace Project.Unity.Unity.Views
                 return null;
             }
 
-            return await _assetService.InstantiateAsync(
+            GameObject slot = await _assetService.InstantiateAsync(
                 cellConfig.AssetKey,
                 position,
                 Quaternion.identity,
                 _worldRoot.PrepareRoot);
+
+            if (slot != null)
+            {
+                // Spawn hidden, then animate
+                slot.transform.localScale = Vector3.zero;
+                slot.transform
+                    .DOScale(Vector3.one, SpawnDuration)
+                    .SetEase(SpawnEase);
+            }
+
+            return slot;
         }
 
         private async UniTask<GameObject> SpawnFigureAsync(string figureTypeId, Vector3 slotPosition)
@@ -158,8 +201,11 @@ namespace Project.Unity.Unity.Views
                 _logger.Error($"Failed to instantiate figure controller for {figureTypeId}");
                 return null;
             }
+            
+            // IMMEDIATELY hide to prevent flicker
+            controller.transform.localScale = Vector3.zero;
 
-            // Spawn view as child of controller
+            // Spawn view as child of controller (still hidden)
             GameObject view = await _assetService.InstantiateAsync(
                 figureConfig.AssetKey,
                 Vector3.zero,
@@ -175,6 +221,11 @@ namespace Project.Unity.Unity.Views
             {
                 _logger.Warning($"Failed to instantiate view '{figureConfig.AssetKey}' for {figureTypeId}");
             }
+            
+            // Play spawn animation
+            controller.transform
+                .DOScale(Vector3.one, SpawnDuration)
+                .SetEase(SpawnEase);
 
             return controller;
         }

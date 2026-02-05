@@ -45,6 +45,24 @@ namespace Project.Gameplay.Gameplay.Figures
             _logger = logService.CreateLogger<FigureSpawnService>();
         }
 
+        /// <summary>
+        /// Preloads all configs needed for spawning figures.
+        /// Call this before gameplay to avoid delays on first spawn.
+        /// </summary>
+        public async UniTask PreloadConfigsAsync()
+        {
+            _logger.Debug("Preloading figure spawn configs...");
+            
+            _figureConfigCache ??= await _configProvider.Get<FigureConfigRepository>("figures_conf");
+            _descriptionConfigCache ??= await _configProvider.Get<FigureDescriptionConfigRepository>("figure_descriptions_conf");
+            _statsConfigCache ??= await _configProvider.Get<StatsConfigRepository>("stats_conf");
+            _passiveConfigCache ??= await _configProvider.Get<PassiveConfigRepository>("passives_conf");
+            
+            await _turnPatternFactory.InitializeAsync();
+            
+            _logger.Debug("Figure spawn configs preloaded");
+        }
+
         public async UniTask<Figure> SpawnAsync(BoardGrid grid, GridPosition position, string figureId, Team team)
         {
             BoardCell cell = grid.GetBoardCell(position);
