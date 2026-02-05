@@ -1,19 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Cysharp.Threading.Tasks;
 using MessagePipe;
-using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Components;
 using Project.Gameplay.Gameplay.Board;
 using Project.Gameplay.Gameplay.Figures;
-using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Run;
 using Project.Gameplay.Gameplay.Selection;
 using Project.Gameplay.Gameplay.Turn;
 using Project.Gameplay.Gameplay.Turn.BonusMove;
-using Project.Gameplay.Gameplay.Turn.Execution;
 using Project.Gameplay.Movement;
 using VContainer;
 using VContainer.Unity;
@@ -21,33 +17,33 @@ using VContainer.Unity;
 namespace Project.Gameplay.Gameplay.Stage
 {
     /// <summary>
-    /// Stage coordinator - listens to events and delegates to appropriate services.
-    /// Does NOT contain game logic, only orchestration.
+    /// Stage coordinator - handles highlights and visual state.
+    /// Does NOT contain game logic or turn execution.
+    /// 
+    /// Responsibilities:
+    /// - Highlight management for selection and bonus moves
+    /// - SelectTag management on figures
+    /// - Reacting to turn changes for cleanup
     /// </summary>
     public class StageService : IStartable, IDisposable
     {
         private readonly RunHolder _runHolder;
-        private readonly ITurnExecutor _turnExecutor;
         private readonly IBonusMoveController _bonusMoveController;
         private readonly IBoardPresenter _boardPresenter;
         private readonly MovementService _movementService;
-        private readonly TurnSystem _turnSystem;
         private readonly ILogger<StageService> _logger;
         private readonly IDisposable _subscriptions;
-        
-        private bool _bonusMoveInProgress;
+
+        // Track if we're showing bonus move highlights (to avoid overwriting during selection events)
+        private bool _showingBonusMoveHighlights;
 
         [Inject]
         private StageService(
             RunHolder runHolder,
-            ITurnExecutor turnExecutor,
             IBonusMoveController bonusMoveController,
             IBoardPresenter boardPresenter,
             MovementService movementService,
-            TurnSystem turnSystem,
             ISubscriber<FigureSpawnedMessage> figureSpawnedSubscriber,
-            ISubscriber<MoveRequestedMessage> moveSubscriber,
-            ISubscriber<AttackRequestedMessage> attackSubscriber,
             ISubscriber<FigureSelectedMessage> selectionSubscriber,
             ISubscriber<FigureDeselectedMessage> figureDeselectedSubscriber,
             ISubscriber<TurnChangedMessage> turnSubscriber,
@@ -56,17 +52,13 @@ namespace Project.Gameplay.Gameplay.Stage
             ILogService logService)
         {
             _runHolder = runHolder;
-            _turnExecutor = turnExecutor;
             _bonusMoveController = bonusMoveController;
             _boardPresenter = boardPresenter;
             _movementService = movementService;
-            _turnSystem = turnSystem;
             _logger = logService.CreateLogger<StageService>();
 
             DisposableBagBuilder bag = DisposableBag.CreateBuilder();
             figureSpawnedSubscriber.Subscribe(OnFigureSpawned).AddTo(bag);
-            moveSubscriber.Subscribe(OnMoveRequested).AddTo(bag);
-            attackSubscriber.Subscribe(OnAttackRequested).AddTo(bag);
             selectionSubscriber.Subscribe(OnFigureSelected).AddTo(bag);
             figureDeselectedSubscriber.Subscribe(OnFigureDeselected).AddTo(bag);
             turnSubscriber.Subscribe(OnTurnChanged).AddTo(bag);
@@ -87,87 +79,24 @@ namespace Project.Gameplay.Gameplay.Stage
             _logger.Debug($"Figure {message.Figure.Id} spawned at ({message.Position.Row}, {message.Position.Column})");
         }
 
-        private void OnMoveRequested(MoveRequestedMessage message)
-        {
-            if (_bonusMoveController.IsActive)
-                return;
-
-            _logger.Info($"Move: ({message.From.Row},{message.From.Column}) -> ({message.To.Row},{message.To.Column})");
-            TryExecuteTurn(message.From, message.To);
-        }
-
-        private void OnAttackRequested(AttackRequestedMessage message)
-        {
-            if (_bonusMoveController.IsActive)
-                return;
-
-            _logger.Info($"Attack: ({message.From.Row},{message.From.Column}) -> ({message.To.Row},{message.To.Column})");
-            TryExecuteTurn(message.From, message.To);
-        }
-
-        private void TryExecuteTurn(GridPosition from, GridPosition to)
-        {
-            BoardGrid grid = GetCurrentGrid();
-            if (grid == null) return;
-
-            BoardCell fromCell = grid.GetBoardCell(from);
-            Figure actor = fromCell?.OccupiedBy;
-
-            if (actor == null)
-            {
-                _logger.Error("No figure at source position!");
-                return;
-            }
-
-            ExecuteTurnAsync(actor, from, to, grid).Forget();
-        }
-
         private void OnBonusMoveStarted(BonusMoveStartedMessage message)
         {
-            _bonusMoveInProgress = true;
-            _logger.Debug($"Bonus move started for {message.Actor}");
+            _showingBonusMoveHighlights = true;
+            _logger.Debug($"Bonus move started for {message.Actor}, showing highlights");
+            HighlightPositions(_bonusMoveController.GetAvailablePositions());
         }
 
         private void OnBonusMoveCompleted(BonusMoveCompletedMessage message)
         {
-            _bonusMoveInProgress = false;
-            _logger.Info($"Bonus move completed for {message.Actor}");
+            _showingBonusMoveHighlights = false;
+            _logger.Debug($"Bonus move completed for {message.Actor}, clearing highlights");
             ClearHighlights();
-            _turnSystem.EndTurn();
-        }
-
-        private async UniTaskVoid ExecuteTurnAsync(Figure actor, GridPosition from, GridPosition to, BoardGrid grid)
-        {
-            _logger.Info($"[DEBUG] ExecuteTurnAsync START: actor={actor.Id}, BonusMoveController.IsActive={_bonusMoveController.IsActive}");
-            
-            TurnExecutionResult result = await _turnExecutor.ExecuteAsync(actor, from, to, grid);
-
-            if (!result.Success)
-            {
-                _logger.Debug($"Turn execution failed for {actor}");
-                return;
-            }
-
-            _logger.Info($"[DEBUG] ExecuteTurnAsync RESULT: actor={actor.Id}, BonusMoveDistance={result.BonusMoveDistance?.ToString() ?? "null"}");
-
-            // Check if bonus move was granted
-            if (result.BonusMoveDistance.HasValue && result.BonusMoveDistance.Value > 0)
-            {
-                _logger.Info($"[DEBUG] STARTING BONUS MOVE for {actor.Id}! Distance: {result.BonusMoveDistance.Value}");
-                _bonusMoveController.Start(actor, result.ActorFinalPosition, result.BonusMoveDistance.Value, grid);
-                HighlightPositions(_bonusMoveController.GetAvailablePositions());
-                return;
-            }
-
-            _logger.Info($"Turn completed for {actor}, no bonus move");
-            _turnSystem.EndTurn();
         }
 
         private void OnFigureSelected(FigureSelectedMessage message)
         {
             // Don't change highlights during bonus move
-            // Using our flag to avoid race conditions with BonusMoveController.Clear()
-            if (_bonusMoveInProgress)
+            if (_showingBonusMoveHighlights)
                 return;
 
             if (message.Figure != null)
@@ -192,20 +121,11 @@ namespace Project.Gameplay.Gameplay.Stage
         {
             _logger.Info($"Turn {message.TurnNumber}: {message.CurrentTeam}'s turn");
             
-            // Reset bonus move flag as safety measure
-            _bonusMoveInProgress = false;
+            // Reset highlight state
+            _showingBonusMoveHighlights = false;
             
-            // Cancel any pending bonus move on turn change
-            if (_bonusMoveController.IsActive)
-            {
-                _bonusMoveController.Cancel();
-                ClearHighlights();
-            }
-        }
-
-        private BoardGrid GetCurrentGrid()
-        {
-            return _runHolder.Current?.CurrentStage?.Grid;
+            // Clear any pending highlights
+            ClearHighlights();
         }
 
         private void ClearHighlights()
@@ -220,7 +140,9 @@ namespace Project.Gameplay.Gameplay.Stage
         
         private void HighlightPositions(IEnumerable<MovementStrategyResult> positions)
         {
-            // костыли вы мои костыли. Дайте я вас сейчас расцелую... Дорогие мои костыли, мы ещё, мы ещё повоююем...
+            if (_movementService.Grid == null)
+                return;
+
             foreach (var boardCell in _movementService.Grid.AllCells())
             {
                 var strategyResult = positions?.FirstOrDefault(p =>

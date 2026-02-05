@@ -1,27 +1,27 @@
 using Cysharp.Threading.Tasks;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Figures;
-using Project.Gameplay.Gameplay.Selection;
+using Project.Gameplay.Gameplay.Interaction;
 
 namespace Project.Gameplay.Gameplay.Stage.Phase
 {
     /// <summary>
-    /// Initializes gameplay services (MovementService, SelectionService) with the grid.
+    /// Initializes gameplay services (MovementService, InteractionController) with the grid.
     /// Should run after BoardSpawnPhase.
     /// </summary>
     public sealed class GameplayInitPhase : IStagePhase
     {
         private readonly MovementService _movementService;
-        private readonly SelectionService _selectionService;
+        private readonly InteractionController _interactionController;
         private readonly ILogger<GameplayInitPhase> _logger;
 
         public GameplayInitPhase(
             MovementService movementService,
-            SelectionService selectionService,
+            InteractionController interactionController,
             ILogService logService)
         {
             _movementService = movementService;
-            _selectionService = selectionService;
+            _interactionController = interactionController;
             _logger = logService.CreateLogger<GameplayInitPhase>();
         }
 
@@ -30,7 +30,7 @@ namespace Project.Gameplay.Gameplay.Stage.Phase
             _logger.Info("Initializing gameplay services");
             
             _movementService.Configure(context.Grid);
-            _selectionService.Configure(context.Grid);
+            _interactionController.Configure(context.Grid);
             
             _logger.Info("Gameplay services initialized");
             return UniTask.FromResult(PhaseResult.Continue);

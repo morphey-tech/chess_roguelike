@@ -9,7 +9,9 @@ namespace Project.Gameplay.Gameplay.Turn.BonusMove
     /// <summary>
     /// Controls bonus move state - when a figure gets an extra move after action.
     /// Examples: retreat after attack, jump after kill, chain moves.
-    /// Handles its own click events when active.
+    /// 
+    /// Passive controller - does NOT handle click events directly.
+    /// TurnController forwards clicks via TryExecute().
     /// </summary>
     public interface IBonusMoveController
     {

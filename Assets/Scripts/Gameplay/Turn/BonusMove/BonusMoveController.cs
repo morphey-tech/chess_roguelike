@@ -1,30 +1,28 @@
 using System;
 using System.Collections.Generic;
-using Cysharp.Threading.Tasks;
-using MessagePipe;
 using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
-using Project.Gameplay.Gameplay.Input.Messages;
 using Project.Gameplay.Movement;
 using VContainer;
 
 namespace Project.Gameplay.Gameplay.Turn.BonusMove
 {
-    public sealed class BonusMoveController : IBonusMoveController, IDisposable
+    /// <summary>
+    /// Passive controller for bonus move DOMAIN logic only.
+    /// Does NOT subscribe to clicks - TurnController handles click forwarding.
+    /// Does NOT handle visuals - TurnController plays animations via VisualPipeline.
+    /// </summary>
+    public sealed class BonusMoveController : IBonusMoveController
     {
-        public Figure? Actor { get; private set; }
+        public Figure Actor { get; private set; }
         
         public bool IsActive => Actor != null;
         public GridPosition From => _from;
         
         private readonly MovementService _movementService;
-        private readonly IFigurePresenter _figurePresenter;
-        private readonly IPublisher<BonusMoveStartedMessage> _startedPublisher;
-        private readonly IPublisher<BonusMoveCompletedMessage> _completedPublisher;
         private readonly ILogger<BonusMoveController> _logger;
-        private readonly IDisposable _subscriptions;
 
         private GridPosition _from;
         private int _maxDistance;
@@ -33,38 +31,12 @@ namespace Project.Gameplay.Gameplay.Turn.BonusMove
         [Inject]
         private BonusMoveController(
             MovementService movementService,
-            IFigurePresenter figurePresenter,
-            ISubscriber<CellClickedMessage> cellClickedSubscriber,
-            IPublisher<BonusMoveStartedMessage> startedPublisher,
-            IPublisher<BonusMoveCompletedMessage> completedPublisher,
             ILogService logService)
         {
             _movementService = movementService;
-            _figurePresenter = figurePresenter;
-            _startedPublisher = startedPublisher;
-            _completedPublisher = completedPublisher;
             _logger = logService.CreateLogger<BonusMoveController>();
-
-            DisposableBagBuilder bag = DisposableBag.CreateBuilder();
-            cellClickedSubscriber.Subscribe(OnCellClicked).AddTo(bag);
-            _subscriptions = bag.Build();
-        }
-
-        private void OnCellClicked(CellClickedMessage message)
-        {
-            if (!IsActive)
-                return;
-
-            if (_grid == null || !_grid.IsInside(message.Position))
-                return;
-
-            _logger.Debug($"Bonus move click: ({message.Position.Row},{message.Position.Column})");
             
-            Figure actor = Actor;
-            if (TryExecute(message.Position))
-            {
-                _completedPublisher.Publish(new BonusMoveCompletedMessage(actor));
-            }
+            _logger.Info("BonusMoveController created (passive mode)");
         }
 
         public void Start(Figure actor, GridPosition from, int maxDistance, BoardGrid grid)
@@ -75,9 +47,13 @@ namespace Project.Gameplay.Gameplay.Turn.BonusMove
             _grid = grid;
             
             _logger.Info($"Bonus move started for {actor} from ({from.Row},{from.Column}), max distance: {maxDistance}");
-            _startedPublisher.Publish(new BonusMoveStartedMessage(actor));
         }
 
+        /// <summary>
+        /// Validates and executes domain logic for bonus move.
+        /// Does NOT play visuals - caller (TurnController) handles that via VisualPipeline.
+        /// </summary>
+        /// <returns>True if move was valid and domain was updated.</returns>
         public bool TryExecute(GridPosition to)
         {
             if (!IsActive)
@@ -107,7 +83,6 @@ namespace Project.Gameplay.Gameplay.Turn.BonusMove
             }
 
             _movementService.MoveFigure(_from, to);
-            _figurePresenter.MoveFigureAsync(Actor.Id, to).Forget();
             _logger.Info($"{Actor} bonus moved to ({to.Row},{to.Column})");
             
             Clear();
@@ -121,7 +96,6 @@ namespace Project.Gameplay.Gameplay.Turn.BonusMove
                 Figure actor = Actor;
                 _logger.Info($"Bonus move cancelled for {actor}");
                 Clear();
-                _completedPublisher.Publish(new BonusMoveCompletedMessage(actor));
             }
         }
 
@@ -152,11 +126,6 @@ namespace Project.Gameplay.Gameplay.Turn.BonusMove
             _from = default;
             _maxDistance = 0;
             _grid = null;
-        }
-
-        public void Dispose()
-        {
-            _subscriptions?.Dispose();
         }
     }
 }

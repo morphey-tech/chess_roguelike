@@ -17,7 +17,7 @@ namespace Project.Gameplay.Gameplay.Stage
     {
         public string Id => _config.Id;
         public string BoardId => _config.BoardId;
-        public BoardGrid Grid { get; }
+        public BoardGrid? Grid { get; }
         public bool IsCompleted { get; private set; }
 
         private readonly StageConfig _config;
@@ -26,9 +26,9 @@ namespace Project.Gameplay.Gameplay.Stage
         private readonly IPublisher<StageCompletedMessage> _completedPublisher;
         private readonly ILogger<Stage> _logger;
 
-        private StageContext _context;
+        private StageContext _context = null!;
         private int _currentPhaseIndex = -1;
-        private UniTaskCompletionSource<PhaseResult> _waitingPhaseCompletion;
+        private UniTaskCompletionSource<PhaseResult>? _waitingPhaseCompletion;
 
         public Stage(
             StageConfig config,

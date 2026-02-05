@@ -10,11 +10,11 @@ using Project.Gameplay.Gameplay.Board.Appear.Strategies;
 using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Input;
+using Project.Gameplay.Gameplay.Interaction;
 using Project.Gameplay.Gameplay.Movement;
 using Project.Gameplay.Gameplay.Movement.Strategies;
 using Project.Gameplay.Gameplay.Prepare;
 using Project.Gameplay.Gameplay.Run;
-using Project.Gameplay.Gameplay.Selection;
 using Project.Gameplay.Gameplay.Stage;
 using Project.Gameplay.Gameplay.Stage.Phase;
 using Project.Gameplay.Gameplay.Turn;
@@ -124,13 +124,21 @@ namespace Project.Unity.Unity.Installers
                 .AsImplementedInterfaces()
                 .AsSelf();
 
-            // Turn & Selection - subscribe to input events
+            // Turn system
             builder.Register<TurnSystem>(Lifetime.Singleton)
                 .AsImplementedInterfaces()
                 .AsSelf();
-            builder.Register<SelectionService>(Lifetime.Singleton)
+
+            // Interaction layer
+            builder.Register<InteractionLockService>(Lifetime.Singleton)
+                .As<IInteractionLock>();
+            builder.Register<ClickIntentResolver>(Lifetime.Singleton)
+                .As<IClickIntentResolver>();
+            builder.Register<InteractionController>(Lifetime.Singleton)
                 .AsImplementedInterfaces()
                 .AsSelf();
+            builder.Register<TurnController>(Lifetime.Singleton)
+                .As<ITurnController>();
 
             // Stage Service - handles stage events
             builder.Register<StageService>(Lifetime.Singleton)
@@ -218,14 +226,15 @@ namespace Project.Unity.Unity.Installers
 
         private void OnContainerBuilt(IObjectResolver resolver)
         {
-            // Принудительно создаём сервисы с подписками
+            // Force-create services with subscriptions
             resolver.Resolve<TurnSystem>();
-            resolver.Resolve<SelectionService>();
+            resolver.Resolve<InteractionController>();
+            resolver.Resolve<ITurnController>();
             resolver.Resolve<StageService>();
             resolver.Resolve<PrepareService>();
             resolver.Resolve<HandFigureClickHandler>();
 
-            // Инжектим MonoSceneBootstrap
+            // Inject MonoSceneBootstrap
             MonoSceneBootstrap? bootstrap = _worldObjectCollector.GetObjectByType<MonoSceneBootstrap>();
             if (bootstrap != null)
             {
