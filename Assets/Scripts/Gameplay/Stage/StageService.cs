@@ -115,6 +115,13 @@ namespace Project.Gameplay.Gameplay.Stage
         private void OnFigureDeselected(FigureDeselectedMessage message)
         {
             message.Figure.Del<SelectTag>();
+            
+            // Clear highlights immediately when figure is deselected
+            // (before move animation starts)
+            if (!_showingBonusMoveHighlights)
+            {
+                ClearHighlights();
+            }
         }
 
         private void OnTurnChanged(TurnChangedMessage message)

@@ -74,19 +74,21 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
             // === DOMAIN PHASE ===
             CombatResult result = _combatResolver.Resolve(hitContext);
 
-            using VisualScope scope = _visualPipeline.BeginScope();
-            CombatEffectContext effectContext = new(
-                context,
-                context.Grid,
-                _deathPublisher,
-                _passives,
-                scope,
-                _logger);
+            using (VisualScope scope = _visualPipeline.BeginScope())
+            {
+                CombatEffectContext effectContext = new CombatEffectContext(
+                    context,
+                    context.Grid,
+                    _deathPublisher,
+                    _passives,
+                    scope,
+                    _logger);
 
-            ApplyEffects(result.Effects, effectContext);
+                ApplyEffects(result.Effects, effectContext);
 
-            // === VISUAL PHASE ===
-            await scope.PlayAsync();
+                // === VISUAL PHASE ===
+                await scope.PlayAsync();
+            }
         }
 
         private void ApplyEffects(IEnumerable<ICombatEffect> effects, CombatEffectContext context)

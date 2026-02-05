@@ -216,6 +216,8 @@ namespace Project.Unity.Unity.Installers
                 .As<ITurnExecutor>();
             builder.Register<BonusMoveController>(Lifetime.Singleton)
                 .As<IBonusMoveController>();
+            builder.Register<BonusMoveSession>(Lifetime.Singleton)
+                .As<IBonusMoveSession>();
 
             // Pure gameplay services
             builder.Register<BoardSpawnService>(Lifetime.Singleton);
@@ -230,6 +232,7 @@ namespace Project.Unity.Unity.Installers
             resolver.Resolve<TurnSystem>();
             resolver.Resolve<InteractionController>();
             resolver.Resolve<ITurnController>();
+            resolver.Resolve<IBonusMoveSession>(); // Has click subscription
             resolver.Resolve<StageService>();
             resolver.Resolve<PrepareService>();
             resolver.Resolve<HandFigureClickHandler>();

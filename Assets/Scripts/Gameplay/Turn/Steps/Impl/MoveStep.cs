@@ -36,9 +36,11 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
             _movementService.MoveFigure(context.From, context.To);
 
             // === VISUAL ===
-            using VisualScope scope = _visualPipeline.BeginScope();
-            scope.Enqueue(new MoveCommand(new MoveVisualContext(context.Actor.Id, context.To)));
-            await scope.PlayAsync();
+            using (VisualScope scope = _visualPipeline.BeginScope())
+            {
+                scope.Enqueue(new MoveCommand(new MoveVisualContext(context.Actor.Id, context.To)));
+                await scope.PlayAsync();
+            }
 
             context.From = context.To;
         }
