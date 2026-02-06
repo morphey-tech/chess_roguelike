@@ -26,6 +26,7 @@ using Project.Gameplay.Gameplay.Visual;
 using Project.Gameplay.Gameplay.Visual.Commands;
 using Project.Gameplay.Presentations;
 using Project.Unity.Unity.Bootstrap;
+using Project.Unity.Unity.Prepare;
 using Project.Unity.Unity.Views;
 using Project.Unity.Unity.World;
 using UnityEngine;
@@ -49,16 +50,18 @@ namespace Project.Unity.Unity.Installers
             ConfigureMessagePipe(builder);
             ConfigureInput(builder);
             ConfigureCollectors(builder);
-            ConfigurePresentations(builder);
+            ConfigureEntities(builder);
             ConfigureViews(builder);
             ConfigureServices(builder);
             builder.RegisterBuildCallback(OnContainerBuilt);
         }
 
-        private void ConfigurePresentations(IContainerBuilder builder)
+        private void ConfigureEntities(IContainerBuilder builder)
         {
-            builder.Register<PresentationManager>(Lifetime.Singleton)
-                .As<PresentationManager>();
+            builder.Register<EntityInstances>(Lifetime.Singleton)
+                .AsSelf()
+                .AsImplementedInterfaces();
+            builder.Register<EntityService>(Lifetime.Singleton);
         }
 
         private void ConfigureMessagePipe(IContainerBuilder builder)
@@ -102,6 +105,12 @@ namespace Project.Unity.Unity.Installers
             builder.Register<VisualCommandExecutor>(Lifetime.Singleton);
             builder.Register<VisualPipeline>(Lifetime.Singleton);
 
+            // Prepare zone — разделённые слои (provider, layout, factory, anim), presenter = оркестратор
+            builder.Register<PrepareZoneAssetProvider>(Lifetime.Singleton)
+                .As<IPrepareZoneAssetProvider>();
+            builder.Register<PrepareLayoutService>(Lifetime.Singleton);
+            builder.Register<PrepareViewFactory>(Lifetime.Singleton);
+            builder.Register<PrepareAnimationPlayer>(Lifetime.Singleton);
             builder.Register<PreparePresenter>(Lifetime.Singleton)
                 .As<IPreparePresenter>();
 
@@ -145,7 +154,10 @@ namespace Project.Unity.Unity.Installers
                 .AsImplementedInterfaces()
                 .AsSelf();
 
-            // Prepare phase
+            // Prepare phase — один кэш: заполняется во время доски, отдаёт префабы без задержки
+            builder.Register<PrepareZonePrefabCache>(Lifetime.Singleton)
+                .As<IPrepareZoneAssetPreloader>()
+                .As<IPrepareZonePrefabCache>();
             builder.Register<PrepareService>(Lifetime.Singleton)
                 .AsImplementedInterfaces()
                 .AsSelf();
@@ -157,6 +169,7 @@ namespace Project.Unity.Unity.Installers
             builder.Register<IFiguresSpawnProviderFactory, FiguresSpawnProviderFactory>(Lifetime.Singleton);
 
             // Stage phases (Transient - created per stage)
+            builder.Register<PrepareZoneCachePhase>(Lifetime.Transient);
             builder.Register<BoardSpawnPhase>(Lifetime.Transient);
             builder.Register<PreparePlacementPhase>(Lifetime.Transient);
             builder.Register<GameplayInitPhase>(Lifetime.Transient);
@@ -164,7 +177,7 @@ namespace Project.Unity.Unity.Installers
 
             // Board - animation strategies
             builder.Register<BoardAppearAnimationFactory>(Lifetime.Singleton)
-                .WithParameter(new List<IBoardAppearAnimationStrategy>
+                .WithParameter<IEnumerable<IBoardAppearAnimationStrategy>>(new IBoardAppearAnimationStrategy[]
                 {
                     new BoardNoneAppearStrategy(),
                     new BoardWaveAppearStrategy()

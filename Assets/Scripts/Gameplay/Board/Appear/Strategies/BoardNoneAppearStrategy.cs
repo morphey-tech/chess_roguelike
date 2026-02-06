@@ -11,6 +11,16 @@ namespace Project.Gameplay.Gameplay.Board.Appear.Strategies
 
         public UniTask Appear(IReadOnlyList<EntityLink> cells)
         {
+            foreach (EntityLink cell in cells)
+            {
+                if (cell != null)
+                    cell.transform.localScale = Vector3.zero;
+            }
+            foreach (EntityLink cell in cells)
+            {
+                if (cell != null)
+                    cell.transform.localScale = Vector3.one;
+            }
             return UniTask.CompletedTask;
         }
     }

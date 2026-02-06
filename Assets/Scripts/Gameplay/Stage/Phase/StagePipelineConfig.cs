@@ -12,9 +12,10 @@ namespace Project.Gameplay.Gameplay.Stage.Phase
             {
                 StageType.Duel, new[]
                 {
+                    typeof(PrepareZoneCachePhase),   // только для стейджей с prepare — греем кэш до доски
                     typeof(BoardSpawnPhase),
-                    typeof(PreparePlacementPhase),  // Player places figures first
-                    typeof(FiguresSpawnPhase),       // Enemies spawn after player is ready
+                    typeof(PreparePlacementPhase),
+                    typeof(FiguresSpawnPhase),
                     typeof(GameplayInitPhase),
                     typeof(BattleDuelPhase)
                 }

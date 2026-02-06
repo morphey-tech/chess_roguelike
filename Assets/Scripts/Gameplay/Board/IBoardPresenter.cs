@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Project.Core.Core.Grid;
 
@@ -8,13 +9,13 @@ namespace Project.Gameplay.Gameplay.Board
     /// </summary>
     public interface IBoardPresenter
     {
-        void CreateCell(Entity entity, GridPosition pos, string skinId);
-        void DestroyCell(GridPosition pos);
-
-        void PlayAppear(GridPosition pos);
-        void PlayHit(GridPosition pos);
-        
-        // Board-wide operations
+        UniTask CreateCell(Entity entity, GridPosition pos, string skinId);
+        /// <summary>
+        /// Создаёт все клетки (параллельно), затем при необходимости запускает одну анимацию появления.
+        /// Визуально: все клетки появляются вместе, без «по одной».
+        /// </summary>
+        UniTask CreateCellsBatchAsync(IReadOnlyList<CellSpawnRequest> requests, string? appearStrategyId);
+        UniTask DestroyCell(GridPosition pos);
         UniTask PlayBoardAppearAsync(string strategyId);
         void Clear();
     }

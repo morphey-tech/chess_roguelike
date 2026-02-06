@@ -18,7 +18,7 @@ namespace Project.Gameplay.Gameplay.Stage.Phase
         public async UniTask<PhaseResult> ExecuteAsync(StageContext context)
         {
             _logger.Info($"Spawning board: {context.Stage.BoardId}");
-            await _boardSpawnService.SpawnAsync(context.Stage.BoardId);
+            await _boardSpawnService.SpawnVisualAsync(context.Grid, context.Stage.BoardId);
             _logger.Info("Board spawned");
             return PhaseResult.Continue;
         }

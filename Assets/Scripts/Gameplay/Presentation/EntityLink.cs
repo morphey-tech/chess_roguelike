@@ -12,9 +12,9 @@ namespace Project.Gameplay.Presentations
     public int EntityId => _entity.Id;
     
     private Entity _entity;
-    public PresentationManagerInstances Map { get; set; }
+    public EntityInstances Map { get; set; }
 
-    public void Init(Entity entity, PresentationManagerInstances map)
+    public void Init(Entity entity, EntityInstances map)
     {
       _entity = entity;
       Map = map;

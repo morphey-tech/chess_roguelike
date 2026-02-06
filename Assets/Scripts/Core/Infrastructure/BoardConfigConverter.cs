@@ -11,6 +11,9 @@ namespace Project.Core.Core.Infrastructure
         {
             writer.WriteStartObject();
 
+            writer.WritePropertyName("Id");
+            writer.WriteValue(value.Id);
+
             writer.WritePropertyName("Width");
             writer.WriteValue(value.Width);
 
@@ -24,6 +27,9 @@ namespace Project.Core.Core.Infrastructure
                 writer.WriteValue(value.Board[i]);
             }
             writer.WriteEndArray();
+
+            writer.WritePropertyName("AppearId");
+            writer.WriteValue(value.AppearStrategyId);
             writer.WriteEndObject();
         }
 
@@ -35,20 +41,32 @@ namespace Project.Core.Core.Infrastructure
                 if (reader.TokenType == JsonToken.PropertyName)
                 {
                     string? propertyName = reader.Value.ToString();
-                    switch (propertyName)
+                    string prop = propertyName?.Trim().ToLowerInvariant() ?? string.Empty;
+                    switch (prop)
                     {
-                        case "Width":
+                        case "id":
+                            reader.Read();
+                            boardConfig.Id = reader.Value?.ToString();
+                            break;
+                        case "width":
                             reader.Read();
                             boardConfig.Width = (int)reader.Value;
                             break;
-                        case "Height":
+                        case "height":
                             reader.Read();
                             boardConfig.Height = (int)reader.Value;
                             break;
-                        case "Board":
+                        case "board":
+                        case "board_data":
                             reader.Read();
                             string[]? board = serializer.Deserialize<string[]>(reader);
                             boardConfig.Board = board;
+                            break;
+                        case "appear_id":
+                        case "appearid":
+                        case "appearstrategyid":
+                            reader.Read();
+                            boardConfig.AppearStrategyId = reader.Value?.ToString();
                             break;
                     }
                 }

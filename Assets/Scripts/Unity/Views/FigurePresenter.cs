@@ -23,7 +23,7 @@ namespace Project.Unity.Unity.Views
         private const int DeathAnimationDurationMs = 500;
         private const int PushAnimationDurationMs = 200;
         
-        private readonly PresentationManager _presentationManager;
+        private readonly EntityService _entityService;
         private readonly IWorldRoot _worldRoot;
         private readonly ILogger<FigurePresenter> _logger;
 
@@ -32,11 +32,11 @@ namespace Project.Unity.Unity.Views
         private readonly Dictionary<int, GridPosition> _positions = new();
 
         public FigurePresenter(
-            PresentationManager presentationManager,
+            EntityService entityService,
             IWorldRoot worldRoot,
             ILogService logService)
         {
-            _presentationManager = presentationManager;
+            _entityService = entityService;
             _worldRoot = worldRoot;
             _logger = logService.CreateLogger<FigurePresenter>();
             _logger.Info("FigurePresenter created");
@@ -47,7 +47,7 @@ namespace Project.Unity.Unity.Views
             Vector3 worldPos = GetCellTopPosition(pos);
             
             // Spawn controller prefab
-            EntityLink controllerLink = await _presentationManager.SpawnView(
+            EntityLink controllerLink = await _entityService.SpawnView(
                 figure,
                 FigureControllerAssetKey,
                 worldPos,
@@ -69,7 +69,7 @@ namespace Project.Unity.Unity.Views
             _positions[figure.Id] = pos;
 
             // Spawn view as child of controller (still hidden because parent scale is 0)
-            GameObject viewGO = await _presentationManager.InstantiateAsChild(viewAssetKey, controller.transform);
+            GameObject viewGO = await _entityService.InstantiateAsChild(viewAssetKey, controller.transform);
             if (viewGO == null)
             {
                 _logger.Warning($"Failed to instantiate view '{viewAssetKey}' for {figure}");
@@ -141,7 +141,7 @@ namespace Project.Unity.Unity.Views
             _figureViews.Remove(figureId);
             _positions.Remove(figureId);
             
-            _presentationManager.Destroy(figureId);
+            _entityService.Destroy(figureId);
             _logger.Debug($"Figure {figureId} removed");
         }
 

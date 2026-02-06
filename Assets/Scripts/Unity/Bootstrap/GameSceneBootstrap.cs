@@ -34,11 +34,9 @@ namespace Project.Unity.Unity.Bootstrap
         protected override async UniTask OnBootstrapAsync()
         {
             Log.Info("Game bootstrap started");
+            await _configProvider.PreloadAllAsync(this.GetCancellationTokenOnDestroy());
 
-            // Load run config first to get initial stage ID
             RunConfig runConfig = await LoadRunConfigAsync(DefaultRunId);
-            
-            // Initialize run state with figures from suite
             await InitializeRunStateAsync(runConfig);
 
             Run run = _runFactory.Create(runConfig);

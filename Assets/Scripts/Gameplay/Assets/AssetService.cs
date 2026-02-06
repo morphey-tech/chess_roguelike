@@ -110,7 +110,17 @@ namespace Project.Gameplay.Gameplay.Assets
         {
             return InstantiateAsync(key.Address, position, rotation, parent);
         }
-        
+
+        public GameObject InstantiateFromPrefab(GameObject prefab, Vector3 position, Quaternion rotation, Transform parent = null)
+        {
+            if (prefab == null)
+            {
+                _logger.Error("InstantiateFromPrefab: prefab is null");
+                return null;
+            }
+            return UnityEngine.Object.Instantiate(prefab, position, rotation, parent);
+        }
+
         public void Release<T>(T asset) where T : UnityEngine.Object
         {
             if (asset == null) return;

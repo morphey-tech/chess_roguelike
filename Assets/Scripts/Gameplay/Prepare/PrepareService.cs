@@ -9,6 +9,8 @@ using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Input.Messages;
 using Project.Gameplay.Gameplay.Prepare.Messages;
 using Project.Gameplay.Gameplay.Save.Models;
+using Project.Gameplay.Gameplay.Visual;
+using Project.Gameplay.Gameplay.Visual.Commands.Impl;
 using VContainer;
 
 namespace Project.Gameplay.Gameplay.Prepare
@@ -17,6 +19,7 @@ namespace Project.Gameplay.Gameplay.Prepare
     {
         private readonly FigureSpawnService _figureSpawnService;
         private readonly IPreparePresenter _preparePresenter;
+        private readonly VisualPipeline _visualPipeline;
         private readonly IPublisher<PreparePhaseCompletedMessage> _completedPublisher;
         private readonly ILogger<PrepareService> _logger;
         private readonly IDisposable _subscriptions;
@@ -31,6 +34,7 @@ namespace Project.Gameplay.Gameplay.Prepare
         public PrepareService(
             FigureSpawnService figureSpawnService,
             IPreparePresenter preparePresenter,
+            VisualPipeline visualPipeline,
             ISubscriber<HandFigureClickedMessage> handFigureClickedSubscriber,
             ISubscriber<CellClickedMessage> cellClickedSubscriber,
             ISubscriber<CancelRequestedMessage> cancelSubscriber,
@@ -39,6 +43,7 @@ namespace Project.Gameplay.Gameplay.Prepare
         {
             _figureSpawnService = figureSpawnService;
             _preparePresenter = preparePresenter;
+            _visualPipeline = visualPipeline;
             _completedPublisher = completedPublisher;
             _logger = logService.CreateLogger<PrepareService>();
 
@@ -62,25 +67,24 @@ namespace Project.Gameplay.Gameplay.Prepare
 
             _logger.Info($"Prepare started: {runState.FiguresInHand.Count} figures in hand");
 
-            // Preload configs while showing prepare zone animation
-            // This prevents delay on first figure placement
-            UniTask preloadTask = _figureSpawnService.PreloadConfigsAsync();
-            UniTask spawnTask = SpawnPrepareZoneAsync();
-            
-            await UniTask.WhenAll(preloadTask, spawnTask);
+            // Preload в фоне — не блокируем появление prepare-зоны (PreloadConfigsAsync может тянуть 2–3 сек из-за TurnPatternFactory)
+            _figureSpawnService.PreloadConfigsAsync().Forget();
+            await SpawnPrepareZoneAsync();
         }
 
         private async UniTask SpawnPrepareZoneAsync()
         {
-            // Build data for presenter (domain doesn't know about visual timing)
             List<PrepareZoneFigureData> figureDataList = new List<PrepareZoneFigureData>();
             foreach (FigureState fig in _runState.FiguresInHand)
             {
                 figureDataList.Add(new PrepareZoneFigureData(fig.Id, fig.TypeId));
             }
 
-            // Presenter handles all visual spawning with its own timing
-            await _preparePresenter.SpawnPrepareZoneAsync(figureDataList);
+            using (VisualScope scope = _visualPipeline.BeginScope())
+            {
+                scope.Enqueue(new SpawnPrepareZoneCommand(figureDataList));
+                await scope.PlayAsync();
+            }
 
             if (_state.IsCompleted)
             {

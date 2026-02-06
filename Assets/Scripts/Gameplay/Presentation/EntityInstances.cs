@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Project.Gameplay.Presentations
 {
-  public class PresentationManagerInstances : IPresentationsMap
+  public class EntityInstances : IPresentationsMap
   {
     private readonly Dictionary<int, EntityLink> _presentationsList = new();
 
@@ -49,12 +49,13 @@ namespace Project.Gameplay.Presentations
       }
     }
 
-    public bool Has(int id) => _presentationsList.ContainsKey(id);
-    
-    public GameObject? Find(int id) => _presentationsList.TryGetValue(id, out EntityLink link)  ? link.gameObject : null;
-    public GameObject Get(int id)
+    bool IPresentationsMap.Has(int id) => _presentationsList.ContainsKey(id);
+
+    GameObject? IPresentationsMap.Find(int id) => _presentationsList.TryGetValue(id, out EntityLink link)  ? link.gameObject : null;
+
+    GameObject IPresentationsMap.Get(int id)
     {
-      return Find(id) ?? throw new KeyNotFoundException();
+      return ((IPresentationsMap)this).Find(id) ?? throw new KeyNotFoundException();
     }
 
     public void DestroyView(int id)

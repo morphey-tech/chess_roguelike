@@ -20,7 +20,10 @@ namespace Project.Gameplay.Gameplay.Visual.Commands
     /// </summary>
     public sealed class VisualCommandExecutor
     {
-        private const int TimeoutMs = 5000;
+        /// <summary>
+        /// Таймаут на одну команду. SpawnPrepareZone (кэш + N слотов/фигур с анимацией) может занимать 6–10 сек.
+        /// </summary>
+        private const int TimeoutMs = 15000;
         
         private readonly IPresenterProvider _presenters;
         private readonly ILogger<VisualCommandExecutor> _logger;

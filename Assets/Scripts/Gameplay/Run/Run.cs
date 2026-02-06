@@ -26,10 +26,10 @@ namespace Project.Gameplay.Gameplay.Run
         private readonly BoardSpawnService _boardSpawnService;
 
         public Run(
-            RunConfig config, 
+            RunConfig config,
             ConfigProvider configProvider,
-            StageFactory stageFactory, 
-            StagePhaseFactory phaseFactory, 
+            StageFactory stageFactory,
+            StagePhaseFactory phaseFactory,
             PlayerRunStateService runStateService,
             BoardSpawnService boardSpawnService)
         {
@@ -61,7 +61,7 @@ namespace Project.Gameplay.Gameplay.Run
             StageConfig stageConfig = await LoadStageConfig();
             BoardConfig boardConfig = await LoadBoardConfig(stageConfig);
 
-            var grid = await _boardSpawnService.SpawnAsync(boardConfig.Id);
+            BoardGrid grid = await _boardSpawnService.GetGridAsync(boardConfig.Id);
             List<IStagePhase> phases = await _phaseFactory.CreatePhasesForStageAsync(stageConfig);
             CurrentStage = _stageFactory.Create(stageConfig, grid, _runStateService.Current!, phases);
             await CurrentStage.BeginAsync();

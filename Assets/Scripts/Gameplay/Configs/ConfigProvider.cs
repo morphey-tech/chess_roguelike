@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
@@ -14,6 +15,28 @@ namespace Project.Gameplay.Gameplay.Configs
 {
     public class ConfigProvider : ConfigProviderBase, IDisposable
     {
+        /// <summary>
+        /// Список ключей конфигов для предзагрузки при старте игры/уровня.
+        /// </summary>
+        public static readonly IReadOnlyList<string> PreloadConfigKeys = new[]
+        {
+            "runs_conf",
+            "suites_conf",
+            "figures_conf",
+            "figure_descriptions_conf",
+            "stats_conf",
+            "passives_conf",
+            "spawn_patterns_conf",
+            "boards_conf",
+            "cells_conf",
+            "gameplay_conf",
+            "stages_conf",
+            "conditions_conf",
+            "turn_pattern_descriptions_conf",
+            "turn_patterns_conf",
+            "duels_conf"
+        };
+
         private readonly Dictionary<string, object> _configsCache = new();
         private readonly HashSet<string> _preloadedAddresses = new();
         private readonly IAssetService _assetService;
@@ -29,21 +52,35 @@ namespace Project.Gameplay.Gameplay.Configs
 
         public async UniTask<T> Get<T>(string key, CancellationToken cancellationToken = default) where T : class
         {
-            if (_configsCache.TryGetValue(key, out object? cachedConfig))
+            if (_configsCache.TryGetValue(key, out object? cached))
             {
-                return cachedConfig as T;
+                if (cached is T typed)
+                    return typed;
+                if (cached is string json)
+                {
+                    T config = JsonConvert.DeserializeObject<T>(json, JsonDeserializerSettings)!;
+                    _configsCache[key] = config;
+                    return config;
+                }
             }
 
-            T config = await Download<T>(key, null, cancellationToken);
-            _configsCache[key] = config;
-            return config;
+            T downloaded = await Download<T>(key, null, cancellationToken);
+            _configsCache[key] = downloaded;
+            return downloaded;
         }
 
         public T GetSync<T>(string key) where T : class
         {
-            if (_configsCache.TryGetValue(key, out object? cachedConfig))
+            if (_configsCache.TryGetValue(key, out object? cached))
             {
-                return cachedConfig as T;
+                if (cached is T typed)
+                    return typed;
+                if (cached is string json)
+                {
+                    T config = JsonConvert.DeserializeObject<T>(json, JsonDeserializerSettings)!;
+                    _configsCache[key] = config;
+                    return config;
+                }
             }
             throw new ApplicationException($"Config for key {key} not loaded yet.");
         }
@@ -65,9 +102,8 @@ namespace Project.Gameplay.Gameplay.Configs
                 if (textAsset != null)
                 {
                     string json = textAsset.text;
-                    var config = JsonConvert.DeserializeObject<object>(json, JsonDeserializerSettings);  // Применение конвертеров
-                    _configsCache[key] = config;
-                    _logger.Debug($"Config loaded from Addressables: {key}");
+                    _configsCache[key] = json;
+                    _logger.Debug($"Config preloaded from Addressables: {key}");
                 }
                 else
                 {
@@ -78,6 +114,15 @@ namespace Project.Gameplay.Gameplay.Configs
             {
                 _logger.Error($"Error loading config {key} from Addressables", ex);
             }
+        }
+
+        /// <summary>
+        /// Предзагружает все конфиги из списка <see cref="PreloadConfigKeys"/>.
+        /// </summary>
+        public async UniTask PreloadAllAsync(CancellationToken cancellationToken = default)
+        {
+            await UniTask.WhenAll(PreloadConfigKeys.Select(key 
+                => PreloadConfigAsync(key, cancellationToken).AsAsyncUnitUniTask()));
         }
 
         protected override async UniTask<T> InnerDownload<T>(string key, T storage, CancellationToken cancellationToken)

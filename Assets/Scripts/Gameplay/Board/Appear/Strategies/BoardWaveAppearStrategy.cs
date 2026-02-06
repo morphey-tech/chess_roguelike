@@ -13,6 +13,12 @@ namespace Project.Gameplay.Gameplay.Board.Appear.Strategies
 
         public async UniTask Appear(IReadOnlyList<EntityLink> cells)
         {
+            foreach (EntityLink cell in cells)
+            {
+                if (cell != null)
+                    cell.transform.localScale = Vector3.zero;
+            }
+
             IReadOnlyList<EntityLink> ordered =
                 cells.OrderBy(c => 
                         c.transform.position.x + c.transform.position.z)
