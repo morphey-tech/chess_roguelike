@@ -29,10 +29,7 @@ namespace Project.Core.Window
     [SerializeField] private CanvasGroup _canvasGroup = null;
     [SerializeField] private float _planeDistance = 1f;
     [SerializeField] private int _sortingOrder = 10;
-
-    [Space] [Header("Background:")] [SerializeField]
-    private RectTransform _background = null;
-
+    
     public IReadOnlyList<Window> GetVisibleStack() => _visibleWindows;
     public IReadOnlyCollection<Window> GetAllWindows() => _windows.Values;
 
@@ -112,6 +109,7 @@ namespace Project.Core.Window
     {
       _assetService = assetService;
       _logService = logService;
+      _log = _logService.CreateLogger<WindowsController>();
       SetCanvasSettings();
       MapPreloadedWindows();
     }
@@ -332,29 +330,11 @@ namespace Project.Core.Window
       if (wnd == null && _windowQueue.Count > 0)
         return;
 
-      if (wnd == null || !wnd.NeedShowBackground)
-      {
+      if (wnd == null || !wnd.NeedShowBackground) 
         return;
-      }
-
-      PushBackgroundUnder(wnd);
-      StretchBackground();
     }
 
-    private void StretchBackground()
-    {
-      const float stretch_overshoot = 100f; //for IPhone X, for other 5f is enough
-      _background.offsetMin = new Vector2(-stretch_overshoot, -stretch_overshoot);
-      _background.offsetMax = new Vector2(stretch_overshoot, stretch_overshoot);
-    }
 
-    private void PushBackgroundUnder(Window wnd)
-    {
-      _background.SetSiblingIndex(0);
-      _background.SetSiblingIndex(Math.Max(0, wnd.transform.GetSiblingIndex() - 1));
-      _background.anchoredPosition3D = Vector3.forward * wnd.ZOrder;
-      _background.GetComponent<Canvas>().sortingOrder = wnd.ZOrder * -10 - 1;
-    }
 
     public T GetOrCreateWindow<T>() where T : Window
     {
@@ -489,6 +469,10 @@ namespace Project.Core.Window
             _windowContainer.transform)).GetComponent<Window>();
         var id = windowType;
         _windows.Add(id, window);
+        
+        //хз почему оно просто не спавнится так как надо
+        window.GetComponent<RectTransform>().anchoredPosition = window.transform.parent.GetComponent<RectTransform>().anchoredPosition;
+        window.GetComponent<RectTransform>().sizeDelta = window.transform.parent.GetComponent<RectTransform>().sizeDelta;
         window.name = id.Name;
         window.Init(_assetService, _logService);
 

@@ -10,7 +10,8 @@
         "Unity.ResourceManager",
         "Unity.InputSystem",
         "ZLogger.Unity",
-        "MessagePipe"
+        "MessagePipe",
+        "DOTween.Modules"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

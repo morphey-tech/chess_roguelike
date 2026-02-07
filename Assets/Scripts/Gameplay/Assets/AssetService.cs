@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using VContainer;
+using VContainer.Unity;
 using ILogger = Project.Core.Core.Logging.ILogger;
 
 namespace Project.Gameplay.Gameplay.Assets
@@ -99,7 +100,7 @@ namespace Project.Gameplay.Gameplay.Assets
                 }
                 
                 _instantiatedObjects[instance] = handle;
-                _resolver.Inject(instance);
+                _resolver.InjectGameObject(instance);
                 _logger.Debug($"Instantiated: {address}");
                 return instance;
             }
@@ -124,7 +125,7 @@ namespace Project.Gameplay.Gameplay.Assets
                 return null;
             }
             GameObject instance = UnityEngine.Object.Instantiate(prefab, position, rotation, parent);
-            _resolver.Inject(instance);
+            _resolver.InjectGameObject(instance);
             return instance;
         }
 

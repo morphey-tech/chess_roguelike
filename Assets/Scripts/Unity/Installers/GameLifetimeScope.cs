@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using LiteUI.UI.Service;
 using MessagePipe;
 using Project.Core.Core.World;
+using Project.Core.Window;
 using Project.Gameplay.Gameplay.Attack;
 using Project.Gameplay.Gameplay.Attack.Strategies;
 using Project.Gameplay.Gameplay.Board;
@@ -237,6 +238,7 @@ namespace Project.Unity.Unity.Installers
             builder.Register<FigureSpawnService>(Lifetime.Singleton);
             builder.Register<DamageService>(Lifetime.Singleton);
             builder.Register<MovementService>(Lifetime.Singleton);
+            builder.Register<UI>(Lifetime.Singleton);
         }
 
         private void OnContainerBuilt(IObjectResolver resolver)

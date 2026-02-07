@@ -11,6 +11,7 @@ using Project.Gameplay.Gameplay.Prepare.Messages;
 using Project.Gameplay.Gameplay.Save.Models;
 using Project.Gameplay.Gameplay.Visual;
 using Project.Gameplay.Gameplay.Visual.Commands.Impl;
+using Project.Gameplay.UI;
 using VContainer;
 
 namespace Project.Gameplay.Gameplay.Prepare
@@ -69,6 +70,8 @@ namespace Project.Gameplay.Gameplay.Prepare
 
             // Preload в фоне — не блокируем появление prepare-зоны (PreloadConfigsAsync может тянуть 2–3 сек из-за TurnPatternFactory)
             _figureSpawnService.PreloadConfigsAsync().Forget();
+            var wnd = await Core.Window.UI.ShowAsync<TurnWindow>();
+            wnd.SetPreparePhase();
             await SpawnPrepareZoneAsync();
         }
 
