@@ -13,15 +13,18 @@ namespace Project.Gameplay.Gameplay.Assets
 {
     public class AssetService : IAssetService, IDisposable
     {
+        private readonly IObjectResolver _resolver;
+        private readonly ILogger _logger;
+        
         private readonly Dictionary<string, AsyncOperationHandle> _loadedAssets = new();
         private readonly Dictionary<GameObject, AsyncOperationHandle<GameObject>> _instantiatedObjects = new();
         private readonly HashSet<string> _preloadedAddresses = new();
-        private readonly ILogger _logger;
         private bool _disposed;
         
         [Inject]
-        public AssetService(ILogService logService)
+        private AssetService(IObjectResolver resolver, ILogService logService)
         {
+            _resolver = resolver;
             _logger = logService.CreateLogger<AssetService>();
         }
         
@@ -96,6 +99,7 @@ namespace Project.Gameplay.Gameplay.Assets
                 }
                 
                 _instantiatedObjects[instance] = handle;
+                _resolver.Inject(instance);
                 _logger.Debug($"Instantiated: {address}");
                 return instance;
             }
@@ -111,14 +115,17 @@ namespace Project.Gameplay.Gameplay.Assets
             return InstantiateAsync(key.Address, position, rotation, parent);
         }
 
-        public GameObject InstantiateFromPrefab(GameObject prefab, Vector3 position, Quaternion rotation, Transform parent = null)
+        public GameObject InstantiateFromPrefab(GameObject prefab, Vector3 position, Quaternion rotation,
+            Transform parent = null)
         {
             if (prefab == null)
             {
                 _logger.Error("InstantiateFromPrefab: prefab is null");
                 return null;
             }
-            return UnityEngine.Object.Instantiate(prefab, position, rotation, parent);
+            GameObject instance = UnityEngine.Object.Instantiate(prefab, position, rotation, parent);
+            _resolver.Inject(instance);
+            return instance;
         }
 
         public void Release<T>(T asset) where T : UnityEngine.Object
