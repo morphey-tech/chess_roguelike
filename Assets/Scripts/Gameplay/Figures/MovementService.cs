@@ -10,11 +10,10 @@ namespace Project.Gameplay.Gameplay.Figures
 {
     public class MovementService
     {
-        public BoardGrid Grid => _grid;
-        
+        public BoardGrid? Grid { get; private set; }
+
         private readonly MovementStrategyFactory _strategyFactory;
         private readonly ILogger<MovementService> _logger;
-        private BoardGrid _grid;
 
         [Inject]
         private MovementService(
@@ -27,20 +26,20 @@ namespace Project.Gameplay.Gameplay.Figures
 
         public void Configure(BoardGrid grid)
         {
-            _grid = grid;
+            Grid = grid;
             _logger.Debug($"Grid set: {grid.Width}x{grid.Height}");
         }
 
         public IEnumerable<MovementStrategyResult> GetAvailableMoves(Figure figure, GridPosition from)
         {
-            if (_grid == null)
+            if (Grid == null)
             {
                 _logger.Error("Grid not set!");
                 yield break;
             }
 
             IMovementStrategy strategy = _strategyFactory.Get(figure.MovementId);
-            foreach (MovementStrategyResult move in strategy.GetAvailableMoves(figure, from, _grid))
+            foreach (MovementStrategyResult move in strategy.GetAvailableMoves(figure, from, Grid))
             {
                 yield return move;
             }
@@ -48,16 +47,16 @@ namespace Project.Gameplay.Gameplay.Figures
 
         public bool CanMove(GridPosition from, GridPosition to)
         {
-            if (_grid == null)
+            if (Grid == null)
             {
                 _logger.Error("Grid not set!");
                 return false;
             }
 
-            if (!_grid.IsInside(from) || !_grid.IsInside(to))
+            if (!Grid.IsInside(from) || !Grid.IsInside(to))
                 return false;
 
-            BoardCell fromCell = _grid.GetBoardCell(from);
+            BoardCell fromCell = Grid.GetBoardCell(from);
             Figure figure = fromCell.OccupiedBy;
 
             if (figure == null)
@@ -71,14 +70,14 @@ namespace Project.Gameplay.Gameplay.Figures
 
         public bool CanMove(Figure figure, GridPosition from, GridPosition to)
         {
-            if (_grid == null)
+            if (Grid == null)
             {
                 _logger.Error("Grid not set!");
                 return false;
             }
 
             IMovementStrategy strategy = _strategyFactory.Get(figure.MovementId);
-            var strategyResult = strategy.GetFor(figure, from, to, _grid);
+            MovementStrategyResult strategyResult = strategy.GetFor(figure, from, to, Grid);
 
             if (!strategyResult.CanOccupy())
             {
@@ -90,14 +89,14 @@ namespace Project.Gameplay.Gameplay.Figures
 
         public void MoveFigure(GridPosition from, GridPosition to)
         {
-            if (_grid == null)
+            if (Grid == null)
             {
                 _logger.Error("Grid not set!");
                 return;
             }
 
-            BoardCell fromCell = _grid.GetBoardCell(from);
-            BoardCell toCell = _grid.GetBoardCell(to);
+            BoardCell fromCell = Grid.GetBoardCell(from);
+            BoardCell toCell = Grid.GetBoardCell(to);
             Figure figure = fromCell.OccupiedBy;
             if (figure == null)
             {

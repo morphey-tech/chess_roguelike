@@ -1,16 +1,11 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using MessagePipe;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Components;
-using Project.Gameplay.Gameplay.Board;
 using Project.Gameplay.Gameplay.Figures;
-using Project.Gameplay.Gameplay.Run;
 using Project.Gameplay.Gameplay.Selection;
 using Project.Gameplay.Gameplay.Turn;
 using Project.Gameplay.Gameplay.Turn.BonusMove;
-using Project.Gameplay.Movement;
 using VContainer;
 using VContainer.Unity;
 
@@ -27,22 +22,23 @@ namespace Project.Gameplay.Gameplay.Stage
     /// </summary>
     public class StageService : IStartable, IDisposable
     {
-        private readonly RunHolder _runHolder;
-        private readonly IBonusMoveController _bonusMoveController;
-        private readonly IBoardPresenter _boardPresenter;
-        private readonly MovementService _movementService;
+        private readonly IStageQueryService _query;
+        private readonly IStageHighlightRenderer _renderer;
         private readonly ILogger<StageService> _logger;
         private readonly IDisposable _subscriptions;
 
-        // Track if we're showing bonus move highlights (to avoid overwriting during selection events)
-        private bool _showingBonusMoveHighlights;
+        private enum StageMode
+        {
+            Normal,
+            BonusMove
+        }
+
+        private StageMode _mode;
 
         [Inject]
         private StageService(
-            RunHolder runHolder,
-            IBonusMoveController bonusMoveController,
-            IBoardPresenter boardPresenter,
-            MovementService movementService,
+            IStageQueryService query,
+            IStageHighlightRenderer renderer,
             ISubscriber<FigureSpawnedMessage> figureSpawnedSubscriber,
             ISubscriber<FigureSelectedMessage> selectionSubscriber,
             ISubscriber<FigureDeselectedMessage> figureDeselectedSubscriber,
@@ -51,10 +47,8 @@ namespace Project.Gameplay.Gameplay.Stage
             ISubscriber<BonusMoveCompletedMessage> bonusMoveCompletedSubscriber,
             ILogService logService)
         {
-            _runHolder = runHolder;
-            _bonusMoveController = bonusMoveController;
-            _boardPresenter = boardPresenter;
-            _movementService = movementService;
+            _query = query;
+            _renderer = renderer;
             _logger = logService.CreateLogger<StageService>();
 
             DisposableBagBuilder bag = DisposableBag.CreateBuilder();
@@ -81,33 +75,35 @@ namespace Project.Gameplay.Gameplay.Stage
 
         private void OnBonusMoveStarted(BonusMoveStartedMessage message)
         {
-            _showingBonusMoveHighlights = true;
+            _mode = StageMode.BonusMove;
             _logger.Debug($"Bonus move started for {message.Actor}, showing highlights");
-            HighlightPositions(_bonusMoveController.GetAvailablePositions());
+            var moveTargets = _query.GetBonusMoveTargets();
+            _renderer.Show(StageSelectionInfo.ForMoves(moveTargets));
         }
 
         private void OnBonusMoveCompleted(BonusMoveCompletedMessage message)
         {
-            _showingBonusMoveHighlights = false;
+            _mode = StageMode.Normal;
             _logger.Debug($"Bonus move completed for {message.Actor}, clearing highlights");
-            ClearHighlights();
+            _renderer.Clear();
         }
 
         private void OnFigureSelected(FigureSelectedMessage message)
         {
             // Don't change highlights during bonus move
-            if (_showingBonusMoveHighlights)
+            if (_mode == StageMode.BonusMove)
                 return;
 
             if (message.Figure != null)
             {
                 _logger.Debug($"Figure {message.Figure.Id} selected at ({message.Position.Row}, {message.Position.Column})");
-                HighlightPositions(_movementService.GetAvailableMoves(message.Figure, message.Position));
+                StageSelectionInfo info = _query.GetSelectionInfo(message.Figure, message.Position);
+                _renderer.Show(StageSelectionInfo.ForCombat(info.MoveTargets, info.AttackTargets));
                 message.Figure.EnsureComponent(new SelectTag());
             }
             else
             {
-                ClearHighlights();
+                _renderer.Clear();
                 _logger.Debug("Selection cleared");
             }
         }
@@ -118,9 +114,9 @@ namespace Project.Gameplay.Gameplay.Stage
             
             // Clear highlights immediately when figure is deselected
             // (before move animation starts)
-            if (!_showingBonusMoveHighlights)
+            if (_mode != StageMode.BonusMove)
             {
-                ClearHighlights();
+                _renderer.Clear();
             }
         }
 
@@ -129,59 +125,15 @@ namespace Project.Gameplay.Gameplay.Stage
             _logger.Info($"Turn {message.TurnNumber}: {message.CurrentTeam}'s turn");
             
             // Reset highlight state
-            _showingBonusMoveHighlights = false;
+            _mode = StageMode.Normal;
             
             // Clear any pending highlights
-            ClearHighlights();
-        }
-
-        private void ClearHighlights()
-        {
-            HighlightPositions(null);
+            _renderer.Clear();
         }
 
         void IDisposable.Dispose()
         {
             _subscriptions?.Dispose();
-        }
-        
-        private void HighlightPositions(IEnumerable<MovementStrategyResult> positions)
-        {
-            if (_movementService.Grid == null)
-            {
-                _logger.Warning("HighlightPositions: Grid is null");
-                return;
-            }
-
-            int highlightCount = 0;
-            int attackCount = 0;
-            
-            foreach (var boardCell in _movementService.Grid.AllCells())
-            {
-                var strategyResult = positions?.FirstOrDefault(p =>
-                    boardCell.Position.Column == p.Position.Column && boardCell.Position.Row == p.Position.Row) ?? MovementStrategyResult.MakeEmpty();
-
-                if (!strategyResult.CanOccupy())
-                {
-                    boardCell.Del<HighlightTag>();
-                    boardCell.Del<AttackHighlightTag>();
-                }
-                else
-                {
-                    if (strategyResult.IsFree)
-                    {
-                        boardCell.EnsureComponent(new HighlightTag());
-                        highlightCount++;
-                    }
-                    else
-                    {
-                        boardCell.EnsureComponent(new AttackHighlightTag());
-                        attackCount++;
-                    }
-                }
-            }
-            
-            _logger.Info($"HighlightPositions: Added {highlightCount} move highlights, {attackCount} attack highlights");
         }
     }
 }

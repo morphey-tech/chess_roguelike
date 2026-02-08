@@ -151,6 +151,12 @@ namespace Project.Unity.Unity.Installers
                 .As<ITurnController>();
 
             // Stage Service - handles stage events
+            builder.Register<StageQueryService>(Lifetime.Singleton)
+                .As<IStageQueryService>();
+            builder.Register<AttackQueryService>(Lifetime.Singleton)
+                .As<IAttackQueryService>();
+            builder.Register<StageHighlightRenderer>(Lifetime.Singleton)
+                .As<IStageHighlightRenderer>();
             builder.Register<StageService>(Lifetime.Singleton)
                 .AsImplementedInterfaces()
                 .AsSelf();

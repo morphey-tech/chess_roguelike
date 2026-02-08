@@ -1,8 +1,12 @@
+using System.Threading;
+using Cysharp.Threading.Tasks;
+using Project.Core.Core.Logging;
 using Project.Gameplay;
 using Project.Gameplay.Components;
 using Project.Gameplay.Presentations;
 using UnityEngine;
 using UnityEngine.Serialization;
+using VContainer;
 
 namespace Project.Unity.Presentations
 {
@@ -13,40 +17,52 @@ namespace Project.Unity.Presentations
         [SerializeField] private GameObject _highlightRenderer;
         [SerializeField] private GameObject _attackRenderer;
 
-        private EntityLink _link;
+        private ILogger<CellHighlightPresenter> _logger;
+        
+        private EntityLink _link = null!;
+        private CancellationToken _destroyToken;
+
+        [Inject]
+        private void Construct(ILogService logger)
+        {
+            _logger = logger.CreateLogger<CellHighlightPresenter>();
+        }
         
         public void Init(EntityLink link)
         {
             _link = link;
-            Debug.Log($"[CellHighlightPresenter] Init called on {gameObject.name}, link: {link?.EntityId}");
+            _destroyToken = this.GetCancellationTokenOnDestroy();
+            RunLoopAsync().Forget();
         }
 
-        private void Update()
+        private async UniTaskVoid RunLoopAsync()
         {
-            if (_link == null)
+            await UniTask.WaitUntil(LinkIsExist, cancellationToken: _destroyToken);
+
+            while (!_destroyToken.IsCancellationRequested)
             {
-                // Only log once to avoid spam
-                if (!_loggedOnce)
-                {
-                    Debug.LogWarning($"[CellHighlightPresenter] _link is null on {gameObject.name}");
-                    _loggedOnce = true;
-                }
-                return;
-            }
-            
-            Entity entity = _link.GetEntity();
-            if (entity == null)
-                return;
-            
-            if (entity.Exists<HighlightTag>())
-                SetHighlight();
-            else if (entity.Exists<AttackHighlightTag>())
-                SetAttackHighlight();
-            else
+                Entity entity = _link.GetEntity();
                 SetDefault();
+                if (entity.Exists<HighlightTag>())
+                {
+                    SetHighlight();
+                }
+                else if (entity.Exists<AttackHighlightTag>())
+                {
+                    SetAttackHighlight();
+                }
+                else
+                {
+                    SetDefault();
+                }
+                await UniTask.Yield(_destroyToken);
+            }
         }
-        
-        private bool _loggedOnce;
+
+        private bool LinkIsExist()
+        {
+            return _link != null;
+        }
         
         private void SetDefault()
         {
