@@ -94,6 +94,12 @@ namespace Project.Unity.Unity.Views
             };
             _visuals[figure.Id] = visuals;
 
+            // Face enemy figures towards player
+            if (team == Team.Enemy)
+            {
+                controller.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
+            }
+
             FigureSpawnPresenter? spawnPresenter = controllerLink.GetComponent<FigureSpawnPresenter>();
             if (spawnPresenter != null)
             {
