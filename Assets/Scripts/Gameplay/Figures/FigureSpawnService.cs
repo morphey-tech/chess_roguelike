@@ -61,7 +61,7 @@ namespace Project.Gameplay.Gameplay.Figures
             _logger.Debug("Figure spawn configs preloaded");
         }
 
-        public async UniTask<Figure> SpawnAsync(BoardGrid grid, GridPosition position, string figureId, Team team)
+        public async UniTask<Figure?> SpawnAsync(BoardGrid grid, GridPosition position, string figureId, Team team)
         {
             BoardCell cell = grid.GetBoardCell(position);
 
@@ -84,7 +84,7 @@ namespace Project.Gameplay.Gameplay.Figures
                 return null;
             }
 
-            FigureDescriptionConfig description = _descriptionConfigCache.Get(figureConfig.DescriptionId);
+            FigureDescriptionConfig? description = _descriptionConfigCache.Get(figureConfig.DescriptionId);
             if (description == null)
             {
                 _logger.Error($"Description not found: {figureConfig.DescriptionId}");
@@ -106,7 +106,7 @@ namespace Project.Gameplay.Gameplay.Figures
             {
                 foreach (string passiveId in description.Passives)
                 {
-                    PassiveConfig passiveConfig = _passiveConfigCache.Get(passiveId);
+                    PassiveConfig? passiveConfig = _passiveConfigCache.Get(passiveId);
                     if (passiveConfig != null)
                     {
                         IPassive passive = PassiveFactory.Create(passiveConfig);

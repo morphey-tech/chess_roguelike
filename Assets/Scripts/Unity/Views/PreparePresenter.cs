@@ -20,7 +20,6 @@ namespace Project.Unity.Unity.Views
         private readonly IPrepareZoneAssetProvider _provider;
         private readonly PrepareLayoutService _layout;
         private readonly PrepareViewFactory _factory;
-        private readonly PrepareAnimationPlayer _anim;
         private readonly IWorldRoot _worldRoot;
         private readonly ILogger<PreparePresenter> _logger;
 
@@ -35,14 +34,12 @@ namespace Project.Unity.Unity.Views
             IPrepareZoneAssetProvider provider,
             PrepareLayoutService layout,
             PrepareViewFactory factory,
-            PrepareAnimationPlayer anim,
             IWorldRoot worldRoot,
             ILogService logService)
         {
             _provider = provider;
             _layout = layout;
             _factory = factory;
-            _anim = anim;
             _worldRoot = worldRoot;
             _logger = logService.CreateLogger<PreparePresenter>();
         }
@@ -50,7 +47,10 @@ namespace Project.Unity.Unity.Views
         public async UniTask SpawnPrepareZoneAsync(IReadOnlyList<PrepareZoneFigureData> figures)
         {
             int count = figures.Count;
-            if (count == 0) return;
+            if (count == 0)
+            {
+                return;
+            }
 
             PrepareZonePrefabs prefabs = await _provider.GetPrefabsAsync(GetUniqueFigureTypeIds(figures));
             if (prefabs.CellPrefab == null || prefabs.ControllerPrefab == null)
@@ -69,7 +69,7 @@ namespace Project.Unity.Unity.Views
                 if (slot != null)
                 {
                     _slots.Add(slot);
-                    await _anim.PlaySpawnAsync(slot);
+                    await PrepareAnimationPlayer.PlaySpawnAsync(slot);
                 }
             }
 
@@ -85,9 +85,10 @@ namespace Project.Unity.Unity.Views
                     _figures[fig.FigureId] = controller;
                     _figureSlots[fig.FigureId] = i;
                     _figureTypes[fig.FigureId] = fig.FigureTypeId;
-                    var marker = controller.GetComponent<HandFigureMarker>() ?? controller.AddComponent<HandFigureMarker>();
+                    HandFigureMarker? marker = controller.GetComponent<HandFigureMarker>() 
+                                               ?? controller.AddComponent<HandFigureMarker>();
                     marker.Initialize(fig.FigureId);
-                    await _anim.PlaySpawnAsync(controller);
+                    await PrepareAnimationPlayer.PlaySpawnAsync(controller);
                 }
             }
 
@@ -96,11 +97,12 @@ namespace Project.Unity.Unity.Views
 
         public void RemoveFigure(string figureId)
         {
-            if (_figures.Remove(figureId, out GameObject figure))
+            if (!_figures.Remove(figureId, out GameObject figure))
             {
-                Object.Destroy(figure);
-                _logger.Debug($"Removed figure {figureId}");
+                return;
             }
+            Object.Destroy(figure);
+            _logger.Debug($"Removed figure {figureId}");
         }
 
         public async UniTask RestoreFigureAsync(string figureId)
@@ -144,9 +146,10 @@ namespace Project.Unity.Unity.Views
             }
 
             _figures[figureId] = controller;
-            var marker = controller.GetComponent<HandFigureMarker>() ?? controller.AddComponent<HandFigureMarker>();
+            HandFigureMarker? marker = controller.GetComponent<HandFigureMarker>() 
+                                       ?? controller.AddComponent<HandFigureMarker>();
             marker.Initialize(figureId);
-            await _anim.PlaySpawnAsync(controller);
+            await PrepareAnimationPlayer.PlaySpawnAsync(controller);
         }
 
         public void SetSelected(string figureId, bool selected)
@@ -157,11 +160,17 @@ namespace Project.Unity.Unity.Views
 
         public void Clear()
         {
-            foreach (var figure in _figures.Values)
-                if (figure != null) Object.Destroy(figure);
+            foreach (GameObject? figure in _figures.Values)
+                if (figure != null)
+                {
+                    Object.Destroy(figure);
+                }
             _figures.Clear();
-            foreach (var slot in _slots)
-                if (slot != null) Object.Destroy(slot);
+            foreach (GameObject? slot in _slots)
+                if (slot != null)
+                {
+                    Object.Destroy(slot);
+                }
             _slots.Clear();
             _slotPositions.Clear();
             _figureSlots.Clear();
@@ -178,7 +187,7 @@ namespace Project.Unity.Unity.Views
         {
             var ids = new List<string>(figures.Count);
             var seen = new HashSet<string>();
-            foreach (var f in figures)
+            foreach (PrepareZoneFigureData f in figures)
             {
                 if (seen.Add(f.FigureTypeId))
                     ids.Add(f.FigureTypeId);

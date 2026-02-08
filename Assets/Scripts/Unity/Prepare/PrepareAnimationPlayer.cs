@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using LiteUI.Common.Extensions;
 using UnityEngine;
 using VContainer;
 
@@ -10,17 +11,20 @@ namespace Project.Unity.Unity.Prepare
     /// </summary>
     public sealed class PrepareAnimationPlayer
     {
-        private const float SpawnDuration = 0.35f;
-        private static readonly Ease SpawnEase = Ease.OutBack;
+        private const float SPAWN_DURATION = 0.2f;
+        
+        private static readonly Ease _spawnEase = Ease.OutBack;
 
-        public async UniTask PlaySpawnAsync(GameObject obj)
+        public static async UniTask PlaySpawnAsync(GameObject obj)
         {
-            if (obj == null) return;
+            if (obj.IsNullOrDestroyed())
+            {
+                return;
+            }
             obj.transform.localScale = Vector3.zero;
-            await UniTask.Yield();
             await obj.transform
-                .DOScale(Vector3.one, SpawnDuration)
-                .SetEase(SpawnEase)
+                .DOScale(Vector3.one, SPAWN_DURATION)
+                .SetEase(_spawnEase)
                 .AsyncWaitForCompletion()
                 .AsUniTask();
         }

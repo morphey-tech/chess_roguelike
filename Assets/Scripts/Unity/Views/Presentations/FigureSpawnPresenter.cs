@@ -17,8 +17,6 @@ namespace Project.Unity.Presentations
 
         public async UniTaskVoid PlaySpawnAsync()
         {
-            // Scale is already 0 (set by FigurePresenter before this is called)
-            // Animate to full scale
             await transform
                 .DOScale(Vector3.one, _spawnDuration)
                 .SetEase(_spawnEase)
