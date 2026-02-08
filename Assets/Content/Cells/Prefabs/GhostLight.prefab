@@ -110,7 +110,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 08f210828086c1a4398856e1ba65627c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ShapesRuntime::Shapes.Rectangle
-  blendMode: 1
+  blendMode: 7
   scaleMode: 0
   color: {r: 1, g: 1, b: 1, a: 0.78431374}
   detailLevel: 2
@@ -187,7 +187,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 525db45b2ebe18842a5def43de83a261, type: 2}
+  - {fileID: 2100000, guid: 30cc88762d3fbb246a2383a15ab68dc9, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

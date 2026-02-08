@@ -19,8 +19,6 @@ namespace Project.Unity.Unity.Views
         private const string FigureControllerAssetKey = "figure_controller";
         private const int MoveAnimationDurationMs = 300;
         private const int AttackAnimationDurationMs = 200;
-        private const int DamageFlashDurationMs = 160;
-        private const int HealEffectDurationMs = 300;
         private const int DeathAnimationDurationMs = 500;
         private const int PushAnimationDurationMs = 200;
         
@@ -29,8 +27,16 @@ namespace Project.Unity.Unity.Views
         private readonly ILogger<FigurePresenter> _logger;
 
         private readonly Dictionary<int, GameObject> _figures = new();
-        private readonly Dictionary<int, IFigureView> _figureViews = new();
+        private readonly Dictionary<int, FigureVisualSet> _visuals = new();
         private readonly Dictionary<int, GridPosition> _positions = new();
+
+        private sealed class FigureVisualSet
+        {
+            public FigureMovePresenter? Move { get; set; }
+            public FigureAttackPresenter? Attack { get; set; }
+            public FigureDeathPresenter? Death { get; set; }
+            public FigureHitPresenter? Hit { get; set; }
+        }
 
         public FigurePresenter(
             EntityService entityService,
@@ -40,7 +46,6 @@ namespace Project.Unity.Unity.Views
             _entityService = entityService;
             _worldRoot = worldRoot;
             _logger = logService.CreateLogger<FigurePresenter>();
-            _logger.Info("FigurePresenter created");
         }
 
         public async UniTask CreateFigure(Figure figure, string viewAssetKey, GridPosition pos, Team team)
@@ -70,29 +75,32 @@ namespace Project.Unity.Unity.Views
             _positions[figure.Id] = pos;
 
             // Spawn view as child of controller (still hidden because parent scale is 0)
-            GameObject viewGO = await _entityService.InstantiateAsChild(viewAssetKey, controller.transform);
+            GameObject? viewGO = await _entityService.InstantiateAsChild(viewAssetKey, controller.transform);
             if (viewGO == null)
             {
                 _logger.Warning($"Failed to instantiate view '{viewAssetKey}' for {figure}");
             }
             
-            var selectPresenter = controllerLink.GetComponent<FigureSelectPresenter>();
+            FigureSelectPresenter? selectPresenter = controllerLink.GetComponent<FigureSelectPresenter>();
             if (selectPresenter != null)
                 selectPresenter.InitSelecting();
                 
-            var view = controllerLink.GetComponent<IFigureView>();
-            if (view != null)
-                _figureViews[figure.Id] = view;
+            FigureVisualSet visuals = new()
+            {
+                Move = controllerLink.GetComponentInChildren<FigureMovePresenter>(true),
+                Attack = controllerLink.GetComponentInChildren<FigureAttackPresenter>(true),
+                Death = controllerLink.GetComponentInChildren<FigureDeathPresenter>(true),
+                Hit = controllerLink.GetComponentInChildren<FigureHitPresenter>(true)
+            };
+            _visuals[figure.Id] = visuals;
 
-            // NOW play spawn animation (scale from 0 to 1)
-            var spawnPresenter = controllerLink.GetComponent<FigureSpawnPresenter>();
+            FigureSpawnPresenter? spawnPresenter = controllerLink.GetComponent<FigureSpawnPresenter>();
             if (spawnPresenter != null)
             {
                 spawnPresenter.PlaySpawnAsync().Forget();
             }
             else
             {
-                // No spawn presenter - just set scale to 1
                 controller.transform.localScale = Vector3.one;
             }
 
@@ -109,9 +117,9 @@ namespace Project.Unity.Unity.Views
 
             Vector3 newWorldPos = GetCellTopPosition(to);
 
-            if (_figureViews.TryGetValue(figureId, out IFigureView view))
+            if (_visuals.TryGetValue(figureId, out FigureVisualSet visuals) && visuals.Move != null)
             {
-                await view.PlayMoveAsync(newWorldPos);
+                await visuals.Move.PlayMoveAsync(newWorldPos);
             }
             else
             {
@@ -125,21 +133,21 @@ namespace Project.Unity.Unity.Views
 
         public async UniTask RemoveFigureAsync(int figureId)
         {
-            if (!_figures.TryGetValue(figureId, out GameObject figureGO))
+            if (!_figures.TryGetValue(figureId, out GameObject _))
                 return;
 
-            if (_figureViews.TryGetValue(figureId, out IFigureView view))
+            if (_visuals.TryGetValue(figureId, out FigureVisualSet visuals) && visuals.Death != null)
             {
-                await view.PlayDeathAsync();
+                await visuals.Death.PlayDeathAsync();
             }
             
-            CleanupFigure(figureId, figureGO);
+            CleanupFigure(figureId);
         }
 
-        private void CleanupFigure(int figureId, GameObject figureGO)
+        private void CleanupFigure(int figureId)
         {
             _figures.Remove(figureId);
-            _figureViews.Remove(figureId);
+            _visuals.Remove(figureId);
             _positions.Remove(figureId);
             
             _entityService.Destroy(figureId);
@@ -148,10 +156,10 @@ namespace Project.Unity.Unity.Views
 
         public async UniTask PlayAttackAsync(int figureId, GridPosition target)
         {
-            if (_figureViews.TryGetValue(figureId, out IFigureView view))
+            if (_visuals.TryGetValue(figureId, out FigureVisualSet visuals) && visuals.Attack != null)
             {
                 Vector3 targetPos = GetCellTopPosition(target);
-                await view.PlayAttackAsync(targetPos);
+                await visuals.Attack.PlayAttackAsync(targetPos);
             }
             else
             {
@@ -164,6 +172,11 @@ namespace Project.Unity.Unity.Views
             if (!_figures.TryGetValue(figureId, out GameObject figureGO))
                 return;
 
+            if (_visuals.TryGetValue(figureId, out FigureVisualSet visuals) && visuals.Hit != null)
+            {
+                await visuals.Hit.PlayHitAsync();
+                return;
+            }
             await PlaySimpleDamageEffect(figureGO);
         }
 
@@ -177,9 +190,9 @@ namespace Project.Unity.Unity.Views
 
         public async UniTask PlayDeathEffectAsync(int figureId)
         {
-            if (_figureViews.TryGetValue(figureId, out IFigureView view))
+            if (_visuals.TryGetValue(figureId, out FigureVisualSet visuals) && visuals.Death != null)
             {
-                await view.PlayDeathAsync();
+                await visuals.Death.PlayDeathAsync();
             }
             else
             {
@@ -194,10 +207,10 @@ namespace Project.Unity.Unity.Views
 
             Vector3 newWorldPos = GetCellTopPosition(to);
 
-            if (_figureViews.TryGetValue(figureId, out IFigureView view))
+            if (_visuals.TryGetValue(figureId, out FigureVisualSet visuals) && visuals.Move != null)
             {
                 // Could have a special push animation, for now use move
-                await view.PlayMoveAsync(newWorldPos);
+                await visuals.Move.PlayMoveAsync(newWorldPos);
             }
             else
             {
@@ -311,7 +324,7 @@ namespace Project.Unity.Unity.Views
                     Object.Destroy(figure);
             }
             _figures.Clear();
-            _figureViews.Clear();
+            _visuals.Clear();
             _positions.Clear();
 
             _logger.Debug("Figures cleared");
@@ -322,7 +335,7 @@ namespace Project.Unity.Unity.Views
             Clear();
         }
 
-        private Vector3 GetCellTopPosition(GridPosition gridPos)
+        private static Vector3 GetCellTopPosition(GridPosition gridPos)
         {
             const float surfaceY = 0f;
 

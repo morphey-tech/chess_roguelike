@@ -11,9 +11,12 @@ GameObject:
   - component: {fileID: 700778397425556649}
   - component: {fileID: 3018979080851452577}
   - component: {fileID: -8354830629548974188}
-  - component: {fileID: 6533899885431309447}
   - component: {fileID: -1993780159180671554}
   - component: {fileID: 2074524879576951669}
+  - component: {fileID: 2752750990497315469}
+  - component: {fileID: 317426383785266942}
+  - component: {fileID: 301852541256864080}
+  - component: {fileID: 4735786356695318062}
   m_Layer: 7
   m_Name: figure_controller
   m_TagString: Untagged
@@ -69,28 +72,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19829e90c0b64a9d82ec5ae053be1c66, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Gameplay::Project.Gameplay.Presentations.EntityLink
---- !u!114 &6533899885431309447
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 740290869039254118}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2a8f945ec26fef742b973369e64e0219, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity::Project.Unity.Views.Components.FigureView
-  _moveDuration: 0.25
-  _moveEase: 7
-  _jumpHeight: 0.3
-  _attackDuration: 0.15
-  _attackDistance: 0.3
-  _deathDuration: 0.3
-  _hitDuration: 0.1
-  _hitShake: 0.1
-  _highlightRenderer: {fileID: 0}
-  _highlightColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
 --- !u!114 &-1993780159180671554
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -103,7 +84,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 77c1ed1a7caaca54b915a081bd3c5556, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity::Project.Unity.Presentations.FigureSpawnPresenter
-  _spawnDuration: 0.3
+  _spawnDuration: 0.2
   _spawnEase: 27
 --- !u!114 &2074524879576951669
 MonoBehaviour:
@@ -119,3 +100,59 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity::Project.Unity.Presentations.FigureSelectPresenter
   _color: {r: 1, g: 1, b: 1, a: 1}
   _width: 5
+--- !u!114 &2752750990497315469
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 740290869039254118}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b10874dec8583647ba35e9d459d3768, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity::Project.Unity.Presentations.FigureMovePresenter
+  _moveDuration: 0.25
+  _moveEase: 7
+  _jumpHeight: 0.3
+--- !u!114 &317426383785266942
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 740290869039254118}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a9cea112bc5df042a09e4190f9d1025, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity::Project.Unity.Presentations.FigureAttackPresenter
+  _attackDuration: 0.15
+  _attackDistance: 0.3
+--- !u!114 &301852541256864080
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 740290869039254118}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1609962fcd7b5c24385d92b6dd682688, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity::Project.Unity.Presentations.FigureHitPresenter
+  _hitDuration: 0.1
+  _hitShake: 0.1
+--- !u!114 &4735786356695318062
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 740290869039254118}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 203619cd371447d4ca888f80778a7924, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity::Project.Unity.Presentations.FigureDeathPresenter
+  _deathDuration: 0.3
