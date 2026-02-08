@@ -47,7 +47,7 @@ namespace Project.Unity.Unity.Installers
         [SerializeField] private WorldObjectCollector _worldObjectCollector;
         [SerializeField] private UiObjectCollector _uiObjectCollector;
         
-        private IObjectResolver _resolver;
+        private IObjectResolver _resolver = null!;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -166,6 +166,8 @@ namespace Project.Unity.Unity.Installers
             builder.Register<StageService>(Lifetime.Singleton)
                 .AsImplementedInterfaces()
                 .AsSelf();
+            
+            builder.Register<GameShutdownCleanupService>(Lifetime.Singleton);
 
             // Prepare phase — один кэш: заполняется во время доски, отдаёт префабы без задержки
             builder.Register<PrepareZonePrefabCache>(Lifetime.Singleton)
@@ -288,16 +290,14 @@ namespace Project.Unity.Unity.Installers
 
         protected override void OnDestroy()
         {
-            if (_resolver != null)
+            try
             {
-                try
-                {
-                    foreach (IGameShutdownCleanup cleanup in _resolver.Resolve<IEnumerable<IGameShutdownCleanup>>())
-                        cleanup.Cleanup();
-                }
-                catch { /* ignore */ }
+                _resolver.Resolve<GameShutdownCleanupService>().Cleanup();
             }
-
+            catch
+            {
+                /* ignore */
+            }
             base.OnDestroy();
         }
     }
