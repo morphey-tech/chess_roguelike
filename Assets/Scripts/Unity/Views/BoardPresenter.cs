@@ -12,6 +12,7 @@ using Project.Gameplay.Gameplay.Board;
 using Project.Gameplay.Gameplay.Board.Appear;
 using Project.Gameplay.Gameplay.Board.Appear.Strategies;
 using Project.Gameplay.Gameplay.Configs;
+using Project.Gameplay.Gameplay.Shutdown;
 using Project.Gameplay.Presentations;
 using UnityEngine;
 using VContainer;
@@ -23,7 +24,7 @@ namespace Project.Unity.Unity.Views
     /// Effects are delegated to IBoardCellView components on prefabs.
     /// </summary>
     
-    public sealed class BoardPresenter : IBoardPresenter
+    public sealed class BoardPresenter : IBoardPresenter, IGameShutdownCleanup
     {
         private const float CELL_SIZE = 1f;
         
@@ -199,6 +200,11 @@ namespace Project.Unity.Unity.Views
             _cellsList.Clear();
             _cellConfigCache = null;
             _cellPrefabCache.Clear();
+        }
+
+        void IGameShutdownCleanup.Cleanup()
+        {
+            (this as IBoardPresenter).Clear();
         }
 
         private async UniTask LoadAndCachePrefabAsync(string skinId, AssetKey assetKey)

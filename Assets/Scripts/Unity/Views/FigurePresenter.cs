@@ -7,13 +7,14 @@ using Project.Core.Core.World;
 using Project.Gameplay;
 using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.Gameplay.Figures;
+using Project.Gameplay.Gameplay.Shutdown;
 using Project.Gameplay.Presentations;
 using Project.Unity.Presentations;
 using UnityEngine;
 
 namespace Project.Unity.Unity.Views
 {
-    public sealed class FigurePresenter : IFigurePresenter
+    public sealed class FigurePresenter : IFigurePresenter, IGameShutdownCleanup
     {
         private const string FigureControllerAssetKey = "figure_controller";
         private const int MoveAnimationDurationMs = 300;
@@ -314,6 +315,11 @@ namespace Project.Unity.Unity.Views
             _positions.Clear();
 
             _logger.Debug("Figures cleared");
+        }
+
+        void IGameShutdownCleanup.Cleanup()
+        {
+            Clear();
         }
 
         private Vector3 GetCellTopPosition(GridPosition gridPos)

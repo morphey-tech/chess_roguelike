@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using Project.Core.Core.Logging;
 using Project.Core.Core.World;
 using Project.Gameplay.Gameplay.Prepare;
+using Project.Gameplay.Gameplay.Shutdown;
 using Project.Unity.Unity.Prepare;
 using Project.Unity.Unity.Views.Components;
 using UnityEngine;
@@ -14,7 +15,7 @@ namespace Project.Unity.Unity.Views
     /// Оркестратор prepare-зоны. Не грузит ассеты, не считает позиции, не знает про DOTween.
     /// Build (prefabs) → Layout (positions) → Factory (create) → Animation (play).
     /// </summary>
-    public sealed class PreparePresenter : IPreparePresenter
+    public sealed class PreparePresenter : IPreparePresenter, IGameShutdownCleanup
     {
         private readonly IPrepareZoneAssetProvider _provider;
         private readonly PrepareLayoutService _layout;
@@ -114,6 +115,11 @@ namespace Project.Unity.Unity.Views
             _slots.Clear();
             _slotPositions.Clear();
             _logger.Debug("Prepare zone cleared");
+        }
+
+        void IGameShutdownCleanup.Cleanup()
+        {
+            Clear();
         }
 
         private static List<string> GetUniqueFigureTypeIds(IReadOnlyList<PrepareZoneFigureData> figures)

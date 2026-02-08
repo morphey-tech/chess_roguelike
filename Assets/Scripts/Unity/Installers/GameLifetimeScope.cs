@@ -25,6 +25,7 @@ using Project.Gameplay.Gameplay.Turn.Conditions.Impl;
 using Project.Gameplay.Gameplay.Turn.Execution;
 using Project.Gameplay.Gameplay.Visual;
 using Project.Gameplay.Gameplay.Visual.Commands;
+using Project.Gameplay.Gameplay.Shutdown;
 using Project.Gameplay.Presentations;
 using Project.Unity.Unity.Bootstrap;
 using Project.Unity.Unity.Prepare;
@@ -45,6 +46,8 @@ namespace Project.Unity.Unity.Installers
         [Header("Collectors")]
         [SerializeField] private WorldObjectCollector _worldObjectCollector;
         [SerializeField] private UiObjectCollector _uiObjectCollector;
+        
+        private IObjectResolver _resolver;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -95,10 +98,12 @@ namespace Project.Unity.Unity.Installers
         {
             // Views are regular classes - they implement Core interfaces
             builder.Register<BoardPresenter>(Lifetime.Singleton)
-                .As<IBoardPresenter>();
+                .As<IBoardPresenter>()
+                .As<IGameShutdownCleanup>();
 
             builder.Register<FigurePresenter>(Lifetime.Singleton)
-                .As<IFigurePresenter>();
+                .As<IFigurePresenter>()
+                .As<IGameShutdownCleanup>();
 
             // Visual command pipeline
             builder.Register<PresenterProvider>(Lifetime.Singleton)
@@ -113,7 +118,8 @@ namespace Project.Unity.Unity.Installers
             builder.Register<PrepareViewFactory>(Lifetime.Singleton);
             builder.Register<PrepareAnimationPlayer>(Lifetime.Singleton);
             builder.Register<PreparePresenter>(Lifetime.Singleton)
-                .As<IPreparePresenter>();
+                .As<IPreparePresenter>()
+                .As<IGameShutdownCleanup>();
 
             // Unity-side input handlers
             builder.Register<HandFigureClickHandler>(Lifetime.Singleton)
@@ -261,6 +267,8 @@ namespace Project.Unity.Unity.Installers
 
         private void OnContainerBuilt(IObjectResolver resolver)
         {
+            _resolver = resolver;
+            
             // Force-create services with subscriptions
             resolver.Resolve<TurnSystem>();
             resolver.Resolve<InteractionController>();
@@ -276,6 +284,21 @@ namespace Project.Unity.Unity.Installers
             {
                 resolver.Inject(bootstrap);
             }
+        }
+
+        protected override void OnDestroy()
+        {
+            if (_resolver != null)
+            {
+                try
+                {
+                    foreach (IGameShutdownCleanup cleanup in _resolver.Resolve<IEnumerable<IGameShutdownCleanup>>())
+                        cleanup.Cleanup();
+                }
+                catch { /* ignore */ }
+            }
+
+            base.OnDestroy();
         }
     }
 }
