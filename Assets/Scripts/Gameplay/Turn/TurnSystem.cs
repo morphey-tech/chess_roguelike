@@ -1,8 +1,10 @@
 using System;
+using Cysharp.Threading.Tasks;
 using MessagePipe;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Input.Messages;
+using Project.Gameplay.UI;
 
 namespace Project.Gameplay.Gameplay.Turn
 {
@@ -11,7 +13,7 @@ namespace Project.Gameplay.Gameplay.Turn
         private readonly IPublisher<TurnChangedMessage> _turnChangedPublisher;
         private readonly ILogger<TurnSystem> _logger;
         private readonly IDisposable _subscriptions;
-
+        
         public Team CurrentTeam { get; private set; } = Team.Player;
         public int TurnNumber { get; private set; } = 1;
 
@@ -22,7 +24,7 @@ namespace Project.Gameplay.Gameplay.Turn
         {
             _turnChangedPublisher = turnChangedPublisher;
             _logger = logService.CreateLogger<TurnSystem>();
-
+            
             DisposableBagBuilder bag = DisposableBag.CreateBuilder();
             endTurnSubscriber.Subscribe(_ => OnEndTurnRequested()).AddTo(bag);
             _subscriptions = bag.Build();
@@ -56,11 +58,12 @@ namespace Project.Gameplay.Gameplay.Turn
             CurrentTeam = Team.Player;
             TurnNumber = 1;
             _logger.Info("Battle started! Player's turn");
+            Core.Window.UI.GetOrCreate<TurnWindow>().SetGamePhase();
             _turnChangedPublisher.Publish(new TurnChangedMessage(CurrentTeam, TurnNumber));
         }
 
         public void Dispose()
-        {
+        {  
             _subscriptions?.Dispose();
         }
     }

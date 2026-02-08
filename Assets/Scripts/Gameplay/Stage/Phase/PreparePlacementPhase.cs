@@ -23,7 +23,7 @@ namespace Project.Gameplay.Gameplay.Stage.Phase
         public PreparePlacementPhase(
             PrepareService prepareService,
             ISubscriber<PreparePhaseCompletedMessage> completedSubscriber,
-            ILogService logService)
+            ILogService logService, Core.Window.UI ui)
         {
             _prepareService = prepareService;
             _completedSubscriber = completedSubscriber;

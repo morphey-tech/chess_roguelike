@@ -56,9 +56,6 @@ namespace Project.Unity.Unity.Installers
             builder.Register<SceneTransitionService>(Lifetime.Singleton);
             builder.Register<SceneService>(Lifetime.Singleton)
                 .AsImplementedInterfaces();
-
-            builder.Register<UI>(Lifetime.Singleton);
-
         }
     }
 }
