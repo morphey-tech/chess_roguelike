@@ -13,16 +13,19 @@ namespace Project.Gameplay.Gameplay.Visual
         public IBoardPresenter Board { get; }
         public IFigurePresenter Figures { get; }
         public IPreparePresenter Prepare { get; }
+        public IProjectilePresenter Projectiles { get; }
 
         [Inject]
         private PresenterProvider(
             IFigurePresenter figurePresenter,
             IBoardPresenter board,
-            IPreparePresenter prepare)
+            IPreparePresenter prepare,
+            IProjectilePresenter projectiles)
         {
             Figures = figurePresenter;
             Board = board;
             Prepare = prepare;
+            Projectiles = projectiles;
         }
     }
 }

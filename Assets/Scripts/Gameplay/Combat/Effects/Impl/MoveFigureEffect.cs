@@ -1,7 +1,6 @@
 using Project.Core.Core.Grid;
+using Project.Gameplay.Gameplay.Combat.Visual;
 using Project.Gameplay.Gameplay.Figures;
-using Project.Gameplay.Gameplay.Visual.Commands.Contexts;
-using Project.Gameplay.Gameplay.Visual.Commands.Impl;
 
 namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
 {
@@ -29,9 +28,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
         {
             context.Logger.Info($"{_figure} moved to ({_newPosition.Row}, {_newPosition.Column})");
             
-            // Visual: Queue move command
-            var visualCtx = new MoveVisualContext(_figure.Id, _newPosition);
-            context.Visuals.Enqueue(new MoveCommand(visualCtx));
+            context.AddVisualEvent(new MoveVisualEvent(_figure.Id, _newPosition));
             
             // Domain: Update context if needed
             if (_updateActionContextFrom)

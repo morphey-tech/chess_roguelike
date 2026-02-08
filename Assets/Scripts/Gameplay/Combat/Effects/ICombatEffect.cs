@@ -6,7 +6,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects
     /// 
     /// DESIGN RULES:
     /// - Effects are SYNCHRONOUS (no async) - they only mutate domain state
-    /// - Effects queue visual commands via context.Visuals.Enqueue()
+    /// - Effects record visual events via context.AddVisualEvent()
     /// - Visuals are executed AFTER all effects complete
     /// - This ensures predictable ordering and no race conditions
     /// </summary>
@@ -27,7 +27,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects
         /// <summary>
         /// Apply this effect synchronously.
         /// - Mutate domain state (HP, position, etc.)
-        /// - Queue visual commands via context.Visuals.Enqueue()
+        /// - Record visual events via context.AddVisualEvent()
         /// - Add follow-up effects via context.AddEffect()
         /// </summary>
         void Apply(CombatEffectContext context);

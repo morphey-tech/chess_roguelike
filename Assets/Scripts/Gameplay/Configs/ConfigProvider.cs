@@ -30,6 +30,7 @@ namespace Project.Gameplay.Gameplay.Configs
             "boards_conf",
             "cells_conf",
             "gameplay_conf",
+            "projectiles_conf",
             "stages_conf",
             "conditions_conf",
             "turn_pattern_descriptions_conf",

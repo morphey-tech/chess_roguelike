@@ -8,13 +8,26 @@ namespace Project.Gameplay.Gameplay.Attack
         public int Damage { get; }
         public int Range { get; }
         public TargetingType Targeting { get; }
+        public DeliveryType Delivery { get; }
+        public HitPattern Pattern { get; }
+        public string ProjectileConfigId { get; }
 
-        public AttackProfile(AttackType type, int damage, int range, TargetingType targeting)
+        public AttackProfile(
+            AttackType type,
+            int damage,
+            int range,
+            TargetingType targeting,
+            DeliveryType delivery,
+            HitPattern pattern,
+            string projectileConfigId = null)
         {
             Type = type;
             Damage = damage;
             Range = range;
             Targeting = targeting;
+            Delivery = delivery;
+            Pattern = pattern;
+            ProjectileConfigId = projectileConfigId;
         }
 
         public bool CanHit(int distance) => distance <= Range;

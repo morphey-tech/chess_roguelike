@@ -1,6 +1,5 @@
+using Project.Gameplay.Gameplay.Combat.Visual;
 using Project.Gameplay.Gameplay.Figures;
-using Project.Gameplay.Gameplay.Visual.Commands.Contexts;
-using Project.Gameplay.Gameplay.Visual.Commands.Impl;
 
 namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
 {
@@ -28,8 +27,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
         {
             if (_bonusDamage > 0)
             {
-                var visualCtx = new DamageVisualContext(_target.Id, _bonusDamage, damageType: _source);
-                context.Visuals.Enqueue(new DamageCommand(visualCtx));
+                context.AddVisualEvent(new DamageVisualEvent(_target.Id, _bonusDamage, damageType: _source));
                 context.Logger.Info($"{_target} took {_bonusDamage} bonus damage from {_source}. HP: {_target.Stats.CurrentHp}/{_target.Stats.MaxHp}");
             }
         }

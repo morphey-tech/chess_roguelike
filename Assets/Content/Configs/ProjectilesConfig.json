@@ -1,0 +1,20 @@
+{
+  "content": [
+    {
+      "id": "arrow_basic",
+      "asset_key": "",
+      "speed": 10.0,
+      "acceleration": 0.0,
+      "curve": "Linear",
+      "homing": false,
+      "turn_speed": 0.0,
+      "height_offset": 0.1,
+      "impact_fx_key": "",
+      "trail_fx_key": "",
+      "shake": 0.0,
+      "camera_zoom": 0.0,
+      "sound_shoot": "",
+      "sound_hit": ""
+    }
+  ]
+}

@@ -1,6 +1,5 @@
+using Project.Gameplay.Gameplay.Combat.Visual;
 using Project.Gameplay.Gameplay.Figures;
-using Project.Gameplay.Gameplay.Visual.Commands.Contexts;
-using Project.Gameplay.Gameplay.Visual.Commands.Impl;
 
 namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
 {
@@ -24,9 +23,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
 
         public void Apply(CombatEffectContext context)
         {
-            // Visual: Queue damage effect on attacker
-            var visualCtx = new DamageVisualContext(_attacker.Id, _reflectedDamage, damageType: "thorns");
-            context.Visuals.Enqueue(new DamageCommand(visualCtx));
+            context.AddVisualEvent(new DamageVisualEvent(_attacker.Id, _reflectedDamage, damageType: "thorns"));
             context.Logger.Info($"{_attacker} takes {_reflectedDamage} thorns damage. HP: {_attacker.Stats.CurrentHp}/{_attacker.Stats.MaxHp}");
         }
     }

@@ -1,7 +1,6 @@
+using Project.Gameplay.Gameplay.Combat.Visual;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
-using Project.Gameplay.Gameplay.Visual.Commands.Contexts;
-using Project.Gameplay.Gameplay.Visual.Commands.Impl;
 
 namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
 {
@@ -32,9 +31,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
             // Domain: Apply damage
             bool died = _target.Stats.TakeDamage(_damage);
             
-            // Visual: Queue damage effect
-            var visualCtx = new DamageVisualContext(_target.Id, _damage, _isCritical, "primary");
-            context.Visuals.Enqueue(new DamageCommand(visualCtx));
+            context.AddVisualEvent(new DamageVisualEvent(_target.Id, _damage, _isCritical, "primary"));
             
             // Domain: Update ActionContext
             context.ActionContext.LastDamageDealt = _damage;

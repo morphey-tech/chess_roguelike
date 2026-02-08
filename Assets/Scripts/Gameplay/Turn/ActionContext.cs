@@ -23,6 +23,7 @@ namespace Project.Gameplay.Gameplay.Turn
         
         public bool LastAttackKilledTarget { get; set; }
         public int LastDamageDealt { get; set; }
+        
 
         /// <summary>
         /// Set by steps when an action actually happens (move/attack).

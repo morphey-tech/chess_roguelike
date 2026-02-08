@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Project.Core.Core.Configs.Stats;
 using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Combat.Effects;
 using Project.Gameplay.Gameplay.Figures;
@@ -7,6 +8,11 @@ namespace Project.Gameplay.Gameplay.Combat
 {
     public sealed class CombatResult
     {
+        public Figure Attacker { get; }
+        public GridPosition From { get; }
+        public DeliveryType Delivery { get; }
+        public IReadOnlyList<HitResult> Hits { get; }
+
         /// <summary>
         /// All combat effects to be applied. Sorted by priority.
         /// </summary>
@@ -18,11 +24,19 @@ namespace Project.Gameplay.Gameplay.Combat
         public bool WasCritical { get; }
 
         public CombatResult(
-            IReadOnlyList<ICombatEffect> effects, 
-            int damageDealt, 
-            bool targetDied, 
+            Figure attacker,
+            GridPosition from,
+            DeliveryType delivery,
+            IReadOnlyList<HitResult> hits,
+            IReadOnlyList<ICombatEffect> effects,
+            int damageDealt,
+            bool targetDied,
             bool wasCritical)
         {
+            Attacker = attacker;
+            From = from;
+            Delivery = delivery;
+            Hits = hits;
             Effects = effects;
             DamageDealt = damageDealt;
             TargetDied = targetDied;
@@ -30,10 +44,29 @@ namespace Project.Gameplay.Gameplay.Combat
         }
     }
 
-    public struct AdditionalTargetResult
+    public sealed class HitResult
     {
-        public Figure Target { get; set; }
-        public int DamageDealt { get; set; }
-        public bool Died { get; set; }
+        public Figure Target { get; }
+        public GridPosition Position { get; }
+        public int Damage { get; }
+        public bool IsCritical { get; }
+        public bool IsBlocked { get; }
+        public bool IsKilled { get; }
+
+        public HitResult(
+            Figure target,
+            GridPosition position,
+            int damage,
+            bool isCritical,
+            bool isBlocked,
+            bool isKilled)
+        {
+            Target = target;
+            Position = position;
+            Damage = damage;
+            IsCritical = isCritical;
+            IsBlocked = isBlocked;
+            IsKilled = isKilled;
+        }
     }
 }

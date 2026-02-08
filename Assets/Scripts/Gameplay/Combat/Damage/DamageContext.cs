@@ -1,0 +1,31 @@
+using System.Collections.Generic;
+using Project.Gameplay.Gameplay.Figures;
+
+namespace Project.Gameplay.Gameplay.Combat.Damage
+{
+    public sealed class DamageContext
+    {
+        public Figure Attacker { get; }
+        public Figure Target { get; }
+        public int RawDamage { get; }
+        public bool IsCritical { get; }
+        public string AttackId { get; }
+        public IReadOnlyList<IDamageModifier> Modifiers { get; }
+
+        public DamageContext(
+            Figure attacker,
+            Figure target,
+            int rawDamage,
+            bool isCritical,
+            string attackId,
+            IReadOnlyList<IDamageModifier> modifiers)
+        {
+            Attacker = attacker;
+            Target = target;
+            RawDamage = rawDamage;
+            IsCritical = isCritical;
+            AttackId = attackId;
+            Modifiers = modifiers;
+        }
+    }
+}

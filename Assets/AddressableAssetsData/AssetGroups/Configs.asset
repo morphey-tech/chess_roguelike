@@ -15,6 +15,12 @@ MonoBehaviour:
   m_GroupName: Configs
   m_GUID: d5bda6645f02ab1428bf65697a591e97
   m_SerializeEntries:
+  - m_GUID: 2654eae1139f43b41bbfc20bbb23ec51
+    m_Address: projectiles_conf
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - configs
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 29b7da3d075af6446987422230eb2f18
     m_Address: gameplay_conf
     m_ReadOnly: 0

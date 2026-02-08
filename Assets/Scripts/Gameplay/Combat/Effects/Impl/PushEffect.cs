@@ -1,7 +1,6 @@
 using Project.Core.Core.Grid;
+using Project.Gameplay.Gameplay.Combat.Visual;
 using Project.Gameplay.Gameplay.Figures;
-using Project.Gameplay.Gameplay.Visual.Commands.Contexts;
-using Project.Gameplay.Gameplay.Visual.Commands.Impl;
 
 namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
 {
@@ -28,8 +27,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
         public void Apply(CombatEffectContext context)
         {
             context.Logger.Info($"{_target} pushed from ({_fromPosition.Row}, {_fromPosition.Column}) to ({_toPosition.Row}, {_toPosition.Column})");
-            var visualCtx = new PushVisualContext(_target.Id, _fromPosition, _toPosition);
-            context.Visuals.Enqueue(new PushCommand(visualCtx));
+            context.AddVisualEvent(new PushVisualEvent(_target.Id, _fromPosition, _toPosition));
         }
     }
 }

@@ -1,7 +1,6 @@
+using Project.Gameplay.Gameplay.Combat.Visual;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
-using Project.Gameplay.Gameplay.Visual.Commands.Contexts;
-using Project.Gameplay.Gameplay.Visual.Commands.Impl;
 
 namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
 {
@@ -32,9 +31,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
             // Domain: Remove from grid
             _cell?.RemoveFigure();
             
-            // Visual: Queue death effect
-            var visualCtx = new DeathVisualContext(_victim.Id, _deathReason);
-            context.Visuals.Enqueue(new DeathCommand(visualCtx));
+            context.AddVisualEvent(new DeathVisualEvent(_victim.Id, _deathReason));
             
             // Domain: Publish event
             context.DeathPublisher.Publish(new FigureDeathMessage(_victim.Id, _victim.Team));

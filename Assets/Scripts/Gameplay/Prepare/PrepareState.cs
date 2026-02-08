@@ -48,6 +48,12 @@ namespace Project.Gameplay.Gameplay.Prepare
             SelectedFigureId = null;
         }
 
+        public void Restore(string figureId)
+        {
+            _availableFigures.Add(figureId);
+            SelectedFigureId = null;
+        }
+
         public void Complete()
         {
             IsActive = false;

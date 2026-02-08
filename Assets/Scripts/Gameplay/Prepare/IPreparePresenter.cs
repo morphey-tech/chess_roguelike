@@ -36,6 +36,11 @@ namespace Project.Gameplay.Gameplay.Prepare
         void RemoveFigure(string figureId);
 
         /// <summary>
+        /// Restores figure back to prepare zone (spawn failed).
+        /// </summary>
+        UniTask RestoreFigureAsync(string figureId);
+
+        /// <summary>
         /// Highlights the selected figure.
         /// </summary>
         void SetSelected(string figureId, bool selected);

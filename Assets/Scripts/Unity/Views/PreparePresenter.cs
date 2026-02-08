@@ -27,6 +27,8 @@ namespace Project.Unity.Unity.Views
         private readonly Dictionary<string, GameObject> _figures = new();
         private readonly List<GameObject> _slots = new();
         private readonly Dictionary<int, Vector3> _slotPositions = new();
+        private readonly Dictionary<string, int> _figureSlots = new();
+        private readonly Dictionary<string, string> _figureTypes = new();
 
         [Inject]
         public PreparePresenter(
@@ -81,6 +83,8 @@ namespace Project.Unity.Unity.Views
                 if (controller != null)
                 {
                     _figures[fig.FigureId] = controller;
+                    _figureSlots[fig.FigureId] = i;
+                    _figureTypes[fig.FigureId] = fig.FigureTypeId;
                     var marker = controller.GetComponent<HandFigureMarker>() ?? controller.AddComponent<HandFigureMarker>();
                     marker.Initialize(fig.FigureId);
                     await _anim.PlaySpawnAsync(controller);
@@ -99,6 +103,52 @@ namespace Project.Unity.Unity.Views
             }
         }
 
+        public async UniTask RestoreFigureAsync(string figureId)
+        {
+            if (_figures.ContainsKey(figureId))
+                return;
+            if (!_figureSlots.TryGetValue(figureId, out int slotIndex))
+            {
+                _logger.Warning($"Restore failed: no slot for {figureId}");
+                return;
+            }
+            if (!_figureTypes.TryGetValue(figureId, out string figureTypeId))
+            {
+                _logger.Warning($"Restore failed: no type for {figureId}");
+                return;
+            }
+            if (!_slotPositions.TryGetValue(slotIndex, out Vector3 pos))
+            {
+                _logger.Warning($"Restore failed: no slot position for {figureId}");
+                return;
+            }
+
+            PrepareZonePrefabs prefabs = await _provider.GetPrefabsAsync(new List<string> { figureTypeId });
+            if (prefabs.ControllerPrefab == null)
+            {
+                _logger.Warning($"Restore failed: controller prefab missing for {figureId}");
+                return;
+            }
+            if (!prefabs.FigurePrefabsByTypeId.TryGetValue(figureTypeId, out GameObject viewPrefab))
+            {
+                _logger.Warning($"Restore failed: view prefab missing for {figureTypeId}");
+                return;
+            }
+
+            Transform root = _worldRoot.PrepareRoot;
+            GameObject controller = _factory.CreateFigure(prefabs.ControllerPrefab, viewPrefab, pos, root);
+            if (controller == null)
+            {
+                _logger.Warning($"Restore failed: controller not created for {figureId}");
+                return;
+            }
+
+            _figures[figureId] = controller;
+            var marker = controller.GetComponent<HandFigureMarker>() ?? controller.AddComponent<HandFigureMarker>();
+            marker.Initialize(figureId);
+            await _anim.PlaySpawnAsync(controller);
+        }
+
         public void SetSelected(string figureId, bool selected)
         {
             if (_figures.TryGetValue(figureId, out GameObject figure))
@@ -114,6 +164,8 @@ namespace Project.Unity.Unity.Views
                 if (slot != null) Object.Destroy(slot);
             _slots.Clear();
             _slotPositions.Clear();
+            _figureSlots.Clear();
+            _figureTypes.Clear();
             _logger.Debug("Prepare zone cleared");
         }
 

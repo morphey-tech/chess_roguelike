@@ -3,13 +3,16 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using MessagePipe;
 using Project.Core.Core.Logging;
-using Project.Core.Core.Configs.Stats;
 using Project.Gameplay.Gameplay.Attack;
 using Project.Gameplay.Gameplay.Combat;
+using Project.Gameplay.Gameplay.Combat.Visual;
 using Project.Gameplay.Gameplay.Combat.Effects;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Visual;
+using Project.Gameplay.Gameplay.Turn;
+using Project.Core.Core.Configs.Stats;
+using Project.Gameplay.Gameplay.Visual.Commands;
 
 namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
 {
@@ -18,8 +21,9 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
     /// 
     /// PIPELINE:
     /// 1. Domain: CombatResolver creates effects (no visuals)
-    /// 2. Domain: Effects apply game logic, queue visual commands via IVisualCommandSink
-    /// 3. Visual: VisualPipeline plays all animations
+    /// 2. Domain: Effects apply game logic, record visual events
+    /// 3. Presentation: CombatVisualPlanner builds visual commands from events
+    /// 4. Visual: VisualPipeline plays all animations
     /// </summary>
     public sealed class AttackStep : ITurnStep
     {
@@ -28,9 +32,11 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
         private readonly AttackStrategyFactory _attackFactory;
         private readonly IAttackResolver _attackResolver;
         private readonly CombatResolver _combatResolver;
+        private readonly ICombatVisualPlanner _visualPlanner;
         private readonly PassiveTriggerService _passives;
         private readonly VisualPipeline _visualPipeline;
         private readonly IPublisher<FigureDeathMessage> _deathPublisher;
+        private readonly ActionContextAccessor _contextAccessor;
         private readonly ILogger<AttackStep> _logger;
 
         public AttackStep(
@@ -38,18 +44,22 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
             AttackStrategyFactory attackFactory,
             IAttackResolver attackResolver,
             CombatResolver combatResolver,
+            ICombatVisualPlanner visualPlanner,
             PassiveTriggerService passives,
             VisualPipeline visualPipeline,
             IPublisher<FigureDeathMessage> deathPublisher,
+            ActionContextAccessor contextAccessor,
             ILogger<AttackStep> logger)
         {
             Id = id;
             _attackFactory = attackFactory;
             _attackResolver = attackResolver;
             _combatResolver = combatResolver;
+            _visualPlanner = visualPlanner;
             _passives = passives;
             _visualPipeline = visualPipeline;
             _deathPublisher = deathPublisher;
+            _contextAccessor = contextAccessor;
             _logger = logger;
         }
 
@@ -65,7 +75,7 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
 
             if (context.Actor.AttackId == "profiled")
             {
-                AttackProfile profile = _attackResolver.Resolve(context.Actor, context.From, context.To, context.Grid);
+                AttackProfile? profile = _attackResolver.Resolve(context.Actor, context.From, context.To, context.Grid);
                 if (profile == null)
                     return;
 
@@ -79,7 +89,10 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
                     BaseDamage = profile.Damage,
                     HitType = MapHitType(profile.Type),
                     AttackerMovesOnKill = false,
-                    AttackId = profile.Type.ToString()
+                    AttackId = profile.Type.ToString(),
+                    Delivery = profile.Delivery,
+                    Pattern = profile.Pattern,
+                    ProjectileConfigId = profile.ProjectileConfigId
                 };
             }
             else
@@ -95,6 +108,8 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
                     context.To, 
                     context.Grid);
                 hitContext.AttackId = attackStrategy.Id;
+                hitContext.Delivery = MapDelivery(attackStrategy.Id);
+                hitContext.Pattern = HitPattern.Single;
             }
 
             context.ActionExecuted = true;
@@ -102,20 +117,33 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
             // === DOMAIN PHASE ===
             CombatResult result = _combatResolver.Resolve(hitContext);
 
-            using (VisualScope scope = _visualPipeline.BeginScope())
+            using VisualScope scope = _visualPipeline.BeginScope();
+
+            var visualEvents = new List<ICombatVisualEvent>();
+            CombatEffectContext effectContext = new(
+                context,
+                context.Grid,
+                _deathPublisher,
+                _passives,
+                visualEvents,
+                _logger);
+
+            ApplyEffects(result.Effects, effectContext);
+
+            // Build and enqueue visual plan for main hits + secondary effects
+            VisualCombatPlan plan = _visualPlanner.Build(result, visualEvents);
+            foreach (IVisualCommand cmd in plan.Commands)
+                scope.Enqueue(cmd);
+
+            // === VISUAL PHASE ===
+            _contextAccessor.Set(context);
+            try
             {
-                CombatEffectContext effectContext = new CombatEffectContext(
-                    context,
-                    context.Grid,
-                    _deathPublisher,
-                    _passives,
-                    scope,
-                    _logger);
-
-                ApplyEffects(result.Effects, effectContext);
-
-                // === VISUAL PHASE ===
                 await scope.PlayAsync();
+            }
+            finally
+            {
+                _contextAccessor.Clear();
             }
         }
 
@@ -162,6 +190,11 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
                 AttackType.Magic => HitType.Magic,
                 _ => HitType.Melee
             };
+        }
+
+        private static DeliveryType MapDelivery(string attackId)
+        {
+            return attackId == "ranged" ? DeliveryType.Projectile : DeliveryType.Instant;
         }
     }
 }

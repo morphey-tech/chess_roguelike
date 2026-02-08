@@ -13,5 +13,6 @@ namespace Project.Gameplay.Gameplay.Visual
         IBoardPresenter Board { get; }
         IFigurePresenter Figures { get; }
         IPreparePresenter Prepare { get; }
+        IProjectilePresenter Projectiles { get; }
     }
 }

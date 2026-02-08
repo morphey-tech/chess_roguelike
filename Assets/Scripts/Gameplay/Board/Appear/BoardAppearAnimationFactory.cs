@@ -18,12 +18,7 @@ namespace Project.Gameplay.Gameplay.Board.Appear
 
         public IBoardAppearAnimationStrategy Get(string id)
         {
-            if (string.IsNullOrEmpty(id))
-                return _fallback;
-                
-            return _strategies.TryGetValue(id, out IBoardAppearAnimationStrategy strategy) 
-                ? strategy 
-                : _fallback;
+            return string.IsNullOrEmpty(id) ? _fallback : _strategies.GetValueOrDefault(id, _fallback);
         }
     }
 }

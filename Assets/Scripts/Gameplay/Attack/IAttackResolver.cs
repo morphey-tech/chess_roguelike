@@ -6,6 +6,6 @@ namespace Project.Gameplay.Gameplay.Attack
 {
     public interface IAttackResolver
     {
-        AttackProfile Resolve(Figure attacker, GridPosition from, GridPosition to, BoardGrid grid);
+        AttackProfile? Resolve(Figure attacker, GridPosition from, GridPosition to, BoardGrid grid);
     }
 }

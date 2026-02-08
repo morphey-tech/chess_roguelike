@@ -41,7 +41,10 @@ namespace Project.Gameplay.Gameplay.Figures
                         ac.Type,
                         ac.Damage,
                         ac.Range,
-                        ac.Targeting));
+                        ac.Targeting,
+                        ac.Delivery,
+                        ac.Pattern,
+                        ac.ProjectileId));
                 }
             }
 

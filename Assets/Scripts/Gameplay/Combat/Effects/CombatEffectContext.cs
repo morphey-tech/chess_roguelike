@@ -3,8 +3,8 @@ using MessagePipe;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
+using Project.Gameplay.Gameplay.Combat.Visual;
 using Project.Gameplay.Gameplay.Turn;
-using Project.Gameplay.Gameplay.Visual.Commands;
 
 namespace Project.Gameplay.Gameplay.Combat.Effects
 {
@@ -12,7 +12,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects
     /// Context provided to combat effects during execution.
     /// 
     /// DESIGN RULES:
-    /// - Effects add visual commands via Visuals sink, never call presenters directly
+    /// - Effects record visual events, never call presenters directly
     /// - Effects can add new combat effects via AddEffect()
     /// - Visual commands are executed AFTER all combat effects complete
     /// - NO presenter references - commands receive presenters at execution time
@@ -26,11 +26,10 @@ namespace Project.Gameplay.Gameplay.Combat.Effects
         public ILogger Logger { get; }
         
         /// <summary>
-        /// Sink for visual commands. Effects add commands here.
-        /// Commands are executed after all effects complete.
-        /// Commands receive presenters at execution time, not creation time.
+        /// Visual events recorded during effects execution.
+        /// CombatVisualPlanner converts these to visual commands later.
         /// </summary>
-        public IVisualCommandSink Visuals { get; }
+        public List<ICombatVisualEvent> VisualEvents { get; }
         
         /// <summary>
         /// Effects added during Apply. Processed after current effect.
@@ -42,17 +41,23 @@ namespace Project.Gameplay.Gameplay.Combat.Effects
             BoardGrid grid,
             IPublisher<FigureDeathMessage> deathPublisher,
             PassiveTriggerService passives,
-            IVisualCommandSink visuals,
+            List<ICombatVisualEvent> visualEvents,
             ILogger logger)
         {
             ActionContext = actionContext;
             Grid = grid;
             DeathPublisher = deathPublisher;
             Passives = passives;
-            Visuals = visuals;
+            VisualEvents = visualEvents;
             Logger = logger;
         }
         
         public void AddEffect(ICombatEffect effect) => PendingEffects.Add(effect);
+
+        public void AddVisualEvent(ICombatVisualEvent visualEvent)
+        {
+            if (visualEvent != null)
+                VisualEvents.Add(visualEvent);
+        }
     }
 }

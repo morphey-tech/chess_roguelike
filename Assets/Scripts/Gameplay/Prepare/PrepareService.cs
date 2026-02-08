@@ -12,6 +12,7 @@ using Project.Gameplay.Gameplay.Save.Models;
 using Project.Gameplay.Gameplay.Visual;
 using Project.Gameplay.Gameplay.Visual.Commands.Impl;
 using Project.Gameplay.UI;
+using Project.Gameplay.Components;
 using VContainer;
 
 namespace Project.Gameplay.Gameplay.Prepare
@@ -30,9 +31,11 @@ namespace Project.Gameplay.Gameplay.Prepare
         private PlayerRunStateModel _runState;
         private BoardGrid _grid;
         private string? _previousSelectedId;
+        private bool _isPlacing;
+        private HashSet<GridPosition>? _availablePlacementPositions;
 
         [Inject]
-        public PrepareService(
+        private PrepareService(
             FigureSpawnService figureSpawnService,
             IPreparePresenter preparePresenter,
             VisualPipeline visualPipeline,
@@ -53,8 +56,6 @@ namespace Project.Gameplay.Gameplay.Prepare
             cellClickedSubscriber.Subscribe(OnCellClicked).AddTo(bag);
             cancelSubscriber.Subscribe(_ => OnCancel()).AddTo(bag);
             _subscriptions = bag.Build();
-
-            _logger.Info("PrepareService created");
         }
 
         public async UniTask Start(PlayerRunStateModel runState, BoardGrid grid, IPreparePlacementRules rules)
@@ -66,13 +67,12 @@ namespace Project.Gameplay.Gameplay.Prepare
             _state = new PrepareState(runState.FiguresInHand);
             _state.Start();
 
-            _logger.Info($"Prepare started: {runState.FiguresInHand.Count} figures in hand");
-
             // Preload в фоне — не блокируем появление prepare-зоны (PreloadConfigsAsync может тянуть 2–3 сек из-за TurnPatternFactory)
             _figureSpawnService.PreloadConfigsAsync().Forget();
-            var wnd = await Core.Window.UI.ShowAsync<TurnWindow>();
-            wnd.SetPreparePhase();
             await SpawnPrepareZoneAsync();
+            BuildPlacementCache();
+            UpdatePlacementHighlights();
+            await ShowHintWindow();
         }
 
         private async UniTask SpawnPrepareZoneAsync()
@@ -89,7 +89,7 @@ namespace Project.Gameplay.Gameplay.Prepare
                 await scope.PlayAsync();
             }
 
-            if (_state.IsCompleted)
+            if (_state?.IsCompleted == true)
             {
                 _logger.Info("No figures to place, completing immediately");
                 Complete();
@@ -105,12 +105,13 @@ namespace Project.Gameplay.Gameplay.Prepare
 
             _state.Complete();
             _preparePresenter.Clear();
-            _logger.Info("Prepare completed");
+            ClearPlacementHighlights();
             _completedPublisher.Publish(new PreparePhaseCompletedMessage(_runState.FiguresOnBoard.Count));
 
             _state = null;
             _rules = null;
             _previousSelectedId = null;
+            _availablePlacementPositions = null;
         }
 
         private void OnHandFigureClicked(HandFigureClickedMessage message)
@@ -158,38 +159,57 @@ namespace Project.Gameplay.Gameplay.Prepare
             PlaceSelectedAsync(pos).Forget();
         }
 
-        private async UniTaskVoid PlaceSelectedAsync(GridPosition pos)
+        private async UniTask PlaceSelectedAsync(GridPosition pos)
         {
-            FigureState? state = _state.GetSelectedFigure(_runState);
-            if (state == null)
-            {
+            if (_isPlacing)
                 return;
-            }
 
-            string figureId = state.Id;
-            string figureTypeId = state.TypeId;
-            
-            // IMMEDIATELY remove from prepare zone and clear selection
-            // This prevents ghost figures during async spawn
-            _preparePresenter.RemoveFigure(figureId);
-            _state.OnPlaced(figureId);
-            _previousSelectedId = null;
-
-            // Now spawn on board (may take time on first call due to config loading)
-            Figure figure = await _figureSpawnService.SpawnAsync(_grid, pos, figureTypeId, Team.Player);
-            if (figure == null)
+            _isPlacing = true;
+            try
             {
-                _logger.Error("Failed to spawn figure");
-                return;
+                if (_state is not { IsActive: true })
+                    return;
+
+                FigureState? state = _state.GetSelectedFigure(_runState);
+                if (state == null)
+                    return;
+
+                _previousSelectedId = null;
+
+                var transaction = new PreparePlacementTransaction(
+                    _state,
+                    _preparePresenter,
+                    _figureSpawnService,
+                    _runState,
+                    _grid,
+                    _logger);
+
+                bool success = await transaction.ExecuteAsync(state, pos);
+                if (success)
+                {
+                    _availablePlacementPositions?.Remove(pos);
+                    UpdatePlacementHighlights();
+
+                    if (_state?.IsCompleted == true)
+                    {
+                        _logger.Info("All figures placed");
+                        Complete();
+                    }
+                }
+                else
+                {
+                    if (_availablePlacementPositions != null && _rules != null && _rules.CanPlace(pos))
+                        _availablePlacementPositions.Add(pos);
+                    UpdatePlacementHighlights();
+                }
             }
-
-            _runState.PlaceOnBoard(figureId, pos);
-            _logger.Info($"Placed {figureTypeId} at ({pos.Row}, {pos.Column})");
-
-            if (_state.IsCompleted)
+            catch (Exception ex)
             {
-                _logger.Info("All figures placed");
-                Complete();
+                _logger.Error("PlaceSelectedAsync failed", ex);
+            }
+            finally
+            {
+                _isPlacing = false;
             }
         }
 
@@ -217,6 +237,63 @@ namespace Project.Gameplay.Gameplay.Prepare
         void IDisposable.Dispose()
         {
             _subscriptions?.Dispose();
+        }
+
+        private void UpdatePlacementHighlights()
+        {
+            if (_grid == null || _rules == null)
+            {
+                return;
+            }
+
+            foreach (BoardCell cell in _grid.AllCells())
+            {
+                GridPosition pos = cell.Position;
+                cell.Del<AttackHighlightTag>();
+                bool canPlace = _availablePlacementPositions?
+                    .Contains(pos) ?? _rules.CanPlace(pos);
+                if (canPlace)
+                {
+                    cell.EnsureComponent(new HighlightTag());
+                }
+                else
+                {
+                    cell.Del<HighlightTag>();
+                }
+            }
+        }
+
+        private async UniTask ShowHintWindow()
+        {
+            TurnWindow? wnd = await Core.Window.UI.ShowAsync<TurnWindow>();
+            wnd?.SetPreparePhase();
+        }
+
+        private void ClearPlacementHighlights()
+        {
+            if (_grid == null)
+            {
+                return;
+            }
+            foreach (BoardCell cell in _grid.AllCells())
+            {
+                cell.Del<HighlightTag>();
+                cell.Del<AttackHighlightTag>();
+            }
+        }
+
+        private void BuildPlacementCache()
+        {
+            if (_grid == null || _rules == null)
+                return;
+
+            _availablePlacementPositions = new HashSet<GridPosition>();
+            foreach (BoardCell cell in _grid.AllCells())
+            {
+                GridPosition pos = cell.Position;
+                if (_rules.CanPlace(pos))
+                    _availablePlacementPositions.Add(pos);
+            }
         }
     }
 }

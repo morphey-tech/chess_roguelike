@@ -17,5 +17,14 @@ namespace Project.Core.Core.Configs.Stats
 
         [JsonProperty("targeting")]
         public TargetingType Targeting { get; set; }
+
+        [JsonProperty("delivery")]
+        public DeliveryType Delivery { get; set; }
+
+        [JsonProperty("pattern")]
+        public HitPattern Pattern { get; set; }
+
+        [JsonProperty("projectile_id")]
+        public string ProjectileId { get; set; }
     }
 }

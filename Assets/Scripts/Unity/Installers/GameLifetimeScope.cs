@@ -9,6 +9,8 @@ using Project.Gameplay.Gameplay.Board;
 using Project.Gameplay.Gameplay.Board.Appear;
 using Project.Gameplay.Gameplay.Board.Appear.Strategies;
 using Project.Gameplay.Gameplay.Combat;
+using Project.Gameplay.Gameplay.Combat.Damage;
+using Project.Gameplay.Gameplay.Combat.Visual;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Input;
 using Project.Gameplay.Gameplay.Interaction;
@@ -105,6 +107,16 @@ namespace Project.Unity.Unity.Installers
                 .As<IFigurePresenter>()
                 .As<IGameShutdownCleanup>();
 
+            builder.Register<ProjectilePresenter>(Lifetime.Singleton)
+                .As<IProjectilePresenter>()
+                .As<IGameShutdownCleanup>();
+
+            builder.Register<ActionContextAccessor>(Lifetime.Singleton);
+            builder.Register<DamageTokenStore>(Lifetime.Singleton)
+                .As<IDamageTokenStore>();
+            builder.Register<ProjectileHitHandler>(Lifetime.Singleton)
+                .As<IProjectileHitHandler>();
+
             // Visual command pipeline
             builder.Register<PresenterProvider>(Lifetime.Singleton)
                 .As<IPresenterProvider>();
@@ -195,7 +207,7 @@ namespace Project.Unity.Unity.Installers
                 .WithParameter<IEnumerable<IBoardAppearAnimationStrategy>>(new IBoardAppearAnimationStrategy[]
                 {
                     new BoardNoneAppearStrategy(),
-                    new BoardWaveAppearStrategy()
+                    new BoardRainDropAppearStrategy()
                 });
 
             // Movement strategies
@@ -233,7 +245,27 @@ namespace Project.Unity.Unity.Installers
 
             // Combat system
             builder.Register<PassiveTriggerService>(Lifetime.Singleton);
+            builder.Register<DamagePipeline>(Lifetime.Singleton)
+                .WithParameter<IEnumerable<IDamageModifier>>(new IDamageModifier[]
+                {
+                    new CritDamageModifier()
+                })
+                .As<IDamagePipeline>();
             builder.Register<CombatResolver>(Lifetime.Singleton);
+            builder.Register<CombatVisualPlanner>(Lifetime.Singleton)
+                .WithParameter<IEnumerable<IVisualEventMapper>>(new IVisualEventMapper[]
+                {
+                    new AttackVisualEventMapper(),
+                    new ProjectileVisualEventMapper(),
+                    new BeamVisualEventMapper(),
+                    new WaveVisualEventMapper(),
+                    new DamageVisualEventMapper(),
+                    new HealVisualEventMapper(),
+                    new PushVisualEventMapper(),
+                    new MoveVisualEventMapper(),
+                    new DeathVisualEventMapper()
+                })
+                .As<ICombatVisualPlanner>();
 
             // Turn pattern system
             builder.Register<ConditionRegistry>(Lifetime.Singleton)
