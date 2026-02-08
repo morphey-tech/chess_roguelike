@@ -45,7 +45,8 @@ namespace Project.Gameplay.Gameplay.Turn.Execution
                 From = from,
                 To = to,
                 Enemies = enemies,
-                MovementService = _movementService
+                MovementService = _movementService,
+                ActionExecuted = false
             };
 
             // DEBUG: Verify ActionContext is fresh
@@ -64,6 +65,12 @@ namespace Project.Gameplay.Gameplay.Turn.Execution
             
             // DEBUG: Check after step execution
             _logger.Info($"[DEBUG] AFTER step for {actor.Id}: BonusMoveDistance={context.BonusMoveDistance?.ToString() ?? "null"}");
+
+            if (!context.ActionExecuted)
+            {
+                _logger.Debug($"Action not executed for {actor} — turn not consumed");
+                return TurnExecutionResult.Failed;
+            }
 
             GridPosition finalPosition = context.From;
             

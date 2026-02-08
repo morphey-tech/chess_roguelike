@@ -6,6 +6,7 @@ using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.Gameplay.Turn.Conditions;
 using Project.Gameplay.Gameplay.Turn.Steps;
+using VContainer;
 
 namespace Project.Gameplay.Gameplay.Turn
 {
@@ -21,7 +22,8 @@ namespace Project.Gameplay.Gameplay.Turn
         private ConditionConfigRepository _conditionConfigs;
         private bool _initialized;
 
-        public TurnPatternFactory(
+        [Inject]
+        private TurnPatternFactory(
             ConfigProvider configProvider,
             TurnStepFactory stepFactory,
             ConditionRegistry conditionRegistry,
@@ -41,7 +43,7 @@ namespace Project.Gameplay.Gameplay.Turn
             _descriptionConfigs = await _configProvider.Get<TurnPatternDescriptionConfigRepository>("turn_pattern_descriptions_conf");
             _patternsConfigs = await _configProvider.Get<TurnPatternsConfigRepository>("turn_patterns_conf");
 
-            foreach (var condConfig in _conditionConfigs.Conditions)
+            foreach (var condConfig in _conditionConfigs.All)
             {
                 _conditionRegistry.RegisterPreset(condConfig);
             }
@@ -52,7 +54,7 @@ namespace Project.Gameplay.Gameplay.Turn
 
         public TurnPatternDescription CreatePattern(string patternId)
         {
-            TurnPatternDescriptionConfig config = Array.Find(_descriptionConfigs.Descriptions, p => p.Id == patternId);
+            TurnPatternDescriptionConfig config = _descriptionConfigs.Get(patternId);
             if (config == null)
                 throw new Exception($"Unknown pattern description: {patternId}");
 
@@ -61,7 +63,7 @@ namespace Project.Gameplay.Gameplay.Turn
 
         public TurnPattern CreatePatternSet(string setId)
         {
-            TurnPatternsConfig config = Array.Find(_patternsConfigs.Patterns, s => s.Id == setId);
+            TurnPatternsConfig config = _patternsConfigs.Get(setId);
             if (config == null)
                 throw new Exception($"Unknown turn patterns: {setId}");
 

@@ -37,7 +37,7 @@ namespace Project.Gameplay.Gameplay.Board
         public async UniTask<BoardGrid> GetGridAsync(string boardId)
         {
             BoardConfigRepository repo = await _configProvider.Get<BoardConfigRepository>("boards_conf");
-            BoardConfig board = repo.GetBy(boardId) ?? throw new Exception($"Board '{boardId}' not found");
+            BoardConfig board = repo.Get(boardId) ?? throw new Exception($"Board '{boardId}' not found");
             return new BoardGrid(board.Width, board.Height);
         }
 
@@ -46,7 +46,7 @@ namespace Project.Gameplay.Gameplay.Board
         {
             _logger.Info($"Spawning board visual {boardId}");
             BoardConfigRepository repo = await _configProvider.Get<BoardConfigRepository>("boards_conf");
-            BoardConfig board = repo.GetBy(boardId) ?? throw new Exception($"Board '{boardId}' not found");
+            BoardConfig board = repo.Get(boardId) ?? throw new Exception($"Board '{boardId}' not found");
             string[,] map = board.GetBoard2D();
             List<CellSpawnRequest> requests = CollectCellRequests(grid, map);
             string? appearStrategyId = string.IsNullOrWhiteSpace(board.AppearStrategyId)

@@ -195,6 +195,18 @@ namespace Project.Unity.Unity.Installers
                     new QueenMovement()
                 });
 
+            builder.Register<FigureStatsFactory>(Lifetime.Singleton)
+                .As<IFigureStatsFactory>();
+
+            builder.Register<AttackResolver>(Lifetime.Singleton)
+                .As<IAttackResolver>();
+
+            builder.Register<TargetingService>(Lifetime.Singleton)
+                .As<ITargetingService>();
+
+            builder.Register<EngagementRuleService>(Lifetime.Singleton)
+                .As<IEngagementRuleService>();
+
             // Attack strategies
             builder.Register<AttackStrategyFactory>(Lifetime.Singleton)
                 .WithParameter<IEnumerable<IAttackStrategy>>(new IAttackStrategy[]

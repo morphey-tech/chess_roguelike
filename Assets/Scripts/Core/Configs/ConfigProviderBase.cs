@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using Project.Core.Core.Infrastructure;
 
@@ -16,7 +17,8 @@ namespace Project.Core.Core.Configs
             Converters =
             {
                 new Vector2IntConverter(),
-                new Vec2ObservableDictionaryConverter()
+                new Vec2ObservableDictionaryConverter(),
+                new StringEnumConverter()
             }
         };
 
@@ -26,7 +28,8 @@ namespace Project.Core.Core.Configs
             Converters =
             {
                 new Vector2IntConverter(),
-                new Vec2ObservableDictionaryConverter()
+                new Vec2ObservableDictionaryConverter(),
+                new StringEnumConverter()
             }
         };
 

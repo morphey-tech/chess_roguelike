@@ -3,7 +3,6 @@ using Cysharp.Threading.Tasks;
 using MessagePipe;
 using Project.Core.Core.Configs.Figure;
 using Project.Core.Core.Configs.Passive;
-using Project.Core.Core.Configs.Stats;
 using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Combat;
@@ -19,27 +18,27 @@ namespace Project.Gameplay.Gameplay.Figures
     {
         private readonly ConfigProvider _configProvider;
         private readonly IFigurePresenter _figurePresenter;
+        private readonly IFigureStatsFactory _statsFactory;
         private readonly TurnPatternFactory _turnPatternFactory;
         private readonly IPublisher<FigureSpawnedMessage> _spawnedPublisher;
-        private readonly IObjectResolver _objectResolver;
         private readonly ILogger<FigureSpawnService> _logger;
         
-        private FigureConfigRepository _figureConfigCache;
-        private FigureDescriptionConfigRepository _descriptionConfigCache;
-        private StatsConfigRepository _statsConfigCache;
-        private PassiveConfigRepository _passiveConfigCache;
+        private FigureConfigRepository? _figureConfigCache;
+        private FigureDescriptionConfigRepository? _descriptionConfigCache;
+        private PassiveConfigRepository? _passiveConfigCache;
 
         [Inject]
         private FigureSpawnService(
             ConfigProvider configProvider,
             IFigurePresenter figurePresenter,
+            IFigureStatsFactory statsFactory,
             TurnPatternFactory turnPatternFactory,
             IPublisher<FigureSpawnedMessage> spawnedPublisher,
-            IObjectResolver objectResolver,
             ILogService logService)
         {
             _configProvider = configProvider;
             _figurePresenter = figurePresenter;
+            _statsFactory = statsFactory;
             _turnPatternFactory = turnPatternFactory;
             _spawnedPublisher = spawnedPublisher;
             _logger = logService.CreateLogger<FigureSpawnService>();
@@ -55,7 +54,6 @@ namespace Project.Gameplay.Gameplay.Figures
             
             _figureConfigCache ??= await _configProvider.Get<FigureConfigRepository>("figures_conf");
             _descriptionConfigCache ??= await _configProvider.Get<FigureDescriptionConfigRepository>("figure_descriptions_conf");
-            _statsConfigCache ??= await _configProvider.Get<StatsConfigRepository>("stats_conf");
             _passiveConfigCache ??= await _configProvider.Get<PassiveConfigRepository>("passives_conf");
             
             await _turnPatternFactory.InitializeAsync();
@@ -75,32 +73,25 @@ namespace Project.Gameplay.Gameplay.Figures
 
             _figureConfigCache ??= await _configProvider.Get<FigureConfigRepository>("figures_conf");
             _descriptionConfigCache ??= await _configProvider.Get<FigureDescriptionConfigRepository>("figure_descriptions_conf");
-            _statsConfigCache ??= await _configProvider.Get<StatsConfigRepository>("stats_conf");
             _passiveConfigCache ??= await _configProvider.Get<PassiveConfigRepository>("passives_conf");
             
             await _turnPatternFactory.InitializeAsync();
 
-            FigureConfig figureConfig = Array.Find(_figureConfigCache.Figures, f => f.Id == figureId);
+            FigureConfig? figureConfig = _figureConfigCache.Get(figureId);
             if (figureConfig == null)
             {
                 _logger.Error($"Figure config not found: {figureId}");
                 return null;
             }
 
-            FigureDescriptionConfig description = Array.Find(
-                _descriptionConfigCache.Descriptions, 
-                d => d.Id == figureConfig.DescriptionId);
-            
+            FigureDescriptionConfig description = _descriptionConfigCache.Get(figureConfig.DescriptionId);
             if (description == null)
             {
                 _logger.Error($"Description not found: {figureConfig.DescriptionId}");
                 return null;
             }
 
-            StatsConfig statsConfig = Array.Find(_statsConfigCache.Configs, s => s.Id == description.StatsId);
-            FigureStats stats = statsConfig != null 
-                ? new FigureStats(statsConfig.MaxHp, statsConfig.Attack, statsConfig.AttackRange)
-                : new FigureStats(1, 1);
+            FigureStats stats = _statsFactory.Create(description.StatsId);
 
             Figure figure = new(
                 IdGetter.MakeId(), 
@@ -115,7 +106,7 @@ namespace Project.Gameplay.Gameplay.Figures
             {
                 foreach (string passiveId in description.Passives)
                 {
-                    PassiveConfig passiveConfig = Array.Find(_passiveConfigCache.Passives, p => p.Id == passiveId);
+                    PassiveConfig passiveConfig = _passiveConfigCache.Get(passiveId);
                     if (passiveConfig != null)
                     {
                         IPassive passive = PassiveFactory.Create(passiveConfig);

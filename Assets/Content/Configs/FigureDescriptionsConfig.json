@@ -79,6 +79,14 @@
       "stats_id": "pusher_stats",
       "turn_patterns_id": "melee_default",
       "passives": ["push_on_hit"]
+    },
+    {
+      "id": "ranger",
+      "movement_id": "pawn",
+      "attack_id": "profiled",
+      "stats_id": "ranger_stats",
+      "turn_patterns_id": "archer_set",
+      "passives": []
     }
   ]
 }

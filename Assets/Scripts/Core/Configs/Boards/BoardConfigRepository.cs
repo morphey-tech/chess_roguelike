@@ -1,25 +1,23 @@
 using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
+using Project.Core.Core.Configs;
 
 namespace Project.Core.Core.Configs.Boards
 {
     [Serializable]
-    public class BoardConfigRepository
+    public class BoardConfigRepository : ConfigRepository<BoardConfig>
     {
-        [JsonProperty("content")]
-        public BoardConfig[] Boards { get; set; }
+        private BoardConfig[] _boards = Array.Empty<BoardConfig>();
 
-        public BoardConfig? GetBy(string id)
+        [JsonProperty("content")]
+        public BoardConfig[] Boards
         {
-            foreach (BoardConfig config in Boards)
-            {
-                if (config.Id != id)
-                {
-                    continue;
-                }
-                return config;
-            }
-            return null;
+            get => _boards;
+            set { _boards = value ?? Array.Empty<BoardConfig>(); ResetIndex(); }
         }
+
+        protected override IReadOnlyList<BoardConfig> Items => _boards;
+        protected override string GetKey(BoardConfig item) => item.Id;
     }
 }

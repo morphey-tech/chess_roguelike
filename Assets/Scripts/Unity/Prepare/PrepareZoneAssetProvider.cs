@@ -46,14 +46,14 @@ namespace Project.Unity.Unity.Prepare
             var figuresRepo = await _configProvider.Get<FigureConfigRepository>("figures_conf");
 
             GameObject cellPrefab = null;
-            if (cellsRepo.Cells.Count > 0)
+            if (cellsRepo.Cells.Length > 0)
                 cellPrefab = await _assetService.LoadAssetAsync<GameObject>(cellsRepo.Cells[0].AssetKey);
             var controllerPrefab = await _assetService.LoadAssetAsync<GameObject>(FigureControllerAssetKey);
 
             var figurePrefabs = new Dictionary<string, GameObject>();
             foreach (string typeId in figureTypeIds.Distinct())
             {
-                var cfg = figuresRepo.GetBy(typeId);
+                var cfg = figuresRepo.Get(typeId);
                 if (cfg == null || string.IsNullOrEmpty(cfg.AssetKey)) continue;
                 var prefab = await _assetService.LoadAssetAsync<GameObject>(cfg.AssetKey);
                 if (prefab != null)

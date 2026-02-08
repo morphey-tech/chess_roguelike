@@ -17,6 +17,7 @@ namespace Project.Gameplay.Gameplay.Turn
         private readonly MovementService _movementService;
         private readonly AttackStrategyFactory _attackFactory;
         private readonly CombatResolver _combatResolver;
+        private readonly IAttackResolver _attackResolver;
         private readonly PassiveTriggerService _passives;
         private readonly VisualPipeline _visualPipeline;
         private readonly IPublisher<FigureDeathMessage> _deathPublisher;
@@ -26,6 +27,7 @@ namespace Project.Gameplay.Gameplay.Turn
             MovementService movementService,
             AttackStrategyFactory attackFactory,
             CombatResolver combatResolver,
+            IAttackResolver attackResolver,
             PassiveTriggerService passives,
             VisualPipeline visualPipeline,
             IPublisher<FigureDeathMessage> deathPublisher,
@@ -34,6 +36,7 @@ namespace Project.Gameplay.Gameplay.Turn
             _movementService = movementService;
             _attackFactory = attackFactory;
             _combatResolver = combatResolver;
+            _attackResolver = attackResolver;
             _passives = passives;
             _visualPipeline = visualPipeline;
             _deathPublisher = deathPublisher;
@@ -49,7 +52,7 @@ namespace Project.Gameplay.Gameplay.Turn
             return config.Type switch
             {
                 "move" => new MoveStep(stepId, _movementService, _visualPipeline),
-                "attack" => new AttackStep(stepId, _attackFactory, _combatResolver, _passives, _visualPipeline, _deathPublisher, _logService.CreateLogger<AttackStep>()),
+                "attack" => new AttackStep(stepId, _attackFactory, _attackResolver, _combatResolver, _passives, _visualPipeline, _deathPublisher, _logService.CreateLogger<AttackStep>()),
                 "move_to_killed" => new MoveToKilledTargetStep(_movementService, _visualPipeline, _logService),
                 "composite" => CreateComposite(stepId, config.Steps),
                 _ => throw new Exception($"Unknown step type: {config.Type}")

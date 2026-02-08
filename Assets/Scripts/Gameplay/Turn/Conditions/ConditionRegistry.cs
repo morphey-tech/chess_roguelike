@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Project.Core.Core.Configs.Turn;
-using Project.Gameplay.Gameplay.Turn.Conditions.Impl;
 
 namespace Project.Gameplay.Gameplay.Turn.Conditions
 {
@@ -19,10 +18,10 @@ namespace Project.Gameplay.Gameplay.Turn.Conditions
 
         public void RegisterPreset(ConditionConfig config)
         {
-            if (!_conditionsByType.TryGetValue(config.Type, out var condition))
+            if (!_conditionsByType.TryGetValue(config.Type, out ITurnCondition? condition))
                 throw new Exception($"Unknown condition type: {config.Type}");
 
-            var preset = new ConditionPreset(
+            ConditionPreset preset = new(
                 config.Id,
                 condition,
                 new ConditionParams(config.Params));
@@ -32,10 +31,10 @@ namespace Project.Gameplay.Gameplay.Turn.Conditions
 
         public ConditionPreset GetPreset(string id)
         {
-            if (_presets.TryGetValue(id, out var preset))
+            if (_presets.TryGetValue(id, out ConditionPreset? preset))
                 return preset;
 
-            if (_conditionsByType.TryGetValue(id, out var condition))
+            if (_conditionsByType.TryGetValue(id, out ITurnCondition? condition))
                 return new ConditionPreset(id, condition, ConditionParams.Empty);
 
             throw new Exception($"Unknown condition: {id}");
@@ -43,24 +42,10 @@ namespace Project.Gameplay.Gameplay.Turn.Conditions
 
         public ITurnCondition GetConditionByType(string type)
         {
-            if (_conditionsByType.TryGetValue(type, out var condition))
+            if (_conditionsByType.TryGetValue(type, out ITurnCondition? condition))
                 return condition;
 
             throw new Exception($"Unknown condition type: {type}");
-        }
-    }
-
-    public sealed class ConditionPreset
-    {
-        public string Id { get; }
-        public ITurnCondition Condition { get; }
-        public ConditionParams DefaultParams { get; }
-
-        public ConditionPreset(string id, ITurnCondition condition, ConditionParams defaultParams)
-        {
-            Id = id;
-            Condition = condition;
-            DefaultParams = defaultParams;
         }
     }
 }

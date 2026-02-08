@@ -78,14 +78,14 @@ namespace Project.Gameplay.Gameplay.Run
             string stageId = _runStateService.Current?.StageId ?? _config.Stages[0];
             StageConfigRepository stageRepository = 
                 await _configProvider.Get<StageConfigRepository>("stages_conf");
-            StageConfig stageConfig = Array.Find(stageRepository.Stages, s => s.Id == stageId);
+            StageConfig stageConfig = stageRepository.Get(stageId);
             return stageConfig ?? throw new NullReferenceException($"Stage config '{stageId}' not found");
         }
 
         private async UniTask<BoardConfig> LoadBoardConfig(StageConfig stageConfig)
         {
             BoardConfigRepository boardRepository = await _configProvider.Get<BoardConfigRepository>("boards_conf");
-            BoardConfig? boardConfig = boardRepository.GetBy(stageConfig.BoardId);
+            BoardConfig boardConfig = boardRepository.Get(stageConfig.BoardId);
             return boardConfig ?? throw new NullReferenceException($"Board config '{stageConfig.BoardId}' not found");
         }
     }

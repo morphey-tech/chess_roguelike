@@ -3,6 +3,7 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using MessagePipe;
 using Project.Core.Core.Logging;
+using Project.Core.Core.Configs.Stats;
 using Project.Gameplay.Gameplay.Attack;
 using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Combat.Effects;
@@ -25,6 +26,7 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
         public string Id { get; }
 
         private readonly AttackStrategyFactory _attackFactory;
+        private readonly IAttackResolver _attackResolver;
         private readonly CombatResolver _combatResolver;
         private readonly PassiveTriggerService _passives;
         private readonly VisualPipeline _visualPipeline;
@@ -34,6 +36,7 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
         public AttackStep(
             string id,
             AttackStrategyFactory attackFactory,
+            IAttackResolver attackResolver,
             CombatResolver combatResolver,
             PassiveTriggerService passives,
             VisualPipeline visualPipeline,
@@ -42,6 +45,7 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
         {
             Id = id;
             _attackFactory = attackFactory;
+            _attackResolver = attackResolver;
             _combatResolver = combatResolver;
             _passives = passives;
             _visualPipeline = visualPipeline;
@@ -57,19 +61,43 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
             if (defender == null || defender.Team == context.Actor.Team)
                 return;
 
-            IAttackStrategy attackStrategy = _attackFactory.Get(context.Actor.AttackId);
-            
-            if (!attackStrategy.CanAttack(context.Actor, context.From, context.To, context.Grid))
-                return;
+            HitContext hitContext;
 
-            HitContext hitContext = attackStrategy.CreateHitContext(
-                context.Actor, 
-                defender, 
-                context.From, 
-                context.To, 
-                context.Grid);
-            
-            hitContext.AttackId = attackStrategy.Id;
+            if (context.Actor.AttackId == "profiled")
+            {
+                AttackProfile profile = _attackResolver.Resolve(context.Actor, context.From, context.To, context.Grid);
+                if (profile == null)
+                    return;
+
+                hitContext = new HitContext
+                {
+                    Attacker = context.Actor,
+                    Target = defender,
+                    AttackerPosition = context.From,
+                    TargetPosition = context.To,
+                    Grid = context.Grid,
+                    BaseDamage = profile.Damage,
+                    HitType = MapHitType(profile.Type),
+                    AttackerMovesOnKill = false,
+                    AttackId = profile.Type.ToString()
+                };
+            }
+            else
+            {
+                IAttackStrategy attackStrategy = _attackFactory.Get(context.Actor.AttackId);
+                if (!attackStrategy.CanAttack(context.Actor, context.From, context.To, context.Grid))
+                    return;
+
+                hitContext = attackStrategy.CreateHitContext(
+                    context.Actor, 
+                    defender, 
+                    context.From, 
+                    context.To, 
+                    context.Grid);
+                hitContext.AttackId = attackStrategy.Id;
+            }
+
+            context.ActionExecuted = true;
 
             // === DOMAIN PHASE ===
             CombatResult result = _combatResolver.Resolve(hitContext);
@@ -123,6 +151,17 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
             }
             
             _logger.Debug("=== Effect Pipeline Complete ===");
+        }
+
+        private static HitType MapHitType(AttackType type)
+        {
+            return type switch
+            {
+                AttackType.Melee => HitType.Melee,
+                AttackType.Ranged => HitType.Ranged,
+                AttackType.Magic => HitType.Magic,
+                _ => HitType.Melee
+            };
         }
     }
 }

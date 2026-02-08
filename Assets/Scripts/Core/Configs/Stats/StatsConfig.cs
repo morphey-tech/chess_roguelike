@@ -12,10 +12,7 @@ namespace Project.Core.Core.Configs.Stats
         [JsonProperty("max_hp")]
         public int MaxHp { get; set; }
         
-        [JsonProperty("attack")]
-        public int Attack { get; set; }
-        
-        [JsonProperty("attack_range")]
-        public int AttackRange { get; set; } = 1;
+        [JsonProperty("attacks")]
+        public AttackConfig[] Attacks { get; set; } = Array.Empty<AttackConfig>();
     }
 }

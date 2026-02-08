@@ -93,6 +93,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - figures
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cbd104645bc81f94a883d913bbb4fe54
+    m_Address: ranger_figure_view
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - figures
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cd67beaf4ad9270468c0200acb96de75
     m_Address: rook_white_view
     m_ReadOnly: 0

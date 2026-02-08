@@ -64,7 +64,7 @@ namespace Project.Unity.Unity.Views
 
                 if (!_cellPrefabCache.TryGetValue(skinId, out GameObject prefab))
                 {
-                    CellConfig cellConfig = _cellConfigCache.Cells.Find(c => c.Alias == skinId);
+                    CellConfig cellConfig = _cellConfigCache.Get(skinId);
                     if (cellConfig == null)
                     {
                         _logger.Error($"No config found for cell skin '{skinId}'");
@@ -119,7 +119,7 @@ namespace Project.Unity.Unity.Views
             {
                 if (_cellPrefabCache.ContainsKey(skinId))
                     continue;
-                CellConfig? cellConfig = _cellConfigCache!.Cells.Find(c => c.Alias == skinId);
+                CellConfig? cellConfig = _cellConfigCache!.Get(skinId);
                 if (cellConfig == null)
                 {
                     _logger.Error($"No config found for cell skin '{skinId}'");

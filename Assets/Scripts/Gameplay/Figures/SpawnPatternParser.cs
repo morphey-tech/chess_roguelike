@@ -31,7 +31,7 @@ namespace Project.Gameplay.Gameplay.Figures
         {
             await EnsureLoadedAsync();
 
-            SpawnPatternConfig pattern = Array.Find(_patternCache.Patterns, p => p.Id == patternId);
+            SpawnPatternConfig pattern = _patternCache.Get(patternId);
             if (pattern == null)
             {
                 _logger.Error($"Spawn pattern not found: {patternId}");

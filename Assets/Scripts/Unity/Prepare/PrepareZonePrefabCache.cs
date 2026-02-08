@@ -58,7 +58,7 @@ namespace Project.Unity.Unity.Prepare
             var cellsRepo = await _configProvider.Get<CellConfigRepository>("cells_conf");
             var figuresRepo = await _configProvider.Get<FigureConfigRepository>("figures_conf");
 
-            var loadCell = cellsRepo.Cells.Count > 0
+            var loadCell = cellsRepo.Cells.Length > 0
                 ? _assetService.LoadAssetAsync<GameObject>(cellsRepo.Cells[0].AssetKey)
                 : UniTask.FromResult<GameObject>(null);
             var loadController = _assetService.LoadAssetAsync<GameObject>(FigureControllerAssetKey);
@@ -66,7 +66,7 @@ namespace Project.Unity.Unity.Prepare
             var figureTasks = new List<UniTask<(string typeId, GameObject prefab)>>();
             foreach (string typeId in figureTypeIds.Distinct())
             {
-                var cfg = figuresRepo.GetBy(typeId);
+                var cfg = figuresRepo.Get(typeId);
                 if (cfg == null || string.IsNullOrEmpty(cfg.AssetKey)) continue;
                 figureTasks.Add(LoadFigureAsync(cfg.AssetKey, typeId));
             }

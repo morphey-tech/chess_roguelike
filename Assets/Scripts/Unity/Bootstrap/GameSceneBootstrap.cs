@@ -75,7 +75,7 @@ namespace Project.Unity.Unity.Bootstrap
         {
             RunConfigRepository repository = 
                 await _configProvider.Get<RunConfigRepository>("runs_conf");
-            RunConfig config = Array.Find(repository.Runs, r => r.Id == runId);
+            RunConfig config = repository.Get(runId);
             return config ?? throw new Exception($"Run config '{runId}' not found");
         }
 
@@ -84,7 +84,7 @@ namespace Project.Unity.Unity.Bootstrap
             SuiteConfigRepository repository = 
                 await _configProvider.Get<SuiteConfigRepository>("suites_conf");
             string suiteId = _loadoutService.Current.SuiteId;
-            SuiteConfig config = Array.Find(repository.Suites, s => s.Id == suiteId);
+            SuiteConfig config = repository.Get(suiteId);
             return config ?? throw new Exception($"Suite config '{suiteId}' not found");
         }
     }

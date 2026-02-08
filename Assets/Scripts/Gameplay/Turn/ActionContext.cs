@@ -23,6 +23,12 @@ namespace Project.Gameplay.Gameplay.Turn
         
         public bool LastAttackKilledTarget { get; set; }
         public int LastDamageDealt { get; set; }
+
+        /// <summary>
+        /// Set by steps when an action actually happens (move/attack).
+        /// Used to avoid consuming a turn on invalid actions.
+        /// </summary>
+        public bool ActionExecuted { get; set; }
         
         /// <summary>
         /// If set, the actor gets a bonus move after the current step.

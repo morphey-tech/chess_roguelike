@@ -89,6 +89,12 @@
       "alias": "pr",
       "asset_key": "pierce_figure_view",
       "description_id": "pierce"
+    },
+    {
+      "id": "ranger",
+      "alias": "rg",
+      "asset_key": "ranger_figure_view",
+      "description_id": "ranger"
     }
   ]
 }

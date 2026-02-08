@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using Project.Core.Core.Configs;
 
 namespace Project.Core.Core.Configs.Turn
 {
@@ -21,9 +23,18 @@ namespace Project.Core.Core.Configs.Turn
         public StepConfig[] Steps { get; set; }
     }
 
-    public class TurnPatternDescriptionConfigRepository
+    public class TurnPatternDescriptionConfigRepository : ConfigRepository<TurnPatternDescriptionConfig>
     {
+        private TurnPatternDescriptionConfig[] _descriptions = Array.Empty<TurnPatternDescriptionConfig>();
+
         [JsonProperty("content")]
-        public TurnPatternDescriptionConfig[] Descriptions { get; set; }
+        public TurnPatternDescriptionConfig[] Descriptions
+        {
+            get => _descriptions;
+            set { _descriptions = value ?? Array.Empty<TurnPatternDescriptionConfig>(); ResetIndex(); }
+        }
+
+        protected override IReadOnlyList<TurnPatternDescriptionConfig> Items => _descriptions;
+        protected override string GetKey(TurnPatternDescriptionConfig item) => item.Id;
     }
 }

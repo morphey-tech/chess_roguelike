@@ -34,6 +34,7 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
 
             // === DOMAIN ===
             _movementService.MoveFigure(context.From, context.To);
+            context.ActionExecuted = true;
 
             // === VISUAL ===
             using (VisualScope scope = _visualPipeline.BeginScope())
