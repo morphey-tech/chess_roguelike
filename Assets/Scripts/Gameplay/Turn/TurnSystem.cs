@@ -11,6 +11,7 @@ namespace Project.Gameplay.Gameplay.Turn
     public class TurnSystem : IDisposable
     {
         private readonly IPublisher<TurnChangedMessage> _turnChangedPublisher;
+        private readonly IGameUiService _uiService;
         private readonly ILogger<TurnSystem> _logger;
         private readonly IDisposable _subscriptions;
         
@@ -20,9 +21,11 @@ namespace Project.Gameplay.Gameplay.Turn
         public TurnSystem(
             ISubscriber<EndTurnRequestedMessage> endTurnSubscriber,
             IPublisher<TurnChangedMessage> turnChangedPublisher,
+            IGameUiService uiService,
             ILogService logService)
         {
             _turnChangedPublisher = turnChangedPublisher;
+            _uiService = uiService;
             _logger = logService.CreateLogger<TurnSystem>();
             
             DisposableBagBuilder bag = DisposableBag.CreateBuilder();
@@ -58,7 +61,7 @@ namespace Project.Gameplay.Gameplay.Turn
             CurrentTeam = Team.Player;
             TurnNumber = 1;
             _logger.Info("Battle started! Player's turn");
-            Core.Window.UI.GetOrCreate<TurnWindow>().SetGamePhase();
+            _uiService.SetGamePhase();
             _turnChangedPublisher.Publish(new TurnChangedMessage(CurrentTeam, TurnNumber));
         }
 

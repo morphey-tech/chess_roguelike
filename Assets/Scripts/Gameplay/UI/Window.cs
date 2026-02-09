@@ -6,6 +6,7 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using Project.Core.Core.Assets;
 using Project.Core.Core.Logging;
+using Project.Gameplay.Gameplay.UI;
 using Sirenix.Utilities;
 using UnityEngine.UI;
 

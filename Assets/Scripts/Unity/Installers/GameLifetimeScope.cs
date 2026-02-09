@@ -28,7 +28,9 @@ using Project.Gameplay.Gameplay.Turn.Execution;
 using Project.Gameplay.Gameplay.Visual;
 using Project.Gameplay.Gameplay.Visual.Commands;
 using Project.Gameplay.Gameplay.Shutdown;
+using Project.Gameplay.UI;
 using Project.Unity.Unity.Debug;
+using Project.Unity.UI;
 using Project.Gameplay.Presentations;
 using Project.Unity.Unity.Bootstrap;
 using Project.Unity.Unity.Prepare;
@@ -152,6 +154,8 @@ namespace Project.Unity.Unity.Installers
             builder.Register<ReloadStageConsoleCommands>(Lifetime.Singleton)
                 .AsImplementedInterfaces()
                 .AsSelf();
+            builder.Register<GameUiService>(Lifetime.Singleton)
+                .As<IGameUiService>();
 
             // Input - dispatches input events via MessagePipe
             builder.Register<InputDispatcher>(Lifetime.Singleton)
@@ -165,7 +169,8 @@ namespace Project.Unity.Unity.Installers
 
             // Interaction layer
             builder.Register<InteractionLockService>(Lifetime.Singleton)
-                .As<IInteractionLock>();
+                .As<IInteractionLock>()
+                .AsSelf();
             builder.Register<ClickIntentResolver>(Lifetime.Singleton)
                 .As<IClickIntentResolver>();
             builder.Register<InteractionController>(Lifetime.Singleton)
@@ -228,7 +233,8 @@ namespace Project.Unity.Unity.Installers
                 });
 
             builder.Register<FigureStatsFactory>(Lifetime.Singleton)
-                .As<IFigureStatsFactory>();
+                .As<IFigureStatsFactory>()
+                .AsSelf();
 
             builder.Register<AttackResolver>(Lifetime.Singleton)
                 .As<IAttackResolver>();
@@ -302,7 +308,7 @@ namespace Project.Unity.Unity.Installers
             builder.Register<FigureSpawnService>(Lifetime.Singleton);
             builder.Register<DamageService>(Lifetime.Singleton);
             builder.Register<MovementService>(Lifetime.Singleton);
-            builder.Register<Project.Core.Window.UI>(Lifetime.Singleton);
+            builder.Register<Gameplay.Gameplay.UI.UI>(Lifetime.Singleton);
         }
 
         private void OnContainerBuilt(IObjectResolver resolver)
@@ -317,6 +323,11 @@ namespace Project.Unity.Unity.Installers
             resolver.Resolve<StageService>();
             resolver.Resolve<PrepareService>();
             resolver.Resolve<HandFigureClickHandler>();
+            
+            // UI must be force-resolved so its constructor runs InitAsync
+            // (loads WindowsController prefab). Without this, static UI methods
+            // throw "UI is not valid" because _controller is never set.
+            resolver.Resolve<Gameplay.Gameplay.UI.UI>();
 
             // Inject MonoSceneBootstrap
             MonoSceneBootstrap? bootstrap = _worldObjectCollector.GetObjectByType<MonoSceneBootstrap>();

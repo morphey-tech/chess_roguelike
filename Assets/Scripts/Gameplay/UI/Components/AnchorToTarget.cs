@@ -69,12 +69,12 @@ namespace Project.Unity.UI.Components
         if (_screenRect == null || _prevSize != _rectTransform.rect.size)
         {
           Vector3 leftBottomCorner = _useSafeArea
-            ? Core.Window.UI.Canvas.ScreenToCanvasPosition(Screen.safeArea.min)
-            : Core.Window.UI.Canvas.ViewportToCanvasPosition(new Vector3(0, 0));
+            ? Gameplay.Gameplay.UI.UI.Canvas.ScreenToCanvasPosition(Screen.safeArea.min)
+            : Gameplay.Gameplay.UI.UI.Canvas.ViewportToCanvasPosition(new Vector3(0, 0));
 
           Vector3 rightTopCorner = _useSafeArea
-            ? Core.Window.UI.Canvas.ScreenToCanvasPosition(Screen.safeArea.max)
-            : Core.Window.UI.Canvas.ViewportToCanvasPosition(new Vector3(1, 1));
+            ? Gameplay.Gameplay.UI.UI.Canvas.ScreenToCanvasPosition(Screen.safeArea.max)
+            : Gameplay.Gameplay.UI.UI.Canvas.ViewportToCanvasPosition(new Vector3(1, 1));
 
           leftBottomCorner += (Vector3)_screenLeftBottomBorders;
           rightTopCorner -= (Vector3)_screenRightTopBorders;
@@ -185,7 +185,7 @@ namespace Project.Unity.UI.Components
     {
       if (!_targetPosition.HasValue && _target == null)
       {
-        _rectTransform.anchoredPosition = Core.Window.UI.Canvas.ViewportToCanvasPosition(_nonTargetViewportPosition);
+        _rectTransform.anchoredPosition = Gameplay.Gameplay.UI.UI.Canvas.ViewportToCanvasPosition(_nonTargetViewportPosition);
         return;
       }
 
@@ -205,7 +205,7 @@ namespace Project.Unity.UI.Components
       else
       {
         targetPosition = _targetPosition ?? _target.position + _target.rotation * _worldLocalOffset;
-        targetPosition = Core.Window.UI.Canvas.WorldToCanvasPosition(targetPosition + _worldOffset, main) + _anchorOffset;
+        targetPosition = Gameplay.Gameplay.UI.UI.Canvas.WorldToCanvasPosition(targetPosition + _worldOffset, main) + _anchorOffset;
       }
 
       IsOnScreen = ScreenRect.Contains(targetPosition);

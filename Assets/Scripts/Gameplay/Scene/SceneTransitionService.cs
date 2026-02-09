@@ -44,7 +44,6 @@ namespace Project.Gameplay.Gameplay.Scene
 
             float startTime = Time.realtimeSinceStartup;
 
-            UnityEngine.SceneManagement.Scene previousScene = SceneManager.GetSceneByName(fromScene);
             progress.OnNext(new SceneLoadProgress(toScene, 0f, SceneLoadPhase.Starting));
             await LoadSceneAsync(toScene, transitionData, progress, cancellationToken);
             // Active scene уже установлена в LoadSceneAsync
@@ -57,20 +56,6 @@ namespace Project.Gameplay.Gameplay.Scene
                     SceneLoadPhase.UnloadingPrevious));
 
                 await _sceneLoader.UnloadAsync(fromScene, cancellationToken);
-
-                if (loadParams.CanDoHeavyCleanup)
-                {
-                    await _memoryCleanService.CleanMemory();
-                }
-            }
-            else if (loadParams.UnloadPrevious && fromScene == toScene)
-            {
-                progress.OnNext(new SceneLoadProgress(
-                    toScene,
-                    0.8f,
-                    SceneLoadPhase.UnloadingPrevious));
-
-                await _sceneLoader.UnloadAsync(previousScene, cancellationToken);
 
                 if (loadParams.CanDoHeavyCleanup)
                 {
@@ -114,8 +99,11 @@ namespace Project.Gameplay.Gameplay.Scene
                 }
                 catch (Exception e)
                 {
+                    // Log but don't re-throw — let the transition service finish
+                    // scene unloading. Re-throwing here would leave the previous
+                    // scene loaded, causing scene stacking (overlapping UI, duplicate
+                    // EventSystem / AudioListener, etc.).
                     _logger.Error($"Bootstrap failed: {bootstrap.GetType().Name}", e);
-                    throw;
                 }
             }
             else

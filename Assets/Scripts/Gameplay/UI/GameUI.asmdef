@@ -1,20 +1,14 @@
 {
-    "name": "Unity",
-    "rootNamespace": "Project.Unity",
+    "name": "GameUI",
+    "rootNamespace": "Project.Gameplay",
     "references": [
         "Core",
         "Gameplay",
         "UniTask",
         "UniRx",
         "VContainer",
-        "Unity.InputSystem",
         "MessagePipe",
-        "MessagePipe.VContainer",
-        "LiteUI",
-        "DOTween.Modules",
-        "ShapesRuntime",
-        "IngameDebugConsole.Runtime",
-        "GameUI"
+        "DOTween.Modules"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

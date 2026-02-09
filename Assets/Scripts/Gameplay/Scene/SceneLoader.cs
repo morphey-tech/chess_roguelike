@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Project.Core.Core.Logging;
@@ -99,6 +100,36 @@ namespace Project.Gameplay.Gameplay.Scene
             await operation.ToUniTask(cancellationToken: cancellationToken);
 
             _logger.Info($"Scene unloaded: '{scene.name}'");
+        }
+
+        public async UniTask UnloadAllExcept(
+            UnityEngine.SceneManagement.Scene keepScene,
+            CancellationToken cancellationToken)
+        {
+            var toUnload = new List<UnityEngine.SceneManagement.Scene>();
+            for (int i = 0; i < SceneManager.sceneCount; i++)
+            {
+                UnityEngine.SceneManagement.Scene scene = SceneManager.GetSceneAt(i);
+                if (!scene.isLoaded)
+                {
+                    continue;
+                }
+                if (scene.handle == keepScene.handle)
+                {
+                    continue;
+                }
+                if (scene.name == "DontDestroyOnLoad")
+                {
+                    continue;
+                }
+
+                toUnload.Add(scene);
+            }
+
+            foreach (UnityEngine.SceneManagement.Scene scene in toUnload)
+            {
+                await UnloadAsync(scene, cancellationToken);
+            }
         }
 
         public static void SetActive(string sceneName)

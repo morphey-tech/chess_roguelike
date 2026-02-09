@@ -85,7 +85,9 @@ namespace Project.Gameplay.Gameplay.Stage
                 _turnPatternFactory.ResetCache();
 
                 _logger.Info($"Reloading stage '{stageId}' in-place");
-                await _runHolder.Current.RestartCurrentStageAsync();
+                // Fire-and-forget: stage phases run indefinitely (wait for player input).
+                // Awaiting here would keep _reloading=1 forever, blocking subsequent reloads.
+                _runHolder.Current.RestartCurrentStageAsync().Forget();
             }
             finally
             {

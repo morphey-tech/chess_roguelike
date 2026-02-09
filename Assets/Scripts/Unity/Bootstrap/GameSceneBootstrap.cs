@@ -45,7 +45,9 @@ namespace Project.Unity.Unity.Bootstrap
             _runHolder.Set(run);
             
             Log.Info($"Starting run: {runConfig.Id}");
-            await run.Begin();
+            // Fire-and-forget: game loop runs indefinitely (phases wait for player input).
+            // Awaiting here would block the bootstrap and prevent the previous scene from unloading.
+            run.Begin().Forget();
         }
 
         private async UniTask InitializeRunStateAsync(RunConfig runConfig)

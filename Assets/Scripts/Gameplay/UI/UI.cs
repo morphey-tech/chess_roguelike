@@ -7,11 +7,12 @@ using System.Runtime.CompilerServices;
 using Cysharp.Threading.Tasks;
 using Project.Core.Core.Assets;
 using Project.Core.Core.Logging;
+using Project.Core.Window;
 using UnityEngine;
 using VContainer;
 using Object = UnityEngine.Object;
 
-namespace Project.Core.Window
+namespace Project.Gameplay.Gameplay.UI
 {
   public class UI
   {

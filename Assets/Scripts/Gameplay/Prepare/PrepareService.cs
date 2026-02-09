@@ -22,6 +22,7 @@ namespace Project.Gameplay.Gameplay.Prepare
         private readonly FigureSpawnService _figureSpawnService;
         private readonly IPreparePresenter _preparePresenter;
         private readonly VisualPipeline _visualPipeline;
+        private readonly IGameUiService _uiService;
         private readonly IPublisher<PreparePhaseCompletedMessage> _completedPublisher;
         private readonly ILogger<PrepareService> _logger;
         private readonly IDisposable _subscriptions;
@@ -39,6 +40,7 @@ namespace Project.Gameplay.Gameplay.Prepare
             FigureSpawnService figureSpawnService,
             IPreparePresenter preparePresenter,
             VisualPipeline visualPipeline,
+            IGameUiService uiService,
             ISubscriber<HandFigureClickedMessage> handFigureClickedSubscriber,
             ISubscriber<CellClickedMessage> cellClickedSubscriber,
             ISubscriber<CancelRequestedMessage> cancelSubscriber,
@@ -48,6 +50,7 @@ namespace Project.Gameplay.Gameplay.Prepare
             _figureSpawnService = figureSpawnService;
             _preparePresenter = preparePresenter;
             _visualPipeline = visualPipeline;
+            _uiService = uiService;
             _completedPublisher = completedPublisher;
             _logger = logService.CreateLogger<PrepareService>();
 
@@ -72,7 +75,7 @@ namespace Project.Gameplay.Gameplay.Prepare
             await SpawnPrepareZoneAsync();
             BuildPlacementCache();
             UpdatePlacementHighlights();
-            await Core.Window.UI.ShowAsync<WorldUIWindow>(); 
+            await _uiService.ShowWorldUiAsync();
             await ShowHintWindow();
         }
 
@@ -266,8 +269,7 @@ namespace Project.Gameplay.Gameplay.Prepare
 
         private async UniTask ShowHintWindow()
         {
-            TurnWindow? wnd = await Core.Window.UI.ShowAsync<TurnWindow>();
-            wnd?.SetPreparePhase();
+            await _uiService.ShowPreparePhaseAsync();
         }
 
         private void ClearPlacementHighlights()
