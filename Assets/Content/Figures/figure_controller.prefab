@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: 317426383785266942}
   - component: {fileID: 301852541256864080}
   - component: {fileID: 4735786356695318062}
+  - component: {fileID: 3955189433567374003}
   m_Layer: 7
   m_Name: figure_controller
   m_TagString: Untagged
@@ -36,7 +37,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 6379926337035602019}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &3018979080851452577
@@ -143,6 +145,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity::Project.Unity.Presentations.FigureHitPresenter
   _hitDuration: 0.1
   _hitShake: 0.1
+  _flashCount: 2
+  _flashDuration: 0.1
+  _flashColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!114 &4735786356695318062
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -156,3 +161,48 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity::Project.Unity.Presentations.FigureDeathPresenter
   _deathDuration: 0.3
+--- !u!114 &3955189433567374003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 740290869039254118}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 20023a15bfdf4b74893dcf28720a24b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity::Project.Unity.Presentations.FigureHealthPresenter
+  _viewTemplate: {fileID: 8073077205331353932, guid: 397047c327b269a4ebac25835a79c7e3, type: 3}
+  _pivot: {fileID: 6379926337035602019}
+--- !u!1 &5087786982688211350
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6379926337035602019}
+  m_Layer: 7
+  m_Name: HealthPivot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6379926337035602019
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5087786982688211350}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.3, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 700778397425556649}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
