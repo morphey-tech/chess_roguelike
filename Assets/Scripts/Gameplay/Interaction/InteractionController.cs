@@ -236,7 +236,7 @@ namespace Project.Gameplay.Gameplay.Interaction
 
         private BoardGrid? GetCurrentGrid()
         {
-            return _grid ?? _runHolder.Current.CurrentStage.Grid;
+            return _grid ?? _runHolder.Current?.CurrentStage?.Grid;
         }
 
         void IDisposable.Dispose()

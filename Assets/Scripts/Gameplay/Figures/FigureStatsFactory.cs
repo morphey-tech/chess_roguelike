@@ -12,7 +12,7 @@ namespace Project.Gameplay.Gameplay.Figures
     public sealed class FigureStatsFactory : IFigureStatsFactory
     {
         private readonly ConfigProvider _configProvider;
-        private StatsConfigRepository _statsRepo;
+        private StatsConfigRepository? _statsRepo;
 
         [Inject]
         public FigureStatsFactory(ConfigProvider configProvider)
@@ -49,6 +49,11 @@ namespace Project.Gameplay.Gameplay.Figures
             }
 
             return new FigureStats(cfg.MaxHp, attacks);
+        }
+
+        public void ClearCache()
+        {
+            _statsRepo = null;
         }
     }
 }

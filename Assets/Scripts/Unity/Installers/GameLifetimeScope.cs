@@ -28,6 +28,7 @@ using Project.Gameplay.Gameplay.Turn.Execution;
 using Project.Gameplay.Gameplay.Visual;
 using Project.Gameplay.Gameplay.Visual.Commands;
 using Project.Gameplay.Gameplay.Shutdown;
+using Project.Unity.Unity.Debug;
 using Project.Gameplay.Presentations;
 using Project.Unity.Unity.Bootstrap;
 using Project.Unity.Unity.Prepare;
@@ -146,6 +147,11 @@ namespace Project.Unity.Unity.Installers
             builder.Register<RunFactory>(Lifetime.Singleton);
             builder.Register<StageFactory>(Lifetime.Singleton);
             builder.Register<StagePhaseFactory>(Lifetime.Singleton);
+            builder.Register<StageReloadService>(Lifetime.Singleton)
+                .AsSelf();
+            builder.Register<ReloadStageConsoleCommands>(Lifetime.Singleton)
+                .AsImplementedInterfaces()
+                .AsSelf();
 
             // Input - dispatches input events via MessagePipe
             builder.Register<InputDispatcher>(Lifetime.Singleton)

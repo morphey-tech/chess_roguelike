@@ -8,6 +8,7 @@ using Project.Gameplay.Gameplay.Save;
 using Project.Gameplay.Gameplay.Save.Adapter;
 using Project.Gameplay.Gameplay.Save.Service;
 using Project.Gameplay.Gameplay.Scene;
+using Project.Unity.Unity.Debug;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -34,6 +35,9 @@ namespace Project.Unity.Unity.Installers
                 .AsImplementedInterfaces();
 
             builder.Register<ConfigProvider>(Lifetime.Singleton)
+                .AsImplementedInterfaces()
+                .AsSelf();
+            builder.Register<ConfigHotReloadService>(Lifetime.Singleton)
                 .AsImplementedInterfaces()
                 .AsSelf();
 

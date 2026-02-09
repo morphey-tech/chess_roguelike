@@ -3,9 +3,11 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Project.Core.Core.Logging;
 using Project.Core.Core.Scene;
+using Project.Gameplay.Gameplay.Configs;
 using UniRx;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using VContainer;
 using ILogger = Project.Core.Core.Logging.ILogger;
 
 namespace Project.Gameplay.Gameplay.Scene
@@ -19,19 +21,23 @@ namespace Project.Gameplay.Gameplay.Scene
 
         private readonly SceneTransitionService _transitionService;
         private readonly ILogger _logger;
+        private readonly ConfigHotReloadService _hotReloadService;
 
         private readonly Subject<SceneLoadProgress> _progress = new();
         private CancellationTokenSource? _loadCts;
         private bool _disposed;
 
-        private const string BootstrapSceneName = "Bootstrap";
+        private const string BOOTSTRAP_SCENE_NAME = "Bootstrap";
 
-        public SceneService(
+        [Inject]
+        private SceneService(
             SceneTransitionService transitionService,
-            ILogService logService)
+            ILogService logService,
+            ConfigHotReloadService hotReloadService)
         {
             _transitionService = transitionService;
             _logger = logService.CreateLogger<SceneService>();
+            _hotReloadService = hotReloadService;
             CurrentScene = SceneManager.GetActiveScene().name;
         }
 
@@ -41,6 +47,8 @@ namespace Project.Gameplay.Gameplay.Scene
             SceneTransitionData transitionData)
         {
             ThrowIfDisposed();
+
+            _hotReloadService.ReloadIfDirty();
 
             if (IsLoading)
             {
@@ -58,15 +66,15 @@ namespace Project.Gameplay.Gameplay.Scene
                 string fromScene = SceneManager.GetActiveScene().name;
                 _logger.Debug($"Loading: {fromScene} → {targetScene}");
 
-                bool useBootstrap = SceneExists(BootstrapSceneName) 
-                                    && targetScene != BootstrapSceneName;
+                bool useBootstrap = SceneExists(BOOTSTRAP_SCENE_NAME) 
+                                    && targetScene != BOOTSTRAP_SCENE_NAME;
 
                 if (useBootstrap)
                 {
                     transitionData.Set(targetScene);
                     await LoadInternalAsync(
                         fromScene,
-                        BootstrapSceneName,
+                        BOOTSTRAP_SCENE_NAME,
                         loadParams,
                         transitionData,
                         _loadCts.Token);
@@ -118,7 +126,7 @@ namespace Project.Gameplay.Gameplay.Scene
             }
         }
 
-        public void Dispose()
+        void IDisposable.Dispose()
         {
             if (_disposed)
             {

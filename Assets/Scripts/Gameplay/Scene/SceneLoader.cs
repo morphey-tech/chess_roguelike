@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Project.Core.Core.Logging;
@@ -78,6 +78,27 @@ namespace Project.Gameplay.Gameplay.Scene
             await operation.ToUniTask(cancellationToken: cancellationToken);
             
             _logger.Info($"Scene unloaded: '{sceneName}'");
+        }
+
+        public async UniTask UnloadAsync(
+            UnityEngine.SceneManagement.Scene scene,
+            CancellationToken cancellationToken)
+        {
+            if (!scene.IsValid() || !scene.isLoaded)
+            {
+                _logger.Warning($"Scene not loaded, skip unload: '{scene.name}'");
+                return;
+            }
+
+            _logger.Info($"Unloading scene: '{scene.name}'");
+
+            AsyncOperation operation =
+                SceneManager.UnloadSceneAsync(scene)
+                ?? throw new InvalidOperationException($"Failed to start unloading scene {scene.name}");
+
+            await operation.ToUniTask(cancellationToken: cancellationToken);
+
+            _logger.Info($"Scene unloaded: '{scene.name}'");
         }
 
         public static void SetActive(string sceneName)

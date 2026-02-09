@@ -17,9 +17,9 @@ namespace Project.Gameplay.Gameplay.Turn
         private readonly ConditionRegistry _conditionRegistry;
         private readonly ILogger<TurnPatternFactory> _logger;
 
-        private TurnPatternDescriptionConfigRepository _descriptionConfigs;
-        private TurnPatternsConfigRepository _patternsConfigs;
-        private ConditionConfigRepository _conditionConfigs;
+        private TurnPatternDescriptionConfigRepository? _descriptionConfigs;
+        private TurnPatternsConfigRepository? _patternsConfigs;
+        private ConditionConfigRepository? _conditionConfigs;
         private bool _initialized;
 
         [Inject]
@@ -54,7 +54,7 @@ namespace Project.Gameplay.Gameplay.Turn
 
         public TurnPatternDescription CreatePattern(string patternId)
         {
-            TurnPatternDescriptionConfig config = _descriptionConfigs.Get(patternId);
+            TurnPatternDescriptionConfig config = _descriptionConfigs!.Get(patternId);
             if (config == null)
                 throw new Exception($"Unknown pattern description: {patternId}");
 
@@ -63,7 +63,7 @@ namespace Project.Gameplay.Gameplay.Turn
 
         public TurnPattern CreatePatternSet(string setId)
         {
-            TurnPatternsConfig config = _patternsConfigs.Get(setId);
+            TurnPatternsConfig config = _patternsConfigs!.Get(setId);
             if (config == null)
                 throw new Exception($"Unknown turn patterns: {setId}");
 
@@ -72,6 +72,16 @@ namespace Project.Gameplay.Gameplay.Turn
                 .ToList();
 
             return new TurnPattern(setId, patterns);
+        }
+
+        public void ResetCache()
+        {
+            _initialized = false;
+            _conditionConfigs = null;
+            _descriptionConfigs = null;
+            _patternsConfigs = null;
+            _conditionRegistry.ClearPresets();
+            _logger.Info("TurnPatternFactory cache cleared");
         }
 
         private TurnPatternDescription CreatePatternFromConfig(TurnPatternDescriptionConfig config)

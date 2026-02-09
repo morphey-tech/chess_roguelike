@@ -152,6 +152,13 @@ namespace Project.Gameplay.Gameplay.Configs
             _preloadedAddresses.Clear();
         }
 
+        public void ReloadAll()
+        {
+            ClearCache();
+            PreloadAllAsync().Forget();
+            _logger.Info("Config cache cleared, preload started");
+        }
+
         void IDisposable.Dispose()
         {
             if (_disposed)

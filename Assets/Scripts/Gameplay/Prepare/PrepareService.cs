@@ -28,8 +28,8 @@ namespace Project.Gameplay.Gameplay.Prepare
 
         private PrepareState? _state;
         private IPreparePlacementRules? _rules;
-        private PlayerRunStateModel _runState;
-        private BoardGrid _grid;
+        private PlayerRunStateModel? _runState;
+        private BoardGrid? _grid;
         private string? _previousSelectedId;
         private bool _isPlacing;
         private HashSet<GridPosition>? _availablePlacementPositions;
@@ -78,7 +78,7 @@ namespace Project.Gameplay.Gameplay.Prepare
         private async UniTask SpawnPrepareZoneAsync()
         {
             List<PrepareZoneFigureData> figureDataList = new List<PrepareZoneFigureData>();
-            foreach (FigureState fig in _runState.FiguresInHand)
+            foreach (FigureState fig in _runState!.FiguresInHand)
             {
                 figureDataList.Add(new PrepareZoneFigureData(fig.Id, fig.TypeId));
             }
@@ -106,7 +106,7 @@ namespace Project.Gameplay.Gameplay.Prepare
             _state.Complete();
             _preparePresenter.Clear();
             ClearPlacementHighlights();
-            _completedPublisher.Publish(new PreparePhaseCompletedMessage(_runState.FiguresOnBoard.Count));
+            _completedPublisher.Publish(new PreparePhaseCompletedMessage(_runState!.FiguresOnBoard.Count));
 
             _state = null;
             _rules = null;
@@ -131,7 +131,7 @@ namespace Project.Gameplay.Gameplay.Prepare
             _previousSelectedId = message.FigureId;
             _preparePresenter.SetSelected(message.FigureId, true);
 
-            FigureState? selected = _state.GetSelectedFigure(_runState);
+            FigureState? selected = _state.GetSelectedFigure(_runState!);
             if (selected != null)
             {
                 _logger.Debug($"Selected: {selected.TypeId} (id={selected.Id})");
@@ -170,7 +170,7 @@ namespace Project.Gameplay.Gameplay.Prepare
                 if (_state is not { IsActive: true })
                     return;
 
-                FigureState? state = _state.GetSelectedFigure(_runState);
+                FigureState? state = _state.GetSelectedFigure(_runState!);
                 if (state == null)
                     return;
 
@@ -180,8 +180,8 @@ namespace Project.Gameplay.Gameplay.Prepare
                     _state,
                     _preparePresenter,
                     _figureSpawnService,
-                    _runState,
-                    _grid,
+                    _runState!,
+                    _grid!,
                     _logger);
 
                 bool success = await transaction.ExecuteAsync(state, pos);
@@ -294,6 +294,26 @@ namespace Project.Gameplay.Gameplay.Prepare
                 if (_rules.CanPlace(pos))
                     _availablePlacementPositions.Add(pos);
             }
+        }
+
+        public void Reset()
+        {
+            _state = null;
+            _rules = null;
+            _previousSelectedId = null;
+            _availablePlacementPositions = null;
+            _isPlacing = false;
+
+            if (_grid != null)
+            {
+                ClearPlacementHighlights();
+            }
+
+            _preparePresenter.Clear();
+            _runState = null;
+            _grid = null;
+
+            _logger.Info("PrepareService reset");
         }
     }
 }

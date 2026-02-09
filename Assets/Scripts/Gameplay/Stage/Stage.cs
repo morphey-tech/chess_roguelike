@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using MessagePipe;
@@ -13,7 +14,7 @@ namespace Project.Gameplay.Gameplay.Stage
     /// Represents a single stage/level. Controls the flow through phases.
     /// Stage owns the phase execution - phases don't call back into Stage.
     /// </summary>
-    public class Stage
+    public class Stage : IDisposable
     {
         public string Id => _config.Id;
         public string BoardId => _config.BoardId;
@@ -29,6 +30,7 @@ namespace Project.Gameplay.Gameplay.Stage
         private StageContext _context = null!;
         private int _currentPhaseIndex = -1;
         private UniTaskCompletionSource<PhaseResult>? _waitingPhaseCompletion;
+        private bool _cancelRequested;
 
         public Stage(
             StageConfig config,
@@ -58,11 +60,15 @@ namespace Project.Gameplay.Gameplay.Stage
         {
             while (++_currentPhaseIndex < _phases.Count)
             {
+                if (_cancelRequested)
+                {
+                    return;
+                }
+
                 IStagePhase phase = _phases[_currentPhaseIndex];
                 _logger.Info($"[Phase {_currentPhaseIndex + 1}/{_phases.Count}] {phase.GetType().Name} starting");
 
                 PhaseResult result = await phase.ExecuteAsync(_context);
-
                 if (result == PhaseResult.WaitForCompletion)
                 {
                     _waitingPhaseCompletion = new UniTaskCompletionSource<PhaseResult>();
@@ -70,8 +76,12 @@ namespace Project.Gameplay.Gameplay.Stage
                     _waitingPhaseCompletion = null;
                 }
 
-                _logger.Info($"[Phase] {phase.GetType().Name} completed with {result}");
+                if (_cancelRequested)
+                {
+                    return;
+                }
 
+                _logger.Info($"[Phase] {phase.GetType().Name} completed with {result}");
                 if (result is PhaseResult.Victory or PhaseResult.Defeat)
                 {
                     Complete(result == PhaseResult.Victory ? StageResult.Victory : StageResult.Defeat);
@@ -87,6 +97,18 @@ namespace Project.Gameplay.Gameplay.Stage
             _waitingPhaseCompletion?.TrySetResult(result);
         }
 
+        public void Abort()
+        {
+            if (_cancelRequested || IsCompleted)
+            {
+                return;
+            }
+
+            _cancelRequested = true;
+            _waitingPhaseCompletion?.TrySetResult(PhaseResult.Defeat);
+            _logger.Info($"Stage {Id} abort requested");
+        }
+
         private void Complete(StageResult result)
         {
             if (IsCompleted)
@@ -94,8 +116,19 @@ namespace Project.Gameplay.Gameplay.Stage
                 return;
             }
             IsCompleted = true;
-            _logger.Info($"Stage {Id} completed: {result}");
             _completedPublisher.Publish(new StageCompletedMessage(Id, result));
+            _logger.Info($"Stage {Id} completed: {result}");
+        }
+
+        public void Dispose()
+        {
+            foreach (IStagePhase phase in _phases)
+            {
+                if (phase is IDisposable disposable)
+                {
+                    disposable.Dispose();
+                }
+            }
         }
     }
 }

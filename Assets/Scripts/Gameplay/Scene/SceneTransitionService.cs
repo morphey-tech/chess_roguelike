@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Project.Core.Core.Bootstrap;
@@ -44,6 +44,7 @@ namespace Project.Gameplay.Gameplay.Scene
 
             float startTime = Time.realtimeSinceStartup;
 
+            UnityEngine.SceneManagement.Scene previousScene = SceneManager.GetSceneByName(fromScene);
             progress.OnNext(new SceneLoadProgress(toScene, 0f, SceneLoadPhase.Starting));
             await LoadSceneAsync(toScene, transitionData, progress, cancellationToken);
             // Active scene уже установлена в LoadSceneAsync
@@ -56,6 +57,20 @@ namespace Project.Gameplay.Gameplay.Scene
                     SceneLoadPhase.UnloadingPrevious));
 
                 await _sceneLoader.UnloadAsync(fromScene, cancellationToken);
+
+                if (loadParams.CanDoHeavyCleanup)
+                {
+                    await _memoryCleanService.CleanMemory();
+                }
+            }
+            else if (loadParams.UnloadPrevious && fromScene == toScene)
+            {
+                progress.OnNext(new SceneLoadProgress(
+                    toScene,
+                    0.8f,
+                    SceneLoadPhase.UnloadingPrevious));
+
+                await _sceneLoader.UnloadAsync(previousScene, cancellationToken);
 
                 if (loadParams.CanDoHeavyCleanup)
                 {

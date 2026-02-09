@@ -12,7 +12,8 @@
         "MessagePipe.VContainer",
         "LiteUI",
         "DOTween.Modules",
-        "ShapesRuntime"
+        "ShapesRuntime",
+        "IngameDebugConsole.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

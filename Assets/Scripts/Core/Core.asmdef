@@ -3,7 +3,8 @@
     "rootNamespace": "Project.Core",
     "references": [
         "UniTask",
-        "UniRx"
+        "UniRx",
+        "VContainer"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

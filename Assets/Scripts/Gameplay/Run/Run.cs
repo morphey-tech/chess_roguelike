@@ -15,7 +15,7 @@ namespace Project.Gameplay.Gameplay.Run
 {
     public class Run
     {
-        public Stage.Stage CurrentStage { get; private set; }
+        public Stage.Stage? CurrentStage { get; private set; }
         public bool IsCompleted => GetCurrentStageIndex() >= _config.Stages.Length;
         
         private readonly RunConfig _config;
@@ -41,9 +41,15 @@ namespace Project.Gameplay.Gameplay.Run
             _boardSpawnService = boardSpawnService ?? throw new ArgumentNullException(nameof(boardSpawnService));
         }
 
-        public void Begin()
+        public async UniTask Begin()
         {
-            LaunchCurrentStageAsync().Forget();
+            await LaunchCurrentStageAsync();
+        }
+
+        public async UniTask RestartCurrentStageAsync()
+        {
+            CancelCurrentStage();
+            await LaunchCurrentStageAsync();
         }
 
         public void NextStage()
@@ -67,6 +73,18 @@ namespace Project.Gameplay.Gameplay.Run
             await CurrentStage.BeginAsync();
         }
 
+        private void CancelCurrentStage()
+        {
+            if (CurrentStage == null)
+            {
+                return;
+            }
+
+            CurrentStage.Abort();
+            CurrentStage.Dispose();
+            CurrentStage = null;
+        }
+
         private int GetCurrentStageIndex()
         {
             string currentStageId = _runStateService.Current?.StageId ?? _config.Stages[0];
@@ -78,14 +96,14 @@ namespace Project.Gameplay.Gameplay.Run
             string stageId = _runStateService.Current?.StageId ?? _config.Stages[0];
             StageConfigRepository stageRepository = 
                 await _configProvider.Get<StageConfigRepository>("stages_conf");
-            StageConfig stageConfig = stageRepository.Get(stageId);
+            StageConfig? stageConfig = stageRepository.Get(stageId);
             return stageConfig ?? throw new NullReferenceException($"Stage config '{stageId}' not found");
         }
 
         private async UniTask<BoardConfig> LoadBoardConfig(StageConfig stageConfig)
         {
             BoardConfigRepository boardRepository = await _configProvider.Get<BoardConfigRepository>("boards_conf");
-            BoardConfig boardConfig = boardRepository.Get(stageConfig.BoardId);
+            BoardConfig? boardConfig = boardRepository.Get(stageConfig.BoardId);
             return boardConfig ?? throw new NullReferenceException($"Board config '{stageConfig.BoardId}' not found");
         }
     }

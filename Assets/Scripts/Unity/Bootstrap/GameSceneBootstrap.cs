@@ -45,7 +45,7 @@ namespace Project.Unity.Unity.Bootstrap
             _runHolder.Set(run);
             
             Log.Info($"Starting run: {runConfig.Id}");
-            run.Begin();
+            await run.Begin();
         }
 
         private async UniTask InitializeRunStateAsync(RunConfig runConfig)

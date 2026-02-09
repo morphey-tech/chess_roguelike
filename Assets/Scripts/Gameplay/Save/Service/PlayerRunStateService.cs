@@ -6,11 +6,13 @@ namespace Project.Gameplay.Gameplay.Save.Service
 {
     public class PlayerRunStateService
     {
-        public PlayerRunStateModel Current { get; private set; }
+        public PlayerRunStateModel? Current { get; private set; }
 
         public bool HasRun => Current != null;
 
-        public void StartNew(PlayerLoadoutModel loadoutModel, IEnumerable<string> figureTypeIds, string initialStageId)
+        public void StartNew(PlayerLoadoutModel loadoutModel,
+            IEnumerable<string> figureTypeIds,
+            string initialStageId)
         {
             int seed = HasRun ? Current!.Seed : (int)DateTime.Now.Ticks;
             Current = new PlayerRunStateModel

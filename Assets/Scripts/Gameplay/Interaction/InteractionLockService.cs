@@ -41,6 +41,12 @@ namespace Project.Gameplay.Gameplay.Interaction
             _logger.Debug($"Lock released (count: {_lockCount}){(reason != null ? $", reason: {reason}" : "")}");
         }
 
+        public void Reset()
+        {
+            _lockCount = 0;
+            _logger.Info("InteractionLockService reset");
+        }
+
         private sealed class LockHandle : IDisposable
         {
             private readonly InteractionLockService _service;

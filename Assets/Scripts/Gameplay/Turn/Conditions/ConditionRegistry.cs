@@ -47,5 +47,10 @@ namespace Project.Gameplay.Gameplay.Turn.Conditions
 
             throw new Exception($"Unknown condition type: {type}");
         }
+
+        public void ClearPresets()
+        {
+            _presets.Clear();
+        }
     }
 }

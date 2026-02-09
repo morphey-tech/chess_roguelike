@@ -136,5 +136,12 @@ namespace Project.Gameplay.Gameplay.Figures
 
             return figure;
         }
+
+        public void ClearCache()
+        {
+            _figureConfigCache = null;
+            _descriptionConfigCache = null;
+            _passiveConfigCache = null;
+        }
     }
 }
