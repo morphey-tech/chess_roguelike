@@ -296,7 +296,7 @@ namespace Project.Unity.Unity.Installers
             builder.Register<FigureSpawnService>(Lifetime.Singleton);
             builder.Register<DamageService>(Lifetime.Singleton);
             builder.Register<MovementService>(Lifetime.Singleton);
-            builder.Register<UI>(Lifetime.Singleton);
+            builder.Register<Project.Core.Window.UI>(Lifetime.Singleton);
         }
 
         private void OnContainerBuilt(IObjectResolver resolver)

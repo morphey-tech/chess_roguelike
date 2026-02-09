@@ -72,6 +72,7 @@ namespace Project.Gameplay.Gameplay.Prepare
             await SpawnPrepareZoneAsync();
             BuildPlacementCache();
             UpdatePlacementHighlights();
+            await Core.Window.UI.ShowAsync<WorldUIWindow>(); 
             await ShowHintWindow();
         }
 
