@@ -16,6 +16,7 @@ namespace Project.Gameplay.Gameplay.Visual.Commands.Impl
         private readonly string _skinId;
 
         public string DebugName => $"CreateCell(pos=[{_pos.Row},{_pos.Column}], skin={_skinId})";
+        public VisualCommandMode Mode => VisualCommandMode.Blocking;
 
         public CreateCellCommand(Entity entity, GridPosition pos, string skinId)
         {

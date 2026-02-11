@@ -1,0 +1,54 @@
+{
+  "content": [
+    {
+      "id": "ring_of_power",
+      "category": "artifact",
+      "name": "Ring of Power",
+      "description": "Grants a chance to deal critical hits",
+      "max_stack": 1,
+      "lifetime": "run",
+      "passives": ["crit_20"],
+      "params": {}
+    },
+    {
+      "id": "vampire_fang",
+      "category": "artifact",
+      "name": "Vampire Fang",
+      "description": "Heals on hit",
+      "max_stack": 1,
+      "lifetime": "run",
+      "passives": ["lifesteal_25"],
+      "params": {}
+    },
+    {
+      "id": "iron_shield",
+      "category": "artifact",
+      "name": "Iron Shield",
+      "description": "Reduces incoming damage when not moved",
+      "max_stack": 1,
+      "lifetime": "run",
+      "passives": ["fortify_tank"],
+      "params": {}
+    },
+    {
+      "id": "thorn_armor",
+      "category": "artifact",
+      "name": "Thorn Armor",
+      "description": "Reflects a portion of received damage",
+      "max_stack": 1,
+      "lifetime": "run",
+      "passives": ["thorns_25"],
+      "params": {}
+    },
+    {
+      "id": "health_potion",
+      "category": "consumable",
+      "name": "Health Potion",
+      "description": "Restores health",
+      "max_stack": 5,
+      "lifetime": "run",
+      "passives": [],
+      "params": { "heal_amount": 10 }
+    }
+  ]
+}

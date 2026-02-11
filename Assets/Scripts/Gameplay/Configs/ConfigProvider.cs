@@ -35,7 +35,10 @@ namespace Project.Gameplay.Gameplay.Configs
             "conditions_conf",
             "turn_pattern_descriptions_conf",
             "turn_patterns_conf",
-            "duels_conf"
+            "duels_conf",
+            "items_conf",
+            "resources_conf",
+            "loot_tables_conf"
         };
 
         private readonly Dictionary<string, object> _configsCache = new();

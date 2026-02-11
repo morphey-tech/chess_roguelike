@@ -3,6 +3,12 @@ using Project.Gameplay.Gameplay.Visual;
 
 namespace Project.Gameplay.Gameplay.Visual.Commands
 {
+    public enum VisualCommandMode
+    {
+        Blocking,
+        Background
+    }
+
     /// <summary>
     /// Represents a visual command that can be executed asynchronously.
     /// Commands are created by domain logic and executed by VisualCommandExecutor.
@@ -21,6 +27,8 @@ namespace Project.Gameplay.Gameplay.Visual.Commands
         /// Example: "DamageCommand(target=5, dmg=12)"
         /// </summary>
         string DebugName { get; }
+
+        VisualCommandMode Mode { get; }
         
         /// <summary>
         /// Execute the visual command (play animation, update UI, etc.)

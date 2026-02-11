@@ -15,6 +15,7 @@ namespace Project.Gameplay.Gameplay.Visual.Commands.Impl
         private readonly string? _appearStrategyId;
 
         public string DebugName => $"SpawnBoardCells(count={_requests.Count}, appear={_appearStrategyId ?? "none"})";
+        public VisualCommandMode Mode => VisualCommandMode.Blocking;
 
         public SpawnBoardCellsCommand(IReadOnlyList<CellSpawnRequest> requests, string? appearStrategyId)
         {

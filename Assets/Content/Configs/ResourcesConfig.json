@@ -1,0 +1,22 @@
+{
+  "content": [
+    {
+      "id": "gold",
+      "icon": "gold_icon",
+      "max": 9999,
+      "meta": false
+    },
+    {
+      "id": "crystals",
+      "icon": "crystals_icon",
+      "max": 999999,
+      "meta": true
+    },
+    {
+      "id": "keys",
+      "icon": "keys_icon",
+      "max": 99,
+      "meta": false
+    }
+  ]
+}

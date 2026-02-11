@@ -26,7 +26,7 @@ namespace Project.Unity.Presentations
             
             _entityLink = link;
             _figure = figure;
-            _healthView = Gameplay.Gameplay.UI.UI.GetOrCreate<WorldUIWindow>().Add(_viewTemplate, _pivot);
+            _healthView = Gameplay.Gameplay.UI.UIService.GetOrCreate<WorldUIWindow>().Add(_viewTemplate, _pivot);
 
             var color = _figure.Team == Team.Player ? _playerTeamColor : _enemyTeamColor;
             _healthView.Init(_figure.Stats.CurrentHp, _figure.Stats.MaxHp, color);
@@ -34,16 +34,35 @@ namespace Project.Unity.Presentations
 
         private void Update()
         {
-            if(_figure == null)
+            if (_figure == null || _healthView == null)
                 return;
+
+            if (_figure.Stats.IsDead)
+            {
+                RemoveBar();
+                return;
+            }
 
             _healthView.SetHp(_figure.Stats.CurrentHp);
         }
 
+        public void Hide()
+        {
+            RemoveBar();
+        }
+
+        private void RemoveBar()
+        {
+            if (_healthView == null)
+                return;
+            Gameplay.Gameplay.UI.UIService.GetOrCreate<WorldUIWindow>().Remove(_healthView);
+            _healthView = null;
+            _figure = null;
+        }
+
         private void OnDestroy()
         {
-            if(_healthView != null)
-                Gameplay.Gameplay.UI.UI.GetOrCreate<WorldUIWindow>().Remove(_healthView);
+            RemoveBar();
         }
     }
 }

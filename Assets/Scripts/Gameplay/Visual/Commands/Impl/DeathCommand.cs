@@ -12,6 +12,7 @@ namespace Project.Gameplay.Gameplay.Visual.Commands.Impl
         private readonly DeathVisualContext _ctx;
 
         public string DebugName => $"Death(figure={_ctx.FigureId}{(_ctx.DeathReason != null ? $", reason={_ctx.DeathReason}" : "")})";
+        public VisualCommandMode Mode => VisualCommandMode.Blocking;
 
         public DeathCommand(DeathVisualContext ctx)
         {
@@ -20,6 +21,7 @@ namespace Project.Gameplay.Gameplay.Visual.Commands.Impl
 
         public async UniTask ExecuteAsync(IPresenterProvider presenters)
         {
+            presenters.Figures.HideFigureHealthBar(_ctx.FigureId);
             await presenters.Figures.PlayDeathEffectAsync(_ctx.FigureId);
             await presenters.Figures.RemoveFigureAsync(_ctx.FigureId);
         }

@@ -29,8 +29,7 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
             int reflect = (int)(context.DamageDealt * _reflectPercent);
             if (reflect > 0)
             {
-                context.Attacker.Stats.TakeDamage(reflect);
-                context.Effects.Add(new ThornsReflectEffect(context.Attacker, reflect));
+                context.Effects.Add(new ThornsReflectEffect(owner, context.Attacker, reflect));
             }
         }
     }

@@ -82,8 +82,7 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
             }
 
             // Push blocked - deal bonus damage
-            context.Target.Stats.TakeDamage(_bonusDamageIfBlocked);
-            context.Effects.Add(new BonusDamageEffect(context.Target, _bonusDamageIfBlocked, "push blocked"));
+            context.Effects.Add(new BonusDamageEffect(owner, context.Target, _bonusDamageIfBlocked, "push blocked"));
             Debug.Log($"[PushOnHit] {context.Target} takes {_bonusDamageIfBlocked} bonus damage (push blocked)");
         }
     }

@@ -22,7 +22,10 @@ namespace Project.Gameplay.Gameplay.Combat.Visual
 
             if (visualEvents != null && visualEvents.Count > 0)
             {
-                foreach (ICombatVisualEvent visualEvent in visualEvents)
+                var sorted = new List<ICombatVisualEvent>(visualEvents);
+                sorted.Sort((a, b) => a.Stage != b.Stage ? a.Stage.CompareTo(b.Stage) : a.OrderInStage.CompareTo(b.OrderInStage));
+
+                foreach (ICombatVisualEvent visualEvent in sorted)
                 {
                     System.Type eventType = visualEvent.GetType();
                     if (_mappers.TryGetValue(eventType, out IVisualEventMapper mapper))

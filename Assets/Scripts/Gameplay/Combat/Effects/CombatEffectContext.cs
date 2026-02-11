@@ -5,6 +5,8 @@ using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Combat.Visual;
 using Project.Gameplay.Gameplay.Turn;
+using Project.Gameplay.Gameplay.Loot;
+using Project.Gameplay.Gameplay.Combat;
 
 namespace Project.Gameplay.Gameplay.Combat.Effects
 {
@@ -23,6 +25,9 @@ namespace Project.Gameplay.Gameplay.Combat.Effects
         public BoardGrid Grid { get; }
         public IPublisher<FigureDeathMessage> DeathPublisher { get; }
         public PassiveTriggerService Passives { get; }
+        public LootService LootService { get; }
+        public DamageApplier DamageApplier { get; }
+        public IFigureLifeService FigureLifeService { get; }
         public ILogger Logger { get; }
         
         /// <summary>
@@ -41,6 +46,9 @@ namespace Project.Gameplay.Gameplay.Combat.Effects
             BoardGrid grid,
             IPublisher<FigureDeathMessage> deathPublisher,
             PassiveTriggerService passives,
+            LootService lootService,
+            DamageApplier damageApplier,
+            IFigureLifeService figureLifeService,
             List<ICombatVisualEvent> visualEvents,
             ILogger logger)
         {
@@ -48,6 +56,9 @@ namespace Project.Gameplay.Gameplay.Combat.Effects
             Grid = grid;
             DeathPublisher = deathPublisher;
             Passives = passives;
+            LootService = lootService;
+            DamageApplier = damageApplier;
+            FigureLifeService = figureLifeService;
             VisualEvents = visualEvents;
             Logger = logger;
         }

@@ -14,6 +14,7 @@ namespace Project.Gameplay.Gameplay.Figures
         public Team Team { get; }
         public List<IPassive> Passives { get; } = new();
         public TurnPattern TurnPattern { get; private set; }
+        public string? LootTableId { get; set; }
 
         public Figure(int id, string typeId, string movementId, string attackId,
             string turnPatternsId, FigureStats stats, Team team) : base(id)

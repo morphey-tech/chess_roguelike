@@ -137,17 +137,12 @@ namespace Project.Unity.Unity.Views
             _logger.Info($"Figure {figureId} moved to ({to.Row}, {to.Column})");
         }
 
-        public async UniTask RemoveFigureAsync(int figureId)
+        public UniTask RemoveFigureAsync(int figureId)
         {
             if (!_figures.TryGetValue(figureId, out GameObject _))
-                return;
-
-            if (_visuals.TryGetValue(figureId, out FigureVisualSet visuals) && visuals.Death != null)
-            {
-                await visuals.Death.PlayDeathAsync();
-            }
-            
+                return UniTask.CompletedTask;
             CleanupFigure(figureId);
+            return UniTask.CompletedTask;
         }
 
         private void CleanupFigure(int figureId)
@@ -194,8 +189,19 @@ namespace Project.Unity.Unity.Views
             await PlaySimpleHealEffect(figureGO);
         }
 
+        public void HideFigureHealthBar(int figureId)
+        {
+            if (_figures.TryGetValue(figureId, out GameObject controller))
+            {
+                var health = controller.GetComponentInChildren<FigureHealthPresenter>(true);
+                health?.Hide();
+            }
+        }
+
         public async UniTask PlayDeathEffectAsync(int figureId)
         {
+            HideFigureHealthBar(figureId);
+
             if (_visuals.TryGetValue(figureId, out FigureVisualSet visuals) && visuals.Death != null)
             {
                 await visuals.Death.PlayDeathAsync();

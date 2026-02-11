@@ -23,5 +23,8 @@ namespace Project.Core.Core.Configs.Figure
         
         [JsonProperty("passives")]
         public string[] Passives { get; set; } = Array.Empty<string>();
+
+        [JsonProperty("loot_table_id")]
+        public string LootTableId { get; set; } = string.Empty;
     }
 }

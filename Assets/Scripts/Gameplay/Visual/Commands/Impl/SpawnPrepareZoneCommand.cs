@@ -13,6 +13,7 @@ namespace Project.Gameplay.Gameplay.Visual.Commands.Impl
         private readonly IReadOnlyList<PrepareZoneFigureData> _figures;
 
         public string DebugName => $"SpawnPrepareZone(count={_figures.Count})";
+        public VisualCommandMode Mode => VisualCommandMode.Blocking;
 
         public SpawnPrepareZoneCommand(IReadOnlyList<PrepareZoneFigureData> figures)
         {

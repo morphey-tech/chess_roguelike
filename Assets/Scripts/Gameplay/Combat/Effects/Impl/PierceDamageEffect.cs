@@ -1,3 +1,5 @@
+using System;
+using Project.Gameplay.Gameplay.Combat.Damage;
 using Project.Gameplay.Gameplay.Combat.Visual;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
@@ -5,13 +7,12 @@ using Project.Gameplay.Gameplay.Grid;
 namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
 {
     /// <summary>
-    /// Applies pierce damage to a target behind the primary target.
-    /// If target dies, adds KillEffect to pending effects.
+    /// Applies pierce damage via DamageApplier. Смерть обрабатывает LifeService.
     /// </summary>
     public sealed class PierceDamageEffect : ICombatEffect
     {
         public CombatEffectPhase Phase => CombatEffectPhase.SecondaryDamage;
-        public int OrderInPhase => 10; // After splash
+        public int OrderInPhase => 10;
 
         private readonly Figure _attacker;
         private readonly Figure _target;
@@ -29,21 +30,11 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
             if (_target == null || _target.Stats.CurrentHp <= 0)
                 return;
 
-            // Domain: Apply damage
-            bool died = _target.Stats.TakeDamage(_damage);
-            
-            context.AddVisualEvent(new DamageVisualEvent(_target.Id, _damage, damageType: "pierce"));
-            context.Logger.Info($"Pierce hit {_target} for {_damage} damage. HP: {_target.Stats.CurrentHp}/{_target.Stats.MaxHp}");
+            var dmgCtx = new DamageContext(_attacker, _target, _damage, false, "pierce", Array.Empty<IDamageModifier>());
+            (DamageResult result, _) = context.DamageApplier.Apply(context, dmgCtx);
 
-            // Domain: If died, add KillEffect
-            if (died)
-            {
-                context.Passives.TriggerKill(_attacker, _target);
-                context.Passives.TriggerDeath(_target, _attacker);
-                
-                BoardCell cell = context.Grid.FindFigure(_target);
-                context.PendingEffects.Add(new KillEffect(_target, cell, "pierce"));
-            }
+            context.AddVisualEvent(new DamageVisualEvent(_target.Id, result.Final, false, "pierce"));
+            context.Logger.Info($"Pierce hit {_target} for {result.Final} damage. HP: {_target.Stats.CurrentHp}/{_target.Stats.MaxHp}");
         }
     }
 }

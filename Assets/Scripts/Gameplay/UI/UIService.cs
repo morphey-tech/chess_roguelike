@@ -14,7 +14,7 @@ using Object = UnityEngine.Object;
 
 namespace Project.Gameplay.Gameplay.UI
 {
-  public class UI
+  public class UIService
   {
     public static Canvas Canvas => GetController().Canvas;
 
@@ -24,7 +24,7 @@ namespace Project.Gameplay.Gameplay.UI
     public static bool IsValid => IsControllerValid();
     
     [Inject]
-    public UI(
+    private UIService(
       IAssetService assetService,
       ILogService logService)
     {

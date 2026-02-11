@@ -14,13 +14,11 @@ namespace Project.Gameplay.Gameplay.Combat
     public sealed class CombatResolver
     {
         private readonly ILogger<CombatResolver> _logger;
-        private readonly IDamageTokenStore _tokenStore;
         private readonly IDamagePipeline _damagePipeline;
 
-        public CombatResolver(ILogService logService, IDamageTokenStore tokenStore, IDamagePipeline damagePipeline)
+        public CombatResolver(ILogService logService, IDamagePipeline damagePipeline)
         {
             _logger = logService.CreateLogger<CombatResolver>();
-            _tokenStore = tokenStore;
             _damagePipeline = damagePipeline;
         }
 
@@ -37,7 +35,6 @@ namespace Project.Gameplay.Gameplay.Combat
                 context.AttackId,
                 context.Delivery,
                 context.ProjectileConfigId,
-                _tokenStore,
                 _damagePipeline));
 
             // Effects from attack strategy (splash, pierce, etc.)

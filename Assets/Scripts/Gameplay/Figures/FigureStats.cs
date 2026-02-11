@@ -9,25 +9,23 @@ namespace Project.Gameplay.Gameplay.Figures
     {
         public int MaxHp { get; }
         public int CurrentHp { get; private set; }
-
-        private readonly IReadOnlyList<AttackProfile> _attacks;
-        public IReadOnlyList<AttackProfile> Attacks => _attacks;
+        public IReadOnlyList<AttackProfile> Attacks { get; }
 
         /// <summary>Compatibility: max damage across all attacks.</summary>
-        public int Attack => _attacks.Count == 0 ? 0 : _attacks.Max(a => a.Damage);
+        public int Attack => Attacks.Count == 0 ? 0 : Attacks.Max(a => a.Damage);
 
         /// <summary>Compatibility: max range across all attacks.</summary>
         public int AttackRange => MaxAttackRange;
 
-        public int MaxAttackRange => _attacks.Count == 0 ? 0 : _attacks.Max(a => a.Range);
+        public int MaxAttackRange => Attacks.Count == 0 ? 0 : Attacks.Max(a => a.Range);
 
         public bool IsDead => CurrentHp <= 0;
 
-        public FigureStats(int maxHp, IReadOnlyList<AttackProfile> attacks)
+        public FigureStats(int maxHp, IReadOnlyList<AttackProfile>? attacks)
         {
             MaxHp = maxHp;
             CurrentHp = maxHp;
-            _attacks = attacks ?? Array.Empty<AttackProfile>();
+            Attacks = attacks ?? Array.Empty<AttackProfile>();
         }
 
         /// <summary>

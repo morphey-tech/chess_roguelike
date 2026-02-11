@@ -13,6 +13,7 @@ namespace Project.Gameplay.Gameplay.Visual.Commands.Impl
         private readonly IVisualCommand[] _commands;
 
         public string DebugName => $"Parallel([{string.Join(", ", _commands.Select(c => c.DebugName))}])";
+        public VisualCommandMode Mode => VisualCommandMode.Blocking;
 
         public ParallelCommand(params IVisualCommand[] commands)
         {

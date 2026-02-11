@@ -1,0 +1,58 @@
+{
+  "tables": [
+    {
+      "id": "goblin_basic",
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "resource",
+          "id": "gold",
+          "min": 3,
+          "max": 7,
+          "weight": 60
+        },
+        {
+          "type": "item",
+          "id": "health_potion",
+          "weight": 25
+        },
+        {
+          "type": "item",
+          "id": "ring_of_power",
+          "weight": 5
+        },
+        {
+          "type": "nothing",
+          "weight": 10
+        }
+      ]
+    },
+    {
+      "id": "boss_dragon",
+      "rolls": 2,
+      "entries": [
+        {
+          "type": "resource",
+          "id": "gold",
+          "min": 20,
+          "max": 50,
+          "weight": 40
+        },
+        {
+          "type": "item",
+          "id": "vampire_fang",
+          "weight": 15
+        },
+        {
+          "type": "item",
+          "id": "thorn_armor",
+          "weight": 10
+        },
+        {
+          "type": "nothing",
+          "weight": 35
+        }
+      ]
+    }
+  ]
+}

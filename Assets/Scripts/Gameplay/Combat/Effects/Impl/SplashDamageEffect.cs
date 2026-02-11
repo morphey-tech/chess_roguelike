@@ -1,3 +1,5 @@
+using System;
+using Project.Gameplay.Gameplay.Combat.Damage;
 using Project.Gameplay.Gameplay.Combat.Visual;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
@@ -5,8 +7,7 @@ using Project.Gameplay.Gameplay.Grid;
 namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
 {
     /// <summary>
-    /// Applies splash/AoE damage to an additional target.
-    /// If target dies, adds KillEffect to pending effects.
+    /// Applies splash damage via DamageApplier. Смерть обрабатывает LifeService.
     /// </summary>
     public sealed class SplashDamageEffect : ICombatEffect
     {
@@ -29,21 +30,11 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
             if (_target == null || _target.Stats.CurrentHp <= 0)
                 return;
 
-            // Domain: Apply damage
-            bool died = _target.Stats.TakeDamage(_damage);
-            
-            context.AddVisualEvent(new DamageVisualEvent(_target.Id, _damage, damageType: "splash"));
-            context.Logger.Info($"Splash hit {_target} for {_damage} damage. HP: {_target.Stats.CurrentHp}/{_target.Stats.MaxHp}");
+            var dmgCtx = new DamageContext(_attacker, _target, _damage, false, "splash", Array.Empty<IDamageModifier>());
+            (DamageResult result, _) = context.DamageApplier.Apply(context, dmgCtx);
 
-            // Domain: If died, add KillEffect
-            if (died)
-            {
-                context.Passives.TriggerKill(_attacker, _target);
-                context.Passives.TriggerDeath(_target, _attacker);
-                
-                BoardCell cell = context.Grid.FindFigure(_target);
-                context.PendingEffects.Add(new KillEffect(_target, cell, "splash"));
-            }
+            context.AddVisualEvent(new DamageVisualEvent(_target.Id, result.Final, false, "splash"));
+            context.Logger.Info($"Splash hit {_target} for {result.Final} damage. HP: {_target.Stats.CurrentHp}/{_target.Stats.MaxHp}");
         }
     }
 }

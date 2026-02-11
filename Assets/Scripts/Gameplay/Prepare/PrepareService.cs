@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using MessagePipe;
 using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
+using Project.Gameplay.Gameplay.Async;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Input.Messages;
@@ -12,7 +14,6 @@ using Project.Gameplay.Gameplay.Save.Models;
 using Project.Gameplay.Gameplay.Visual;
 using Project.Gameplay.Gameplay.Visual.Commands.Impl;
 using Project.Gameplay.UI;
-using Project.Gameplay.Components;
 using VContainer;
 
 namespace Project.Gameplay.Gameplay.Prepare
@@ -20,69 +21,84 @@ namespace Project.Gameplay.Gameplay.Prepare
     public sealed class PrepareService : IDisposable
     {
         private readonly FigureSpawnService _figureSpawnService;
-        private readonly IPreparePresenter _preparePresenter;
         private readonly VisualPipeline _visualPipeline;
+        private readonly PreparePlacementController _placementController;
+        private readonly PrepareHighlightService _highlightService;
         private readonly IGameUiService _uiService;
         private readonly IPublisher<PreparePhaseCompletedMessage> _completedPublisher;
+        private readonly IPublisher<PrepareSelectionChangedMessage> _selectionChangedPublisher;
+        private readonly IPublisher<PrepareVisualResetMessage> _visualResetPublisher;
         private readonly ILogger<PrepareService> _logger;
-        private readonly IDisposable _subscriptions;
 
-        private PrepareState? _state;
-        private IPreparePlacementRules? _rules;
-        private PlayerRunStateModel? _runState;
-        private BoardGrid? _grid;
-        private string? _previousSelectedId;
-        private bool _isPlacing;
-        private HashSet<GridPosition>? _availablePlacementPositions;
+        private PrepareContext? _context;
+        private CancellationTokenSource? _sessionCts;
 
         [Inject]
         private PrepareService(
             FigureSpawnService figureSpawnService,
-            IPreparePresenter preparePresenter,
             VisualPipeline visualPipeline,
+            PreparePlacementController placementController,
+            PrepareHighlightService highlightService,
             IGameUiService uiService,
-            ISubscriber<HandFigureClickedMessage> handFigureClickedSubscriber,
-            ISubscriber<CellClickedMessage> cellClickedSubscriber,
-            ISubscriber<CancelRequestedMessage> cancelSubscriber,
             IPublisher<PreparePhaseCompletedMessage> completedPublisher,
+            IPublisher<PrepareSelectionChangedMessage> selectionChangedPublisher,
+            IPublisher<PrepareVisualResetMessage> visualResetPublisher,
             ILogService logService)
         {
             _figureSpawnService = figureSpawnService;
-            _preparePresenter = preparePresenter;
             _visualPipeline = visualPipeline;
+            _placementController = placementController;
+            _highlightService = highlightService;
             _uiService = uiService;
             _completedPublisher = completedPublisher;
+            _selectionChangedPublisher = selectionChangedPublisher;
+            _visualResetPublisher = visualResetPublisher;
             _logger = logService.CreateLogger<PrepareService>();
-
-            DisposableBagBuilder bag = DisposableBag.CreateBuilder();
-            handFigureClickedSubscriber.Subscribe(OnHandFigureClicked).AddTo(bag);
-            cellClickedSubscriber.Subscribe(OnCellClicked).AddTo(bag);
-            cancelSubscriber.Subscribe(_ => OnCancel()).AddTo(bag);
-            _subscriptions = bag.Build();
         }
 
         public async UniTask Start(PlayerRunStateModel runState, BoardGrid grid, IPreparePlacementRules rules)
         {
-            _runState = runState;
-            _grid = grid;
-            _rules = rules;
+            Reset();
 
-            _state = new PrepareState(runState.FiguresInHand);
-            _state.Start();
+            _sessionCts = new CancellationTokenSource();
+            var context = new PrepareContext(
+                runState,
+                grid,
+                rules,
+                new PrepareState(runState.FiguresInHand),
+                _sessionCts.Token);
+            context.State.Start();
+            _context = context;
 
-            // Preload в фоне — не блокируем появление prepare-зоны (PreloadConfigsAsync может тянуть 2–3 сек из-за TurnPatternFactory)
-            _figureSpawnService.PreloadConfigsAsync().Forget();
-            await SpawnPrepareZoneAsync();
-            BuildPlacementCache();
-            UpdatePlacementHighlights();
-            await _uiService.ShowWorldUiAsync();
-            await ShowHintWindow();
+            // Preload in background, but under session lifetime.
+            _figureSpawnService
+                .PreloadConfigsAsync()
+                .AttachExternalCancellation(context.CancellationToken)
+                .ForgetLogged(_logger, "Prepare preload failed", context.CancellationToken);
+
+            try
+            {
+                await SpawnPrepareZoneAsync(context);
+                if (_context != context)
+                    return;
+
+                _highlightService.BuildPlacementCache(context);
+                _highlightService.ApplyAll(context);
+
+                await _uiService.ShowWorldUiAsync().AttachExternalCancellation(context.CancellationToken);
+                await _uiService.ShowPreparePhaseAsync().AttachExternalCancellation(context.CancellationToken);
+                context.IsInputReady = true;
+            }
+            catch (OperationCanceledException) when (context.CancellationToken.IsCancellationRequested)
+            {
+                _logger.Debug("Prepare start cancelled");
+            }
         }
 
-        private async UniTask SpawnPrepareZoneAsync()
+        private async UniTask SpawnPrepareZoneAsync(PrepareContext context)
         {
             List<PrepareZoneFigureData> figureDataList = new List<PrepareZoneFigureData>();
-            foreach (FigureState fig in _runState!.FiguresInHand)
+            foreach (FigureState fig in context.RunState.FiguresInHand)
             {
                 figureDataList.Add(new PrepareZoneFigureData(fig.Id, fig.TypeId));
             }
@@ -90,233 +106,149 @@ namespace Project.Gameplay.Gameplay.Prepare
             using (VisualScope scope = _visualPipeline.BeginScope())
             {
                 scope.Enqueue(new SpawnPrepareZoneCommand(figureDataList));
-                await scope.PlayAsync();
+                await scope.PlayAsync().AttachExternalCancellation(context.CancellationToken);
             }
 
-            if (_state?.IsCompleted == true)
+            if (_context == context && context.State.IsCompleted)
             {
                 _logger.Info("No figures to place, completing immediately");
-                Complete();
+                Complete(context);
             }
         }
 
-        private void Complete()
+        private void Complete(PrepareContext context)
         {
-            if (_state is not { IsActive: true })
+            if (_context != context || !context.State.IsActive)
             {
                 return;
             }
 
-            _state.Complete();
-            _preparePresenter.Clear();
-            ClearPlacementHighlights();
-            _completedPublisher.Publish(new PreparePhaseCompletedMessage(_runState!.FiguresOnBoard.Count));
-
-            _state = null;
-            _rules = null;
-            _previousSelectedId = null;
-            _availablePlacementPositions = null;
+            context.State.Complete();
+            _completedPublisher.Publish(new PreparePhaseCompletedMessage(context.RunState.FiguresOnBoard.Count));
+            EndSession(clearVisuals: true);
         }
 
-        private void OnHandFigureClicked(HandFigureClickedMessage message)
+        public void HandleHandFigureClicked(HandFigureClickedMessage message)
         {
-            if (_state is not { IsActive: true })
+            PrepareContext? context = _context;
+            if (context == null || !context.State.IsActive || !context.IsInputReady)
             {
                 return;
             }
 
-            // Deselect previous
-            if (_previousSelectedId != null)
+            if (context.PreviousSelectedId != null)
             {
-                _preparePresenter.SetSelected(_previousSelectedId, false);
+                _selectionChangedPublisher.Publish(new PrepareSelectionChangedMessage(context.PreviousSelectedId, false));
             }
 
-            _state.Select(message.FigureId);
-            _previousSelectedId = message.FigureId;
-            _preparePresenter.SetSelected(message.FigureId, true);
+            context.State.Select(message.FigureId);
+            if (context.State.SelectedFigureId != message.FigureId)
+                return;
 
-            FigureState? selected = _state.GetSelectedFigure(_runState!);
+            context.PreviousSelectedId = message.FigureId;
+            _selectionChangedPublisher.Publish(new PrepareSelectionChangedMessage(message.FigureId, true));
+            FigureState? selected = context.GetSelectedFigure();
             if (selected != null)
             {
                 _logger.Debug($"Selected: {selected.TypeId} (id={selected.Id})");
             }
         }
 
-        private void OnCellClicked(CellClickedMessage message)
+        public void HandleCellClicked(CellClickedMessage message)
         {
-            if (_state is not { IsActive: true })
+            PrepareContext? context = _context;
+            if (context == null || !context.State.IsActive || !context.IsInputReady)
             {
                 return;
             }
-            if (_state.SelectedFigureId == null)
+
+            if (context.State.SelectedFigureId == null)
             {
                 return;
             }
 
             GridPosition pos = message.Position;
-            if (!_rules.CanPlace(pos))
+            if (!context.Rules.CanPlace(pos))
             {
                 _logger.Debug($"Invalid placement: ({pos.Row}, {pos.Column})");
                 return;
             }
 
-            PlaceSelectedAsync(pos).Forget();
+            HandlePlacementAsync(context, pos)
+                .AttachExternalCancellation(context.CancellationToken)
+                .ForgetLogged(_logger, "Prepare placement failed", context.CancellationToken);
         }
 
-        private async UniTask PlaceSelectedAsync(GridPosition pos)
+        private async UniTask HandlePlacementAsync(PrepareContext context, GridPosition pos)
         {
-            if (_isPlacing)
+            PreparePlacementResult result = await _placementController.PlaceSelectedAsync(context, pos, context.CancellationToken);
+            if (!result.Processed || _context != context)
                 return;
 
-            _isPlacing = true;
-            try
+            _highlightService.ApplyDirty(context, new[] { pos });
+
+            if (result.Completed)
             {
-                if (_state is not { IsActive: true })
-                    return;
-
-                FigureState? state = _state.GetSelectedFigure(_runState!);
-                if (state == null)
-                    return;
-
-                _previousSelectedId = null;
-
-                var transaction = new PreparePlacementTransaction(
-                    _state,
-                    _preparePresenter,
-                    _figureSpawnService,
-                    _runState!,
-                    _grid!,
-                    _logger);
-
-                bool success = await transaction.ExecuteAsync(state, pos);
-                if (success)
-                {
-                    _availablePlacementPositions?.Remove(pos);
-                    UpdatePlacementHighlights();
-
-                    if (_state?.IsCompleted == true)
-                    {
-                        _logger.Info("All figures placed");
-                        Complete();
-                    }
-                }
-                else
-                {
-                    if (_availablePlacementPositions != null && _rules != null && _rules.CanPlace(pos))
-                        _availablePlacementPositions.Add(pos);
-                    UpdatePlacementHighlights();
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.Error("PlaceSelectedAsync failed", ex);
-            }
-            finally
-            {
-                _isPlacing = false;
+                _logger.Info("All figures placed");
+                Complete(context);
             }
         }
 
-        private void OnCancel()
+        public void HandleCancelRequested()
         {
-            if (_state is not { IsActive: true })
-            {
-                return;
-            }
-            if (_state.SelectedFigureId == null)
+            PrepareContext? context = _context;
+            if (context == null || !context.State.IsActive || !context.IsInputReady || context.State.SelectedFigureId == null)
             {
                 return;
             }
 
-            if (_previousSelectedId != null)
+            if (context.PreviousSelectedId != null)
             {
-                _preparePresenter.SetSelected(_previousSelectedId, false);
+                _selectionChangedPublisher.Publish(new PrepareSelectionChangedMessage(context.PreviousSelectedId, false));
             }
 
             _logger.Debug("Selection cancelled");
-            _state.ClearSelection();
-            _previousSelectedId = null;
-        }
-
-        void IDisposable.Dispose()
-        {
-            _subscriptions?.Dispose();
-        }
-
-        private void UpdatePlacementHighlights()
-        {
-            if (_grid == null || _rules == null)
-            {
-                return;
-            }
-
-            foreach (BoardCell cell in _grid.AllCells())
-            {
-                GridPosition pos = cell.Position;
-                cell.Del<AttackHighlightTag>();
-                bool canPlace = _availablePlacementPositions?
-                    .Contains(pos) ?? _rules.CanPlace(pos);
-                if (canPlace)
-                {
-                    cell.EnsureComponent(new HighlightTag());
-                }
-                else
-                {
-                    cell.Del<HighlightTag>();
-                }
-            }
-        }
-
-        private async UniTask ShowHintWindow()
-        {
-            await _uiService.ShowPreparePhaseAsync();
-        }
-
-        private void ClearPlacementHighlights()
-        {
-            if (_grid == null)
-            {
-                return;
-            }
-            foreach (BoardCell cell in _grid.AllCells())
-            {
-                cell.Del<HighlightTag>();
-                cell.Del<AttackHighlightTag>();
-            }
-        }
-
-        private void BuildPlacementCache()
-        {
-            if (_grid == null || _rules == null)
-                return;
-
-            _availablePlacementPositions = new HashSet<GridPosition>();
-            foreach (BoardCell cell in _grid.AllCells())
-            {
-                GridPosition pos = cell.Position;
-                if (_rules.CanPlace(pos))
-                    _availablePlacementPositions.Add(pos);
-            }
+            context.State.ClearSelection();
+            context.PreviousSelectedId = null;
         }
 
         public void Reset()
         {
-            _state = null;
-            _rules = null;
-            _previousSelectedId = null;
-            _availablePlacementPositions = null;
-            _isPlacing = false;
+            EndSession(clearVisuals: true);
+            _logger.Info("PrepareService reset");
+        }
 
-            if (_grid != null)
+        public void Dispose()
+        {
+            EndSession(clearVisuals: false);
+        }
+
+        private void EndSession(bool clearVisuals)
+        {
+            PrepareContext? context = _context;
+            if (context != null)
             {
-                ClearPlacementHighlights();
+                context.IsInputReady = false;
+                context.PreviousSelectedId = null;
+                _highlightService.Clear(context.Grid);
             }
 
-            _preparePresenter.Clear();
-            _runState = null;
-            _grid = null;
+            _context = null;
+            CancelSession();
 
-            _logger.Info("PrepareService reset");
+            if (clearVisuals)
+                _visualResetPublisher.Publish(new PrepareVisualResetMessage());
+        }
+
+        private void CancelSession()
+        {
+            if (_sessionCts == null)
+                return;
+
+            if (!_sessionCts.IsCancellationRequested)
+                _sessionCts.Cancel();
+            _sessionCts.Dispose();
+            _sessionCts = null;
         }
     }
 }

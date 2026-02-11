@@ -1,3 +1,5 @@
+using System;
+using Project.Gameplay.Gameplay.Combat.Damage;
 using Project.Gameplay.Gameplay.Combat.Visual;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
@@ -5,8 +7,7 @@ using Project.Gameplay.Gameplay.Grid;
 namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
 {
     /// <summary>
-    /// Applies damage to target (domain logic), queues damage visual.
-    /// If target dies, adds KillEffect to pending effects.
+    /// Applies damage via DamageApplier; queues damage visual. Смерть обрабатывает LifeService.
     /// </summary>
     public sealed class DealDamageEffect : ICombatEffect
     {
@@ -28,27 +29,14 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
 
         public void Apply(CombatEffectContext context)
         {
-            // Domain: Apply damage
-            bool died = _target.Stats.TakeDamage(_damage);
-            
-            context.AddVisualEvent(new DamageVisualEvent(_target.Id, _damage, _isCritical, "primary"));
-            
-            // Domain: Update ActionContext
-            context.ActionContext.LastDamageDealt = _damage;
-            
-            // Log
-            string critText = _isCritical ? " (CRIT)" : "";
-            context.Logger.Info($"{_target} takes {_damage} damage{critText}. HP: {_target.Stats.CurrentHp}/{_target.Stats.MaxHp}");
+            var dmgCtx = new DamageContext(_attacker, _target, _damage, _isCritical, "primary", Array.Empty<IDamageModifier>());
+            (DamageResult result, bool died) = context.DamageApplier.Apply(context, dmgCtx);
 
-            // Domain: If died, add KillEffect and trigger passives
-            if (died)
-            {
-                context.Passives.TriggerKill(_attacker, _target);
-                context.Passives.TriggerDeath(_target, _attacker);
-                
-                BoardCell targetCell = context.Grid.GetBoardCell(context.ActionContext.To);
-                context.PendingEffects.Add(new KillEffect(_target, targetCell));
-            }
+            context.AddVisualEvent(new DamageVisualEvent(_target.Id, result.Final, _isCritical, "primary"));
+            context.ActionContext.LastDamageDealt = result.Final;
+
+            string critText = _isCritical ? " (CRIT)" : "";
+            context.Logger.Info($"{_target} takes {result.Final} damage{critText}. HP: {_target.Stats.CurrentHp}/{_target.Stats.MaxHp}");
         }
     }
 }

@@ -136,7 +136,7 @@ namespace Project.Core.Window
 
       OnBeforeClosed();
       Hide();
-      UI.StartCoroutine(CloseRoutine());
+      UIService.StartCoroutine(CloseRoutine());
     }
 
     public void CloseImmediate()
@@ -188,7 +188,7 @@ namespace Project.Core.Window
 
       if (HideOtherWindows)
       {
-        _windowsBeforeShow ??= UI.GetVisibleStack().Where(w => w != this).ToList();
+        _windowsBeforeShow ??= UIService.GetVisibleStack().Where(w => w != this).ToList();
         _windowsBeforeShow?.ForEach(w =>
         {
           if (w != null && !w.IgnoreHideOthersWindows)

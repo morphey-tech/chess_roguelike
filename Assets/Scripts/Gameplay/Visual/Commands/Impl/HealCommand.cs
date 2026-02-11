@@ -12,6 +12,7 @@ namespace Project.Gameplay.Gameplay.Visual.Commands.Impl
         private readonly HealVisualContext _ctx;
 
         public string DebugName => $"Heal(target={_ctx.TargetId}, amount={_ctx.Amount})";
+        public VisualCommandMode Mode => VisualCommandMode.Background;
 
         public HealCommand(HealVisualContext ctx)
         {

@@ -12,6 +12,7 @@ namespace Project.Gameplay.Gameplay.Visual.Commands.Impl
         private readonly DamageVisualContext _ctx;
 
         public string DebugName => $"Damage(target={_ctx.TargetId}, amount={_ctx.Amount}{(_ctx.IsCritical ? ", CRIT" : "")}{(_ctx.DamageType != null ? $", type={_ctx.DamageType}" : "")})";
+        public VisualCommandMode Mode => VisualCommandMode.Blocking;
 
         public DamageCommand(DamageVisualContext ctx)
         {

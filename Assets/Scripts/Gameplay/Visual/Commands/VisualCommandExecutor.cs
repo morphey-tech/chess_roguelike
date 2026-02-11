@@ -1,30 +1,18 @@
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using Cysharp.Threading.Tasks;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Visual;
+using Project.Gameplay.Gameplay.Visual.Commands;
 using VContainer;
 
 namespace Project.Gameplay.Gameplay.Visual.Commands
 {
     /// <summary>
-    /// Executes visual commands sequentially with timeout protection.
-    /// TurnSystem awaits only this service for visual synchronization.
-    /// 
-    /// USAGE:
-    /// 1. Domain logic populates VisualCommandQueue via IVisualCommandSink
-    /// 2. TurnSystem calls ExecuteAsync(queue)
-    /// 3. Executor awaits each command in order (with timeout)
-    /// 4. TurnSystem continues after all visuals complete
+    /// Executes visual commands sequentially. Без таймаутов — зависание = баг, лог + продолжение.
     /// </summary>
     public sealed class VisualCommandExecutor
     {
-        /// <summary>
-        /// Таймаут на одну команду. SpawnPrepareZone (кэш + N слотов/фигур с анимацией) может занимать 6–10 сек.
-        /// </summary>
-        private const int TimeoutMs = 15000;
-        
         private readonly IPresenterProvider _presenters;
         private readonly ILogger<VisualCommandExecutor> _logger;
 
@@ -37,60 +25,63 @@ namespace Project.Gameplay.Gameplay.Visual.Commands
             _logger = logService.CreateLogger<VisualCommandExecutor>();
         }
 
-        /// <summary>
-        /// Execute all commands from the queue sequentially.
-        /// </summary>
         public async UniTask ExecuteAsync(VisualCommandQueue queue)
         {
-            await ExecuteAsync(queue.Commands);
-            queue.Clear();
-        }
-
-        /// <summary>
-        /// Execute a list of commands sequentially with timeout protection.
-        /// </summary>
-        public async UniTask ExecuteAsync(IReadOnlyList<IVisualCommand> commands)
-        {
-            if (commands.Count == 0)
-                return;
-
-            _logger.Debug($"=== Visual Pipeline Start ({commands.Count} commands) ===");
-
-            for (int i = 0; i < commands.Count; i++)
+            if (queue == null || queue.Commands.Count == 0)
             {
-                IVisualCommand command = commands[i];
-                _logger.Debug($"▶ [{i}] {command.DebugName}");
-                
-                bool completed = await ExecuteWithTimeout(command);
-                
-                if (!completed)
-                {
-                    _logger.Warning($"⚠️ Visual command timeout: {command.DebugName}");
-                }
+                queue?.Clear();
+                return;
             }
 
-            _logger.Debug($"=== Visual Pipeline Complete ===");
-        }
-
-        private async UniTask<bool> ExecuteWithTimeout(IVisualCommand command)
-        {
-            using CancellationTokenSource cts = new();
-            cts.CancelAfter(TimeSpan.FromMilliseconds(TimeoutMs));
+            IVisualQueueAppender appender = _presenters.QueueAppender;
+            appender?.SetCurrentQueue(queue);
 
             try
             {
-                await command.ExecuteAsync(_presenters).AttachExternalCancellation(cts.Token);
-                return true;
+                _logger.Debug($"=== Visual Pipeline Start ({queue.Commands.Count} commands) ===");
+
+                int i = 0;
+                while (i < queue.Commands.Count)
+                {
+                    IVisualCommand command = queue.Commands[i];
+                    _logger.Debug($"▶ [{i}] {command.DebugName} (mode={command.Mode})");
+
+                    try
+                    {
+                        if (command.Mode == VisualCommandMode.Blocking)
+                        {
+                            await command.ExecuteAsync(_presenters);
+                        }
+                        else
+                        {
+                            command.ExecuteAsync(_presenters).Forget();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Error($"Visual command error: {command.DebugName} - {ex.Message}");
+                    }
+
+                    i++;
+                }
+
+                _logger.Debug($"=== Visual Pipeline Complete ===");
             }
-            catch (OperationCanceledException)
+            finally
             {
-                return false;
+                appender?.SetCurrentQueue(null);
             }
-            catch (Exception ex)
-            {
-                _logger.Error($"Visual command error: {command.DebugName} - {ex.Message}");
-                return false;
-            }
+
+            queue.Clear();
+        }
+
+        public async UniTask ExecuteAsync(IReadOnlyList<IVisualCommand> commands)
+        {
+            if (commands == null || commands.Count == 0)
+                return;
+            var queue = new VisualCommandQueue();
+            queue.EnqueueRange(commands);
+            await ExecuteAsync(queue);
         }
     }
 }

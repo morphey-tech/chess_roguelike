@@ -27,6 +27,8 @@ using Project.Gameplay.Gameplay.Turn.Conditions.Impl;
 using Project.Gameplay.Gameplay.Turn.Execution;
 using Project.Gameplay.Gameplay.Visual;
 using Project.Gameplay.Gameplay.Visual.Commands;
+using Project.Gameplay.Gameplay.Installers;
+using Project.Gameplay.Gameplay.Loot;
 using Project.Gameplay.Gameplay.Shutdown;
 using Project.Gameplay.UI;
 using Project.Unity.Unity.Debug;
@@ -114,11 +116,13 @@ namespace Project.Unity.Unity.Installers
                 .As<IProjectilePresenter>()
                 .As<IGameShutdownCleanup>();
 
+            builder.Register<LootPresenter>(Lifetime.Singleton)
+                .As<ILootPresenter>()
+                .As<IGameShutdownCleanup>();
+
             builder.Register<ActionContextAccessor>(Lifetime.Singleton);
             builder.Register<DamageTokenStore>(Lifetime.Singleton)
                 .As<IDamageTokenStore>();
-            builder.Register<ProjectileHitHandler>(Lifetime.Singleton)
-                .As<IProjectileHitHandler>();
 
             // Visual command pipeline
             builder.Register<PresenterProvider>(Lifetime.Singleton)
@@ -144,171 +148,29 @@ namespace Project.Unity.Unity.Installers
 
         private void ConfigureServices(IContainerBuilder builder)
         {
-            // Run & Stage
-            builder.Register<RunHolder>(Lifetime.Singleton);
-            builder.Register<RunFactory>(Lifetime.Singleton);
-            builder.Register<StageFactory>(Lifetime.Singleton);
-            builder.Register<StagePhaseFactory>(Lifetime.Singleton);
-            builder.Register<StageReloadService>(Lifetime.Singleton)
-                .AsSelf();
-            builder.Register<ReloadStageConsoleCommands>(Lifetime.Singleton)
-                .AsImplementedInterfaces()
-                .AsSelf();
-            builder.Register<GameUiService>(Lifetime.Singleton)
-                .As<IGameUiService>();
+            // Gameplay (domain) scope — в модуле Gameplay
+            GameplayContainerConfiguration.Register(builder);
 
-            // Input - dispatches input events via MessagePipe
-            builder.Register<InputDispatcher>(Lifetime.Singleton)
-                .AsImplementedInterfaces()
-                .AsSelf();
+            // Единая точка смерти и применения урона (зависимости от презентеров — здесь)
+            builder.Register<FigureLifeService>(Lifetime.Singleton).As<IFigureLifeService>();
+            builder.Register<DamageApplier>(Lifetime.Singleton);
+            builder.Register<ProjectileHitApplyService>(Lifetime.Singleton).As<IProjectileHitApplyService>();
 
-            // Turn system
-            builder.Register<TurnSystem>(Lifetime.Singleton)
-                .AsImplementedInterfaces()
-                .AsSelf();
+            // Unity-only: консоль, UI, prepare-зона и фазы (LootPresenter — в ConfigureViews)
+            builder.Register<ReloadStageConsoleCommands>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
+            builder.Register<EconomyConsoleCommands>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
+            builder.Register<GameUiService>(Lifetime.Singleton).As<IGameUiService>();
 
-            // Interaction layer
-            builder.Register<InteractionLockService>(Lifetime.Singleton)
-                .As<IInteractionLock>()
-                .AsSelf();
-            builder.Register<ClickIntentResolver>(Lifetime.Singleton)
-                .As<IClickIntentResolver>();
-            builder.Register<InteractionController>(Lifetime.Singleton)
-                .AsImplementedInterfaces()
-                .AsSelf();
-            builder.Register<TurnController>(Lifetime.Singleton)
-                .As<ITurnController>();
-
-            // Stage Service - handles stage events
-            builder.Register<StageQueryService>(Lifetime.Singleton)
-                .As<IStageQueryService>();
-            builder.Register<AttackQueryService>(Lifetime.Singleton)
-                .As<IAttackQueryService>();
-            builder.Register<StageHighlightRenderer>(Lifetime.Singleton)
-                .As<IStageHighlightRenderer>();
-            builder.Register<StageService>(Lifetime.Singleton)
-                .AsImplementedInterfaces()
-                .AsSelf();
-            
-            builder.Register<GameShutdownCleanupService>(Lifetime.Singleton);
-
-            // Prepare phase — один кэш: заполняется во время доски, отдаёт префабы без задержки
             builder.Register<PrepareZonePrefabCache>(Lifetime.Singleton)
                 .As<IPrepareZoneAssetPreloader>()
                 .As<IPrepareZonePrefabCache>();
-            builder.Register<PrepareService>(Lifetime.Singleton)
-                .AsImplementedInterfaces()
-                .AsSelf();
-
-            // Figures spawn providers
-            builder.Register<SpawnPatternParser>(Lifetime.Singleton);
-            builder.Register<DuelFiguresSpawnProvider>(Lifetime.Singleton);
-            builder.Register<EmptyFiguresSpawnProvider>(Lifetime.Singleton);
-            builder.Register<IFiguresSpawnProviderFactory, FiguresSpawnProviderFactory>(Lifetime.Singleton);
-
-            // Stage phases (Transient - created per stage)
             builder.Register<PrepareZoneCachePhase>(Lifetime.Transient);
-            builder.Register<BoardSpawnPhase>(Lifetime.Transient);
             builder.Register<PreparePlacementPhase>(Lifetime.Transient);
-            builder.Register<GameplayInitPhase>(Lifetime.Transient);
-            builder.Register<BattleDuelPhase>(Lifetime.Transient);
-
-            // Board - animation strategies
-            builder.Register<BoardAppearAnimationFactory>(Lifetime.Singleton)
-                .WithParameter<IEnumerable<IBoardAppearAnimationStrategy>>(new IBoardAppearAnimationStrategy[]
-                {
-                    new BoardNoneAppearStrategy(),
-                    new BoardRainDropAppearStrategy()
-                });
-
-            // Movement strategies
-            builder.Register<MovementStrategyFactory>(Lifetime.Singleton)
-                .WithParameter<IEnumerable<IMovementStrategy>>(new IMovementStrategy[]
-                {
-                    new PawnMovement(),
-                    new KnightMovement(),
-                    new RookMovement(),
-                    new BishopMovement(),
-                    new QueenMovement()
-                });
-
-            builder.Register<FigureStatsFactory>(Lifetime.Singleton)
-                .As<IFigureStatsFactory>()
-                .AsSelf();
-
-            builder.Register<AttackResolver>(Lifetime.Singleton)
-                .As<IAttackResolver>();
-
-            builder.Register<TargetingService>(Lifetime.Singleton)
-                .As<ITargetingService>();
-
-            builder.Register<EngagementRuleService>(Lifetime.Singleton)
-                .As<IEngagementRuleService>();
-
-            // Attack strategies
-            builder.Register<AttackStrategyFactory>(Lifetime.Singleton)
-                .WithParameter<IEnumerable<IAttackStrategy>>(new IAttackStrategy[]
-                {
-                    new SimpleAttack(),
-                    new RangedAttack(),
-                    new SplashAttack(),
-                    new PierceAttack()
-                }); 
-
-            // Combat system
-            builder.Register<PassiveTriggerService>(Lifetime.Singleton);
-            builder.Register<DamagePipeline>(Lifetime.Singleton)
-                .WithParameter<IEnumerable<IDamageModifier>>(new IDamageModifier[]
-                {
-                    new CritDamageModifier()
-                })
-                .As<IDamagePipeline>();
-            builder.Register<CombatResolver>(Lifetime.Singleton);
-            builder.Register<CombatVisualPlanner>(Lifetime.Singleton)
-                .WithParameter<IEnumerable<IVisualEventMapper>>(new IVisualEventMapper[]
-                {
-                    new AttackVisualEventMapper(),
-                    new ProjectileVisualEventMapper(),
-                    new BeamVisualEventMapper(),
-                    new WaveVisualEventMapper(),
-                    new DamageVisualEventMapper(),
-                    new HealVisualEventMapper(),
-                    new PushVisualEventMapper(),
-                    new MoveVisualEventMapper(),
-                    new DeathVisualEventMapper()
-                })
-                .As<ICombatVisualPlanner>();
-
-            // Turn pattern system
-            builder.Register<ConditionRegistry>(Lifetime.Singleton)
-                .WithParameter<IEnumerable<ITurnCondition>>(new ITurnCondition[]
-                {
-                    new AlwaysTrueCondition(),
-                    new EnemyInRangeCondition(),
-                    new EnemyAdjacentCondition(),
-                    new HasTargetCondition(),
-                    new TargetIsEnemyCondition(),
-                    new TargetIsEmptyCondition(),
-                    new CanMoveCondition()
-                });
-            builder.Register<TurnStepFactory>(Lifetime.Singleton);
-            builder.Register<TurnPatternFactory>(Lifetime.Singleton);
-            builder.Register<TurnPatternResolver>(Lifetime.Singleton);
-            
-            // Turn execution
-            builder.Register<TurnExecutor>(Lifetime.Singleton)
-                .As<ITurnExecutor>();
-            builder.Register<BonusMoveController>(Lifetime.Singleton)
-                .As<IBonusMoveController>();
-            builder.Register<BonusMoveSession>(Lifetime.Singleton)
-                .As<IBonusMoveSession>();
-
-            // Pure gameplay services
-            builder.Register<BoardSpawnService>(Lifetime.Singleton);
-            builder.Register<FigureSpawnService>(Lifetime.Singleton);
-            builder.Register<DamageService>(Lifetime.Singleton);
-            builder.Register<MovementService>(Lifetime.Singleton);
-            builder.Register<Gameplay.Gameplay.UI.UI>(Lifetime.Singleton);
+            builder.Register<PrepareHighlightService>(Lifetime.Singleton);
+            builder.Register<PreparePlacementController>(Lifetime.Singleton);
+            builder.Register<PrepareService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
+            builder.Register<PrepareInputHandler>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
+            builder.Register<PrepareVisualSyncService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
         }
 
         private void OnContainerBuilt(IObjectResolver resolver)
@@ -322,12 +184,14 @@ namespace Project.Unity.Unity.Installers
             resolver.Resolve<IBonusMoveSession>(); // Has click subscription
             resolver.Resolve<StageService>();
             resolver.Resolve<PrepareService>();
+            resolver.Resolve<PrepareInputHandler>();
+            resolver.Resolve<PrepareVisualSyncService>();
             resolver.Resolve<HandFigureClickHandler>();
             
             // UI must be force-resolved so its constructor runs InitAsync
             // (loads WindowsController prefab). Without this, static UI methods
             // throw "UI is not valid" because _controller is never set.
-            resolver.Resolve<Gameplay.Gameplay.UI.UI>();
+            resolver.Resolve<Gameplay.Gameplay.UI.UIService>();
 
             // Inject MonoSceneBootstrap
             MonoSceneBootstrap? bootstrap = _worldObjectCollector.GetObjectByType<MonoSceneBootstrap>();

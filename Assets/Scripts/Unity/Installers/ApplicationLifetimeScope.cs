@@ -2,6 +2,7 @@ using Project.Core.Core.Logging;
 using Project.Core.Window;
 using Project.Gameplay.Gameplay.Assets;
 using Project.Gameplay.Gameplay.Configs;
+using Project.Gameplay.Gameplay.Economy;
 using Project.Gameplay.Gameplay.Logging;
 using Project.Gameplay.Gameplay.Memory;
 using Project.Gameplay.Gameplay.Save;
@@ -50,6 +51,13 @@ namespace Project.Unity.Unity.Installers
             builder.Register<PlayerLoadoutSaveAdapter>(Lifetime.Singleton);
             builder.Register<PlayerRunStateSaveAdapter>(Lifetime.Singleton);
             builder.Register<PlayerMetaProgressSaveAdapter>(Lifetime.Singleton);
+            
+            // Economy
+            builder.Register<ItemFactory>(Lifetime.Singleton);
+            builder.Register<EconomyService>(Lifetime.Singleton)
+                .AsSelf();
+            builder.Register<EconomySaveAdapter>(Lifetime.Singleton)
+                .AsImplementedInterfaces();
             
             
             builder.Register<MemoryCleanService>(Lifetime.Singleton)

@@ -9,6 +9,7 @@ using Project.Gameplay.Gameplay.Combat.Visual;
 using Project.Gameplay.Gameplay.Combat.Effects;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
+using Project.Gameplay.Gameplay.Loot;
 using Project.Gameplay.Gameplay.Visual;
 using Project.Gameplay.Gameplay.Turn;
 using Project.Core.Core.Configs.Stats;
@@ -36,6 +37,9 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
         private readonly PassiveTriggerService _passives;
         private readonly VisualPipeline _visualPipeline;
         private readonly IPublisher<FigureDeathMessage> _deathPublisher;
+        private readonly LootService _lootService;
+        private readonly DamageApplier _damageApplier;
+        private readonly IFigureLifeService _figureLifeService;
         private readonly ActionContextAccessor _contextAccessor;
         private readonly ILogger<AttackStep> _logger;
 
@@ -48,6 +52,9 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
             PassiveTriggerService passives,
             VisualPipeline visualPipeline,
             IPublisher<FigureDeathMessage> deathPublisher,
+            LootService lootService,
+            DamageApplier damageApplier,
+            IFigureLifeService figureLifeService,
             ActionContextAccessor contextAccessor,
             ILogger<AttackStep> logger)
         {
@@ -59,6 +66,9 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
             _passives = passives;
             _visualPipeline = visualPipeline;
             _deathPublisher = deathPublisher;
+            _lootService = lootService;
+            _damageApplier = damageApplier;
+            _figureLifeService = figureLifeService;
             _contextAccessor = contextAccessor;
             _logger = logger;
         }
@@ -117,6 +127,8 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
             // === DOMAIN PHASE ===
             CombatResult result = _combatResolver.Resolve(hitContext);
 
+            await _lootService.EnsureLoadedAsync();
+
             using VisualScope scope = _visualPipeline.BeginScope();
 
             var visualEvents = new List<ICombatVisualEvent>();
@@ -125,6 +137,9 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
                 context.Grid,
                 _deathPublisher,
                 _passives,
+                _lootService,
+                _damageApplier,
+                _figureLifeService,
                 visualEvents,
                 _logger);
 

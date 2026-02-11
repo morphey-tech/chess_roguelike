@@ -102,6 +102,9 @@ namespace Project.Gameplay.Gameplay.Figures
                 stats, 
                 team);
 
+            if (!string.IsNullOrEmpty(description.LootTableId))
+                figure.LootTableId = description.LootTableId;
+
             if (description.Passives != null)
             {
                 foreach (string passiveId in description.Passives)

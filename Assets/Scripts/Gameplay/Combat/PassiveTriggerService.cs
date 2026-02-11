@@ -1,13 +1,22 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Project.Gameplay.Gameplay.Combat.Contexts;
 using Project.Gameplay.Gameplay.Combat.Triggers;
+using Project.Gameplay.Gameplay.Economy;
 using Project.Gameplay.Gameplay.Figures;
 
 namespace Project.Gameplay.Gameplay.Combat
 {
     public sealed class PassiveTriggerService
     {
+        private readonly EconomyService _economyService;
+
+        public PassiveTriggerService(EconomyService economyService)
+        {
+            _economyService = economyService;
+        }
+
         public void TriggerBeforeHit(Figure attacker, Figure target, BeforeHitContext context)
         {
             ExecuteWithOwner<IOnBeforeHit>(attacker, (p, owner) => p.OnBeforeHit(owner, context));
@@ -47,9 +56,22 @@ namespace Project.Gameplay.Gameplay.Combat
             Execute<IOnTurnEnd>(figure, p => p.OnTurnEnd(context));
         }
 
+        /// <summary>
+        /// Gathers all passives for a figure: its own + global item passives.
+        /// </summary>
+        private IEnumerable<IPassive> GetAllPassives(Figure figure)
+        {
+            IEnumerable<IPassive> figurePassives = figure.Passives;
+            IReadOnlyList<IPassive> itemPassives = _economyService.GetAllItemPassives();
+
+            return itemPassives.Count > 0
+                ? figurePassives.Concat(itemPassives)
+                : figurePassives;
+        }
+
         private void Execute<TTrigger>(Figure figure, Action<TTrigger> action)
         {
-            foreach (IPassive passive in figure.Passives.OrderBy(p => p.Priority))
+            foreach (IPassive passive in GetAllPassives(figure).OrderBy(p => p.Priority))
             {
                 if (passive is TTrigger trigger)
                     action(trigger);
@@ -58,7 +80,7 @@ namespace Project.Gameplay.Gameplay.Combat
 
         private void ExecuteWithOwner<TTrigger>(Figure owner, Action<TTrigger, Figure> action)
         {
-            foreach (IPassive passive in owner.Passives.OrderBy(p => p.Priority))
+            foreach (IPassive passive in GetAllPassives(owner).OrderBy(p => p.Priority))
             {
                 if (passive is TTrigger trigger)
                     action(trigger, owner);

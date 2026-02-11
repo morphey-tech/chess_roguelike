@@ -7,23 +7,23 @@ namespace Project.Unity.UI
     {
         public async UniTask ShowWorldUiAsync()
         {
-            await Gameplay.Gameplay.UI.UI.ShowAsync<WorldUIWindow>();
+            await Gameplay.Gameplay.UI.UIService.ShowAsync<WorldUIWindow>();
         }
 
         public async UniTask ShowPreparePhaseAsync()
         {
-            TurnWindow? wnd = await Gameplay.Gameplay.UI.UI.ShowAsync<TurnWindow>();
+            TurnWindow? wnd = await Gameplay.Gameplay.UI.UIService.ShowAsync<TurnWindow>();
             wnd?.SetPreparePhase();
         }
 
         public void SetGamePhase()
         {
-            if (!Gameplay.Gameplay.UI.UI.IsValid)
+            if (!Gameplay.Gameplay.UI.UIService.IsValid)
             {
                 return;
             }
 
-            Gameplay.Gameplay.UI.UI.GetOrCreate<TurnWindow>().SetGamePhase();
+            Gameplay.Gameplay.UI.UIService.GetOrCreate<TurnWindow>().SetGamePhase();
         }
     }
 }

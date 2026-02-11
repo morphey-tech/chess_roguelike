@@ -6,7 +6,8 @@
       "attack_id": "simple",
       "stats_id": "pawn_stats",
       "turn_patterns_id": "melee_default",
-      "passives": []
+      "passives": [],
+      "loot_table_id": "goblin_basic"
     },
     {
       "id": "knight",
@@ -14,7 +15,8 @@
       "attack_id": "simple",
       "stats_id": "knight_stats",
       "turn_patterns_id": "melee_default",
-      "passives": ["crit_20"]
+      "passives": ["crit_20"],
+      "loot_table_id": "goblin_basic"
     },
     {
       "id": "bishop",

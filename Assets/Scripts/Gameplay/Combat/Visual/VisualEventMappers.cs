@@ -25,7 +25,7 @@ namespace Project.Gameplay.Gameplay.Combat.Visual
         public IEnumerable<IVisualCommand> Map(ICombatVisualEvent visualEvent)
         {
             var evt = (ProjectileVisualEvent)visualEvent;
-            yield return new ProjectileCommand(new ProjectileVisualContext(
+            yield return new FlyProjectileCommand(new ProjectileVisualContext(
                 evt.AttackerId,
                 evt.TargetId,
                 evt.From,
@@ -34,9 +34,36 @@ namespace Project.Gameplay.Gameplay.Combat.Visual
                 evt.Damage,
                 evt.IsCritical,
                 evt.ImpactFxId,
-                evt.HitId,
-                evt.Timestamp,
                 evt.AttackType));
+        }
+    }
+
+    public sealed class ProjectileImpactEventMapper : IVisualEventMapper
+    {
+        public Type EventType => typeof(ProjectileImpactEvent);
+        public IEnumerable<IVisualCommand> Map(ICombatVisualEvent visualEvent)
+        {
+            var evt = (ProjectileImpactEvent)visualEvent;
+            yield return new ImpactCommand(new ImpactVisualContext(evt.Position, evt.ImpactFxId));
+        }
+    }
+
+    public sealed class CleanupProjectileEventMapper : IVisualEventMapper
+    {
+        public Type EventType => typeof(CleanupProjectileEvent);
+        public IEnumerable<IVisualCommand> Map(ICombatVisualEvent visualEvent)
+        {
+            yield return new CleanupProjectileCommand();
+        }
+    }
+
+    public sealed class ProjectileHitApplyEventMapper : IVisualEventMapper
+    {
+        public Type EventType => typeof(ProjectileHitApplyEvent);
+        public IEnumerable<IVisualCommand> Map(ICombatVisualEvent visualEvent)
+        {
+            var evt = (ProjectileHitApplyEvent)visualEvent;
+            yield return new ProjectileHitApplyCommand(evt);
         }
     }
 
@@ -121,6 +148,16 @@ namespace Project.Gameplay.Gameplay.Combat.Visual
         {
             var evt = (DeathVisualEvent)visualEvent;
             yield return new DeathCommand(new DeathVisualContext(evt.FigureId, evt.Reason));
+        }
+    }
+
+    public sealed class LootVisualEventMapper : IVisualEventMapper
+    {
+        public Type EventType => typeof(LootVisualEvent);
+        public IEnumerable<IVisualCommand> Map(ICombatVisualEvent visualEvent)
+        {
+            var evt = (LootVisualEvent)visualEvent;
+            yield return new LootCommand(new LootVisualContext(evt.DropPosition, evt.Loot));
         }
     }
 }

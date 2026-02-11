@@ -25,28 +25,27 @@ namespace Project.Unity.Unity.Views
         private readonly IAssetService _assetService;
         private readonly IWorldRoot _worldRoot;
         private readonly ConfigProvider _configProvider;
-        private readonly IProjectileHitHandler _hitHandler;
         private readonly ILogger<ProjectilePresenter> _logger;
 
         private ProjectileConfigRepository? _repo;
         private readonly HashSet<GameObject> _active = new();
+        private GameObject _lastFlownProjectile;
+        private bool _lastShouldRelease;
 
         [Inject]
         private ProjectilePresenter(
             IAssetService assetService,
             IWorldRoot worldRoot,
             ConfigProvider configProvider,
-            IProjectileHitHandler hitHandler,
             ILogService logService)
         {
             _assetService = assetService;
             _worldRoot = worldRoot;
             _configProvider = configProvider;
-            _hitHandler = hitHandler;
             _logger = logService.CreateLogger<ProjectilePresenter>();
         }
 
-        public async UniTask PlayProjectileAsync(ProjectileVisualContext ctx)
+        public async UniTask FlyProjectileAsync(ProjectileVisualContext ctx)
         {
             ProjectileConfig? cfg = TryGetConfig(ctx.ProjectileConfigId);
             Vector3 from = GetCellTopPosition(ctx.From);
@@ -66,16 +65,37 @@ namespace Project.Unity.Unity.Views
             }
 
             _active.Add(projectile);
+            _lastFlownProjectile = projectile;
+            _lastShouldRelease = shouldRelease;
+
             float speed = cfg?.Speed > 0f ? cfg.Speed : DEFAULT_SPEED;
             float duration = speed > 0f ? Vector3.Distance(from, to) / speed : DEFAULT_DURATION_SECONDS;
 
             await MoveOverTime(projectile, from, to, duration);
+        }
 
-            await PlayImpactAsync(ctx, to, cfg);
+        public async UniTask PlayImpactAtAsync(GridPosition position, string impactFxId = null)
+        {
+            if (string.IsNullOrWhiteSpace(impactFxId))
+                return;
+            Vector3 worldPos = GetCellTopPosition(position);
+            GameObject fx = await _assetService.InstantiateAsync(impactFxId, worldPos, Quaternion.identity, _worldRoot.EffectsRoot);
+            if (fx == null)
+                return;
+            await UniTask.Delay(500);
+            _assetService.ReleaseInstance(fx);
+        }
 
-            _hitHandler.OnProjectileHit(ctx);
-
-            CleanupProjectile(projectile, shouldRelease);
+        public async UniTask CleanupLastProjectileAsync()
+        {
+            if (_lastFlownProjectile == null)
+            {
+                await UniTask.CompletedTask;
+                return;
+            }
+            CleanupProjectile(_lastFlownProjectile, _lastShouldRelease);
+            _lastFlownProjectile = null;
+            await UniTask.CompletedTask;
         }
 
         public async UniTask PlayBeamAsync(BeamVisualContext ctx)
@@ -94,6 +114,7 @@ namespace Project.Unity.Unity.Views
 
         public void Clear()
         {
+            _lastFlownProjectile = null;
             foreach (GameObject go in _active)
             {
                 if (go != null)
@@ -182,23 +203,6 @@ namespace Project.Unity.Unity.Views
 
             await UniTask.Delay((int)(durationSeconds * 1000f));
             Object.Destroy(go);
-        }
-
-        private async UniTask PlayImpactAsync(ProjectileVisualContext ctx, Vector3 position, ProjectileConfig? cfg)
-        {
-            string impactKey = !string.IsNullOrWhiteSpace(ctx.ImpactFxId)
-                ? ctx.ImpactFxId
-                : cfg?.ImpactFxKey;
-
-            if (string.IsNullOrWhiteSpace(impactKey))
-                return;
-
-            GameObject fx = await _assetService.InstantiateAsync(impactKey, position, Quaternion.identity, _worldRoot.EffectsRoot);
-            if (fx == null)
-                return;
-
-            await UniTask.Delay(500);
-            _assetService.ReleaseInstance(fx);
         }
 
         private void CleanupProjectile(GameObject projectile, bool shouldRelease)

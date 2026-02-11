@@ -15,10 +15,17 @@ MonoBehaviour:
   m_GroupName: UI
   m_GUID: 47c52735aa63fc12e8af0a64d1ff14dd
   m_SerializeEntries:
+  - m_GUID: 4114a4204b400b64880cb0915e6ec963
+    m_Address: Project.Gameplay.UI.WorldUIWindow
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ui
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cb53cfd1a482bcb3ea09b8b1340a8e01
     m_Address: Project.Gameplay.UI.TurnWindow
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - ui
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ebe3530bbc70efe338c696403ae290b8
     m_Address: UI/Windows

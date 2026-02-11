@@ -12,6 +12,7 @@ namespace Project.Gameplay.Gameplay.Visual.Commands.Impl
         private readonly MoveVisualContext _ctx;
 
         public string DebugName => $"Move(figure={_ctx.FigureId}, to=[{_ctx.To.Row},{_ctx.To.Column}])";
+        public VisualCommandMode Mode => VisualCommandMode.Blocking;
 
         public MoveCommand(MoveVisualContext ctx)
         {

@@ -12,6 +12,7 @@ namespace Project.Gameplay.Gameplay.Visual.Commands.Impl
         private readonly BeamVisualContext _ctx;
 
         public string DebugName => $"Beam(attacker={_ctx.AttackerId}, target={_ctx.TargetId}, from=[{_ctx.From.Row},{_ctx.From.Column}], to=[{_ctx.To.Row},{_ctx.To.Column}]{(_ctx.AttackType != null ? $", type={_ctx.AttackType}" : "")})";
+        public VisualCommandMode Mode => VisualCommandMode.Background;
 
         public BeamCommand(BeamVisualContext ctx)
         {

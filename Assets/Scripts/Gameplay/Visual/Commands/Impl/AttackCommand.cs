@@ -12,6 +12,7 @@ namespace Project.Gameplay.Gameplay.Visual.Commands.Impl
         private readonly AttackVisualContext _ctx;
 
         public string DebugName => $"Attack(attacker={_ctx.AttackerId}, target=[{_ctx.TargetPosition.Row},{_ctx.TargetPosition.Column}]{(_ctx.AttackType != null ? $", type={_ctx.AttackType}" : "")})";
+        public VisualCommandMode Mode => VisualCommandMode.Blocking;
 
         public AttackCommand(AttackVisualContext ctx)
         {

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Project.Gameplay.Gameplay.Save.Models;
 
 namespace Project.Gameplay.Gameplay.Save
@@ -14,5 +15,10 @@ namespace Project.Gameplay.Gameplay.Save
         public PlayerLoadoutModel? Loadout { get; set; }
         public PlayerRunStateModel? Run { get; set; }
         public PlayerMetaProgressModel? MetaProgress { get; set; }
+        
+        // Economy
+        public Dictionary<string, int>? RunResources { get; set; }
+        public List<ItemState>? RunItems { get; set; }
+        public Dictionary<string, int>? MetaResources { get; set; }
     }
 }

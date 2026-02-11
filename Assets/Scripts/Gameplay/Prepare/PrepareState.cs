@@ -60,9 +60,5 @@ namespace Project.Gameplay.Gameplay.Prepare
             SelectedFigureId = null;
         }
 
-        public FigureState? GetSelectedFigure(PlayerRunStateModel runState)
-        {
-            return SelectedFigureId != null ? runState.GetFigure(SelectedFigureId) : null;
-        }
     }
 }

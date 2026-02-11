@@ -11,6 +11,7 @@ namespace Project.Gameplay.Gameplay.Visual.Commands.Impl
         private readonly string _strategyId;
 
         public string DebugName => $"PlayBoardAppear(strategy={_strategyId})";
+        public VisualCommandMode Mode => VisualCommandMode.Blocking;
 
         public PlayBoardAppearCommand(string strategyId)
         {

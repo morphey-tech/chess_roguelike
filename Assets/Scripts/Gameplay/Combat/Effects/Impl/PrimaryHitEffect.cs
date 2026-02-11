@@ -3,7 +3,6 @@ using Project.Core.Core.Configs.Stats;
 using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Combat.Damage;
 using Project.Gameplay.Gameplay.Combat.Contexts;
-using Project.Gameplay.Gameplay.Combat.Effects;
 using Project.Gameplay.Gameplay.Combat.Visual;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
@@ -26,7 +25,6 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
         private readonly string _attackId;
         private readonly DeliveryType _delivery;
         private readonly string _projectileConfigId;
-        private readonly IDamageTokenStore _tokenStore;
         private readonly IDamagePipeline _damagePipeline;
 
         public PrimaryHitEffect(
@@ -38,7 +36,6 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
             string attackId,
             DeliveryType delivery,
             string projectileConfigId,
-            IDamageTokenStore tokenStore,
             IDamagePipeline damagePipeline)
         {
             _attacker = attacker;
@@ -49,7 +46,6 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
             _attackId = attackId;
             _delivery = delivery;
             _projectileConfigId = projectileConfigId;
-            _tokenStore = tokenStore;
             _damagePipeline = damagePipeline;
         }
 
@@ -75,51 +71,71 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
                 _attackId,
                 Array.Empty<IDamageModifier>()));
 
-            AddPrimaryDeliveryEvent(context, damageResult.Final, before.IsCritical);
+            bool isProjectile = _delivery == DeliveryType.Projectile;
 
-            context.AddVisualEvent(new DamageVisualEvent(
-                _target.Id,
-                damageResult.Final,
-                before.IsCritical,
-                string.IsNullOrEmpty(_attackId) ? _delivery.ToString() : _attackId));
-
-            bool isDeferred = IsDeferredDelivery(_delivery);
-            bool died = isDeferred
-                ? damageResult.Final >= _target.Stats.CurrentHp
-                : _target.Stats.TakeDamage(damageResult.Final);
-
-            if (!isDeferred)
+            if (!isProjectile)
             {
+                string attackType = string.IsNullOrEmpty(_attackId) ? _delivery.ToString() : _attackId;
+                var damageContext = new DamageContext(
+                    _attacker,
+                    _target,
+                    finalDamage,
+                    before.IsCritical,
+                    attackType,
+                    Array.Empty<IDamageModifier>());
+                (DamageResult appliedDamageResult, bool died) = context.DamageApplier.ApplyNoDeath(damageContext);
+                damageResult = appliedDamageResult;
                 context.ActionContext.LastDamageDealt = damageResult.Final;
+
+                AddPrimaryDeliveryEvent(context, damageResult.Final, before.IsCritical);
+
+                context.AddVisualEvent(new DamageVisualEvent(
+                    _target.Id,
+                    damageResult.Final,
+                    before.IsCritical,
+                    string.IsNullOrEmpty(_attackId) ? _delivery.ToString() : _attackId));
+
+                context.Logger.Info($"{_attacker} hit {_target} for {damageResult.Final} damage. HP: {_target.Stats.CurrentHp}/{_target.Stats.MaxHp}");
+
+                var after = new AfterHitContext
+                {
+                    Attacker = _attacker,
+                    Target = _target,
+                    AttackerPosition = _attackerPosition,
+                    TargetPosition = _targetPosition,
+                    Grid = context.Grid,
+                    DamageDealt = damageResult.Final,
+                    TargetDied = died,
+                    WasCritical = before.IsCritical
+                };
+
+                context.Passives.TriggerAfterHit(_attacker, _target, after);
+                foreach (ICombatEffect effect in after.Effects)
+                {
+                    context.AddEffect(effect);
+                }
+
+                if (died)
+                {
+                    context.Passives.TriggerKill(_attacker, _target);
+                    context.Passives.TriggerDeath(_target, _attacker);
+
+                    BoardCell targetCell = context.Grid.GetBoardCell(_targetPosition);
+                    context.FigureLifeService.HandleDeathFromCombat(context, _target, targetCell);
+                }
             }
-
-            context.Logger.Info($"{_attacker} hit {_target} for {finalDamage} damage. HP: {_target.Stats.CurrentHp}/{_target.Stats.MaxHp}");
-
-            var after = new AfterHitContext
+            else
             {
-                Attacker = _attacker,
-                Target = _target,
-                AttackerPosition = _attackerPosition,
-                TargetPosition = _targetPosition,
-                Grid = context.Grid,
-                DamageDealt = damageResult.Final,
-                TargetDied = died,
-                WasCritical = before.IsCritical
-            };
+                AddPrimaryDeliveryEvent(context, damageResult.Final, before.IsCritical);
+                context.AddVisualEvent(new ProjectileHitApplyEvent(
+                    _attacker.Id,
+                    _target.Id,
+                    _targetPosition,
+                    damageResult.Final,
+                    before.IsCritical,
+                    _attackId));
 
-            context.Passives.TriggerAfterHit(_attacker, _target, after);
-            foreach (ICombatEffect effect in after.Effects)
-            {
-                context.AddEffect(effect);
-            }
-
-            if (!isDeferred && died)
-            {
-                context.Passives.TriggerKill(_attacker, _target);
-                context.Passives.TriggerDeath(_target, _attacker);
-
-                BoardCell targetCell = context.Grid.GetBoardCell(_targetPosition);
-                context.AddEffect(new KillEffect(_target, targetCell, "primary"));
+                context.Logger.Info($"{_attacker} projectile hit (deferred): {finalDamage} damage to {_target}. HP: {_target.Stats.CurrentHp}/{_target.Stats.MaxHp}");
             }
         }
 
@@ -130,8 +146,6 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
             switch (_delivery)
             {
                 case DeliveryType.Projectile:
-                    DamageToken token = CreateToken(finalDamage, isCritical);
-                    _tokenStore.Add(token);
                     context.AddVisualEvent(new ProjectileVisualEvent(
                         _attacker.Id,
                         _attackerPosition,
@@ -141,9 +155,9 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
                         finalDamage,
                         isCritical,
                         null,
-                        token.Id,
-                        token.CreatedAt,
                         attackType));
+                    context.AddVisualEvent(new ProjectileImpactEvent(_targetPosition, null));
+                    context.AddVisualEvent(new CleanupProjectileEvent());
                     break;
                 case DeliveryType.Beam:
                     context.AddVisualEvent(new BeamVisualEvent(
@@ -170,25 +184,5 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
             }
         }
 
-        private static bool IsDeferredDelivery(DeliveryType delivery)
-        {
-            return delivery == DeliveryType.Projectile;
-        }
-
-        private DamageToken CreateToken(int finalDamage, bool isCritical)
-        {
-            Guid id = Guid.NewGuid();
-            float createdAt = (float)DateTime.UtcNow.Subtract(DateTime.UnixEpoch).TotalSeconds;
-            return new DamageToken(
-                id,
-                _attacker.Id,
-                _target.Id,
-                _targetPosition,
-                finalDamage,
-                createdAt,
-                _delivery,
-                isCritical,
-                _attackId);
-        }
     }
 }

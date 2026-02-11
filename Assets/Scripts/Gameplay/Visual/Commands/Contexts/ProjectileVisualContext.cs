@@ -13,8 +13,6 @@ namespace Project.Gameplay.Gameplay.Visual.Commands.Contexts
         public int Damage { get; }
         public bool IsCritical { get; }
         public string ImpactFxId { get; }
-        public System.Guid HitId { get; }
-        public float Timestamp { get; }
 
         public ProjectileVisualContext(
             int attackerId,
@@ -25,8 +23,6 @@ namespace Project.Gameplay.Gameplay.Visual.Commands.Contexts
             int damage,
             bool isCritical,
             string impactFxId = null,
-            System.Guid hitId = default,
-            float timestamp = 0,
             string attackType = null)
         {
             AttackerId = attackerId;
@@ -37,8 +33,6 @@ namespace Project.Gameplay.Gameplay.Visual.Commands.Contexts
             Damage = damage;
             IsCritical = isCritical;
             ImpactFxId = impactFxId;
-            HitId = hitId;
-            Timestamp = timestamp;
             AttackType = attackType;
         }
     }

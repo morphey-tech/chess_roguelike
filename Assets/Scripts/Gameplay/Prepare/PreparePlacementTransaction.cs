@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
@@ -36,7 +37,7 @@ namespace Project.Gameplay.Gameplay.Prepare
             _logger = logger;
         }
 
-        public async UniTask<bool> ExecuteAsync(FigureState state, GridPosition pos)
+        public async UniTask<bool> ExecuteAsync(FigureState state, GridPosition pos, CancellationToken cancellationToken)
         {
             string figureId = state.Id;
             string figureTypeId = state.TypeId;
@@ -47,7 +48,9 @@ namespace Project.Gameplay.Gameplay.Prepare
             bool success = false;
             try
             {
-                Figure figure = await _spawnService.SpawnAsync(_grid, pos, figureTypeId, Team.Player);
+                Figure figure = await _spawnService
+                    .SpawnAsync(_grid, pos, figureTypeId, Team.Player)
+                    .AttachExternalCancellation(cancellationToken);
                 if (figure == null)
                 {
                     _logger.Error("Failed to spawn figure");
@@ -61,12 +64,14 @@ namespace Project.Gameplay.Gameplay.Prepare
             }
             finally
             {
-                if (!success)
+                if (!success && !cancellationToken.IsCancellationRequested)
                 {
                     _state.Restore(figureId);
                     try
                     {
-                        await _presenter.RestoreFigureAsync(figureId);
+                        await _presenter
+                            .RestoreFigureAsync(figureId)
+                            .AttachExternalCancellation(cancellationToken);
                     }
                     catch (Exception ex)
                     {
