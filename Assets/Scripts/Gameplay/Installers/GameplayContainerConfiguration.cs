@@ -63,6 +63,9 @@ namespace Project.Gameplay.Gameplay.Installers
             builder.Register<AttackQueryService>(Lifetime.Singleton).As<IAttackQueryService>();
             builder.Register<StageHighlightRenderer>(Lifetime.Singleton).As<IStageHighlightRenderer>();
             builder.Register<StageService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
+            builder.Register<StageRunStateResetService>(Lifetime.Singleton);
+            builder.Register<StageRuntimeResetService>(Lifetime.Singleton);
+            builder.Register<StageCacheResetService>(Lifetime.Singleton);
             builder.Register<StageReloadService>(Lifetime.Singleton).AsSelf();
             builder.Register<RunTransitionService>(Lifetime.Singleton).As<IRunTransitionService>();
             builder.Register<RunFlowService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();

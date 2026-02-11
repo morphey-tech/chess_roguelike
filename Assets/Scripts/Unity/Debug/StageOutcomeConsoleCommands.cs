@@ -28,9 +28,9 @@ namespace Project.Unity.Unity.Debug
             return;
 #endif
             DebugLogConsole.AddCommand("stage_win", "Trigger stage victory flow", TriggerWin);
-            DebugLogConsole.AddCommand("stage_loose", "Trigger stage defeat flow", TriggerDefeat);
+            DebugLogConsole.AddCommand("stage_lose", "Trigger stage defeat flow", TriggerDefeat);
             _registered = true;
-            _logger.Info("Debug commands registered: stage_win, stage_loose");
+            _logger.Info("Debug commands registered: stage_win, stage_lose");
         }
 
         private void TriggerWin()
@@ -53,7 +53,7 @@ namespace Project.Unity.Unity.Debug
                 return;
 
             DebugLogConsole.RemoveCommand("stage_win");
-            DebugLogConsole.RemoveCommand("stage_loose");
+            DebugLogConsole.RemoveCommand("stage_lose");
             _registered = false;
         }
     }

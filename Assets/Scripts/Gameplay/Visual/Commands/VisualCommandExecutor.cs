@@ -54,7 +54,7 @@ namespace Project.Gameplay.Gameplay.Visual.Commands
                         }
                         else
                         {
-                            command.ExecuteAsync(_presenters).Forget();
+                            RunBackground(command.ExecuteAsync(_presenters), command.DebugName);
                         }
                     }
                     catch (Exception ex)
@@ -82,6 +82,14 @@ namespace Project.Gameplay.Gameplay.Visual.Commands
             var queue = new VisualCommandQueue();
             queue.EnqueueRange(commands);
             await ExecuteAsync(queue);
+        }
+
+        private void RunBackground(UniTask task, string name)
+        {
+            task.Forget(ex =>
+            {
+                _logger.Error($"Background visual command failed: {name}", ex);
+            });
         }
     }
 }
