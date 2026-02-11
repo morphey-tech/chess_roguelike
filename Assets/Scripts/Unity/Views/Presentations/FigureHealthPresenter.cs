@@ -17,6 +17,7 @@ namespace Project.Unity.Presentations
         private EntityLink _entityLink;
         private HealthBar _healthView;
         private Figure? _figure;
+        private CanvasGroup? _canvasGroup;
 
         public void Init(EntityLink link)
         {
@@ -48,7 +49,41 @@ namespace Project.Unity.Presentations
 
         public void Hide()
         {
-            RemoveBar();
+            SetVisible(false);
+        }
+
+        public void Show()
+        {
+            SetVisible(true);
+        }
+
+        public void SetVisible(bool visible)
+        {
+            if (_healthView != null)
+            {
+                CanvasGroup? canvasGroup = GetOrCreateCanvasGroup();
+                if (canvasGroup == null)
+                    return;
+
+                canvasGroup.alpha = visible ? 1f : 0f;
+                canvasGroup.interactable = visible;
+                canvasGroup.blocksRaycasts = visible;
+            }
+        }
+
+        private CanvasGroup? GetOrCreateCanvasGroup()
+        {
+            if (_healthView == null)
+                return null;
+
+            if (_canvasGroup == null || _canvasGroup.gameObject != _healthView.gameObject)
+            {
+                _canvasGroup = _healthView.GetComponent<CanvasGroup>();
+                if (_canvasGroup == null)
+                    _canvasGroup = _healthView.gameObject.AddComponent<CanvasGroup>();
+            }
+
+            return _canvasGroup;
         }
 
         private void RemoveBar()
@@ -58,6 +93,7 @@ namespace Project.Unity.Presentations
             Gameplay.Gameplay.UI.UIService.GetOrCreate<WorldUIWindow>().Remove(_healthView);
             _healthView = null;
             _figure = null;
+            _canvasGroup = null;
         }
 
         private void OnDestroy()

@@ -1,3 +1,5 @@
+using Project.Gameplay.Gameplay.Stage;
+using Project.Gameplay.Gameplay.Stage.Flow;
 using Cysharp.Threading.Tasks;
 
 namespace Project.Gameplay.UI
@@ -7,5 +9,8 @@ namespace Project.Gameplay.UI
         UniTask ShowWorldUiAsync();
         UniTask ShowPreparePhaseAsync();
         void SetGamePhase();
+        UniTask HideCombatUiAsync();
+        UniTask<StageFlowAction> ShowVictoryScreenAsync(StageResult result);
+        UniTask<StageFlowAction> ShowDefeatScreenAsync(StageResult result);
     }
 }

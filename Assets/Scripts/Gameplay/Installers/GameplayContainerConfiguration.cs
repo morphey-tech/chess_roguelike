@@ -17,6 +17,7 @@ using Project.Gameplay.Gameplay.Prepare;
 using Project.Gameplay.Gameplay.Run;
 using Project.Gameplay.Gameplay.Shutdown;
 using Project.Gameplay.Gameplay.Stage;
+using Project.Gameplay.Gameplay.Stage.Flow;
 using Project.Gameplay.Gameplay.Stage.Phase;
 using Project.Gameplay.Gameplay.Turn;
 using Project.Gameplay.Gameplay.Turn.BonusMove;
@@ -63,6 +64,8 @@ namespace Project.Gameplay.Gameplay.Installers
             builder.Register<StageHighlightRenderer>(Lifetime.Singleton).As<IStageHighlightRenderer>();
             builder.Register<StageService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
             builder.Register<StageReloadService>(Lifetime.Singleton).AsSelf();
+            builder.Register<RunTransitionService>(Lifetime.Singleton).As<IRunTransitionService>();
+            builder.Register<RunFlowService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
             builder.Register<GameShutdownCleanupService>(Lifetime.Singleton);
 
             // Stage phases (PrepareZoneCachePhase, PreparePlacementPhase, PrepareService need Unity — register in Unity)

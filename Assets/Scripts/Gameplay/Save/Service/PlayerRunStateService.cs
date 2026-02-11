@@ -18,6 +18,7 @@ namespace Project.Gameplay.Gameplay.Save.Service
             Current = new PlayerRunStateModel
             {
                 StageId = initialStageId,
+                CurrentStageIndex = 0,
                 KingHp = 100,
                 Seed = seed,
                 Figures = new List<FigureState>()

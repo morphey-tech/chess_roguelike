@@ -13,6 +13,7 @@ namespace Project.Gameplay.Gameplay.Save.Models
     public sealed class PlayerRunStateModel
     {
         public string StageId { get; set; }
+        public int CurrentStageIndex { get; set; }
         public int KingHp { get; set; }
         public int Seed { get; set; }
         public List<FigureState> Figures { get; set; } = new();

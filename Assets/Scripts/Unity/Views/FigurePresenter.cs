@@ -7,6 +7,8 @@ using Project.Core.Core.World;
 using Project.Gameplay;
 using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.Gameplay.Figures;
+using Project.Core.Core.Configs.Gameplay;
+using Project.Gameplay.Gameplay.Selection;
 using Project.Gameplay.Gameplay.Shutdown;
 using Project.Gameplay.Presentations;
 using Project.Unity.Presentations;
@@ -23,8 +25,10 @@ namespace Project.Unity.Unity.Views
         private const int PushAnimationDurationMs = 200;
         
         private readonly EntityService _entityService;
+        private readonly ConfigProvider _configProvider;
         private readonly IWorldRoot _worldRoot;
         private readonly ILogger<FigurePresenter> _logger;
+        private GameplayConfig? _gameplayConfig;
 
         private readonly Dictionary<int, GameObject> _figures = new();
         private readonly Dictionary<int, FigureVisualSet> _visuals = new();
@@ -40,16 +44,20 @@ namespace Project.Unity.Unity.Views
 
         public FigurePresenter(
             EntityService entityService,
+            ConfigProvider configProvider,
             IWorldRoot worldRoot,
             ILogService logService)
         {
             _entityService = entityService;
+            _configProvider = configProvider;
             _worldRoot = worldRoot;
             _logger = logService.CreateLogger<FigurePresenter>();
         }
 
         public async UniTask CreateFigure(Figure figure, string viewAssetKey, GridPosition pos, Team team)
         {
+            _gameplayConfig ??= await _configProvider.Get<GameplayConfig>("gameplay_conf");
+
             Vector3 worldPos = GetCellTopPosition(pos);
             
             // Spawn controller prefab
@@ -70,6 +78,8 @@ namespace Project.Unity.Unity.Views
             
             // IMMEDIATELY hide to prevent flicker - before any other operations
             controller.transform.localScale = Vector3.zero;
+
+            ApplyInitialHpBarVisibility(controllerLink, figure, _gameplayConfig);
             
             _figures[figure.Id] = controller;
             _positions[figure.Id] = pos;
@@ -189,13 +199,16 @@ namespace Project.Unity.Unity.Views
             await PlaySimpleHealEffect(figureGO);
         }
 
+        public void ShowFigureHealthBar(int figureId)
+        {
+            FigureHealthPresenter? health = GetHealthPresenter(figureId);
+            health?.Show();
+        }
+
         public void HideFigureHealthBar(int figureId)
         {
-            if (_figures.TryGetValue(figureId, out GameObject controller))
-            {
-                var health = controller.GetComponentInChildren<FigureHealthPresenter>(true);
-                health?.Hide();
-            }
+            FigureHealthPresenter? health = GetHealthPresenter(figureId);
+            health?.Hide();
         }
 
         public async UniTask PlayDeathEffectAsync(int figureId)
@@ -345,6 +358,31 @@ namespace Project.Unity.Unity.Views
         void IGameShutdownCleanup.Cleanup()
         {
             Clear();
+        }
+
+        private FigureHealthPresenter? GetHealthPresenter(int figureId)
+        {
+            if (!_figures.TryGetValue(figureId, out GameObject controller))
+                return null;
+            return controller.GetComponentInChildren<FigureHealthPresenter>(true);
+        }
+
+        private static void ApplyInitialHpBarVisibility(EntityLink controllerLink, Figure figure, GameplayConfig config)
+        {
+            if (controllerLink == null || figure == null || config == null)
+                return;
+
+            FigureHealthPresenter? health = controllerLink.GetComponentInChildren<FigureHealthPresenter>(true);
+            if (health == null)
+                return;
+
+            bool visible = HpBarVisibilityPolicy.ShouldShow(
+                config.HpBarVisibilityMode,
+                config.HpBarTeamScope,
+                figure.Team,
+                isHovered: false,
+                hasFriendlySelection: false);
+            health.SetVisible(visible);
         }
 
         private static Vector3 GetCellTopPosition(GridPosition gridPos)

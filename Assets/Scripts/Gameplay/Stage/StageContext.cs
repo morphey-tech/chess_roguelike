@@ -20,6 +20,7 @@ namespace Project.Gameplay.Gameplay.Stage
         /// Called by phases that returned WaitForCompletion when they're ready to proceed.
         /// </summary>
         public Action<PhaseResult> CompletePhase { get; internal set; }
+        public StageResult? Result { get; set; }
 
         public StageContext(Stage stage, StageConfig config, PlayerRunStateModel runState)
         {

@@ -18,7 +18,9 @@ using Project.Gameplay.Gameplay.Movement;
 using Project.Gameplay.Gameplay.Movement.Strategies;
 using Project.Gameplay.Gameplay.Prepare;
 using Project.Gameplay.Gameplay.Run;
+using Project.Gameplay.Gameplay.Selection;
 using Project.Gameplay.Gameplay.Stage;
+using Project.Gameplay.Gameplay.Stage.Flow;
 using Project.Gameplay.Gameplay.Stage.Phase;
 using Project.Gameplay.Gameplay.Turn;
 using Project.Gameplay.Gameplay.Turn.BonusMove;
@@ -158,6 +160,7 @@ namespace Project.Unity.Unity.Installers
 
             // Unity-only: консоль, UI, prepare-зона и фазы (LootPresenter — в ConfigureViews)
             builder.Register<ReloadStageConsoleCommands>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
+            builder.Register<StageOutcomeConsoleCommands>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
             builder.Register<EconomyConsoleCommands>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
             builder.Register<GameUiService>(Lifetime.Singleton).As<IGameUiService>();
 
@@ -171,6 +174,7 @@ namespace Project.Unity.Unity.Installers
             builder.Register<PrepareService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
             builder.Register<PrepareInputHandler>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
             builder.Register<PrepareVisualSyncService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
+            builder.Register<HpBarVisibilityService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
         }
 
         private void OnContainerBuilt(IObjectResolver resolver)
@@ -183,9 +187,11 @@ namespace Project.Unity.Unity.Installers
             resolver.Resolve<ITurnController>();
             resolver.Resolve<IBonusMoveSession>(); // Has click subscription
             resolver.Resolve<StageService>();
+            resolver.Resolve<RunFlowService>();
             resolver.Resolve<PrepareService>();
             resolver.Resolve<PrepareInputHandler>();
             resolver.Resolve<PrepareVisualSyncService>();
+            resolver.Resolve<HpBarVisibilityService>();
             resolver.Resolve<HandFigureClickHandler>();
             
             // UI must be force-resolved so its constructor runs InitAsync

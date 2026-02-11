@@ -52,14 +52,23 @@ namespace Project.Gameplay.Gameplay.Run
             await LaunchCurrentStageAsync();
         }
 
-        public void NextStage()
+        public bool CanAdvanceToNextStage()
         {
-            int nextIndex = GetCurrentStageIndex() + 1;
-            if (nextIndex < _config.Stages.Length)
-            {
-                _runStateService.Current!.StageId = _config.Stages[nextIndex];
-                LaunchCurrentStageAsync().Forget();
-            }
+            int nextIndex = _runStateService.Current?.CurrentStageIndex + 1 ?? GetCurrentStageIndex() + 1;
+            return nextIndex < _config.Stages.Length;
+        }
+
+        public async UniTask<bool> NextStageAsync()
+        {
+            int nextIndex = _runStateService.Current?.CurrentStageIndex + 1 ?? GetCurrentStageIndex() + 1;
+            if (nextIndex >= _config.Stages.Length)
+                return false;
+
+            _runStateService.Current!.CurrentStageIndex = nextIndex;
+            _runStateService.Current.StageId = _config.Stages[nextIndex];
+            CancelCurrentStage();
+            await LaunchCurrentStageAsync();
+            return true;
         }
 
         private async UniTask LaunchCurrentStageAsync()
@@ -87,13 +96,29 @@ namespace Project.Gameplay.Gameplay.Run
 
         private int GetCurrentStageIndex()
         {
-            string currentStageId = _runStateService.Current?.StageId ?? _config.Stages[0];
-            return Array.IndexOf(_config.Stages, currentStageId);
+            if (_runStateService.Current != null)
+            {
+                int idx = _runStateService.Current.CurrentStageIndex;
+                if (idx >= 0 && idx < _config.Stages.Length)
+                    return idx;
+
+                string currentStageId = _runStateService.Current.StageId ?? _config.Stages[0];
+                idx = Array.IndexOf(_config.Stages, currentStageId);
+                if (idx >= 0)
+                {
+                    _runStateService.Current.CurrentStageIndex = idx;
+                    return idx;
+                }
+            }
+            return 0;
         }
 
         private async UniTask<StageConfig> LoadStageConfig()
         {
-            string stageId = _runStateService.Current?.StageId ?? _config.Stages[0];
+            int stageIndex = GetCurrentStageIndex();
+            string stageId = _config.Stages[stageIndex];
+            if (_runStateService.Current != null)
+                _runStateService.Current.StageId = stageId;
             StageConfigRepository stageRepository = 
                 await _configProvider.Get<StageConfigRepository>("stages_conf");
             StageConfig? stageConfig = stageRepository.Get(stageId);

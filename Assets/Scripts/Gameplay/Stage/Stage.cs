@@ -84,12 +84,18 @@ namespace Project.Gameplay.Gameplay.Stage
                 _logger.Info($"[Phase] {phase.GetType().Name} completed with {result}");
                 if (result is PhaseResult.Victory or PhaseResult.Defeat)
                 {
-                    Complete(result == PhaseResult.Victory ? StageResult.Victory : StageResult.Defeat);
+                    StageResult? stageResult = _context.Result;
+                    if (stageResult == null)
+                    {
+                        StageOutcome outcome = result == PhaseResult.Victory ? StageOutcome.Victory : StageOutcome.Defeat;
+                        stageResult = new StageResult(outcome, turnCount: 0, enemiesKilled: 0);
+                    }
+                    Complete(stageResult);
                     return;
                 }
             }
 
-            Complete(StageResult.Victory);
+            Complete(new StageResult(StageOutcome.Victory, turnCount: 0, enemiesKilled: 0));
         }
 
         private void OnPhaseCompleted(PhaseResult result)

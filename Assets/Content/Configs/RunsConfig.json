@@ -3,7 +3,9 @@
     {
       "id": "0",
       "stages": [
-        "0"
+        "tutorial_1",
+        "tutorial_2",
+        "duel_level_1"
       ]
     }
   ]

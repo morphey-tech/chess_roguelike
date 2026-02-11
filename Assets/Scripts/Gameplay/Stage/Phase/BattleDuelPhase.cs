@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using MessagePipe;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Figures;
+using Project.Gameplay.Gameplay.Stage;
 using Project.Gameplay.Gameplay.Turn;
 
 namespace Project.Gameplay.Gameplay.Stage.Phase
@@ -14,97 +15,97 @@ namespace Project.Gameplay.Gameplay.Stage.Phase
     {
         private readonly TurnSystem _turnSystem;
         private readonly ISubscriber<FigureDeathMessage> _deathSubscriber;
+        private readonly ISubscriber<TurnChangedMessage> _turnChangedSubscriber;
         private readonly ILogger<BattleDuelPhase> _logger;
 
         private StageContext _context;
-        private IDisposable _subscription;
-        private int _playerFiguresAlive;
-        private int _enemyFiguresAlive;
+        private IDisposable? _deathSubscription;
+        private IDisposable? _turnSubscription;
+        private StageResultService? _resultService;
+        private CombatStats? _combatStats;
+        private bool _completed;
 
         public BattleDuelPhase(
             TurnSystem turnSystem,
             ISubscriber<FigureDeathMessage> deathSubscriber,
+            ISubscriber<TurnChangedMessage> turnChangedSubscriber,
             ILogService logService)
         {
             _turnSystem = turnSystem;
             _deathSubscriber = deathSubscriber;
+            _turnChangedSubscriber = turnChangedSubscriber;
             _logger = logService.CreateLogger<BattleDuelPhase>();
         }
 
         public UniTask<PhaseResult> ExecuteAsync(StageContext context)
         {
             _context = context;
+            _context.Result = null;
 
-            // Count figures
-            CountFigures(context);
+            _combatStats = new CombatStats();
+            _resultService = new StageResultService(new StageEndDetector(context.Grid), _combatStats);
+            _completed = false;
 
-            _logger.Info($"Battle started! Player: {_playerFiguresAlive}, Enemy: {_enemyFiguresAlive}");
+            _logger.Info("Battle started");
 
             // Subscribe to deaths
-            _subscription = _deathSubscriber.Subscribe(OnFigureDeath);
+            _deathSubscription = _deathSubscriber.Subscribe(OnFigureDeath);
+            _turnSubscription = _turnChangedSubscriber.Subscribe(OnTurnChanged);
 
             // Start turns
             _turnSystem.StartBattle();
+            _combatStats.Turns = _turnSystem.TurnNumber;
+            CheckBattleEnd();
 
             return UniTask.FromResult(PhaseResult.WaitForCompletion);
         }
 
-        private void CountFigures(StageContext context)
+        private void OnTurnChanged(TurnChangedMessage message)
         {
-            _playerFiguresAlive = 0;
-            _enemyFiguresAlive = 0;
-
-            foreach (var cell in context.Grid.AllCells())
-            {
-                if (cell.OccupiedBy == null) continue;
-
-                if (cell.OccupiedBy.Team == Team.Player)
-                    _playerFiguresAlive++;
-                else
-                    _enemyFiguresAlive++;
-            }
+            if (_combatStats != null)
+                _combatStats.Turns = message.TurnNumber;
+            CheckBattleEnd();
         }
 
         private void OnFigureDeath(FigureDeathMessage message)
         {
-            if (message.Team == Team.Player)
-            {
-                _playerFiguresAlive--;
-                _logger.Info($"Player figure died. Remaining: {_playerFiguresAlive}");
-            }
-            else
-            {
-                _enemyFiguresAlive--;
-                _logger.Info($"Enemy figure died. Remaining: {_enemyFiguresAlive}");
-            }
+            if (message.Team == Team.Enemy && _combatStats != null)
+                _combatStats.Kills++;
 
             CheckBattleEnd();
         }
 
         private void CheckBattleEnd()
         {
-            if (_playerFiguresAlive <= 0)
-            {
-                _logger.Info("Battle ended: DEFEAT");
-                Complete(PhaseResult.Defeat);
-            }
-            else if (_enemyFiguresAlive <= 0)
-            {
-                _logger.Info("Battle ended: VICTORY");
-                Complete(PhaseResult.Victory);
-            }
+            if (_completed)
+                return;
+
+            StageResult? result = _resultService?.TryBuild();
+            if (result == null)
+                return;
+
+            _context.Result = result;
+            _logger.Info($"Battle ended: {result.Outcome}, turns={result.TurnCount}, kills={result.EnemiesKilled}");
+            Complete(result.Outcome == StageOutcome.Victory ? PhaseResult.Victory : PhaseResult.Defeat);
         }
 
         private void Complete(PhaseResult result)
         {
-            _subscription?.Dispose();
-            _subscription = null;
+            if (_completed)
+                return;
+            _completed = true;
+
+            _deathSubscription?.Dispose();
+            _deathSubscription = null;
+            _turnSubscription?.Dispose();
+            _turnSubscription = null;
             _context?.CompletePhase?.Invoke(result);
         }
 
         void IDisposable.Dispose()
         {
-            _subscription?.Dispose();
+            _deathSubscription?.Dispose();
+            _turnSubscription?.Dispose();
         }
     }
 }

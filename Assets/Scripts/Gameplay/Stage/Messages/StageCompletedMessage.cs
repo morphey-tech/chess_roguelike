@@ -1,3 +1,5 @@
+using Project.Gameplay.Gameplay.Stage;
+
 namespace Project.Gameplay.Gameplay.Stage.Messages
 {
     /// <summary>
@@ -13,12 +15,5 @@ namespace Project.Gameplay.Gameplay.Stage.Messages
             StageId = stageId;
             Result = result;
         }
-    }
-
-    public enum StageResult
-    {
-        Victory,
-        Defeat,
-        Skipped
     }
 }

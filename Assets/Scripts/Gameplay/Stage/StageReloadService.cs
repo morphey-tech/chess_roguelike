@@ -72,17 +72,7 @@ namespace Project.Gameplay.Gameplay.Stage
 
                 string stageId = _runStateService.Current.StageId;
                 ResetRunStateForStage(_runStateService.Current, stageId);
-
-                _interactionController.Deactivate();
-                _interactionLock.Reset();
-                _prepareService.Reset();
-
-                _cleanupService.Cleanup();
-
-                _configHotReload.ReloadIfDirty();
-                _figureSpawnService.ClearCache();
-                _figureStatsFactory.ClearCache();
-                _turnPatternFactory.ResetCache();
+                PrepareForStageTransition(resetRunStateToHand: false);
 
                 _logger.Info($"Reloading stage '{stageId}' in-place");
                 // Fire-and-forget: stage phases run indefinitely (wait for player input).
@@ -95,13 +85,40 @@ namespace Project.Gameplay.Gameplay.Stage
             }
         }
 
+        /// <summary>
+        /// Prepares runtime systems and visuals for stage switch (next stage / restart).
+        /// Ensures old board/prepare/figures are fully cleaned before next stage starts.
+        /// </summary>
+        public void PrepareForStageTransition(bool resetRunStateToHand = true)
+        {
+            if (!_runStateService.HasRun || _runStateService.Current == null)
+                return;
+
+            if (resetRunStateToHand)
+                ResetRunStateForNextStage(_runStateService.Current);
+
+            _interactionController.Deactivate();
+            _interactionLock.Reset();
+            _prepareService.Reset();
+
+            _cleanupService.Cleanup();
+
+            _configHotReload.ReloadIfDirty();
+            _figureSpawnService.ClearCache();
+            _figureStatsFactory.ClearCache();
+            _turnPatternFactory.ResetCache();
+        }
+
         private static void ResetRunStateForStage(PlayerRunStateModel runState, string stageId)
         {
             runState.StageId = stageId;
+            ResetRunStateForNextStage(runState);
+        }
+
+        private static void ResetRunStateForNextStage(PlayerRunStateModel runState)
+        {
             foreach (FigureState figure in runState.Figures)
-            {
                 figure.Location = FigureLocation.InHand();
-            }
         }
     }
 }
