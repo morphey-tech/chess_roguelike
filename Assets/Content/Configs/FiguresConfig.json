@@ -61,6 +61,12 @@
       "description_id": "queen"
     },
     {
+      "id": "king",
+      "alias": "kg",
+      "asset_key": "rook_white_view",
+      "description_id": "king"
+    },
+    {
       "id": "brutal",
       "alias": "br",
       "asset_key": "brutal_figure_view",

@@ -16,6 +16,8 @@ namespace Project.Gameplay.Gameplay.Save.Models
         public int CurrentStageIndex { get; set; }
         public int KingHp { get; set; }
         public int Seed { get; set; }
+        public int BoardCapacity { get; set; }
+        public int UsedCapacity { get; set; }
         public List<FigureState> Figures { get; set; } = new();
 
         public IReadOnlyList<FigureState> FiguresInHand =>
@@ -36,6 +38,23 @@ namespace Project.Gameplay.Gameplay.Save.Models
             {
                 figure.Location = FigureLocation.OnBoard(position);
             }
+        }
+
+        public void ReturnToHand(string unitId)
+        {
+            FigureState? figure = GetFigure(unitId);
+            if (figure != null)
+            {
+                figure.Location = FigureLocation.InHand();
+            }
+        }
+
+        public FigureState? GetFigureAtPosition(GridPosition position)
+        {
+            return Figures.Find(u =>
+                u.Location.Type == FigureLocationType.Board
+                && u.Location.Row == position.Row
+                && u.Location.Column == position.Column);
         }
 
         public void MarkDead(string unitId)

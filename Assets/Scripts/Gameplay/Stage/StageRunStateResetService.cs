@@ -18,6 +18,8 @@ namespace Project.Gameplay.Gameplay.Stage
         {
             foreach (FigureState figure in runState.Figures)
                 figure.Location = FigureLocation.InHand();
+
+            runState.UsedCapacity = 0;
         }
     }
 }

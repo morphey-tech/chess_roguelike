@@ -26,20 +26,19 @@ namespace Project.Gameplay.Gameplay.Attack.Strategies
 
         public HitContext CreateHitContext(Figure attacker, Figure defender, GridPosition attackerPos, GridPosition defenderPos, BoardGrid grid)
         {
-            var context = new HitContext
+            HitContext context = new()
             {
                 Attacker = attacker,
                 Target = defender,
                 AttackerPosition = attackerPos,
                 TargetPosition = defenderPos,
                 Grid = grid,
-                BaseDamage = attacker.Stats.Attack,
                 HitType = HitType.Melee,
                 AttackerMovesOnKill = true
             };
 
             // Find up to 2 adjacent enemies and add splash effects
-            int splashDamage = attacker.Stats.Attack;
+            int splashDamage = (int)attacker.Stats.Attack.Value;
             
             GridPosition[] adjacentOffsets = {
                 new(-1, 0), new(1, 0), new(0, -1), new(0, 1),

@@ -1,6 +1,7 @@
 using System;
 using MessagePipe;
 using Project.Gameplay.Gameplay.Input.Messages;
+using Project.Gameplay.Gameplay.Prepare.Messages;
 
 namespace Project.Gameplay.Gameplay.Prepare
 {
@@ -17,7 +18,8 @@ namespace Project.Gameplay.Gameplay.Prepare
             PrepareService prepareService,
             ISubscriber<HandFigureClickedMessage> handFigureClickedSubscriber,
             ISubscriber<CellClickedMessage> cellClickedSubscriber,
-            ISubscriber<CancelRequestedMessage> cancelSubscriber)
+            ISubscriber<CancelRequestedMessage> cancelSubscriber,
+            ISubscriber<PrepareCompleteRequestedMessage> prepareCompleteRequestedSubscriber)
         {
             _prepareService = prepareService;
 
@@ -25,6 +27,7 @@ namespace Project.Gameplay.Gameplay.Prepare
             handFigureClickedSubscriber.Subscribe(_prepareService.HandleHandFigureClicked).AddTo(bag);
             cellClickedSubscriber.Subscribe(_prepareService.HandleCellClicked).AddTo(bag);
             cancelSubscriber.Subscribe(_ => _prepareService.HandleCancelRequested()).AddTo(bag);
+            prepareCompleteRequestedSubscriber.Subscribe(_ => _prepareService.RequestCompletePrepare()).AddTo(bag);
             _subscriptions = bag.Build();
         }
 

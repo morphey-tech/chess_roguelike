@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Project.Gameplay.Gameplay.Economy;
 using Project.Gameplay.Gameplay.Save.Models;
+using VContainer;
 
 namespace Project.Gameplay.Gameplay.Save.Adapter
 {
@@ -12,7 +13,8 @@ namespace Project.Gameplay.Gameplay.Save.Adapter
     {
         private readonly EconomyService _economyService;
 
-        public EconomySaveAdapter(EconomyService economyService)
+        [Inject]
+        private EconomySaveAdapter(EconomyService economyService)
         {
             _economyService = economyService;
         }

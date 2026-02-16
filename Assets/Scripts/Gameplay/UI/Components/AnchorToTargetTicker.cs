@@ -11,8 +11,12 @@ namespace Project.Unity.UI.Components
 
     private void LateUpdate()
     {
-      foreach (var target in _objects) 
-        target.Tick();
+      for (int i = _objects.Count - 1; i >= 0; i--)
+      {
+        var target = _objects[i];
+        if (target != null && target.isActiveAndEnabled)
+          target.Tick();
+      }
     }
 
     public void Register(AnchorToTarget obj)

@@ -28,6 +28,7 @@ namespace Project.Unity.UI
         {
             TurnWindow? wnd = await Gameplay.Gameplay.UI.UIService.ShowAsync<TurnWindow>();
             wnd?.SetPreparePhase();
+            await Gameplay.Gameplay.UI.UIService.ShowAsync<BoardCapacityWindow>();
         }
 
         public void SetGamePhase()
@@ -43,7 +44,10 @@ namespace Project.Unity.UI
         public UniTask HideCombatUiAsync()
         {
             if (Gameplay.Gameplay.UI.UIService.IsValid)
+            {
                 Gameplay.Gameplay.UI.UIService.Hide<TurnWindow>();
+                Gameplay.Gameplay.UI.UIService.Hide<BoardCapacityWindow>();
+            }
             return UniTask.CompletedTask;
         }
 
@@ -66,6 +70,11 @@ namespace Project.Unity.UI
                 $"Turns: {result.TurnCount}\nKills: {result.EnemiesKilled}",
                 ("Restart stage", StageFlowAction.RestartStage),
                 ("Back to hub", StageFlowAction.GoHub));
+        }
+
+        public void ShowWarning(string message)
+        {
+            _logger.Warning($"[UI Warning] {message}");
         }
 
         private UniTask<StageFlowAction> ShowOutcomeScreenAsync(

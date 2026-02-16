@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using Project.Core.Core.Save;
 using UnityEngine;
@@ -10,20 +12,20 @@ namespace Project.Gameplay.Gameplay.Save
     {
         private readonly FileSaveStorage _storage;
         private readonly ISaveEnvironment _environment;
-        private readonly ISaveDataProvider[] _providers;
-        private readonly ISaveDataApplier[] _appliers;
+        private readonly List<ISaveDataProvider> _providers;
+        private readonly List<ISaveDataApplier> _appliers;
 
         [Inject]
         private SaveService(
             FileSaveStorage storage,
             ISaveEnvironment environment,
-            ISaveDataProvider[] providers,
-            ISaveDataApplier[] appliers)
+            IEnumerable<ISaveDataProvider> providers,
+            IEnumerable<ISaveDataApplier> appliers)
         {
             _storage = storage;
             _environment = environment;
-            _providers = providers;
-            _appliers = appliers;
+            _providers = providers.ToList();
+            _appliers = appliers.ToList();
         }
 
         public async UniTask SaveAsync(string slotId)

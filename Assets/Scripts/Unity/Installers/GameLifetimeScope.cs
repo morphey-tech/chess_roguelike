@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using LiteUI.UI.Service;
 using MessagePipe;
+using Project.Core.Core.Logging;
 using Project.Core.Core.World;
 using Project.Core.Window;
 using Project.Gameplay.Gameplay.Attack;
@@ -57,6 +59,7 @@ namespace Project.Unity.Unity.Installers
         [SerializeField] private UiObjectCollector _uiObjectCollector;
         
         private IObjectResolver _resolver = null!;
+        private ILogger<GameLifetimeScope> _logger = null!;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -123,8 +126,6 @@ namespace Project.Unity.Unity.Installers
                 .As<IGameShutdownCleanup>();
 
             builder.Register<ActionContextAccessor>(Lifetime.Singleton);
-            builder.Register<DamageTokenStore>(Lifetime.Singleton)
-                .As<IDamageTokenStore>();
 
             // Visual command pipeline
             builder.Register<PresenterProvider>(Lifetime.Singleton)
@@ -180,9 +181,11 @@ namespace Project.Unity.Unity.Installers
         private void OnContainerBuilt(IObjectResolver resolver)
         {
             _resolver = resolver;
+            _logger = resolver.Resolve<ILogService>()
+                .CreateLogger<GameLifetimeScope>();
             
             // Force-create services with subscriptions
-            resolver.Resolve<TurnSystem>();
+            resolver.Resolve<TurnService>();
             resolver.Resolve<InteractionController>();
             resolver.Resolve<ITurnController>();
             resolver.Resolve<IBonusMoveSession>(); // Has click subscription
@@ -213,9 +216,9 @@ namespace Project.Unity.Unity.Installers
             {
                 _resolver.Resolve<GameShutdownCleanupService>().Cleanup();
             }
-            catch
+            catch (Exception ex)
             {
-                /* ignore */
+                _logger.Error(ex.Message);
             }
             base.OnDestroy();
         }

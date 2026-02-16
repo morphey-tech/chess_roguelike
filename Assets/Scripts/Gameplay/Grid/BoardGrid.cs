@@ -55,9 +55,9 @@ namespace Project.Gameplay.Gameplay.Grid
             }
         }
 
-        public BoardCell FindFigure(Figures.Figure figure)
+        public BoardCell? FindFigure(Figures.Figure figure)
         {
-            foreach (var cell in AllCells())
+            foreach (BoardCell? cell in AllCells())
             {
                 if (cell.OccupiedBy == figure)
                     return cell;
@@ -67,7 +67,7 @@ namespace Project.Gameplay.Gameplay.Grid
 
         public IEnumerable<Figures.Figure> GetAllFigures()
         {
-            foreach (var cell in AllCells())
+            foreach (BoardCell? cell in AllCells())
             {
                 if (cell.OccupiedBy != null)
                     yield return cell.OccupiedBy;
@@ -76,7 +76,7 @@ namespace Project.Gameplay.Gameplay.Grid
 
         public IEnumerable<Figures.Figure> GetFiguresByTeam(Figures.Team team)
         {
-            foreach (var cell in AllCells())
+            foreach (BoardCell? cell in AllCells())
             {
                 if (cell.OccupiedBy?.Team == team)
                     yield return cell.OccupiedBy;

@@ -21,6 +21,12 @@ namespace Project.Core.Core.Configs.Boards
 
         [JsonProperty("appear_id")]
         public string AppearStrategyId { get; set; }
+
+        [JsonProperty("base_capacity")]
+        public int BaseCapacity { get; set; } = 8;
+
+        [JsonProperty("max_capacity")]
+        public int MaxCapacity { get; set; } = 20;
         
         /// <summary>
         /// Parses board data from bracket notation format like "[W][B][W][B]" into 2D array.

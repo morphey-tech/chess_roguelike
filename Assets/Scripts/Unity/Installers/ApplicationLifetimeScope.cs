@@ -27,6 +27,8 @@ namespace Project.Unity.Unity.Installers
         
         protected override void Configure(IContainerBuilder builder)
         {
+            UnitySaveEnvironment saveEnvironment = new();
+
             builder.Register<LogService>(Lifetime.Singleton)
                 .WithParameter(_minLogLevel)
                 .AsImplementedInterfaces()
@@ -34,7 +36,6 @@ namespace Project.Unity.Unity.Installers
 
             builder.Register<AssetService>(Lifetime.Scoped)
                 .AsImplementedInterfaces();
-
             builder.Register<ConfigProvider>(Lifetime.Singleton)
                 .AsImplementedInterfaces()
                 .AsSelf();
@@ -42,31 +43,38 @@ namespace Project.Unity.Unity.Installers
                 .AsImplementedInterfaces()
                 .AsSelf();
 
-            builder.Register<SaveService>(Lifetime.Scoped)
-                .AsImplementedInterfaces();
             builder.Register<PlayerLoadoutService>(Lifetime.Singleton);
             builder.Register<PlayerRunStateService>(Lifetime.Singleton);
             builder.Register<PlayerMetaProgressService>(Lifetime.Singleton);
             
-            builder.Register<PlayerLoadoutSaveAdapter>(Lifetime.Singleton);
-            builder.Register<PlayerRunStateSaveAdapter>(Lifetime.Singleton);
-            builder.Register<PlayerMetaProgressSaveAdapter>(Lifetime.Singleton);
+            builder.Register<PlayerLoadoutSaveAdapter>(Lifetime.Singleton)
+                .AsImplementedInterfaces()
+                .AsSelf();
+            builder.Register<PlayerRunStateSaveAdapter>(Lifetime.Singleton)
+                .AsImplementedInterfaces()
+                .AsSelf();
+            builder.Register<PlayerMetaProgressSaveAdapter>(Lifetime.Singleton)
+                .AsImplementedInterfaces()
+                .AsSelf();
             
-            // Economy
             builder.Register<ItemFactory>(Lifetime.Singleton);
             builder.Register<EconomyService>(Lifetime.Singleton)
                 .AsSelf();
             builder.Register<EconomySaveAdapter>(Lifetime.Singleton)
                 .AsImplementedInterfaces();
             
-            
             builder.Register<MemoryCleanService>(Lifetime.Singleton)
                 .AsImplementedInterfaces()
                 .AsSelf();
-            
             builder.Register<SceneLoader>(Lifetime.Singleton);
             builder.Register<SceneTransitionService>(Lifetime.Singleton);
             builder.Register<SceneService>(Lifetime.Singleton)
+                .AsImplementedInterfaces();
+            
+            builder.RegisterInstance(saveEnvironment)
+                .As<Project.Core.Core.Save.ISaveEnvironment>();
+            builder.RegisterInstance(new FileSaveStorage(saveEnvironment.SavePath));
+            builder.Register<SaveService>(Lifetime.Scoped)
                 .AsImplementedInterfaces();
         }
     }

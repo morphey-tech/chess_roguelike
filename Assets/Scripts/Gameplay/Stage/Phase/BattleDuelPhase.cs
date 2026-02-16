@@ -13,7 +13,7 @@ namespace Project.Gameplay.Gameplay.Stage.Phase
     /// </summary>
     public sealed class BattleDuelPhase : IStagePhase, IDisposable
     {
-        private readonly TurnSystem _turnSystem;
+        private readonly TurnService _turnService;
         private readonly ISubscriber<FigureDeathMessage> _deathSubscriber;
         private readonly ISubscriber<TurnChangedMessage> _turnChangedSubscriber;
         private readonly ILogger<BattleDuelPhase> _logger;
@@ -26,12 +26,12 @@ namespace Project.Gameplay.Gameplay.Stage.Phase
         private bool _completed;
 
         public BattleDuelPhase(
-            TurnSystem turnSystem,
+            TurnService turnService,
             ISubscriber<FigureDeathMessage> deathSubscriber,
             ISubscriber<TurnChangedMessage> turnChangedSubscriber,
             ILogService logService)
         {
-            _turnSystem = turnSystem;
+            _turnService = turnService;
             _deathSubscriber = deathSubscriber;
             _turnChangedSubscriber = turnChangedSubscriber;
             _logger = logService.CreateLogger<BattleDuelPhase>();
@@ -53,8 +53,8 @@ namespace Project.Gameplay.Gameplay.Stage.Phase
             _turnSubscription = _turnChangedSubscriber.Subscribe(OnTurnChanged);
 
             // Start turns
-            _turnSystem.StartBattle();
-            _combatStats.Turns = _turnSystem.TurnNumber;
+            _turnService.StartBattle();
+            _combatStats.Turns = _turnService.TurnNumber;
             CheckBattleEnd();
 
             return UniTask.FromResult(PhaseResult.WaitForCompletion);

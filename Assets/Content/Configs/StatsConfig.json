@@ -4,85 +4,191 @@
       "id": "pawn_stats",
       "max_hp": 3,
       "attacks": [
-        { "type": "Melee", "damage": 1, "range": 1, "targeting": "Adjacent", "delivery": "Instant", "pattern": "Single" }
+        { 
+          "type": "Melee",
+          "damage": 1, "range": 1,
+          "targeting": "Adjacent",
+          "delivery": "Instant",
+          "pattern": "Single"
+        }
       ]
     },
     {
       "id": "knight_stats",
       "max_hp": 4,
       "attacks": [
-        { "type": "Melee", "damage": 2, "range": 1, "targeting": "Adjacent", "delivery": "Instant", "pattern": "Single" }
+        { 
+          "type": "Melee",
+          "damage": 2,
+          "range": 1,
+          "targeting": "Adjacent",
+          "delivery": "Instant",
+          "pattern": "Single"
+        }
       ]
     },
     {
       "id": "bishop_stats",
       "max_hp": 4,
       "attacks": [
-        { "type": "Ranged", "damage": 2, "range": 7, "targeting": "Arc", "delivery": "Projectile", "pattern": "Single", "projectile_id": "arrow_basic" }
+        { 
+          "type": "Ranged",
+          "damage": 2,
+          "range": 7,
+          "targeting": "Arc",
+          "delivery": "Projectile",
+          "pattern": "Single",
+          "projectile_id": "arrow_basic"
+        }
       ]
     },
     {
       "id": "rook_stats",
       "max_hp": 6,
       "attacks": [
-        { "type": "Melee", "damage": 3, "range": 7, "targeting": "Arc", "delivery": "Instant", "pattern": "Single" }
+        { 
+          "type": "Melee",
+          "damage": 3,
+          "range": 7,
+          "targeting": "Arc",
+          "delivery": "Instant",
+          "pattern": "Single"
+        }
       ]
     },
     {
       "id": "queen_stats",
       "max_hp": 8,
       "attacks": [
-        { "type": "Melee", "damage": 4, "range": 7, "targeting": "Arc", "delivery": "Instant", "pattern": "Single" }
+        { 
+          "type": "Melee",
+          "damage": 4,
+          "range": 7,
+          "targeting": "Arc",
+          "delivery": "Instant",
+          "pattern": "Single"
+        }
+      ]
+    },
+    {
+      "id": "king_stats",
+      "max_hp": 8,
+      "attacks": [
+        {
+          "type": "Melee",
+          "damage": 4,
+          "range": 7,
+          "targeting": "Arc",
+          "delivery": "Instant",
+          "pattern": "Single"
+        }
       ]
     },
     {
       "id": "brutal_stats",
       "max_hp": 7,
       "attacks": [
-        { "type": "Melee", "damage": 2, "range": 1, "targeting": "Adjacent", "delivery": "Instant", "pattern": "Single" }
+        { 
+          "type": "Melee",
+          "damage": 2,
+          "range": 1,
+          "targeting": "Adjacent",
+          "delivery": "Instant",
+          "pattern": "Single"
+        }
       ]
     },
     {
       "id": "slippery_stats",
       "max_hp": 5,
       "attacks": [
-        { "type": "Melee", "damage": 2, "range": 1, "targeting": "Adjacent", "delivery": "Instant", "pattern": "Single" }
+        { 
+          "type": "Melee",
+          "damage": 2,
+          "range": 1, 
+          "targeting": "Adjacent",
+          "delivery": "Instant",
+          "pattern": "Single"
+        }
       ]
     },
     {
       "id": "tank_stats",
       "max_hp": 9,
       "attacks": [
-        { "type": "Melee", "damage": 2, "range": 1, "targeting": "Adjacent", "delivery": "Instant", "pattern": "Single" }
+        { 
+          "type": "Melee",
+          "damage": 2,
+          "range": 1,
+          "targeting": "Adjacent",
+          "delivery": "Instant",
+          "pattern": "Single"
+        }
       ]
     },
     {
       "id": "splash_stats",
       "max_hp": 6,
       "attacks": [
-        { "type": "Melee", "damage": 1, "range": 1, "targeting": "Adjacent", "delivery": "Instant", "pattern": "Single" }
+        { 
+          "type": "Melee",
+          "damage": 1,
+          "range": 1,
+          "targeting": "Adjacent",
+          "delivery": "Instant",
+          "pattern": "Single"
+        }
       ]
     },
     {
       "id": "pierce_stats",
       "max_hp": 6,
       "attacks": [
-        { "type": "Melee", "damage": 3, "range": 1, "targeting": "Adjacent", "delivery": "Instant", "pattern": "Single" }
+        { 
+          "type": "Melee",
+          "damage": 3,
+          "range": 1,
+          "targeting": "Adjacent",
+          "delivery": "Instant",
+          "pattern": "Single"
+        }
       ]
     },
     {
       "id": "pusher_stats",
       "max_hp": 5,
       "attacks": [
-        { "type": "Melee", "damage": 1, "range": 1, "targeting": "Adjacent", "delivery": "Instant", "pattern": "Single" }
+        { 
+          "type": "Melee",
+          "damage": 1,
+          "range": 1,
+          "targeting": "Adjacent",
+          "delivery": "Instant",
+          "pattern": "Single"
+        }
       ]
     },
     {
       "id": "ranger_stats",
       "max_hp": 4,
       "attacks": [
-        { "type": "Melee", "damage": 1, "range": 1, "targeting": "Adjacent", "delivery": "Instant", "pattern": "Single" },
-        { "type": "Ranged", "damage": 2, "range": 4, "targeting": "StraightLine", "delivery": "Projectile", "pattern": "Single", "projectile_id": "arrow_basic" }
+        { 
+          "type": "Melee",
+          "damage": 1,
+          "range": 1,
+          "targeting": "Adjacent",
+          "delivery": "Instant",
+          "pattern": "Single"
+        },
+        { 
+          "type": "Ranged",
+          "damage": 2,
+          "range": 4,
+          "targeting": "StraightLine",
+          "delivery": "Projectile",
+          "pattern": "Single",
+          "projectile_id": "arrow_basic"
+        }
       ]
     }
   ]

@@ -27,32 +27,30 @@ namespace Project.Gameplay.Gameplay.Turn
     /// 
     /// All complex interaction logic is delegated to specialized components.
     /// </summary>
-    public sealed class TurnController : ITurnController
+    public sealed class TurnExecutionFlow : ITurnController
     {
         private readonly IInteractionLock _interactionLock;
         private readonly ITurnExecutor _turnExecutor;
         private readonly IBonusMoveSession _bonusMoveSession;
-        private readonly TurnSystem _turnSystem;
+        private readonly TurnService _turnService;
         private readonly RunHolder _runHolder;
-        private readonly ILogger<TurnController> _logger;
+        private readonly ILogger<TurnExecutionFlow> _logger;
 
         [Inject]
-        public TurnController(
+        private TurnExecutionFlow(
             IInteractionLock interactionLock,
             ITurnExecutor turnExecutor,
             IBonusMoveSession bonusMoveSession,
-            TurnSystem turnSystem,
+            TurnService turnService,
             RunHolder runHolder,
             ILogService logService)
         {
             _interactionLock = interactionLock;
             _turnExecutor = turnExecutor;
             _bonusMoveSession = bonusMoveSession;
-            _turnSystem = turnSystem;
+            _turnService = turnService;
             _runHolder = runHolder;
-            _logger = logService.CreateLogger<TurnController>();
-            
-            _logger.Info("TurnController created (orchestrator only)");
+            _logger = logService.CreateLogger<TurnExecutionFlow>();
         }
 
         public async UniTask ExecuteMoveAsync(Figure actor, GridPosition from, GridPosition to)
@@ -65,9 +63,9 @@ namespace Project.Gameplay.Gameplay.Turn
             await ExecuteTurnAsync(actor, from, to);
         }
 
-        private async UniTask ExecuteTurnAsync(Figure actor, GridPosition from, GridPosition to)
+        private async UniTask ExecuteTurnAsync(Figure? actor, GridPosition from, GridPosition to)
         {
-            BoardGrid grid = GetCurrentGrid();
+            BoardGrid? grid = GetCurrentGrid();
             if (grid == null)
             {
                 _logger.Error("Cannot execute turn: no grid available");
@@ -81,42 +79,38 @@ namespace Project.Gameplay.Gameplay.Turn
             }
 
             _logger.Info($"Executing turn for {actor.Id}: ({from.Row},{from.Column}) -> ({to.Row},{to.Column})");
-
-            // Lock scope covers entire turn including bonus move
-            using (IDisposable lockHandle = _interactionLock.Acquire("turn-execution"))
+            using IDisposable lockHandle = _interactionLock.Acquire("turn-execution");
+            try
             {
-                try
+                // 1. Execute the main turn
+                TurnExecutionResult result = await _turnExecutor.ExecuteAsync(actor, from, to, grid);
+
+                if (!result.Success)
                 {
-                    // 1. Execute the main turn
-                    TurnExecutionResult result = await _turnExecutor.ExecuteAsync(actor, from, to, grid);
-
-                    if (!result.Success)
-                    {
-                        _logger.Debug($"Turn execution failed for {actor}");
-                        return;
-                    }
-
-                    _logger.Info($"Turn executed. Final pos: ({result.ActorFinalPosition.Row},{result.ActorFinalPosition.Column}), " +
-                                 $"BonusMove: {(result.BonusMoveDistance.HasValue ? result.BonusMoveDistance.Value.ToString() : "none")}");
-
-                    // 2. Delegate bonus move to session (if granted)
-                    if (result.BonusMoveDistance.HasValue && result.BonusMoveDistance.Value > 0)
-                    {
-                        await _bonusMoveSession.RunAsync(actor, result.ActorFinalPosition, result.BonusMoveDistance.Value, grid);
-                    }
-
-                    // 3. End the turn
-                    _turnSystem.EndTurn();
+                    _logger.Debug($"Turn execution failed for {actor}");
+                    return;
                 }
-                catch (Exception ex)
+
+                _logger.Info($"Turn executed. Final pos: ({result.ActorFinalPosition.Row},{result.ActorFinalPosition.Column}), " +
+                             $"BonusMove: {(result.BonusMoveDistance.HasValue ? result.BonusMoveDistance.Value.ToString() : "none")}");
+
+                // 2. Delegate bonus move to session (if granted)
+                if (result.BonusMoveDistance.HasValue && result.BonusMoveDistance.Value > 0)
                 {
-                    _logger.Error($"Turn execution error: {ex.Message}");
-                    throw;
+                    await _bonusMoveSession.RunAsync(actor, result.ActorFinalPosition, result.BonusMoveDistance.Value, grid);
                 }
+
+                // 3. End the turn
+                _turnService.EndTurn();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Turn execution error: {ex.Message}");
+                throw;
             }
         }
 
-        private BoardGrid GetCurrentGrid()
+        private BoardGrid? GetCurrentGrid()
         {
             return _runHolder.Current?.CurrentStage?.Grid;
         }

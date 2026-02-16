@@ -5,27 +5,39 @@ using Project.Gameplay.Gameplay.Attack;
 
 namespace Project.Gameplay.Gameplay.Figures
 {
+    /// <summary>
+    /// Stats block: Attack/Defence are Base + Mods (math only here).
+    /// CombatResolver reads .Attack.Value and .Defence.Value — no formulas elsewhere.
+    /// </summary>
     public class FigureStats
     {
         public int MaxHp { get; }
         public int CurrentHp { get; private set; }
         public IReadOnlyList<AttackProfile> Attacks { get; }
 
-        /// <summary>Compatibility: max damage across all attacks.</summary>
-        public int Attack => Attacks.Count == 0 ? 0 : Attacks.Max(a => a.Damage);
+        /// <summary>Attack stat: base + modifiers. Use .Value for combat formula.</summary>
+        public FigureStat Attack { get; }
+        /// <summary>Defence stat: base + modifiers. Use .Value for combat formula.</summary>
+        public FigureStat Defence { get; }
 
-        /// <summary>Compatibility: max range across all attacks.</summary>
         public int AttackRange => MaxAttackRange;
-
         public int MaxAttackRange => Attacks.Count == 0 ? 0 : Attacks.Max(a => a.Range);
-
         public bool IsDead => CurrentHp <= 0;
 
-        public FigureStats(int maxHp, IReadOnlyList<AttackProfile>? attacks)
+        public FigureStats(int maxHp, IReadOnlyList<AttackProfile>? attacks, float baseAttack, float baseDefence)
         {
             MaxHp = maxHp;
             CurrentHp = maxHp;
             Attacks = attacks ?? Array.Empty<AttackProfile>();
+            Attack = new FigureStat(baseAttack);
+            Defence = new FigureStat(baseDefence);
+        }
+
+        /// <summary>Call at end of turn: ticks timed modifiers and removes expired.</summary>
+        public void TickTimedModifiers()
+        {
+            Attack.Tick();
+            Defence.Tick();
         }
 
         /// <summary>

@@ -5,15 +5,19 @@ using Project.Gameplay.Gameplay.Combat.Contexts;
 using Project.Gameplay.Gameplay.Combat.Triggers;
 using Project.Gameplay.Gameplay.Economy;
 using Project.Gameplay.Gameplay.Figures;
+using VContainer;
 
 namespace Project.Gameplay.Gameplay.Combat
 {
     public sealed class PassiveTriggerService
     {
+        private readonly IFigureRegistry _figureRegistry;
         private readonly EconomyService _economyService;
 
-        public PassiveTriggerService(EconomyService economyService)
+        [Inject]
+        private PassiveTriggerService(IFigureRegistry figureRegistry, EconomyService economyService)
         {
+            _figureRegistry = figureRegistry;
             _economyService = economyService;
         }
 
@@ -46,14 +50,22 @@ namespace Project.Gameplay.Gameplay.Combat
             Execute<IOnMove>(figure, p => p.OnMove(context));
         }
 
-        public void TriggerTurnStart(Figure figure, TurnContext context)
+        public void TriggerTurnStart(TurnContext context)
         {
-            Execute<IOnTurnStart>(figure, p => p.OnTurnStart(context));
+            IEnumerable<Figure> team = _figureRegistry.GetTeam(context.Team);
+            foreach (Figure figure in team)
+            {
+                Execute<IOnTurnStart>(figure, p => p.OnTurnStart(figure, context));
+            }
         }
 
-        public void TriggerTurnEnd(Figure figure, TurnContext context)
+        public void TriggerTurnEnd(TurnContext context)
         {
-            Execute<IOnTurnEnd>(figure, p => p.OnTurnEnd(context));
+            IEnumerable<Figure> team = _figureRegistry.GetTeam(context.Team);
+            foreach (Figure figure in team)
+            {
+                 Execute<IOnTurnEnd>(figure, p => p.OnTurnEnd(figure, context));
+            }
         }
 
         /// <summary>

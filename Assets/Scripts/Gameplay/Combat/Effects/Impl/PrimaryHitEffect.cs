@@ -1,8 +1,8 @@
 using System;
 using Project.Core.Core.Configs.Stats;
 using Project.Core.Core.Grid;
-using Project.Gameplay.Gameplay.Combat.Damage;
 using Project.Gameplay.Gameplay.Combat.Contexts;
+using Project.Gameplay.Gameplay.Combat.Damage;
 using Project.Gameplay.Gameplay.Combat.Visual;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
@@ -21,22 +21,20 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
         private readonly Figure _target;
         private readonly GridPosition _attackerPosition;
         private readonly GridPosition _targetPosition;
-        private readonly int _baseDamage;
+        private readonly float _baseDamage;
         private readonly string _attackId;
         private readonly DeliveryType _delivery;
         private readonly string _projectileConfigId;
-        private readonly IDamagePipeline _damagePipeline;
 
         public PrimaryHitEffect(
             Figure attacker,
             Figure target,
             GridPosition attackerPosition,
             GridPosition targetPosition,
-            int baseDamage,
+            float baseDamage,
             string attackId,
             DeliveryType delivery,
-            string projectileConfigId,
-            IDamagePipeline damagePipeline)
+            string projectileConfigId)
         {
             _attacker = attacker;
             _target = target;
@@ -46,7 +44,6 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
             _attackId = attackId;
             _delivery = delivery;
             _projectileConfigId = projectileConfigId;
-            _damagePipeline = damagePipeline;
         }
 
         public void Apply(CombatEffectContext context)
@@ -63,28 +60,19 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
             int finalDamage = (int)(before.BaseDamage * before.DamageMultiplier) + before.BonusDamage;
             if (finalDamage < 0) finalDamage = 0;
 
-            DamageResult damageResult = _damagePipeline.Calculate(new DamageContext(
-                _attacker,
-                _target,
-                finalDamage,
-                before.IsCritical,
-                _attackId,
-                Array.Empty<IDamageModifier>()));
-
             bool isProjectile = _delivery == DeliveryType.Projectile;
 
             if (!isProjectile)
             {
                 string attackType = string.IsNullOrEmpty(_attackId) ? _delivery.ToString() : _attackId;
-                var damageContext = new DamageContext(
+                DamageContext damageContext = new(
                     _attacker,
                     _target,
                     finalDamage,
                     before.IsCritical,
                     attackType,
                     Array.Empty<IDamageModifier>());
-                (DamageResult appliedDamageResult, bool died) = context.DamageApplier.ApplyNoDeath(damageContext);
-                damageResult = appliedDamageResult;
+                (DamageResult damageResult, bool died) = context.DamageApplier.ApplyNoDeath(damageContext);
                 context.ActionContext.LastDamageDealt = damageResult.Final;
 
                 AddPrimaryDeliveryEvent(context, damageResult.Final, before.IsCritical);
@@ -97,7 +85,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
 
                 context.Logger.Info($"{_attacker} hit {_target} for {damageResult.Final} damage. HP: {_target.Stats.CurrentHp}/{_target.Stats.MaxHp}");
 
-                var after = new AfterHitContext
+                AfterHitContext after = new()
                 {
                     Attacker = _attacker,
                     Target = _target,
@@ -126,16 +114,18 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
             }
             else
             {
-                AddPrimaryDeliveryEvent(context, damageResult.Final, before.IsCritical);
+                // Defer actual damage application to ProjectileHitApplyService.
+                // Event carries raw base-for-pipeline damage and crit flag; pipeline is applied once on hit.
+                AddPrimaryDeliveryEvent(context, finalDamage, before.IsCritical);
                 context.AddVisualEvent(new ProjectileHitApplyEvent(
                     _attacker.Id,
                     _target.Id,
                     _targetPosition,
-                    damageResult.Final,
+                    finalDamage,
                     before.IsCritical,
                     _attackId));
 
-                context.Logger.Info($"{_attacker} projectile hit (deferred): {finalDamage} damage to {_target}. HP: {_target.Stats.CurrentHp}/{_target.Stats.MaxHp}");
+                context.Logger.Info($"{_attacker} projectile hit (deferred): raw={finalDamage} to {_target}. HP: {_target.Stats.CurrentHp}/{_target.Stats.MaxHp}");
             }
         }
 

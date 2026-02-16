@@ -25,7 +25,7 @@ namespace Project.Unity.Presentations
             if(link.GetEntity() is not Figure figure)
                 return;
             
-            _entityLink = link;
+            _entityLink = link; 
             _figure = figure;
             _healthView = Gameplay.Gameplay.UI.UIService.GetOrCreate<WorldUIWindow>().Add(_viewTemplate, _pivot);
 

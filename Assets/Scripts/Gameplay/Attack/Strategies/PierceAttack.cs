@@ -42,7 +42,6 @@ namespace Project.Gameplay.Gameplay.Attack.Strategies
                 AttackerPosition = attackerPos,
                 TargetPosition = defenderPos,
                 Grid = grid,
-                BaseDamage = attacker.Stats.Attack,
                 HitType = HitType.Ranged,
                 AttackerMovesOnKill = false
             };
@@ -50,11 +49,17 @@ namespace Project.Gameplay.Gameplay.Attack.Strategies
             // Calculate pierce direction
             int dirRow = defenderPos.Row - attackerPos.Row;
             int dirCol = defenderPos.Column - attackerPos.Column;
-            
-            if (dirRow != 0) dirRow = dirRow > 0 ? 1 : -1;
-            if (dirCol != 0) dirCol = dirCol > 0 ? 1 : -1;
 
-            int pierceDamage = (int)(attacker.Stats.Attack * _pierceDamagePercent);
+            if (dirRow != 0)
+            {
+                dirRow = dirRow > 0 ? 1 : -1;
+            }
+            if (dirCol != 0)
+            {
+                dirCol = dirCol > 0 ? 1 : -1;
+            }
+
+            int pierceDamage = (int)(attacker.Stats.Attack.Value * _pierceDamagePercent);
 
             // Find targets behind the primary target and add pierce effects
             GridPosition current = defenderPos;

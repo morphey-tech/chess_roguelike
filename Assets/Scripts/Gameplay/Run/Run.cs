@@ -5,6 +5,7 @@ using Project.Core.Core.Configs.Boards;
 using Project.Core.Core.Configs.Run;
 using Project.Core.Core.Configs.Stage;
 using Project.Gameplay.Gameplay.Board;
+using Project.Gameplay.Gameplay.Board.Capacity;
 using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Save.Service;
@@ -24,6 +25,7 @@ namespace Project.Gameplay.Gameplay.Run
         private readonly StagePhaseFactory _phaseFactory;
         private readonly PlayerRunStateService _runStateService;
         private readonly BoardSpawnService _boardSpawnService;
+        private readonly BoardCapacityService _boardCapacityService;
 
         public Run(
             RunConfig config,
@@ -31,7 +33,8 @@ namespace Project.Gameplay.Gameplay.Run
             StageFactory stageFactory,
             StagePhaseFactory phaseFactory,
             PlayerRunStateService runStateService,
-            BoardSpawnService boardSpawnService)
+            BoardSpawnService boardSpawnService,
+            BoardCapacityService boardCapacityService)
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
             _configProvider = configProvider ?? throw new ArgumentNullException(nameof(configProvider));
@@ -39,6 +42,7 @@ namespace Project.Gameplay.Gameplay.Run
             _phaseFactory = phaseFactory ?? throw new ArgumentNullException(nameof(phaseFactory));
             _runStateService = runStateService ?? throw new ArgumentNullException(nameof(runStateService));
             _boardSpawnService = boardSpawnService ?? throw new ArgumentNullException(nameof(boardSpawnService));
+            _boardCapacityService = boardCapacityService ?? throw new ArgumentNullException(nameof(boardCapacityService));
         }
 
         public async UniTask Begin()
@@ -75,6 +79,8 @@ namespace Project.Gameplay.Gameplay.Run
         {
             StageConfig stageConfig = await LoadStageConfig();
             BoardConfig boardConfig = await LoadBoardConfig(stageConfig);
+            await _boardCapacityService.InitializeForBoardAsync(boardConfig);
+            _boardCapacityService.Reset();
 
             BoardGrid grid = await _boardSpawnService.GetGridAsync(boardConfig.Id);
             List<IStagePhase> phases = await _phaseFactory.CreatePhasesForStageAsync(stageConfig);

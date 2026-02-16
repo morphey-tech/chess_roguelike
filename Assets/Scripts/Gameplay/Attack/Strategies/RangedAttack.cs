@@ -34,7 +34,6 @@ namespace Project.Gameplay.Gameplay.Attack.Strategies
                 AttackerPosition = attackerPos,
                 TargetPosition = defenderPos,
                 Grid = grid,
-                BaseDamage = attacker.Stats.Attack,
                 HitType = HitType.Ranged,
                 AttackerMovesOnKill = false
             };

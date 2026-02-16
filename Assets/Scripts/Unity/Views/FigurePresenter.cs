@@ -13,6 +13,7 @@ using Project.Gameplay.Gameplay.Shutdown;
 using Project.Gameplay.Presentations;
 using Project.Unity.Presentations;
 using UnityEngine;
+using VContainer;
 
 namespace Project.Unity.Unity.Views
 {
@@ -42,7 +43,8 @@ namespace Project.Unity.Unity.Views
             public FigureHitPresenter? Hit { get; set; }
         }
 
-        public FigurePresenter(
+        [Inject]
+        private FigurePresenter(
             EntityService entityService,
             ConfigProvider configProvider,
             IWorldRoot worldRoot,
@@ -351,7 +353,6 @@ namespace Project.Unity.Unity.Views
             _figures.Clear();
             _visuals.Clear();
             _positions.Clear();
-
             _logger.Debug("Figures cleared");
         }
 

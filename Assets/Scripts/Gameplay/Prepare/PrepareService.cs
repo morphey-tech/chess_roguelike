@@ -116,6 +116,18 @@ namespace Project.Gameplay.Gameplay.Prepare
             }
         }
 
+        /// <summary>
+        /// Called when user requests to finish prepare (e.g. "Finish" button) or when all figures are placed.
+        /// </summary>
+        public void RequestCompletePrepare()
+        {
+            PrepareContext? context = _context;
+            if (context == null || !context.State.IsActive)
+                return;
+
+            Complete(context);
+        }
+
         private void Complete(PrepareContext context)
         {
             if (_context != context || !context.State.IsActive)
@@ -162,12 +174,22 @@ namespace Project.Gameplay.Gameplay.Prepare
                 return;
             }
 
+            GridPosition pos = message.Position;
+
+            // Click on already placed (our) figure — return to hand
+            if (context.RunState.GetFigureAtPosition(pos) != null)
+            {
+                HandleUnplaceAsync(context, pos)
+                    .AttachExternalCancellation(context.CancellationToken)
+                    .ForgetLogged(_logger, "Prepare unplace failed", context.CancellationToken);
+                return;
+            }
+
             if (context.State.SelectedFigureId == null)
             {
                 return;
             }
 
-            GridPosition pos = message.Position;
             if (!context.Rules.CanPlace(pos))
             {
                 _logger.Debug($"Invalid placement: ({pos.Row}, {pos.Column})");
@@ -194,17 +216,29 @@ namespace Project.Gameplay.Gameplay.Prepare
             }
         }
 
+        private async UniTask HandleUnplaceAsync(PrepareContext context, GridPosition pos)
+        {
+            bool success = await _placementController.UnplaceAtAsync(context, pos, context.CancellationToken);
+            if (!success || _context != context)
+                return;
+
+            _highlightService.ApplyDirty(context, new[] { pos });
+        }
+
         public void HandleCancelRequested()
         {
             PrepareContext? context = _context;
-            if (context == null || !context.State.IsActive || !context.IsInputReady || context.State.SelectedFigureId == null)
+            if (context == null || !context.State.IsActive
+                                || !context.IsInputReady 
+                                || context.State.SelectedFigureId == null)
             {
                 return;
             }
 
             if (context.PreviousSelectedId != null)
             {
-                _selectionChangedPublisher.Publish(new PrepareSelectionChangedMessage(context.PreviousSelectedId, false));
+                _selectionChangedPublisher.Publish(new 
+                    PrepareSelectionChangedMessage(context.PreviousSelectedId, false));
             }
 
             _logger.Debug("Selection cancelled");
@@ -243,10 +277,13 @@ namespace Project.Gameplay.Gameplay.Prepare
         private void CancelSession()
         {
             if (_sessionCts == null)
+            {
                 return;
-
+            }
             if (!_sessionCts.IsCancellationRequested)
+            {
                 _sessionCts.Cancel();
+            }
             _sessionCts.Dispose();
             _sessionCts = null;
         }
