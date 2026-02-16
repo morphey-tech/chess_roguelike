@@ -4,7 +4,8 @@
       "id": "0",
       "width": 8,
       "height": 8,
-      "board_data": [
+      "cells_appear_id": "rain_drop",
+      "cells": [
         "[W][B][W][B][W][B][W][B]",
         "[B][W][B][W][B][W][B][W]",
         "[W][B][W][B][W][B][W][B]",
@@ -14,10 +15,11 @@
         "[W][B][W][B][W][B][W][B]",
         "[B][W][B][W][B][W][B][W]"
       ],
-      "appear_id": "rain_drop",
-      "base_capacity": 10,
+      "base_capacity": 8,
       "max_capacity" : 20,
-      "background_asset": "board_back_1",
+      "bg_appear_id": "none",
+      "bg_asset": "board_back_1",
+      "board_appear_id": "none",
       "board_asset": "board_base_1",
       "prepare_asset": "board_prepare_1"
     },
@@ -25,7 +27,8 @@
       "id": "1",
       "width": 8,
       "height": 8,
-      "board_data": [
+      "cells_appear_id": "none",
+      "cells": [
         "[.][.][.][.][.][.][.][.]",
         "[.][.][.][.][.][.][.][.]",
         "[.][.][.][.][.][.][.][.]",
@@ -35,17 +38,20 @@
         "[.][.][.][.][.][.][.][.]",
         "[.][.][.][.][.][.][.][.]"
       ],
-      "appear_id": "none",
-      "base_capacity": 10,
+      "base_capacity": 8,
       "max_capacity" : 20,
-      "background_asset": "board_background",
-      "board_asset": "board_mesh"
+      "bg_appear_id": "none",
+      "bg_asset": "board_back_1",
+      "board_appear_id": "none",
+      "board_asset": "board_base_1",
+      "prepare_asset": "board_prepare_1"
     },
     {
       "id": "2",
       "width": 8,
       "height": 8,
-      "board_data": [
+      "cells_appear_id": "none",
+      "cells": [
         "[.][.][.][.][.][.][.][.]",
         "[.][.][.][.][.][.][.][.]",
         "[.][.][.][.][.][.][.][.]",
@@ -55,11 +61,13 @@
         "[.][.][.][.][.][.][.][.]",
         "[.][.][.][.][.][.][.][.]"
       ],
-      "appear_id": "none",
-      "base_capacity": 10,
+      "base_capacity": 8,
       "max_capacity" : 20,
-      "background_asset": "board_background",
-      "board_asset": "board_mesh"
+      "bg_appear_id": "none",
+      "bg_asset": "board_back_1",
+      "board_appear_id": "none",
+      "board_asset": "board_base_1",
+      "prepare_asset": "board_prepare_1"
     }
   ]
 }

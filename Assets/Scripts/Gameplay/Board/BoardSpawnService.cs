@@ -50,15 +50,11 @@ namespace Project.Gameplay.Gameplay.Board
             
             string[,] map = board.GetBoard2D();
             List<CellSpawnRequest> requests = CollectCellRequests(grid, map);
-            string? appearStrategyId = !string.IsNullOrWhiteSpace(board.AppearStrategyId)
-                ? board.AppearStrategyId.Trim().ToLowerInvariant()
-                : null;
-            _logger.Info($"Board appear strategy: '{appearStrategyId ?? "none"}' (raw='{board.AppearStrategyId ?? "null"}')");
             
             using VisualScope scope = _visualPipeline.BeginScope();
-            scope.Enqueue(new SpawnBoardAssetCommand(board.BackgroundAssetKey, appearStrategyId));
-            scope.Enqueue(new SpawnBoardAssetCommand(board.BoardAssetKey, appearStrategyId));
-            scope.Enqueue(new SpawnBoardCellsCommand(requests, appearStrategyId));
+            scope.Enqueue(new SpawnBoardAssetCommand(board.BackgroundAssetKey, board.BackgroundAppearStrategyId));
+            scope.Enqueue(new SpawnBoardAssetCommand(board.BoardAssetKey, board.BoardAppearStrategyId));
+            scope.Enqueue(new SpawnBoardCellsCommand(requests, board.CellsAppearStrategyId));
             await scope.PlayAsync();
             _logger.Info("Board visual created");
         }
