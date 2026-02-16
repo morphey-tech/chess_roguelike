@@ -4,7 +4,7 @@ using Project.Gameplay.UI;
 using Project.Unity.UI.Components.Game;
 using UnityEngine;
 
-namespace Project.Unity.Presentations
+namespace Project.Unity.Unity.Views.Presentations
 {
     public sealed class FigureHealthPresenter : MonoBehaviour, IPresenter
     {

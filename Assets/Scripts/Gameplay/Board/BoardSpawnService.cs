@@ -47,26 +47,20 @@ namespace Project.Gameplay.Gameplay.Board
             _logger.Info($"Spawning board visual {boardId}");
             BoardConfigRepository repo = await _configProvider.Get<BoardConfigRepository>("boards_conf");
             BoardConfig board = repo.Get(boardId) ?? throw new Exception($"Board '{boardId}' not found");
+            
             string[,] map = board.GetBoard2D();
             List<CellSpawnRequest> requests = CollectCellRequests(grid, map);
-            string? appearStrategyId = string.IsNullOrWhiteSpace(board.AppearStrategyId)
-                ? null
-                : board.AppearStrategyId.Trim().ToLowerInvariant();
+            string? appearStrategyId = !string.IsNullOrWhiteSpace(board.AppearStrategyId)
+                ? board.AppearStrategyId.Trim().ToLowerInvariant()
+                : null;
             _logger.Info($"Board appear strategy: '{appearStrategyId ?? "none"}' (raw='{board.AppearStrategyId ?? "null"}')");
-            using (VisualScope scope = _visualPipeline.BeginScope())
-            {
-                scope.Enqueue(new SpawnBoardCellsCommand(requests, appearStrategyId));
-                await scope.PlayAsync();
-            }
+            
+            using VisualScope scope = _visualPipeline.BeginScope();
+            scope.Enqueue(new SpawnBoardAssetCommand(board.BackgroundAssetKey, appearStrategyId));
+            scope.Enqueue(new SpawnBoardAssetCommand(board.BoardAssetKey, appearStrategyId));
+            scope.Enqueue(new SpawnBoardCellsCommand(requests, appearStrategyId));
+            await scope.PlayAsync();
             _logger.Info("Board visual created");
-        }
-
-        /// <summary>Полный спавн: грид + визуал. Оставлен для совместимости.</summary>
-        public async UniTask<BoardGrid> SpawnAsync(string boardId)
-        {
-            BoardGrid grid = await GetGridAsync(boardId);
-            await SpawnVisualAsync(grid, boardId);
-            return grid;
         }
 
         private static List<CellSpawnRequest> CollectCellRequests(BoardGrid grid, string[,] map)

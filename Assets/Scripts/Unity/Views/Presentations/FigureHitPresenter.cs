@@ -3,7 +3,7 @@ using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
 
-namespace Project.Unity.Presentations
+namespace Project.Unity.Unity.Views.Presentations
 {
     public sealed class FigureHitPresenter : MonoBehaviour
     {

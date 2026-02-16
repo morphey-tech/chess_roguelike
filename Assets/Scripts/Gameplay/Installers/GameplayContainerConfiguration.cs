@@ -3,8 +3,6 @@ using Project.Gameplay.Gameplay.Attack;
 using Project.Gameplay.Gameplay.Attack.Strategies;
 using Project.Gameplay.Gameplay.Board;
 using Project.Gameplay.Gameplay.Board.Capacity;
-using Project.Gameplay.Gameplay.Board.Appear;
-using Project.Gameplay.Gameplay.Board.Appear.Strategies;
 using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Combat.Damage;
 using Project.Gameplay.Gameplay.Combat.Visual;
@@ -14,7 +12,6 @@ using Project.Gameplay.Gameplay.Interaction;
 using Project.Gameplay.Gameplay.Loot;
 using Project.Gameplay.Gameplay.Movement;
 using Project.Gameplay.Gameplay.Movement.Strategies;
-using Project.Gameplay.Gameplay.Prepare;
 using Project.Gameplay.Gameplay.Run;
 using Project.Gameplay.Gameplay.Shutdown;
 using Project.Gameplay.Gameplay.Stage;
@@ -26,8 +23,6 @@ using Project.Gameplay.Gameplay.Turn.Conditions;
 using Project.Gameplay.Gameplay.Turn.Conditions.Impl;
 using Project.Gameplay.Gameplay.Turn.Execution;
 using Project.Gameplay.Gameplay.UI;
-using Project.Gameplay.Gameplay.Visual;
-using Project.Gameplay.Gameplay.Visual.Commands;
 using VContainer;
 
 namespace Project.Gameplay.Gameplay.Installers
@@ -86,14 +81,6 @@ namespace Project.Gameplay.Gameplay.Installers
             builder.Register<IFiguresSpawnProviderFactory, FiguresSpawnProviderFactory>(Lifetime.Singleton);
             builder.Register<FigureRegistry>(Lifetime.Singleton)
                 .AsImplementedInterfaces();
-
-            // Board appear
-            builder.Register<BoardAppearAnimationFactory>(Lifetime.Singleton)
-                .WithParameter<IEnumerable<IBoardAppearAnimationStrategy>>(new IBoardAppearAnimationStrategy[]
-                {
-                    new BoardNoneAppearStrategy(),
-                    new BoardRainDropAppearStrategy()
-                });
 
             // Movement
             builder.Register<MovementStrategyFactory>(Lifetime.Singleton)

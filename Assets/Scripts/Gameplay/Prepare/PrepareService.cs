@@ -123,8 +123,13 @@ namespace Project.Gameplay.Gameplay.Prepare
         {
             PrepareContext? context = _context;
             if (context == null || !context.State.IsActive)
+            {
                 return;
-
+            }
+            if (context.RunState.UsedCapacity <= 0)
+            {
+                return;
+            }
             Complete(context);
         }
 

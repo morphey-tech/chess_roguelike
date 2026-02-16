@@ -3,6 +3,7 @@ using MessagePipe;
 using Project.Core.Core.Physics;
 using Project.Gameplay.Gameplay.Input.Messages;
 using Project.Gameplay.Gameplay.Prepare;
+using Project.Unity.Unity.Views.Components;
 using UnityEngine;
 using VContainer;
 

@@ -14,7 +14,12 @@
         "[W][B][W][B][W][B][W][B]",
         "[B][W][B][W][B][W][B][W]"
       ],
-      "appear_id": "rain_drop"
+      "appear_id": "rain_drop",
+      "base_capacity": 10,
+      "max_capacity" : 20,
+      "background_asset": "board_back_1",
+      "board_asset": "board_base_1",
+      "prepare_asset": "board_prepare_1"
     },
     {
       "id": "1",
@@ -30,7 +35,11 @@
         "[.][.][.][.][.][.][.][.]",
         "[.][.][.][.][.][.][.][.]"
       ],
-      "appear_id": "none"
+      "appear_id": "none",
+      "base_capacity": 10,
+      "max_capacity" : 20,
+      "background_asset": "board_background",
+      "board_asset": "board_mesh"
     },
     {
       "id": "2",
@@ -46,7 +55,11 @@
         "[.][.][.][.][.][.][.][.]",
         "[.][.][.][.][.][.][.][.]"
       ],
-      "appear_id": "none"
+      "appear_id": "none",
+      "base_capacity": 10,
+      "max_capacity" : 20,
+      "background_asset": "board_background",
+      "board_asset": "board_mesh"
     }
   ]
 }

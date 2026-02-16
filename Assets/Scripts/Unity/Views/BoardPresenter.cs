@@ -9,11 +9,10 @@ using Project.Core.Core.Logging;
 using Project.Core.Core.World;
 using Project.Gameplay;
 using Project.Gameplay.Gameplay.Board;
-using Project.Gameplay.Gameplay.Board.Appear;
-using Project.Gameplay.Gameplay.Board.Appear.Strategies;
 using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.Gameplay.Shutdown;
 using Project.Gameplay.Presentations;
+using Project.Unity.Unity.Views.Animations.Board;
 using UnityEngine;
 using VContainer;
 
@@ -32,7 +31,7 @@ namespace Project.Unity.Unity.Views
         private readonly IWorldRoot _worldRoot;
         private readonly ConfigProvider _configProvider;
         private readonly IAssetService _assetService;
-        private readonly BoardAppearAnimationFactory _animationFactory;
+        private readonly BoardAnimationFactory _animationFactory;
         private readonly ILogger<BoardPresenter> _logger;
 
         private readonly Dictionary<GridPosition, EntityLink> _cells = new();
@@ -46,7 +45,7 @@ namespace Project.Unity.Unity.Views
             IWorldRoot worldRoot,
             ConfigProvider configProvider,
             IAssetService assetService,
-            BoardAppearAnimationFactory animationFactory,
+            BoardAnimationFactory animationFactory,
             ILogService logService)
         {
             _entityService = entityService;
@@ -57,53 +56,40 @@ namespace Project.Unity.Unity.Views
             _logger = logService.CreateLogger<BoardPresenter>();
         }
 
-        async UniTask IBoardPresenter.CreateCell(Entity entity, GridPosition pos, string skinId)
+        async UniTask IBoardPresenter.CreateBoardAssetAsync(string? assetKey, string? appearStrategyId)
         {
+            if (string.IsNullOrEmpty(assetKey))
+            {
+                _logger.Error("Asset key is empty");
+                return;
+            }
+            
             try
             {
-                _cellConfigCache ??= await _configProvider.Get<CellConfigRepository>("cells_conf");
-
-                if (!_cellPrefabCache.TryGetValue(skinId, out GameObject prefab))
-                {
-                    CellConfig cellConfig = _cellConfigCache.Get(skinId);
-                    if (cellConfig == null)
-                    {
-                        _logger.Error($"No config found for cell skin '{skinId}'");
-                        return;
-                    }
-                    prefab = await _assetService.LoadAssetAsync<GameObject>(cellConfig.AssetKey);
-                    _cellPrefabCache[skinId] = prefab;
-                }
-
-                Vector3 worldPos = new(
-                    pos.Column * CELL_SIZE,
-                    0f,
-                    pos.Row * CELL_SIZE);
-
-                EntityLink? cell = _entityService.SpawnViewFromPrefab(
-                    entity,
-                    prefab,
-                    worldPos,
+                Vector3 rootPosition = _worldRoot.BoardRoot.position;
+                GameObject assetPrefab = await _assetService.LoadAssetAsync<GameObject>(assetKey);
+                GameObject instance = _assetService.InstantiateFromPrefab(assetPrefab, rootPosition,
                     Quaternion.identity,
                     _worldRoot.BoardRoot);
 
-                if (cell == null)
+                if (string.IsNullOrEmpty(appearStrategyId))
                 {
-                    _logger.Error($"Failed to instantiate cell for skin '{skinId}'");
-                    return;
+                    _logger.Warning("Board appear skipped: strategy id is null/empty");
                 }
-
-                _cells[pos] = cell;
-                _cellsList.Add(cell);
-                _logger.Debug($"Cell '{skinId}' created at ({pos.Row}, {pos.Column})");
+                else
+                {
+                    IBoardAnimationStrategy animation = _animationFactory.Get(appearStrategyId);
+                    await animation.Play(BoardAnimationTarget.Single(instance.transform));
+                }
             }
             catch (Exception e)
             {
-                throw; // TODO handle exception
+                _logger.Error($"Failed to create board asset: {e.Message}");
             }
         }
 
-        async UniTask IBoardPresenter.CreateCellsBatchAsync(IReadOnlyList<CellSpawnRequest> requests, string? appearStrategyId)
+        async UniTask IBoardPresenter.CreateCellsBatchAsync(IReadOnlyList<CellSpawnRequest> requests,
+            string? appearStrategyId)
         {
             if (requests.Count == 0)
             {
@@ -119,7 +105,9 @@ namespace Project.Unity.Unity.Views
             foreach (string skinId in uniqueSkins)
             {
                 if (_cellPrefabCache.ContainsKey(skinId))
+                {
                     continue;
+                }
                 CellConfig? cellConfig = _cellConfigCache!.Get(skinId);
                 if (cellConfig == null)
                 {
@@ -128,13 +116,20 @@ namespace Project.Unity.Unity.Views
                 }
                 preloadTasks.Add(LoadAndCachePrefabAsync(skinId, cellConfig.AssetKey));
             }
-            if (preloadTasks.Count > 0)
-                await UniTask.WhenAll(preloadTasks);
 
+            if (preloadTasks.Count > 0)
+            {
+                await UniTask.WhenAll(preloadTasks);
+            }
+
+            List<Transform> cellsTfm = new List<Transform>();
             foreach (CellSpawnRequest req in requests)
             {
                 if (!_cellPrefabCache.TryGetValue(req.SkinId, out GameObject prefab))
+                {
                     continue;
+                }
+
                 Vector3 worldPos = new(
                     req.Position.Column * CELL_SIZE,
                     0f,
@@ -145,28 +140,30 @@ namespace Project.Unity.Unity.Views
                     worldPos,
                     Quaternion.identity,
                     _worldRoot.BoardRoot);
+
                 if (cell != null)
                 {
+                    cellsTfm.Add(cell.transform);
                     _cells[req.Position] = cell;
                     _cellsList.Add(cell);
                 }
             }
-
             _logger.Debug($"Batch created {_cellsList.Count} cells");
 
-            if (!string.IsNullOrEmpty(appearStrategyId))
-            {
-                IBoardAppearAnimationStrategy strategy = _animationFactory.Get(appearStrategyId);
-                _logger.Info($"Playing board appear: {strategy.Id}");
-                await strategy.Appear(_cellsList);
-                _logger.Info("Board appear completed");
-            }
-            else
+            if (string.IsNullOrEmpty(appearStrategyId))
             {
                 _logger.Warning("Board appear skipped: strategy id is null/empty");
             }
+            else
+            {
+                IBoardAnimationStrategy animation = _animationFactory.Get(appearStrategyId);
+                _logger.Info($"Playing board appear: {animation.Id}");
+                
+                await animation.Play(BoardAnimationTarget.Group(cellsTfm));
+                _logger.Info("Board appear completed");
+            }
         }
-
+        
         UniTask IBoardPresenter.DestroyCell(GridPosition pos)
         {
             if (_cells.Remove(pos, out EntityLink cell))
@@ -176,15 +173,6 @@ namespace Project.Unity.Unity.Views
                 _logger.Debug($"Cell destroyed at ({pos.Row}, {pos.Column})");
             }
             return UniTask.CompletedTask;
-        }
-
-        async UniTask IBoardPresenter.PlayBoardAppearAsync(string strategyId)
-        {
-            await UniTask.Yield();
-            IBoardAppearAnimationStrategy strategy = _animationFactory.Get(strategyId);
-            _logger.Info($"Playing board appear: {strategy.Id}");
-            await strategy.Appear(_cellsList);
-            _logger.Info("Board appear completed");
         }
 
         void IBoardPresenter.Clear()

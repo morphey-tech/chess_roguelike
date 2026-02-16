@@ -28,6 +28,12 @@ namespace Project.Core.Core.Configs.Boards
         [JsonProperty("max_capacity")]
         public int MaxCapacity { get; set; } = 20;
         
+        [JsonProperty("background_asset")]
+        public string BackgroundAssetKey { get; set; }
+        
+        [JsonProperty("board_asset")]
+        public string BoardAssetKey { get; set; }
+        
         /// <summary>
         /// Parses board data from bracket notation format like "[W][B][W][B]" into 2D array.
         /// </summary>

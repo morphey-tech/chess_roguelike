@@ -13,7 +13,7 @@ namespace Project.Gameplay.Gameplay.Prepare
         public IPreparePlacementRules Rules { get; }
         public PrepareState State { get; }
         public CancellationToken CancellationToken { get; }
-
+        
         public HashSet<GridPosition> AvailablePlacementPositions { get; } = new();
 
         public string? PreviousSelectedId { get; set; }

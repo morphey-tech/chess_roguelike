@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Project.Gameplay.Gameplay.Prepare
+namespace Project.Unity.Unity.Views.Components
 {
     /// <summary>
     /// Marker component to identify hand figures for click detection.
