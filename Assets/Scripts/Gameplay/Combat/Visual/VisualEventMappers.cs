@@ -103,6 +103,13 @@ namespace Project.Gameplay.Gameplay.Combat.Visual
         public IEnumerable<IVisualCommand> Map(ICombatVisualEvent visualEvent)
         {
             var evt = (DamageVisualEvent)visualEvent;
+            
+            yield return new DamageTextCommand(new DamageVisualContext(
+                evt.TargetId,
+                evt.Amount,
+                evt.IsCritical,
+                evt.DamageType));
+            
             yield return new DamageCommand(new DamageVisualContext(
                 evt.TargetId,
                 evt.Amount,

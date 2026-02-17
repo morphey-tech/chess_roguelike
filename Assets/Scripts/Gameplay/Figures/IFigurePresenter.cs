@@ -1,5 +1,7 @@
 using Cysharp.Threading.Tasks;
 using Project.Core.Core.Grid;
+using Project.Gameplay.Gameplay.Visual.Commands.Contexts;
+using UnityEngine;
 
 namespace Project.Gameplay.Gameplay.Figures
 {
@@ -20,6 +22,7 @@ namespace Project.Gameplay.Gameplay.Figures
         void HideFigureHealthBar(int figureId);
         UniTask PlayDeathEffectAsync(int figureId);
         UniTask PlayPushEffectAsync(int figureId, GridPosition from, GridPosition to);
+        void ShowDamageText(int figureId, DamageVisualContext ctx);
         void Clear();
     }
 }
