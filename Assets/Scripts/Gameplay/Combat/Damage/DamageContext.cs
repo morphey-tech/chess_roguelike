@@ -7,7 +7,7 @@ namespace Project.Gameplay.Gameplay.Combat.Damage
     {
         public Figure Attacker { get; }
         public Figure Target { get; }
-        public int RawDamage { get; }
+        public float RawDamage { get; }
         public bool IsCritical { get; }
         public string AttackId { get; }
         public IReadOnlyList<IDamageModifier> Modifiers { get; }
@@ -15,7 +15,7 @@ namespace Project.Gameplay.Gameplay.Combat.Damage
         public DamageContext(
             Figure attacker,
             Figure target,
-            int rawDamage,
+            float rawDamage,
             bool isCritical,
             string attackId,
             IReadOnlyList<IDamageModifier> modifiers)

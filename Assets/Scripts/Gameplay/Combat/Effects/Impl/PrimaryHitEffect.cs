@@ -57,7 +57,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
 
             context.Passives.TriggerBeforeHit(_attacker, _target, before);
 
-            int finalDamage = (int)(before.BaseDamage * before.DamageMultiplier) + before.BonusDamage;
+            float finalDamage = before.BaseDamage * before.DamageMultiplier + before.BonusDamage;
             if (finalDamage < 0) finalDamage = 0;
 
             bool isProjectile = _delivery == DeliveryType.Projectile;
@@ -129,7 +129,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
             }
         }
 
-        private void AddPrimaryDeliveryEvent(CombatEffectContext context, int finalDamage, bool isCritical)
+        private void AddPrimaryDeliveryEvent(CombatEffectContext context, float finalDamage, bool isCritical)
         {
             string attackType = string.IsNullOrEmpty(_attackId) ? _delivery.ToString() : _attackId;
 

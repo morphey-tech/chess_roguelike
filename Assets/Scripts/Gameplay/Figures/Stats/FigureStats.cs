@@ -12,7 +12,7 @@ namespace Project.Gameplay.Gameplay.Figures
     public class FigureStats
     {
         public int MaxHp { get; }
-        public int CurrentHp { get; private set; }
+        public float CurrentHp { get; private set; }
         public IReadOnlyList<AttackProfile> Attacks { get; }
 
         /// <summary>Attack stat: base + modifiers. Use .Value for combat formula.</summary>
@@ -22,7 +22,7 @@ namespace Project.Gameplay.Gameplay.Figures
 
         public int AttackRange => MaxAttackRange;
         public int MaxAttackRange => Attacks.Count == 0 ? 0 : Attacks.Max(a => a.Range);
-        public bool IsDead => CurrentHp <= 0;
+        public bool IsDead => CurrentHp <= 0f;
 
         public FigureStats(int maxHp, IReadOnlyList<AttackProfile>? attacks, float baseAttack, float baseDefence)
         {
@@ -43,13 +43,13 @@ namespace Project.Gameplay.Gameplay.Figures
         /// <summary>
         /// Apply damage and return true if figure died.
         /// </summary>
-        public bool TakeDamage(int damage)
+        public bool TakeDamage(float damage)
         {
             CurrentHp -= damage;
             return IsDead;
         }
 
-        public void Heal(int amount)
+        public void Heal(float amount)
         {
             CurrentHp = Math.Min(CurrentHp + amount, MaxHp);
         }

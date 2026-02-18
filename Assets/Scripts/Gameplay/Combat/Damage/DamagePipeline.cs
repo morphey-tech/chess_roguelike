@@ -16,15 +16,15 @@ namespace Project.Gameplay.Gameplay.Combat.Damage
 
         public DamageResult Calculate(DamageContext context)
         {
-            int current = context.RawDamage;
-            int raw = current;
+            float current = context.RawDamage;
+            float raw = current;
 
             foreach (IDamageModifier modifier in _modifiers)
             {
                 current = modifier.Modify(context, current);
             }
 
-            int final = current < 0 ? 0 : current;
+            float final = current < 0 ? 0f : current;
             return new DamageResult(raw, final, blocked: false, dodged: false);
         }
     }

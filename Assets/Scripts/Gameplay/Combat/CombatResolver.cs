@@ -31,6 +31,8 @@ namespace Project.Gameplay.Gameplay.Combat
             float atk = attacker.Stats.Attack.Value;
             float def = target.Stats.Defence.Value;
             float baseDamage = Math.Max(1f, atk - def);
+            
+            _logger.Debug($"Damage calc: ATK={atk} DEF={def} BaseDamage={baseDamage}");
 
             var effects = new List<ICombatEffect>();
             effects.Add(new PrimaryHitEffect(

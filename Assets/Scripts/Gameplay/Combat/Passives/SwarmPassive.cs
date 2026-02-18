@@ -3,6 +3,7 @@ using Project.Gameplay.Gameplay.Combat.Triggers;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Modifier;
+using UnityEngine;
 
 namespace Project.Gameplay.Gameplay.Combat.Passives
 {
@@ -13,8 +14,8 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
     {
         public string Id { get; }
         public int Priority => 100;
-
-        private readonly float _percentPerAlly;
+        
+        private readonly float _percentPerAlly = 10.0f;
         private readonly int _duration;
 
         public SwarmPassive(string id, float percentPerAlly, int duration)
@@ -28,7 +29,8 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
         {
             int allies = context.Grid.CountAlliesAround(figure);
             float percentTotal = allies * _percentPerAlly;
-            var mod = new TimedStatModifier(new PercentModifier(percentTotal, 100), _duration);
+            PercentModifier modifier = new(percentTotal, 100);
+            TimedStatModifier mod = new(modifier, _duration);
             figure.Stats.Attack.Add(mod);
         }
     }

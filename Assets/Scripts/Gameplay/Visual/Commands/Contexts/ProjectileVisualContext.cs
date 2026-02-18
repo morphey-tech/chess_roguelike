@@ -10,7 +10,7 @@ namespace Project.Gameplay.Gameplay.Visual.Commands.Contexts
         public GridPosition To { get; }
         public string ProjectileConfigId { get; }
         public string AttackType { get; }
-        public int Damage { get; }
+        public float Damage { get; }
         public bool IsCritical { get; }
         public string ImpactFxId { get; }
 
@@ -20,7 +20,7 @@ namespace Project.Gameplay.Gameplay.Visual.Commands.Contexts
             GridPosition from,
             GridPosition to,
             string projectileConfigId,
-            int damage,
+            float damage,
             bool isCritical,
             string impactFxId = null,
             string attackType = null)

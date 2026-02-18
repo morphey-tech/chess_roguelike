@@ -8,11 +8,11 @@ namespace Project.Unity.UI.Components.Game
         [SerializeField] private Image _mainFill;
         [SerializeField] private Image _damageFill;
         
-        private int _current;
-        private int _currentView;
-        private int _maxHp;
+        private float _current;
+        private float _currentView;
+        private float _maxHp;
         
-        public void Init(int current, int max, Color mainFillColor)
+        public void Init(float current, float max, Color mainFillColor)
         {
             _current = current;
             _currentView = _current;
@@ -31,7 +31,7 @@ namespace Project.Unity.UI.Components.Game
             return _currentView / (float)_maxHp;
         }
 
-        public void SetHp(int statsCurrentHp)
+        public void SetHp(float statsCurrentHp)
         {
             _current = statsCurrentHp;
             _currentView = _current;

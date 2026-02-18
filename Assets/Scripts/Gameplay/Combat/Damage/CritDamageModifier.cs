@@ -8,12 +8,12 @@ namespace Project.Gameplay.Gameplay.Combat.Damage
 
         private const float CritMultiplier = 1.5f;
 
-        public int Modify(DamageContext context, int value)
+        public float Modify(DamageContext context, float value)
         {
             if (!context.IsCritical)
                 return value;
 
-            return (int)Math.Round(value * CritMultiplier);
+            return value * CritMultiplier;
         }
     }
 }

@@ -2,12 +2,12 @@ namespace Project.Gameplay.Gameplay.Combat.Damage
 {
     public sealed class DamageResult
     {
-        public int Raw { get; }
-        public int Final { get; }
+        public float Raw { get; }
+        public float Final { get; }
         public bool Blocked { get; }
         public bool Dodged { get; }
 
-        public DamageResult(int raw, int final, bool blocked, bool dodged)
+        public DamageResult(float raw, float final, bool blocked, bool dodged)
         {
             Raw = raw;
             Final = final;

@@ -55,7 +55,7 @@ namespace Project.Gameplay.Gameplay.Turn
         public void EndTurn()
         {
             BoardGrid? boardGrid = _runHolder.Current.CurrentStage!.Grid;
-            var turnContext = new TurnContext
+            TurnContext turnContext = new()
             {
                 Grid = boardGrid ?? throw new NullReferenceException("Board Grid not set"),
                 Team = CurrentTeam,

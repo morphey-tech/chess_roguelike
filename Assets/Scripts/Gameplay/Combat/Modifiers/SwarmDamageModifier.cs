@@ -20,7 +20,7 @@ namespace Project.Gameplay.Gameplay.Combat
         public void Modify(CombatStatContext ctx)
         {
             float multiplier = 1f + _allies * (_percentPerAlly / 100f);
-            ctx.Damage = (int)(ctx.Damage * multiplier);
+            ctx.Damage = ctx.Damage * multiplier;
         }
     }
 }

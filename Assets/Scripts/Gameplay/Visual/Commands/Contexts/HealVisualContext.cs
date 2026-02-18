@@ -3,9 +3,9 @@ namespace Project.Gameplay.Gameplay.Visual.Commands.Contexts
     public readonly struct HealVisualContext
     {
         public int TargetId { get; }
-        public int Amount { get; }
+        public float Amount { get; }
 
-        public HealVisualContext(int targetId, int amount = 0)
+        public HealVisualContext(int targetId, float amount = 0)
         {
             TargetId = targetId;
             Amount = amount;

@@ -22,7 +22,7 @@ namespace Project.Gameplay.Gameplay.Turn
         public GridPosition From { get; set; }
         
         public bool LastAttackKilledTarget { get; set; }
-        public int LastDamageDealt { get; set; }
+        public float LastDamageDealt { get; set; }
         
 
         /// <summary>

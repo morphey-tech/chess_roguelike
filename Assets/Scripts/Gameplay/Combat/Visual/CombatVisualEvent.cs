@@ -32,11 +32,11 @@ namespace Project.Gameplay.Gameplay.Combat.Visual
         public CombatVisualStage Stage => CombatVisualStage.Hit;
         public int OrderInStage => 0;
         public int TargetId { get; }
-        public int Amount { get; }
+        public float Amount { get; }
         public bool IsCritical { get; }
         public string DamageType { get; }
 
-        public DamageVisualEvent(int targetId, int amount, bool isCritical = false, string damageType = null)
+        public DamageVisualEvent(int targetId, float amount, bool isCritical = false, string damageType = null)
         {
             TargetId = targetId;
             Amount = amount;
@@ -71,7 +71,7 @@ namespace Project.Gameplay.Gameplay.Combat.Visual
         public int TargetId { get; }
         public string ProjectileConfigId { get; }
         public string AttackType { get; }
-        public int Damage { get; }
+        public float Damage { get; }
         public bool IsCritical { get; }
         public string ImpactFxId { get; }
 
@@ -81,7 +81,7 @@ namespace Project.Gameplay.Gameplay.Combat.Visual
             GridPosition to,
             int targetId,
             string projectileConfigId,
-            int damage,
+            float damage,
             bool isCritical,
             string impactFxId = null,
             string attackType = null)
@@ -128,11 +128,11 @@ namespace Project.Gameplay.Gameplay.Combat.Visual
         public int AttackerId { get; }
         public int TargetId { get; }
         public GridPosition TargetPosition { get; }
-        public int Damage { get; }
+        public float Damage { get; }
         public bool IsCritical { get; }
         public string AttackId { get; }
 
-        public ProjectileHitApplyEvent(int attackerId, int targetId, GridPosition targetPosition, int damage, bool isCritical, string attackId)
+        public ProjectileHitApplyEvent(int attackerId, int targetId, GridPosition targetPosition, float damage, bool isCritical, string attackId)
         {
             AttackerId = attackerId;
             TargetId = targetId;
@@ -188,9 +188,9 @@ namespace Project.Gameplay.Gameplay.Combat.Visual
         public CombatVisualStage Stage => CombatVisualStage.Hit;
         public int OrderInStage => 0;
         public int TargetId { get; }
-        public int Amount { get; }
+        public float Amount { get; }
 
-        public HealVisualEvent(int targetId, int amount)
+        public HealVisualEvent(int targetId, float amount)
         {
             TargetId = targetId;
             Amount = amount;
