@@ -1,45 +1,32 @@
+using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Combat.Contexts;
 using Project.Gameplay.Gameplay.Combat.Triggers;
 using Project.Gameplay.Gameplay.Figures;
-using UnityEngine;
+using Project.Gameplay.Gameplay.Modifier;
 
 namespace Project.Gameplay.Gameplay.Combat.Passives
 {
     /// <summary>
-    /// Танк: если не двигался в этом ходу - получает меньше урона.
-    /// Only activates when the tank is being attacked (is the target).
+    /// Tank: +Defence each turn only if this figure did NOT move this turn (timed 1 turn).
     /// </summary>
-    public sealed class FortifyPassive : IPassive, IOnBeforeHit
+    public sealed class FortifyPassive : IPassive, IOnTurnStart
     {
         public string Id { get; }
         public int Priority => 100;
-        
-        private readonly int _damageReduction;
+
+        private readonly int _defenceBonus;
 
         public FortifyPassive(string id, int damageReduction)
         {
             Id = id;
-            _damageReduction = damageReduction;
+            _defenceBonus = damageReduction;
         }
 
-        public void OnBeforeHit(Figure owner, BeforeHitContext context)
+        public void OnTurnStart(Figure figure, TurnContext context)
         {
-            // Only reduce damage when THIS figure (owner) is being attacked
-            if (owner != context.Target)
-            {
-                Debug.Log($"[FortifyPassive] Skipped: owner={owner} is not target={context.Target}");
-                return;
-            }
-
-            if (!context.TargetMovedThisTurn)
-            {
-                context.BonusDamage -= _damageReduction;
-                Debug.Log($"[FortifyPassive] {owner} reduced incoming damage by {_damageReduction}. BonusDamage now: {context.BonusDamage}");
-            }
-            else
-            {
-                Debug.Log($"[FortifyPassive] {owner} moved this turn, no reduction");
-            }
+            var fortifyMod = new FortifyDefenceModifier(figure, _defenceBonus);
+            var mod = new TimedStatModifier(fortifyMod, 1);
+            figure.Stats.Defence.Add(mod);
         }
     }
 }

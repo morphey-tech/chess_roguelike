@@ -1,41 +1,49 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Project.Core.Core.Logging;
-using Project.Gameplay.Gameplay.Combat.Damage;
 using Project.Gameplay.Gameplay.Combat.Effects;
 using Project.Gameplay.Gameplay.Combat.Effects.Impl;
+using Project.Gameplay.Gameplay.Figures;
+using VContainer;
 
 namespace Project.Gameplay.Gameplay.Combat
 {
     /// <summary>
-    /// Orchestrates combat phases and builds effect list.
-    /// Does NOT apply damage directly — that's done by effects.
+    /// Single place for damage formula: uses only Attack.Value and Defence.Value.
+    /// Passives only manage stat modifiers — no formulas here from passives.
     /// </summary>
     public sealed class CombatResolver
     {
         private readonly ILogger<CombatResolver> _logger;
-        private readonly IDamagePipeline _damagePipeline;
 
-        public CombatResolver(ILogService logService, IDamagePipeline damagePipeline)
+        [Inject]
+        private CombatResolver(ILogService logService)
         {
             _logger = logService.CreateLogger<CombatResolver>();
-            _damagePipeline = damagePipeline;
         }
 
         public CombatResult Resolve(HitContext context)
         {
-            var effects = new List<ICombatEffect>();
+            Figure attacker = context.Attacker ?? throw new NullReferenceException(nameof(context.Attacker));
+            Figure target = context.Target ?? throw new NullReferenceException(nameof(context.Target));
 
+            float atk = attacker.Stats.Attack.Value;
+            float def = target.Stats.Defence.Value;
+            float baseDamage = Math.Max(1f, atk - def);
+            
+            _logger.Debug($"Damage calc: ATK={atk} DEF={def} BaseDamage={baseDamage}");
+
+            var effects = new List<ICombatEffect>();
             effects.Add(new PrimaryHitEffect(
-                context.Attacker,
-                context.Target,
+                attacker,
+                target,
                 context.AttackerPosition,
                 context.TargetPosition,
-                context.BaseDamage,
+                baseDamage,
                 context.AttackId,
                 context.Delivery,
-                context.ProjectileConfigId,
-                _damagePipeline));
+                context.ProjectileConfigId));
 
             // Effects from attack strategy (splash, pierce, etc.)
             effects.AddRange(context.Effects);

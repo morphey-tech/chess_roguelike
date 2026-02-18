@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using MessagePipe;
+using Project.Gameplay.Gameplay.Board.Capacity;
 using Project.Gameplay.Gameplay.Combat.Effects;
 using Project.Gameplay.Gameplay.Combat.Visual;
 using Project.Gameplay.Gameplay.Figures;
@@ -21,18 +22,21 @@ namespace Project.Gameplay.Gameplay.Combat
         private readonly LootService _lootService;
         private readonly ILootPresenter _lootPresenter;
         private readonly IPublisher<FigureDeathMessage> _deathPublisher;
+        private readonly BoardCapacityService _capacityService;
 
         [Inject]
         public FigureLifeService(
             IFigurePresenter figurePresenter,
             LootService lootService,
             ILootPresenter lootPresenter,
-            IPublisher<FigureDeathMessage> deathPublisher)
+            IPublisher<FigureDeathMessage> deathPublisher,
+            BoardCapacityService capacityService)
         {
             _figurePresenter = figurePresenter;
             _lootService = lootService;
             _lootPresenter = lootPresenter;
             _deathPublisher = deathPublisher;
+            _capacityService = capacityService;
         }
 
         public void HandleDeathFromCombat(CombatEffectContext context, Figure unit, BoardCell cell)
@@ -50,6 +54,8 @@ namespace Project.Gameplay.Gameplay.Combat
             }
 
             _deathPublisher.Publish(new FigureDeathMessage(unit.Id, unit.Team, unit.LootTableId, fromCombat: true));
+            if (unit.Team == Team.Player)
+                _capacityService.ReleaseByType(unit.TypeId);
             context.ActionContext.LastAttackKilledTarget = true;
         }
 
@@ -57,6 +63,8 @@ namespace Project.Gameplay.Gameplay.Combat
         {
             cell?.RemoveFigure();
             _deathPublisher.Publish(new FigureDeathMessage(unit.Id, unit.Team, unit.LootTableId, fromCombat: true));
+            if (unit.Team == Team.Player)
+                _capacityService.ReleaseByType(unit.TypeId);
         }
 
         public async UniTask HandleDeathDirectAsync(Figure unit, BoardCell cell)
@@ -75,6 +83,8 @@ namespace Project.Gameplay.Gameplay.Combat
             }
 
             _deathPublisher.Publish(new FigureDeathMessage(unit.Id, unit.Team, unit.LootTableId, fromCombat: true));
+            if (unit.Team == Team.Player)
+                _capacityService.ReleaseByType(unit.TypeId);
         }
     }
 }

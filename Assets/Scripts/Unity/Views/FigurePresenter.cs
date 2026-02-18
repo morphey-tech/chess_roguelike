@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
 using Project.Core.Core.Physics;
@@ -10,9 +11,12 @@ using Project.Gameplay.Gameplay.Figures;
 using Project.Core.Core.Configs.Gameplay;
 using Project.Gameplay.Gameplay.Selection;
 using Project.Gameplay.Gameplay.Shutdown;
+using Project.Gameplay.Gameplay.Visual.Commands.Contexts;
 using Project.Gameplay.Presentations;
 using Project.Unity.Presentations;
+using Project.Unity.Unity.Views.Presentations;
 using UnityEngine;
+using VContainer;
 
 namespace Project.Unity.Unity.Views
 {
@@ -40,9 +44,11 @@ namespace Project.Unity.Unity.Views
             public FigureAttackPresenter? Attack { get; set; }
             public FigureDeathPresenter? Death { get; set; }
             public FigureHitPresenter? Hit { get; set; }
+            public DamageTextPresenter? DamageText { get; set; }
         }
 
-        public FigurePresenter(
+        [Inject]
+        private FigurePresenter(
             EntityService entityService,
             ConfigProvider configProvider,
             IWorldRoot worldRoot,
@@ -100,7 +106,8 @@ namespace Project.Unity.Unity.Views
                 Move = controllerLink.GetComponentInChildren<FigureMovePresenter>(true),
                 Attack = controllerLink.GetComponentInChildren<FigureAttackPresenter>(true),
                 Death = controllerLink.GetComponentInChildren<FigureDeathPresenter>(true),
-                Hit = controllerLink.GetComponentInChildren<FigureHitPresenter>(true)
+                Hit = controllerLink.GetComponentInChildren<FigureHitPresenter>(true),
+                DamageText = controllerLink.GetComponentInChildren<DamageTextPresenter>(true)
             };
             _visuals[figure.Id] = visuals;
 
@@ -199,6 +206,14 @@ namespace Project.Unity.Unity.Views
             await PlaySimpleHealEffect(figureGO);
         }
 
+        public void ShowDamageText(int figureId, DamageVisualContext ctx)
+        {
+            if (!_visuals.TryGetValue(figureId, out var visualSet))
+                return;
+
+            visualSet.DamageText?.ShowFor(ctx);
+        }
+        
         public void ShowFigureHealthBar(int figureId)
         {
             FigureHealthPresenter? health = GetHealthPresenter(figureId);
@@ -351,7 +366,6 @@ namespace Project.Unity.Unity.Views
             _figures.Clear();
             _visuals.Clear();
             _positions.Clear();
-
             _logger.Debug("Figures cleared");
         }
 

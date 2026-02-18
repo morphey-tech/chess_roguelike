@@ -13,6 +13,6 @@ namespace Project.Core.Core.Configs.Stage
         public string SpawnPatternId { get; set; }
         
         [JsonProperty("enemies")]
-        public EnemySpawnData[] Enemies { get; set; }
+        public EnemySpawnData[]? Enemies { get; set; }
     }
 }

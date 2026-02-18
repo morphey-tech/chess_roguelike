@@ -4,6 +4,7 @@ using Project.Core;
 using Project.Core.Core.Assets;
 using Project.Core.Window;
 using Project.Unity.UI.Components;
+using Project.Unity.UI.Components.Game;
 using UnityEngine;
 using VContainer;
 
@@ -62,8 +63,8 @@ namespace Project.Gameplay.UI
       anchor.SetTarget(followTarget);
       _anchors.Add(anchor);
 
-      /*if (instance.TryGetComponent(out ICompletableComponent completable))
-        completable.SetOnCompleteAction(OnComplete);*/
+      if (instance.TryGetComponent(out ICompletable completable))
+        completable.SetOnCompleteAction(OnComplete);
 
       SyncAnchorsAvoidanceTargets();
     }
@@ -91,16 +92,16 @@ namespace Project.Gameplay.UI
       anchor.SetTarget(position, isRect: isRect);
       _anchors.Add(anchor);
 
-      /*if (instance.TryGetComponent(out ICompletableComponent completable))
-        completable.SetOnCompleteAction(OnComplete);*/
+      if (instance.TryGetComponent(out ICompletable completable))
+        completable.SetOnCompleteAction(OnComplete);
 
       SyncAnchorsAvoidanceTargets();
     }
 
-    /*private void OnComplete(ICompletableComponent component)
+    private void OnComplete(ICompletable component)
     {
       Remove(component.Value);
-    }*/
+    }
 
     public void Remove<T>(T instance) where T : Component
     {

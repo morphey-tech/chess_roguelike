@@ -1,13 +1,13 @@
+using System;
 using System.Collections.Generic;
 using LiteUI.UI.Service;
 using MessagePipe;
+using Project.Core.Core.Logging;
 using Project.Core.Core.World;
 using Project.Core.Window;
 using Project.Gameplay.Gameplay.Attack;
 using Project.Gameplay.Gameplay.Attack.Strategies;
 using Project.Gameplay.Gameplay.Board;
-using Project.Gameplay.Gameplay.Board.Appear;
-using Project.Gameplay.Gameplay.Board.Appear.Strategies;
 using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Combat.Damage;
 using Project.Gameplay.Gameplay.Combat.Visual;
@@ -39,6 +39,8 @@ using Project.Gameplay.Presentations;
 using Project.Unity.Unity.Bootstrap;
 using Project.Unity.Unity.Prepare;
 using Project.Unity.Unity.Views;
+using Project.Unity.Unity.Views.Animations.Board;
+using Project.Unity.Unity.Views.Animations.Board.Strategies;
 using Project.Unity.Unity.World;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -57,6 +59,7 @@ namespace Project.Unity.Unity.Installers
         [SerializeField] private UiObjectCollector _uiObjectCollector;
         
         private IObjectResolver _resolver = null!;
+        private ILogger<GameLifetimeScope> _logger = null!;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -110,6 +113,14 @@ namespace Project.Unity.Unity.Installers
                 .As<IBoardPresenter>()
                 .As<IGameShutdownCleanup>();
 
+            // Board appear
+            builder.Register<BoardAnimationFactory>(Lifetime.Singleton)
+                .WithParameter<IEnumerable<IBoardAnimationStrategy>>(new IBoardAnimationStrategy[]
+                {
+                    new NoneAnimationStrategy(),
+                    new BoardCellsRainDropAnimationStrategy()
+                });
+            
             builder.Register<FigurePresenter>(Lifetime.Singleton)
                 .As<IFigurePresenter>()
                 .As<IGameShutdownCleanup>();
@@ -123,8 +134,6 @@ namespace Project.Unity.Unity.Installers
                 .As<IGameShutdownCleanup>();
 
             builder.Register<ActionContextAccessor>(Lifetime.Singleton);
-            builder.Register<DamageTokenStore>(Lifetime.Singleton)
-                .As<IDamageTokenStore>();
 
             // Visual command pipeline
             builder.Register<PresenterProvider>(Lifetime.Singleton)
@@ -180,9 +189,11 @@ namespace Project.Unity.Unity.Installers
         private void OnContainerBuilt(IObjectResolver resolver)
         {
             _resolver = resolver;
+            _logger = resolver.Resolve<ILogService>()
+                .CreateLogger<GameLifetimeScope>();
             
             // Force-create services with subscriptions
-            resolver.Resolve<TurnSystem>();
+            resolver.Resolve<TurnService>();
             resolver.Resolve<InteractionController>();
             resolver.Resolve<ITurnController>();
             resolver.Resolve<IBonusMoveSession>(); // Has click subscription
@@ -213,9 +224,9 @@ namespace Project.Unity.Unity.Installers
             {
                 _resolver.Resolve<GameShutdownCleanupService>().Cleanup();
             }
-            catch
+            catch (Exception ex)
             {
-                /* ignore */
+                _logger.Error(ex.Message);
             }
             base.OnDestroy();
         }

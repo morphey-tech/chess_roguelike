@@ -22,14 +22,14 @@ namespace Project.Core.Core.Infrastructure
 
             writer.WritePropertyName("Board");
             writer.WriteStartArray();
-            for (int i = 0; i < value.Board.Length; i++)
+            for (int i = 0; i < value.Cells.Length; i++)
             {
-                writer.WriteValue(value.Board[i]);
+                writer.WriteValue(value.Cells[i]);
             }
             writer.WriteEndArray();
 
             writer.WritePropertyName("AppearId");
-            writer.WriteValue(value.AppearStrategyId);
+            writer.WriteValue(value.CellsAppearStrategyId);
             writer.WriteEndObject();
         }
 
@@ -60,13 +60,13 @@ namespace Project.Core.Core.Infrastructure
                         case "board_data":
                             reader.Read();
                             string[]? board = serializer.Deserialize<string[]>(reader);
-                            boardConfig.Board = board;
+                            boardConfig.Cells = board;
                             break;
                         case "appear_id":
                         case "appearid":
                         case "appearstrategyid":
                             reader.Read();
-                            boardConfig.AppearStrategyId = reader.Value?.ToString();
+                            boardConfig.CellsAppearStrategyId = reader.Value?.ToString();
                             break;
                     }
                 }

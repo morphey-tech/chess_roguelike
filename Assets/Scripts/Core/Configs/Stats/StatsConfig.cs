@@ -14,5 +14,11 @@ namespace Project.Core.Core.Configs.Stats
         
         [JsonProperty("attacks")]
         public AttackConfig[] Attacks { get; set; } = Array.Empty<AttackConfig>();
+
+        [JsonProperty("attack")]
+        public int Attack { get; set; }
+
+        [JsonProperty("defence")]
+        public int Defence { get; set; }
     }
 }

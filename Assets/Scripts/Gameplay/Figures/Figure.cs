@@ -13,7 +13,10 @@ namespace Project.Gameplay.Gameplay.Figures
         public FigureStats Stats { get; }
         public Team Team { get; }
         public List<IPassive> Passives { get; } = new();
-        public TurnPattern TurnPattern { get; private set; }
+        public TurnPattern? TurnPattern { get; private set; }
+
+        /// <summary>True if this figure moved this turn (reset at start of each team's turn). Used e.g. by Fortify.</summary>
+        public bool MovedThisTurn { get; set; }
         public string? LootTableId { get; set; }
 
         public Figure(int id, string typeId, string movementId, string attackId,

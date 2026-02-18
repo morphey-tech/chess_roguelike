@@ -22,7 +22,10 @@ namespace Project.Core.Core.Configs.Figure
         public string TurnPatternsId { get; set; }
         
         [JsonProperty("passives")]
-        public string[] Passives { get; set; } = Array.Empty<string>();
+        public string[]? Passives { get; set; } = Array.Empty<string>();
+        
+        [JsonProperty("load")]
+        public int Load { get; set; } = 1;
 
         [JsonProperty("loot_table_id")]
         public string LootTableId { get; set; } = string.Empty;

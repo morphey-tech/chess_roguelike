@@ -175,6 +175,9 @@ namespace Project.Unity.UI.Components
 
     public void Tick()
     {
+      if (_rectTransform == null)
+        return;
+
       UpdatePosition(_forceUpdateCount > 0);
 
       if (_forceUpdateCount > 0)
@@ -183,6 +186,9 @@ namespace Project.Unity.UI.Components
 
     public void UpdatePosition(bool ignoreLerp = false)
     {
+      if (_rectTransform == null)
+        return;
+
       if (!_targetPosition.HasValue && _target == null)
       {
         _rectTransform.anchoredPosition = Gameplay.Gameplay.UI.UIService.Canvas.ViewportToCanvasPosition(_nonTargetViewportPosition);
@@ -371,8 +377,8 @@ namespace Project.Unity.UI.Components
 
     private void OnDisable()
     {
-      /*if(ApplicationState.IsPlaying)
-        AnchorToTargetTicker.Instance.Unregister(this);*/
+      if (AnchorToTargetTicker.Instance != null)
+        AnchorToTargetTicker.Instance.Unregister(this);
     }
   }
 }

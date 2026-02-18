@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Project.Gameplay.Gameplay.Board;
-using Project.Gameplay.Gameplay.Visual;
 
 namespace Project.Gameplay.Gameplay.Visual.Commands.Impl
 {
@@ -11,12 +10,12 @@ namespace Project.Gameplay.Gameplay.Visual.Commands.Impl
     /// </summary>
     public sealed class SpawnBoardCellsCommand : IVisualCommand
     {
-        private readonly IReadOnlyList<CellSpawnRequest> _requests;
-        private readonly string? _appearStrategyId;
-
         public string DebugName => $"SpawnBoardCells(count={_requests.Count}, appear={_appearStrategyId ?? "none"})";
         public VisualCommandMode Mode => VisualCommandMode.Blocking;
 
+        private readonly IReadOnlyList<CellSpawnRequest> _requests;
+        private readonly string? _appearStrategyId;
+        
         public SpawnBoardCellsCommand(IReadOnlyList<CellSpawnRequest> requests, string? appearStrategyId)
         {
             _requests = requests;

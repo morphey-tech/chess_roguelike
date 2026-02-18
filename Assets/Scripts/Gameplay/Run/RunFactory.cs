@@ -1,5 +1,6 @@
 using Project.Core.Core.Configs.Run;
 using Project.Gameplay.Gameplay.Board;
+using Project.Gameplay.Gameplay.Board.Capacity;
 using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.Gameplay.Save.Service;
 using Project.Gameplay.Gameplay.Stage;
@@ -15,6 +16,7 @@ namespace Project.Gameplay.Gameplay.Run
         private readonly StagePhaseFactory _phaseFactory;
         private readonly PlayerRunStateService _runStateService;
         private readonly BoardSpawnService _boardSpawnService;
+        private readonly BoardCapacityService _boardCapacityService;
 
         [Inject]
         private RunFactory(
@@ -22,13 +24,15 @@ namespace Project.Gameplay.Gameplay.Run
             StageFactory stageFactory,
             StagePhaseFactory phaseFactory, 
             PlayerRunStateService runStateService,
-            BoardSpawnService boardSpawnService)
+            BoardSpawnService boardSpawnService,
+            BoardCapacityService boardCapacityService)
         {
             _configProvider = configProvider;
             _stageFactory = stageFactory;
             _phaseFactory = phaseFactory;
             _runStateService = runStateService;
             _boardSpawnService = boardSpawnService;
+            _boardCapacityService = boardCapacityService;
         }
 
         public Run Create(RunConfig config)
@@ -39,7 +43,8 @@ namespace Project.Gameplay.Gameplay.Run
                 _stageFactory, 
                 _phaseFactory, 
                 _runStateService,
-                _boardSpawnService);
+                _boardSpawnService,
+                _boardCapacityService);
         }
     }
 }

@@ -18,16 +18,16 @@ namespace Project.Gameplay.Gameplay.Attack
             _attackResolver = attackResolver;
         }
 
-        public IReadOnlyCollection<GridPosition> GetTargets(Figure actor, GridPosition from, BoardGrid grid)
+        public IReadOnlyCollection<GridPosition> GetTargets(Figure? actor, GridPosition from, BoardGrid? grid)
         {
-            var result = new HashSet<GridPosition>();
+            HashSet<GridPosition> result = new HashSet<GridPosition>();
             if (actor == null || grid == null)
                 return result;
 
             Team enemyTeam = actor.Team == Team.Player ? Team.Enemy : Team.Player;
             foreach (Figure enemy in grid.GetFiguresByTeam(enemyTeam))
             {
-                BoardCell cell = grid.FindFigure(enemy);
+                BoardCell? cell = grid.FindFigure(enemy);
                 if (cell == null)
                     continue;
 

@@ -2,9 +2,7 @@ using Project.Gameplay.Components;
 using Project.Gameplay.Presentations;
 using UnityEngine;
 
-
-
-namespace Project.Unity.Presentations
+namespace Project.Unity.Unity.Views.Presentations
 {
     public class FigureSelectPresenter : MonoBehaviour, IPresenter
     {

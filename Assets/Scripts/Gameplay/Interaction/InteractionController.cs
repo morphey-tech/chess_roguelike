@@ -27,7 +27,7 @@ namespace Project.Gameplay.Gameplay.Interaction
         private readonly IInteractionLock _interactionLock;
         private readonly IClickIntentResolver _intentResolver;
         private readonly ITurnController _turnController;
-        private readonly TurnSystem _turnSystem;
+        private readonly TurnService _turnService;
         private readonly RunHolder _runHolder;
         private readonly IPublisher<FigureSelectedMessage> _figureSelectedPublisher;
         private readonly IPublisher<FigureDeselectedMessage> _figureDeselectedPublisher;
@@ -46,7 +46,7 @@ namespace Project.Gameplay.Gameplay.Interaction
             IInteractionLock interactionLock,
             IClickIntentResolver intentResolver,
             ITurnController turnController,
-            TurnSystem turnSystem,
+            TurnService turnService,
             RunHolder runHolder,
             ISubscriber<CellClickedMessage> cellClickedSubscriber,
             ISubscriber<CancelRequestedMessage> cancelSubscriber,
@@ -58,7 +58,7 @@ namespace Project.Gameplay.Gameplay.Interaction
             _interactionLock = interactionLock;
             _intentResolver = intentResolver;
             _turnController = turnController;
-            _turnSystem = turnSystem;
+            _turnService = turnService;
             _runHolder = runHolder;
             _figureSelectedPublisher = figureSelectedPublisher;
             _figureDeselectedPublisher = figureDeselectedPublisher;
@@ -124,7 +124,7 @@ namespace Project.Gameplay.Gameplay.Interaction
                 message.Position,
                 SelectedFigure,
                 SelectedPosition,
-                _turnSystem.CurrentTeam
+                _turnService.CurrentTeam
             );
 
             ClickIntent intent = _intentResolver.Resolve(context);

@@ -6,7 +6,8 @@
       "attack_id": "simple",
       "stats_id": "pawn_stats",
       "turn_patterns_id": "melee_default",
-      "passives": [],
+      "passives": ["swarm"],
+      "load": 1,
       "loot_table_id": "goblin_basic"
     },
     {
@@ -16,6 +17,7 @@
       "stats_id": "knight_stats",
       "turn_patterns_id": "melee_default",
       "passives": ["crit_20"],
+      "load": 2,
       "loot_table_id": "goblin_basic"
     },
     {
@@ -24,7 +26,8 @@
       "attack_id": "ranged",
       "stats_id": "bishop_stats",
       "turn_patterns_id": "ranged_default",
-      "passives": ["lifesteal_25"]
+      "passives": ["lifesteal_25"],
+      "load": 2
     },
     {
       "id": "rook",
@@ -32,7 +35,9 @@
       "attack_id": "simple",
       "stats_id": "rook_stats",
       "turn_patterns_id": "melee_default",
-      "passives": ["execute_30"]
+      "passives": ["execute_30"],
+      "load": 3
+      
     },
     {
       "id": "queen",
@@ -40,7 +45,17 @@
       "attack_id": "simple",
       "stats_id": "queen_stats",
       "turn_patterns_id": "melee_default",
-      "passives": ["lifesteal_50", "execute_30"]
+      "passives": ["lifesteal_50", "execute_30"],
+      "load": 4
+    },
+    {
+      "id": "king",
+      "movement_id": "pawn",
+      "attack_id": "simple",
+      "stats_id": "king_stats",
+      "turn_patterns_id": "melee_default",
+      "passives": [],
+      "load": 3
     },
     {
       "id": "slippery",
@@ -48,7 +63,8 @@
       "attack_id": "simple",
       "stats_id": "slippery_stats",
       "turn_patterns_id": "melee_default",
-      "passives": ["retreat_slippery"]
+      "passives": ["retreat_slippery"],
+      "load": 2
     },
     {
       "id": "tank",
@@ -56,7 +72,8 @@
       "attack_id": "simple",
       "stats_id": "tank_stats",
       "turn_patterns_id": "melee_default",
-      "passives": ["fortify_tank"]
+      "passives": ["fortify_tank"],
+      "load": 4
     },
     {
       "id": "splash",
@@ -64,7 +81,8 @@
       "attack_id": "splash",
       "stats_id": "splash_stats",
       "turn_patterns_id": "melee_default",
-      "passives": []
+      "passives": [],
+      "load": 3
     },
     {
       "id": "pierce",
@@ -72,7 +90,8 @@
       "attack_id": "pierce",
       "stats_id": "pierce_stats",
       "turn_patterns_id": "melee_default",
-      "passives": []
+      "passives": [],
+      "load": 3
     },
     {
       "id": "pusher",
@@ -80,7 +99,8 @@
       "attack_id": "simple",
       "stats_id": "pusher_stats",
       "turn_patterns_id": "melee_default",
-      "passives": ["push_on_hit"]
+      "passives": ["push_on_hit"],
+      "load": 4
     },
     {
       "id": "ranger",
@@ -88,7 +108,8 @@
       "attack_id": "profiled",
       "stats_id": "ranger_stats",
       "turn_patterns_id": "archer_set",
-      "passives": []
+      "passives": [],
+      "load": 3
     }
   ]
 }

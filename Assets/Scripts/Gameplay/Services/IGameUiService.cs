@@ -12,5 +12,6 @@ namespace Project.Gameplay.UI
         UniTask HideCombatUiAsync();
         UniTask<StageFlowAction> ShowVictoryScreenAsync(StageResult result);
         UniTask<StageFlowAction> ShowDefeatScreenAsync(StageResult result);
+        void ShowWarning(string message);
     }
 }

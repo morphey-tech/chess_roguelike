@@ -5,6 +5,7 @@ using Project.Core.Core.Configs.Figure;
 using Project.Core.Core.Configs.Passive;
 using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
+using Project.Gameplay.Gameplay.Board.Capacity;
 using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.Gameplay.Grid;
@@ -20,7 +21,9 @@ namespace Project.Gameplay.Gameplay.Figures
         private readonly IFigurePresenter _figurePresenter;
         private readonly IFigureStatsFactory _statsFactory;
         private readonly TurnPatternFactory _turnPatternFactory;
+        private readonly BoardCapacityService _capacityService;
         private readonly IPublisher<FigureSpawnedMessage> _spawnedPublisher;
+        private readonly IFigureRegistry _figureRegistry;
         private readonly ILogger<FigureSpawnService> _logger;
         
         private FigureConfigRepository? _figureConfigCache;
@@ -33,14 +36,18 @@ namespace Project.Gameplay.Gameplay.Figures
             IFigurePresenter figurePresenter,
             IFigureStatsFactory statsFactory,
             TurnPatternFactory turnPatternFactory,
+            BoardCapacityService capacityService,
             IPublisher<FigureSpawnedMessage> spawnedPublisher,
+            IFigureRegistry figureRegistry,
             ILogService logService)
         {
             _configProvider = configProvider;
             _figurePresenter = figurePresenter;
             _statsFactory = statsFactory;
             _turnPatternFactory = turnPatternFactory;
+            _capacityService = capacityService;
             _spawnedPublisher = spawnedPublisher;
+            _figureRegistry = figureRegistry;
             _logger = logService.CreateLogger<FigureSpawnService>();
         }
 
@@ -131,13 +138,32 @@ namespace Project.Gameplay.Gameplay.Figures
                 _logger.Warning($"Failed to create turn patterns '{description.TurnPatternsId}': {e.Message}");
             }
 
-            cell.PlaceFigure(figure);
-            await _figurePresenter.CreateFigure(figure, figureConfig.AssetKey, position, team);
-            
-            _logger.Info($"Spawned {figure} [{description.Id}] HP:{stats.CurrentHp}/{stats.MaxHp} ATK:{stats.Attack}");
-            _spawnedPublisher.Publish(new FigureSpawnedMessage(figure, position));
+            bool reservedCapacity = false;
+            if (team == Team.Player)
+            {
+                reservedCapacity = _capacityService.TryReserve(description);
+                if (!reservedCapacity)
+                {
+                    _logger.Warning($"Spawn blocked by board capacity for '{figureConfig.Id}'");
+                    return null;
+                }
+            }
 
-            return figure;
+            try
+            {
+                cell.PlaceFigure(figure);
+                await _figurePresenter.CreateFigure(figure, figureConfig.AssetKey, position, team);
+                _figureRegistry.Register(figure);
+                _logger.Info($"Spawned {figure} [{description.Id}] HP:{stats.CurrentHp}/{stats.MaxHp} ATK:{stats.Attack}");
+                _spawnedPublisher.Publish(new FigureSpawnedMessage(figure, position));
+                return figure;
+            }
+            catch
+            {
+                if (reservedCapacity)
+                    _capacityService.ReleaseByType(figure.TypeId);
+                throw;
+            }
         }
 
         public void ClearCache()

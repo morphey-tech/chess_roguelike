@@ -2,8 +2,7 @@ using System.Collections.Generic;
 using Project.Gameplay.Gameplay.Attack;
 using Project.Gameplay.Gameplay.Attack.Strategies;
 using Project.Gameplay.Gameplay.Board;
-using Project.Gameplay.Gameplay.Board.Appear;
-using Project.Gameplay.Gameplay.Board.Appear.Strategies;
+using Project.Gameplay.Gameplay.Board.Capacity;
 using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Combat.Damage;
 using Project.Gameplay.Gameplay.Combat.Visual;
@@ -13,7 +12,6 @@ using Project.Gameplay.Gameplay.Interaction;
 using Project.Gameplay.Gameplay.Loot;
 using Project.Gameplay.Gameplay.Movement;
 using Project.Gameplay.Gameplay.Movement.Strategies;
-using Project.Gameplay.Gameplay.Prepare;
 using Project.Gameplay.Gameplay.Run;
 using Project.Gameplay.Gameplay.Shutdown;
 using Project.Gameplay.Gameplay.Stage;
@@ -25,8 +23,6 @@ using Project.Gameplay.Gameplay.Turn.Conditions;
 using Project.Gameplay.Gameplay.Turn.Conditions.Impl;
 using Project.Gameplay.Gameplay.Turn.Execution;
 using Project.Gameplay.Gameplay.UI;
-using Project.Gameplay.Gameplay.Visual;
-using Project.Gameplay.Gameplay.Visual.Commands;
 using VContainer;
 
 namespace Project.Gameplay.Gameplay.Installers
@@ -44,6 +40,8 @@ namespace Project.Gameplay.Gameplay.Installers
             builder.Register<RunFactory>(Lifetime.Singleton);
             builder.Register<StageFactory>(Lifetime.Singleton);
             builder.Register<StagePhaseFactory>(Lifetime.Singleton);
+            builder.Register<BoardCapacityModel>(Lifetime.Singleton);
+            builder.Register<BoardCapacityService>(Lifetime.Singleton);
 
             // Loot (ILootPresenter регистрируется в Unity в ConfigureViews вместе с другими презентерами)
             builder.Register<LootService>(Lifetime.Singleton).AsSelf();
@@ -56,7 +54,7 @@ namespace Project.Gameplay.Gameplay.Installers
             builder.Register<InteractionLockService>(Lifetime.Singleton).As<IInteractionLock>().AsSelf();
             builder.Register<ClickIntentResolver>(Lifetime.Singleton).As<IClickIntentResolver>();
             builder.Register<InteractionController>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
-            builder.Register<TurnController>(Lifetime.Singleton).As<ITurnController>();
+            builder.Register<TurnExecutionFlow>(Lifetime.Singleton).As<ITurnController>();
 
             // Stage
             builder.Register<StageQueryService>(Lifetime.Singleton).As<IStageQueryService>();
@@ -75,20 +73,14 @@ namespace Project.Gameplay.Gameplay.Installers
             builder.Register<BoardSpawnPhase>(Lifetime.Transient);
             builder.Register<GameplayInitPhase>(Lifetime.Transient);
             builder.Register<BattleDuelPhase>(Lifetime.Transient);
-
+            
             // Figures spawn
             builder.Register<SpawnPatternParser>(Lifetime.Singleton);
             builder.Register<DuelFiguresSpawnProvider>(Lifetime.Singleton);
             builder.Register<EmptyFiguresSpawnProvider>(Lifetime.Singleton);
             builder.Register<IFiguresSpawnProviderFactory, FiguresSpawnProviderFactory>(Lifetime.Singleton);
-
-            // Board appear
-            builder.Register<BoardAppearAnimationFactory>(Lifetime.Singleton)
-                .WithParameter<IEnumerable<IBoardAppearAnimationStrategy>>(new IBoardAppearAnimationStrategy[]
-                {
-                    new BoardNoneAppearStrategy(),
-                    new BoardRainDropAppearStrategy()
-                });
+            builder.Register<FigureRegistry>(Lifetime.Singleton)
+                .AsImplementedInterfaces();
 
             // Movement
             builder.Register<MovementStrategyFactory>(Lifetime.Singleton)
@@ -159,12 +151,11 @@ namespace Project.Gameplay.Gameplay.Installers
             builder.Register<TurnExecutor>(Lifetime.Singleton).As<ITurnExecutor>();
             builder.Register<BonusMoveController>(Lifetime.Singleton).As<IBonusMoveController>();
             builder.Register<BonusMoveSession>(Lifetime.Singleton).As<IBonusMoveSession>();
-            builder.Register<TurnSystem>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
+            builder.Register<TurnService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
 
             // Domain services
             builder.Register<BoardSpawnService>(Lifetime.Singleton);
             builder.Register<FigureSpawnService>(Lifetime.Singleton);
-            builder.Register<DamageService>(Lifetime.Singleton);
             builder.Register<MovementService>(Lifetime.Singleton);
             builder.Register<UIService>(Lifetime.Singleton);
         }

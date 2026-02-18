@@ -93,10 +93,10 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
                 {
                     Attacker = context.Actor,
                     Target = defender,
+                    Profile = profile,
                     AttackerPosition = context.From,
                     TargetPosition = context.To,
                     Grid = context.Grid,
-                    BaseDamage = profile.Damage,
                     HitType = MapHitType(profile.Type),
                     AttackerMovesOnKill = false,
                     AttackId = profile.Type.ToString(),
@@ -128,7 +128,6 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
             CombatResult result = _combatResolver.Resolve(hitContext);
 
             await _lootService.EnsureLoadedAsync();
-
             using VisualScope scope = _visualPipeline.BeginScope();
 
             var visualEvents = new List<ICombatVisualEvent>();

@@ -9,14 +9,10 @@ namespace Project.Gameplay.Gameplay.Board
     /// </summary>
     public interface IBoardPresenter
     {
-        UniTask CreateCell(Entity entity, GridPosition pos, string skinId);
-        /// <summary>
-        /// Создаёт все клетки (параллельно), затем при необходимости запускает одну анимацию появления.
-        /// Визуально: все клетки появляются вместе, без «по одной».
-        /// </summary>
+        UniTask CreateBoardAssetAsync(string? assetKey, string? appearStrategyId);   
         UniTask CreateCellsBatchAsync(IReadOnlyList<CellSpawnRequest> requests, string? appearStrategyId);
+        
         UniTask DestroyCell(GridPosition pos);
-        UniTask PlayBoardAppearAsync(string strategyId);
         void Clear();
     }
 }

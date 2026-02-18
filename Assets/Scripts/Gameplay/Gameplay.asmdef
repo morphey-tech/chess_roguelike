@@ -11,7 +11,8 @@
         "Unity.InputSystem",
         "ZLogger.Unity",
         "MessagePipe",
-        "DOTween.Modules"
+        "DOTween.Modules",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

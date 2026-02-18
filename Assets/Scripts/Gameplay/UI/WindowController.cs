@@ -375,8 +375,10 @@ namespace Project.Core.Window
     {
       Window window;
 
-      if (_windows.ContainsKey(windowType))
-        window = _windows[windowType];
+      if (_windows.TryGetValue(windowType, out Window? existed))
+      {
+        window = existed;
+      }
       else
       {
         window = await CreateWindowAsync(windowType);

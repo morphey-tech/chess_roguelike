@@ -21,6 +21,8 @@ namespace Project.Gameplay.Gameplay.Save.Service
                 CurrentStageIndex = 0,
                 KingHp = 100,
                 Seed = seed,
+                BoardCapacity = 0,
+                UsedCapacity = 0,
                 Figures = new List<FigureState>()
             };
 

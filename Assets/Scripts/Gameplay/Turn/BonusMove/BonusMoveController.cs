@@ -83,8 +83,9 @@ namespace Project.Gameplay.Gameplay.Turn.BonusMove
             }
 
             _movementService.MoveFigure(_from, to);
+            Actor.MovedThisTurn = true;
             _logger.Info($"{Actor} bonus moved to ({to.Row},{to.Column})");
-            
+
             Clear();
             return true;
         }
