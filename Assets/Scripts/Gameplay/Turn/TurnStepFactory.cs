@@ -11,6 +11,7 @@ using Project.Gameplay.Gameplay.Turn.Steps;
 using Project.Gameplay.Gameplay.Turn.Steps.Impl;
 using Project.Gameplay.Gameplay.Visual;
 using Project.Gameplay.Gameplay.Loot;
+using VContainer;
 
 namespace Project.Gameplay.Gameplay.Turn
 {
@@ -30,7 +31,8 @@ namespace Project.Gameplay.Gameplay.Turn
         private readonly ActionContextAccessor _contextAccessor;
         private readonly ILogService _logService;
 
-        public TurnStepFactory(
+        [Inject]
+        private TurnStepFactory(
             MovementService movementService,
             AttackStrategyFactory attackFactory,
             CombatResolver combatResolver,
@@ -71,6 +73,7 @@ namespace Project.Gameplay.Gameplay.Turn
                 "move" => new MoveStep(stepId, _movementService, _visualPipeline),
                 "attack" => new AttackStep(stepId, _attackFactory, _attackResolver, _combatResolver, _visualPlanner, _passives, _visualPipeline, _deathPublisher, _lootService, _damageApplier, _figureLifeService, _contextAccessor, _logService.CreateLogger<AttackStep>()),
                 "move_to_killed" => new MoveToKilledTargetStep(_movementService, _visualPipeline, _logService),
+                "move_to_enemy" => new MoveToTargetStep(_movementService, _visualPipeline, _logService),
                 "composite" => CreateComposite(stepId, config.Steps),
                 _ => throw new Exception($"Unknown step type: {config.Type}")
             };

@@ -1,58 +1,89 @@
 using System.Collections.Generic;
 using System.Linq;
-using Project.Gameplay.Gameplay.Modifier;
 
 namespace Project.Gameplay.Gameplay.Figures
 {
     /// <summary>
-    /// Stat = Base + ordered modifiers. All math happens here only.
+    /// Generic stat with modifier support. Value is calculated on-the-fly.
     /// </summary>
-    public sealed class FigureStat
+    public sealed class FigureStat<T>
     {
-        private readonly float _baseValue;
-        private readonly List<IStatModifier<float>> _mods = new();
+        /// <summary>For debug: see which mods are applied (e.g. "+5 Aura", "x1.2 Rage").</summary>
+        public IReadOnlyList<IStatModifier<T>> Mods => _mods.AsReadOnly();
+        
+        private readonly T _baseValue;
+        private readonly List<IStatModifier<T>> _mods = new();
 
-        public FigureStat(float baseValue)
+        public FigureStat(T baseValue)
         {
             _baseValue = baseValue;
         }
 
-        public float Value
+        public T Value
         {
             get
             {
-                float v = _baseValue;
-                foreach (var m in _mods.OrderBy(x => x.Priority))
-                    v = m.Apply(v);
-                return v;
+                RemoveExpiredModifiers();
+                T result = _baseValue;
+                foreach (var mod in _mods.OrderBy(x => x.Priority))
+                    result = mod.Apply(result);
+                return result;
             }
         }
 
-        /// <summary>For debug: see which mods are applied (e.g. "+5 Aura", "x1.2 Rage").</summary>
-        public IReadOnlyList<IStatModifier<float>> Mods => _mods;
-
-        public void Add(IStatModifier<float> mod)
+        /// <summary>
+        /// Add modifier. Replaces existing if not stackable, otherwise adds to stack.
+        /// </summary>
+        public void AddModifier(IStatModifier<T> mod)
         {
-            _mods.Add(mod);
+            if (mod == null) return;
+
+            var existing = _mods.FirstOrDefault(m => m.Id == mod.Id);
+            if (existing != null && !existing.Stackable)
+            {
+                var index = _mods.IndexOf(existing);
+                _mods[index] = mod;
+            }
+            else
+            {
+                _mods.Add(mod);
+            }
         }
 
-        public void Remove(IStatModifier<float> mod)
+        /// <summary>
+        /// Remove specific modifier instance.
+        /// </summary>
+        public bool RemoveModifier(IStatModifier<T> mod)
         {
-            _mods.Remove(mod);
+            return _mods.Remove(mod);
         }
 
-        /// <summary>Call at end of turn: ticks timed mods and removes expired.</summary>
+        /// <summary>
+        /// Remove all modifiers with specific ID.
+        /// </summary>
+        public bool RemoveModifiersById(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return false;
+            
+            var removed = _mods.RemoveAll(m => m.Id == id);
+            return removed > 0;
+        }
+
+        /// <summary>
+        /// Called once per turn to update all modifiers.
+        /// </summary>
         public void Tick()
         {
-            for (int i = _mods.Count - 1; i >= 0; i--)
+            foreach (var mod in _mods)
             {
-                if (_mods[i] is ITimedModifier timed)
-                {
-                    timed.Tick();
-                    if (timed.IsExpired)
-                        _mods.RemoveAt(i);
-                }
+                mod.Tick();
             }
+            RemoveExpiredModifiers();
+        }
+
+        private void RemoveExpiredModifiers()
+        {
+            _mods.RemoveAll(m => m.IsExpired);
         }
     }
 }

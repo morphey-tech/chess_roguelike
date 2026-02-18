@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
+using Project.Gameplay.Gameplay.Combat;
+using Project.Gameplay.Gameplay.Combat.Contexts;
 using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Movement;
 using Project.Gameplay.Movement;
@@ -13,14 +15,17 @@ namespace Project.Gameplay.Gameplay.Figures
         public BoardGrid? Grid { get; private set; }
 
         private readonly MovementStrategyFactory _strategyFactory;
+        private readonly PassiveTriggerService _passiveTriggerService;
         private readonly ILogger<MovementService> _logger;
 
         [Inject]
         private MovementService(
             MovementStrategyFactory strategyFactory,
+            PassiveTriggerService passiveTriggerService,
             ILogService logService)
         {
             _strategyFactory = strategyFactory;
+            _passiveTriggerService = passiveTriggerService;
             _logger = logService.CreateLogger<MovementService>();
         }
 
@@ -104,9 +109,24 @@ namespace Project.Gameplay.Gameplay.Figures
                 return;
             }
 
+            // Сохраняем предыдущую позицию для пассивок
+            figure.PreviousPosition = from;
+
             fromCell.RemoveFigure();
             toCell.PlaceFigure(figure);
             toCell.Effects.OnEnter(toCell);
+
+            // Вызываем триггеры движения
+            var moveContext = new MoveContext
+            {
+                Figure = figure,
+                From = from,
+                To = to,
+                Grid = Grid,
+                CurrentTurn = 0, // TODO: получить текущий ход из TurnService
+                DidMove = true
+            };
+            _passiveTriggerService.TriggerMove(figure, moveContext);
 
             _logger.Info($"Moved {figure} from ({from.Row},{from.Column}) to ({to.Row},{to.Column})");
         }

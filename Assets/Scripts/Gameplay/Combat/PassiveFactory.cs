@@ -13,7 +13,7 @@ namespace Project.Gameplay.Gameplay.Combat
         private const string THORNS = "thorns";
         private const string PUSH_ON_HIT = "push_on_hit";
         private const string RETREAT_ON_NO_KILL = "retreat_on_no_kill";
-        private const string FORTIFY = "fortify";
+        private const string MOMENTUM = "momentum";
 
         public static IPassive? Create(PassiveConfig config)
         {
@@ -26,7 +26,7 @@ namespace Project.Gameplay.Gameplay.Combat
                 THORNS => new ThornsPassive(config.Id, config.GetFloat("percent", 0.25f)),
                 PUSH_ON_HIT => new PushOnHitPassive(config.Id, config.GetInt("bonus_damage", 1)),
                 RETREAT_ON_NO_KILL => new RetreatOnNoKillPassive(config.Id, config.GetInt("distance", 1)),
-                FORTIFY => new FortifyPassive(config.Id, config.GetInt("reduction", 1)),
+                MOMENTUM => new MomentumPassive(config.Id, config.GetFloat("bonus_damage", 0.5f)),
                 _ => null
             };
         }

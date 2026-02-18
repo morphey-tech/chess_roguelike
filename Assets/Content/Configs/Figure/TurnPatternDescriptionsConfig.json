@@ -1,0 +1,47 @@
+{
+  "content": [
+    {
+      "id": "melee_attack",
+      "priority": 100,
+      "condition_id": "target_is_enemy",
+      "steps": [
+        { "type": "attack" },
+        { "type": "move_to_killed" }
+      ]
+    },
+    {
+      "id": "ranged_attack",
+      "priority": 100,
+      "condition_id": "target_is_enemy",
+      "steps": [
+        { "type": "attack" }
+      ]
+    },
+    {
+      "id": "move_only",
+      "priority": 10,
+      "condition_id": "can_move",
+      "steps": [
+        { "type": "move" }
+      ]
+    },
+    {
+      "id": "archer_knife",
+      "priority": 150,
+      "condition_id": "enemy_adjacent",
+      "steps": [
+        { "type": "attack" }
+      ]
+    },
+    {
+      "id": "melee_translate",
+      "priority": 150,
+      "condition_id": "target_is_enemy",
+      "steps": [
+        { "type": "move_to_enemy" },
+        { "type": "attack" },
+        { "type": "move_to_killed" }
+      ]
+    }
+  ]
+}

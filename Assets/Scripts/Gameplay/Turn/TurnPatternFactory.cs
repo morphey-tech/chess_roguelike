@@ -63,7 +63,7 @@ namespace Project.Gameplay.Gameplay.Turn
 
         public TurnPattern CreatePatternSet(string setId)
         {
-            TurnPatternsConfig config = _patternsConfigs!.Get(setId);
+            TurnPatternsConfig? config = _patternsConfigs!.Get(setId);
             if (config == null)
                 throw new Exception($"Unknown turn patterns: {setId}");
 

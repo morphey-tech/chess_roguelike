@@ -110,7 +110,9 @@ namespace Project.Gameplay.Gameplay.Figures
                 team);
 
             if (!string.IsNullOrEmpty(description.LootTableId))
+            {
                 figure.LootTableId = description.LootTableId;
+            }
 
             if (description.Passives != null)
             {
@@ -119,7 +121,7 @@ namespace Project.Gameplay.Gameplay.Figures
                     PassiveConfig? passiveConfig = _passiveConfigCache.Get(passiveId);
                     if (passiveConfig != null)
                     {
-                        IPassive passive = PassiveFactory.Create(passiveConfig);
+                        IPassive? passive = PassiveFactory.Create(passiveConfig);
                         figure.AddPassive(passive);
                     }
                 }

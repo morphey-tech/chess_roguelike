@@ -25,10 +25,13 @@ namespace Project.Gameplay.Gameplay.Attack.Strategies
         public bool CanAttack(Figure attacker, GridPosition from, GridPosition to, BoardGrid grid)
         {
             if (!grid.IsInside(to))
+            {
                 return false;
+            }
             if (!AttackUtils.IsInRange(from, to, attacker.Stats.AttackRange))
+            {
                 return false;
-            
+            }
             BoardCell targetCell = grid.GetBoardCell(to);
             return targetCell.OccupiedBy != null && targetCell.OccupiedBy.Team != attacker.Team;
         }
@@ -66,9 +69,11 @@ namespace Project.Gameplay.Gameplay.Attack.Strategies
             for (int i = 0; i < _maxPierceCount; i++)
             {
                 current = new GridPosition(current.Row + dirRow, current.Column + dirCol);
-                
+
                 if (!grid.IsInside(current))
+                {
                     break;
+                }
 
                 BoardCell cell = grid.GetBoardCell(current);
                 if (cell.OccupiedBy != null && cell.OccupiedBy.Team != attacker.Team)

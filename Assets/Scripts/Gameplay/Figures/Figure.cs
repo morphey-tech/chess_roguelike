@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Turn;
 
@@ -17,6 +18,10 @@ namespace Project.Gameplay.Gameplay.Figures
 
         /// <summary>True if this figure moved this turn (reset at start of each team's turn). Used e.g. by Fortify.</summary>
         public bool MovedThisTurn { get; set; }
+        
+        /// <summary>Previous position before movement. Used by passives to calculate movement distance.</summary>
+        public GridPosition? PreviousPosition { get; set; }
+        
         public string? LootTableId { get; set; }
 
         public Figure(int id, string typeId, string movementId, string attackId,

@@ -1,0 +1,34 @@
+{
+  "content": [
+    {
+      "id": "melee_default",
+      "pattern_ids": [
+        "melee_attack",
+        "move_only"
+      ]
+    },
+    {
+      "id": "ranged_default",
+      "pattern_ids": [
+        "ranged_attack",
+        "move_only"
+      ]
+    },
+    {
+      "id": "archer_set",
+      "pattern_ids": [
+        "archer_knife",
+        "ranged_attack",
+        "move_only"
+      ]
+    },
+    {
+      "id": "melee_translate",
+      "pattern_ids": [
+        "melee_translate",
+        "melee_attack",
+        "move_only"
+      ]
+    }
+  ]
+}

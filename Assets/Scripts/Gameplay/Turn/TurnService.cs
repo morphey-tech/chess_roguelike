@@ -65,7 +65,7 @@ namespace Project.Gameplay.Gameplay.Turn
             _passiveTriggerService.TriggerTurnEnd(turnContext);
 
             foreach (Figure figure in _figureRegistry.GetAll())
-                figure.Stats.TickTimedModifiers();
+                figure.Stats.Tick();
 
             Team previousTeam = CurrentTeam;
             CurrentTeam = CurrentTeam == Team.Player ? Team.Enemy : Team.Player;
