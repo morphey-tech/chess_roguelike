@@ -18,7 +18,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Builders
             var moveAction = moveBuilder.Build(moveConfig, builderContext);
             var attackAction = attackBuilder.Build(attackConfig, builderContext);
 
-            return new Actions.Impl.MoveThenAttackAction(
+            return new Impl.MoveThenAttackAction(
                 id,
                 builderContext.MovementService,
                 builderContext.AttackQueryService,

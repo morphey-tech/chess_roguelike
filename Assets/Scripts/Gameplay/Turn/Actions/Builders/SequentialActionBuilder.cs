@@ -26,7 +26,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Builders
                 return subBuilder.Build(subConfig, builderContext);
             }).ToList();
 
-            return new Actions.Impl.SequentialAction(id, actions);
+            return new Impl.SequentialAction(id, actions);
         }
     }
 }

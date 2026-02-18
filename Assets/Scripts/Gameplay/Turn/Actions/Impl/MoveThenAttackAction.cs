@@ -6,6 +6,7 @@ using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Attack;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
+using UnityEngine;
 
 namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
 {
@@ -41,8 +42,11 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
 
         public bool CanExecute(ActionContext context)
         {
+            BoardCell? findFigure = context.Grid.FindFigure(context.Actor);
+            Debug.LogError($"{findFigure.Position.Row} - {findFigure.Position.Column}");
+            Debug.LogError($"{context.From.Row} - {context.From.Column}");
             return GetPreviews(context.Actor, context.From, context.Grid)
-                .Any(p => p.MoveTo == context.To);
+                .Any(p => p.AttackPosition == context.To);
         }
 
         public IReadOnlyCollection<ActionPreview> GetPreviews(Figure actor, GridPosition from, BoardGrid grid)
@@ -76,7 +80,8 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
                     {
                         targets.Add(new ActionPreview
                         {
-                            MoveTo = enemyPos,
+                            MoveTo = mid,
+                            AttackPosition = enemyPos,
                             Target = enemy
                         });
                         break;
@@ -88,7 +93,8 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
                 {
                     targets.Add(new ActionPreview
                     {
-                        MoveTo = enemyPos,
+                        MoveTo = from,
+                        AttackPosition = enemyPos,
                         Target = enemy
                     });
                 }
@@ -132,12 +138,6 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
             if (dRow != 0 && dCol != 0)
                 return from; // Not on same line
 
-            int stepRow = Math.Sign(dRow);
-            int stepCol = Math.Sign(dCol);
-
-            GridPosition current = from;
-            GridPosition bestMove = from;
-
             // Get all reachable moves along the line
             var lineMoves = _movementService.GetAvailableMoves(actor, from)
                 .Where(m => m.CanOccupy() && m.IsFree && IsOnLine(from, attackTarget, m.Position))
@@ -153,7 +153,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
                 }
             }
 
-            return bestMove;
+            return from;
         }
 
         private static bool IsOnLine(GridPosition from, GridPosition to, GridPosition p)

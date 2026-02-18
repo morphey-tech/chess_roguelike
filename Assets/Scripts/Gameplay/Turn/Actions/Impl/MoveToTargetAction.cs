@@ -49,7 +49,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
                 return false;
 
             int attackRange = context.Actor.Stats.AttackRange;
-            if (Attack.AttackUtils.IsInRange(context.From, targetCell.Position, attackRange))
+            if (AttackUtils.IsInRange(context.From, targetCell.Position, attackRange))
                 return false; // Already in range
 
             GridPosition? movePos = FindStraightStepToAttack(
@@ -71,9 +71,6 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
                 }
 
                 GridPosition enemyPos = cell.Position;
-
-                // Use real CanAttack check instead of range-based check
-                // This handles profiled attacks (like Rook with StraightLine targeting) correctly
                 if (_attackQueryService.GetTargets(actor, from, grid).Contains(enemyPos))
                 {
                     continue; // Already can attack, skip
@@ -89,6 +86,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
                         targets.Add(new ActionPreview
                         {
                             MoveTo = movePos,
+                            AttackPosition = enemyPos,
                             Target = enemy
                         });
                     }

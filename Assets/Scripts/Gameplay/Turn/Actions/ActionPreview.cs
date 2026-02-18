@@ -6,7 +6,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions
     public sealed class ActionPreview
     {
         public GridPosition? MoveTo;
+        public GridPosition? AttackPosition;
         public Figure? Target;
-        public bool IsAttack;
     }
 }

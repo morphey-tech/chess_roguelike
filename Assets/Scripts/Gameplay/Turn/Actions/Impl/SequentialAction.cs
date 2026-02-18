@@ -29,7 +29,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
             if (_actions.Count == 0)
                 return false;
 
-            return _actions[0].CanExecute(context);
+            return _actions.Any(a => a.CanExecute(context));
         }
 
         public IReadOnlyCollection<ActionPreview> GetPreviews(Figure actor, GridPosition from, BoardGrid grid)
@@ -59,11 +59,6 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
                 if (context.ActionExecuted)
                 {
                     anyExecuted = true;
-                }
-                else if (!wasExecuted && action == _actions[0])
-                {
-                    // First action failed, stop execution
-                    break;
                 }
             }
 

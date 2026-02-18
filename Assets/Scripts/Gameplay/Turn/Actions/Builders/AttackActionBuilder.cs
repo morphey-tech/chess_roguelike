@@ -1,3 +1,5 @@
+using Project.Gameplay.Gameplay.Turn.Actions.Impl;
+
 namespace Project.Gameplay.Gameplay.Turn.Actions.Builders
 {
     public sealed class AttackActionBuilder : IActionBuilder
@@ -7,7 +9,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Builders
         public ICombatAction Build(ActionConfig config, IActionBuilderContext builderContext)
         {
             string id = string.IsNullOrEmpty(config.Id) ? config.Type : config.Id;
-            return new Actions.Impl.AttackAction(
+            return new AttackAction(
                 id,
                 builderContext.AttackFactory,
                 builderContext.AttackResolver,
@@ -21,7 +23,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Builders
                 builderContext.FigureLifeService,
                 builderContext.ContextAccessor,
                 builderContext.AttackQueryService,
-                builderContext.LogService.CreateLogger<Actions.Impl.AttackAction>());
+                builderContext.LogService.CreateLogger<AttackAction>());
         }
     }
 }
