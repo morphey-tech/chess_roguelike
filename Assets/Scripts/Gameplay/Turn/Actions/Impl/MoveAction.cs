@@ -1,10 +1,15 @@
+using System.Collections.Generic;
+using System.Linq;
 using Cysharp.Threading.Tasks;
+using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Figures;
+using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Visual;
 using Project.Gameplay.Gameplay.Visual.Commands.Contexts;
 using Project.Gameplay.Gameplay.Visual.Commands.Impl;
+using Project.Gameplay.Movement;
 
-namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
+namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
 {
     /// <summary>
     /// Executes move action.
@@ -13,23 +18,39 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
     /// 1. Domain: MovementService updates grid state
     /// 2. Visual: VisualPipeline plays move animation
     /// </summary>
-    public sealed class MoveStep : ITurnStep
+    public sealed class MoveAction : ICombatAction
     {
         public string Id { get; }
 
         private readonly MovementService _movementService;
         private readonly VisualPipeline _visualPipeline;
 
-        public MoveStep(string id, MovementService movementService, VisualPipeline visualPipeline)
+        public MoveAction(string id, MovementService movementService, VisualPipeline visualPipeline)
         {
             Id = id;
             _movementService = movementService;
             _visualPipeline = visualPipeline;
         }
 
+        public bool CanExecute(ActionContext context)
+        {
+            return _movementService.CanMove(context.From, context.To);
+        }
+
+        public IReadOnlyCollection<GridPosition> GetValidTargets(Figure actor, GridPosition from, BoardGrid grid)
+        {
+            var targets = new HashSet<GridPosition>();
+            foreach (MovementStrategyResult move in _movementService.GetAvailableMoves(actor, from))
+            {
+                if (move.CanOccupy() && move.IsFree)
+                    targets.Add(move.Position);
+            }
+            return targets;
+        }
+
         public async UniTask ExecuteAsync(ActionContext context)
         {
-            if (!_movementService.CanMove(context.From, context.To))
+            if (!CanExecute(context))
                 return;
 
             // === DOMAIN ===

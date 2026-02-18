@@ -1,5 +1,5 @@
+using Project.Gameplay.Gameplay.Turn.Actions;
 using Project.Gameplay.Gameplay.Turn.Conditions;
-using Project.Gameplay.Gameplay.Turn.Steps;
 
 namespace Project.Gameplay.Gameplay.Turn
 {
@@ -9,20 +9,20 @@ namespace Project.Gameplay.Gameplay.Turn
         public int Priority { get; }
         public ITurnCondition Condition { get; }
         public ConditionParams ConditionParams { get; }
-        public ITurnStep Step { get; }
+        public ICombatAction Action { get; }
 
         public TurnPatternDescription(
             string id,
             int priority,
             ITurnCondition condition,
             ConditionParams? conditionParams,
-            ITurnStep step)
+            ICombatAction action)
         {
             Id = id;
             Priority = priority;
             Condition = condition;
             ConditionParams = conditionParams ?? ConditionParams.Empty;
-            Step = step;
+            Action = action;
         }
 
         public bool Evaluate(ActionContext context)

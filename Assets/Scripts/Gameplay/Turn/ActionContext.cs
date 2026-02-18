@@ -6,7 +6,7 @@ using Project.Gameplay.Gameplay.Grid;
 namespace Project.Gameplay.Gameplay.Turn
 {
     /// <summary>
-    /// Unified context for turn actions - used by both Conditions and Steps.
+    /// Unified context for turn actions - used by both Conditions and Actions.
     /// </summary>
     public sealed class ActionContext
     {
@@ -26,13 +26,13 @@ namespace Project.Gameplay.Gameplay.Turn
         
 
         /// <summary>
-        /// Set by steps when an action actually happens (move/attack).
+        /// Set by actions when an action actually happens (move/attack).
         /// Used to avoid consuming a turn on invalid actions.
         /// </summary>
         public bool ActionExecuted { get; set; }
         
         /// <summary>
-        /// If set, the actor gets a bonus move after the current step.
+        /// If set, the actor gets a bonus move after the current action.
         /// </summary>
         public int? BonusMoveDistance { get; set; }
         

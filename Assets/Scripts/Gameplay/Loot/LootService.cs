@@ -32,7 +32,7 @@ namespace Project.Gameplay.Gameplay.Loot
         }
 
         /// <summary>
-        /// Ensures loot table config is loaded. Call before combat that may roll loot (e.g. in AttackStep).
+        /// Ensures loot table config is loaded. Call before combat that may roll loot (e.g. in AttackAction).
         /// </summary>
         public async UniTask EnsureLoadedAsync()
         {

@@ -19,8 +19,11 @@ namespace Project.Core.Core.Configs.Turn
         [JsonProperty("condition_params")]
         public Dictionary<string, object> ConditionParams { get; set; }
 
-        [JsonProperty("steps")]
-        public StepConfig[] Steps { get; set; }
+        /// <summary>
+        /// Action config.
+        /// </summary>
+        [JsonProperty("action")]
+        public Core.Configs.Turn.ActionConfig Action { get; set; }
     }
 
     public class TurnPatternDescriptionConfigRepository : ConfigRepository<TurnPatternDescriptionConfig>

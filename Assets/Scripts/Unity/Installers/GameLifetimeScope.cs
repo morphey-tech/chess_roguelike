@@ -23,6 +23,7 @@ using Project.Gameplay.Gameplay.Stage;
 using Project.Gameplay.Gameplay.Stage.Flow;
 using Project.Gameplay.Gameplay.Stage.Phase;
 using Project.Gameplay.Gameplay.Turn;
+using Project.Gameplay.Gameplay.Turn.Actions;
 using Project.Gameplay.Gameplay.Turn.BonusMove;
 using Project.Gameplay.Gameplay.Turn.Conditions;
 using Project.Gameplay.Gameplay.Turn.Conditions.Impl;
@@ -166,6 +167,16 @@ namespace Project.Unity.Unity.Installers
             builder.Register<FigureLifeService>(Lifetime.Singleton).As<IFigureLifeService>();
             builder.Register<DamageApplier>(Lifetime.Singleton);
             builder.Register<ProjectileHitApplyService>(Lifetime.Singleton).As<IProjectileHitApplyService>();
+            
+            // ActionBuilderContext (needs VisualPipeline, ActionContextAccessor, etc. registered above)
+            builder.Register<ActionBuilderContext>(Lifetime.Singleton).As<IActionBuilderContext>();
+            
+            // Register SequentialActionBuilder after ActionBuilderRegistry is created
+            builder.RegisterBuildCallback(resolver =>
+            {
+                var registry = resolver.Resolve<ActionBuilderRegistry>();
+                registry.RegisterSequentialBuilder();
+            });
 
             // Unity-only: консоль, UI, prepare-зона и фазы (LootPresenter — в ConfigureViews)
             builder.Register<ReloadStageConsoleCommands>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();

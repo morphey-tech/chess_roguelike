@@ -10,12 +10,13 @@ using Project.Gameplay.Gameplay.Combat.Effects;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Loot;
-using Project.Gameplay.Gameplay.Visual;
 using Project.Gameplay.Gameplay.Turn;
-using Project.Core.Core.Configs.Stats;
+using Project.Gameplay.Gameplay.Visual;
 using Project.Gameplay.Gameplay.Visual.Commands;
+using Project.Core.Core.Configs.Stats;
+using Project.Core.Core.Grid;
 
-namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
+namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
 {
     /// <summary>
     /// Executes attack action.
@@ -26,7 +27,7 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
     /// 3. Presentation: CombatVisualPlanner builds visual commands from events
     /// 4. Visual: VisualPipeline plays all animations
     /// </summary>
-    public sealed class AttackStep : ITurnStep
+    public sealed class AttackAction : ICombatAction
     {
         public string Id { get; }
 
@@ -41,9 +42,10 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
         private readonly DamageApplier _damageApplier;
         private readonly IFigureLifeService _figureLifeService;
         private readonly ActionContextAccessor _contextAccessor;
-        private readonly ILogger<AttackStep> _logger;
+        private readonly IAttackQueryService _attackQueryService;
+        private readonly ILogger<AttackAction> _logger;
 
-        public AttackStep(
+        public AttackAction(
             string id,
             AttackStrategyFactory attackFactory,
             IAttackResolver attackResolver,
@@ -56,7 +58,8 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
             DamageApplier damageApplier,
             IFigureLifeService figureLifeService,
             ActionContextAccessor contextAccessor,
-            ILogger<AttackStep> logger)
+            IAttackQueryService attackQueryService,
+            ILogger<AttackAction> logger)
         {
             Id = id;
             _attackFactory = attackFactory;
@@ -70,11 +73,40 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
             _damageApplier = damageApplier;
             _figureLifeService = figureLifeService;
             _contextAccessor = contextAccessor;
+            _attackQueryService = attackQueryService;
             _logger = logger;
+        }
+
+        public bool CanExecute(ActionContext context)
+        {
+            BoardCell targetCell = context.Grid.GetBoardCell(context.To);
+            Figure defender = targetCell?.OccupiedBy;
+
+            if (defender == null || defender.Team == context.Actor.Team)
+                return false;
+
+            if (context.Actor.AttackId == "profiled")
+            {
+                AttackProfile? profile = _attackResolver.Resolve(context.Actor, context.From, context.To, context.Grid);
+                return profile != null;
+            }
+            else
+            {
+                IAttackStrategy attackStrategy = _attackFactory.Get(context.Actor.AttackId);
+                return attackStrategy.CanAttack(context.Actor, context.From, context.To, context.Grid);
+            }
+        }
+
+        public IReadOnlyCollection<GridPosition> GetValidTargets(Figure actor, GridPosition from, BoardGrid grid)
+        {
+            return _attackQueryService.GetTargets(actor, from, grid);
         }
 
         public async UniTask ExecuteAsync(ActionContext context)
         {
+            if (!CanExecute(context))
+                return;
+
             BoardCell targetCell = context.Grid.GetBoardCell(context.To);
             Figure defender = targetCell?.OccupiedBy;
 
@@ -112,10 +144,10 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
                     return;
 
                 hitContext = attackStrategy.CreateHitContext(
-                    context.Actor, 
-                    defender, 
-                    context.From, 
-                    context.To, 
+                    context.Actor,
+                    defender,
+                    context.From,
+                    context.To,
                     context.Grid);
                 hitContext.AttackId = attackStrategy.Id;
                 hitContext.Delivery = MapDelivery(attackStrategy.Id);
@@ -171,9 +203,9 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
             while (queue.Count > 0)
             {
                 ICombatEffect effect = queue.Dequeue();
-                
+
                 _logger.Debug($"[{effectIndex++}] {effect.GetType().Name} (Phase: {effect.Phase}, Order: {effect.OrderInPhase})");
-                
+
                 effect.Apply(context);
 
                 if (context.PendingEffects.Count > 0)
@@ -182,7 +214,7 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
                         .OrderBy(e => e.Phase)
                         .ThenBy(e => e.OrderInPhase)
                         .ToList();
-                    
+
                     foreach (ICombatEffect? pending in sorted)
                     {
                         _logger.Debug($"  + Queued: {pending.GetType().Name} (Phase: {pending.Phase})");
@@ -191,7 +223,7 @@ namespace Project.Gameplay.Gameplay.Turn.Steps.Impl
                     context.PendingEffects.Clear();
                 }
             }
-            
+
             _logger.Debug("=== Effect Pipeline Complete ===");
         }
 

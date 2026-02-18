@@ -5,7 +5,7 @@ using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
-using Project.Gameplay.Gameplay.Turn.Steps;
+using Project.Gameplay.Gameplay.Turn.Actions;
 using VContainer;
 
 namespace Project.Gameplay.Gameplay.Turn.Execution
@@ -52,19 +52,26 @@ namespace Project.Gameplay.Gameplay.Turn.Execution
             // DEBUG: Verify ActionContext is fresh
             _logger.Info($"[DEBUG] NEW ActionContext for {actor.Id}: BonusMoveDistance={context.BonusMoveDistance?.ToString() ?? "null"} (should be null)");
 
-            ITurnStep step = _patternResolver.Resolve(actor, actor.TurnPattern, context);
+            ICombatAction action = _patternResolver.Resolve(actor, actor.TurnPattern, context);
 
-            if (step == null)
+            if (action == null)
             {
                 _logger.Debug($"No valid pattern for {actor}");
                 return TurnExecutionResult.Failed;
             }
 
-            _logger.Info($"{actor} executing pattern: {step.Id}");
-            await step.ExecuteAsync(context);
+            // Validate action can be executed before executing
+            if (!action.CanExecute(context))
+            {
+                _logger.Debug($"Action '{action.Id}' cannot be executed for {actor} with target ({context.To.Row},{context.To.Column})");
+                return TurnExecutionResult.Failed;
+            }
+
+            _logger.Info($"{actor} executing action: {action.Id}");
+            await action.ExecuteAsync(context);
             
-            // DEBUG: Check after step execution
-            _logger.Info($"[DEBUG] AFTER step for {actor.Id}: BonusMoveDistance={context.BonusMoveDistance?.ToString() ?? "null"}");
+            // DEBUG: Check after action execution
+            _logger.Info($"[DEBUG] AFTER action for {actor.Id}: BonusMoveDistance={context.BonusMoveDistance?.ToString() ?? "null"}");
 
             if (!context.ActionExecuted)
             {

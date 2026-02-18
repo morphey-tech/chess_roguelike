@@ -2,7 +2,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects
 {
     /// <summary>
     /// Represents a single effect produced by combat (damage, heal, push, etc.)
-    /// Effects are created during combat resolution and applied sequentially by AttackStep.
+    /// Effects are created during combat resolution and applied sequentially by AttackAction.
     /// 
     /// DESIGN RULES:
     /// - Effects are SYNCHRONOUS (no async) - they only mutate domain state

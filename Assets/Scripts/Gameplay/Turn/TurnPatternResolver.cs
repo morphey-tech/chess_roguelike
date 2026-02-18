@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Figures;
-using Project.Gameplay.Gameplay.Turn.Steps;
+using Project.Gameplay.Gameplay.Turn.Actions;
 
 namespace Project.Gameplay.Gameplay.Turn
 {
@@ -15,7 +15,7 @@ namespace Project.Gameplay.Gameplay.Turn
             _logger = logService.CreateLogger<TurnPatternResolver>();
         }
 
-        public ITurnStep Resolve(Figure actor, TurnPattern pattern, ActionContext context)
+        public ICombatAction Resolve(Figure actor, TurnPattern pattern, ActionContext context)
         {
             if (pattern == null || pattern.Patterns.Count == 0)
             {
@@ -37,7 +37,7 @@ namespace Project.Gameplay.Gameplay.Turn
             TurnPatternDescription chosen = validPatterns.First();
             _logger.Debug($"{actor} chose pattern '{chosen.Id}' (priority {chosen.Priority})");
 
-            return chosen.Step;
+            return chosen.Action;
         }
     }
 }

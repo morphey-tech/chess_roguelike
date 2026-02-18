@@ -4,8 +4,8 @@ using Cysharp.Threading.Tasks;
 using Project.Core.Core.Configs.Turn;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Configs;
+using Project.Gameplay.Gameplay.Turn.Actions;
 using Project.Gameplay.Gameplay.Turn.Conditions;
-using Project.Gameplay.Gameplay.Turn.Steps;
 using VContainer;
 
 namespace Project.Gameplay.Gameplay.Turn
@@ -13,7 +13,8 @@ namespace Project.Gameplay.Gameplay.Turn
     public sealed class TurnPatternFactory
     {
         private readonly ConfigProvider _configProvider;
-        private readonly TurnStepFactory _stepFactory;
+        private readonly ActionBuilderRegistry _actionBuilderRegistry;
+        private readonly IActionBuilderContext _builderContext;
         private readonly ConditionRegistry _conditionRegistry;
         private readonly ILogger<TurnPatternFactory> _logger;
 
@@ -25,12 +26,14 @@ namespace Project.Gameplay.Gameplay.Turn
         [Inject]
         private TurnPatternFactory(
             ConfigProvider configProvider,
-            TurnStepFactory stepFactory,
+            ActionBuilderRegistry actionBuilderRegistry,
+            IActionBuilderContext builderContext,
             ConditionRegistry conditionRegistry,
             ILogService logService)
         {
             _configProvider = configProvider;
-            _stepFactory = stepFactory;
+            _actionBuilderRegistry = actionBuilderRegistry;
+            _builderContext = builderContext;
             _conditionRegistry = conditionRegistry;
             _logger = logService.CreateLogger<TurnPatternFactory>();
         }
@@ -92,16 +95,37 @@ namespace Project.Gameplay.Gameplay.Turn
                 ? preset.DefaultParams.MergeWith(new ConditionParams(config.ConditionParams))
                 : preset.DefaultParams;
 
-            ITurnStep step = config.Steps.Length == 1
-                ? _stepFactory.CreateStep(config.Steps[0], config.Id)
-                : _stepFactory.CreateComposite(config.Id, config.Steps);
+            if (config.Action == null)
+                throw new Exception($"Pattern '{config.Id}' must have Action config.");
+
+            IActionBuilder builder = _actionBuilderRegistry.GetBuilder(config.Action.Type);
+            var actionConfig = new Actions.ActionConfig
+            {
+                Type = config.Action.Type,
+                Strategy = config.Action.Strategy,
+                Id = string.IsNullOrEmpty(config.Action.Id) ? config.Id : config.Action.Id,
+                SubActions = config.Action.SubActions?.Select(sa => new Actions.ActionConfig
+                {
+                    Type = sa.Type,
+                    Strategy = sa.Strategy,
+                    Id = sa.Id,
+                    SubActions = sa.SubActions?.Select(sub => new Actions.ActionConfig
+                    {
+                        Type = sub.Type,
+                        Strategy = sub.Strategy,
+                        Id = sub.Id,
+                        SubActions = null
+                    }).ToArray()
+                }).ToArray()
+            };
+            ICombatAction action = builder.Build(actionConfig, _builderContext);
 
             return new TurnPatternDescription(
                 config.Id,
                 config.Priority,
                 preset.Condition,
                 finalParams,
-                step);
+                action);
         }
     }
 }

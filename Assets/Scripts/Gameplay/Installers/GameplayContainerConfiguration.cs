@@ -18,6 +18,8 @@ using Project.Gameplay.Gameplay.Stage;
 using Project.Gameplay.Gameplay.Stage.Flow;
 using Project.Gameplay.Gameplay.Stage.Phase;
 using Project.Gameplay.Gameplay.Turn;
+using Project.Gameplay.Gameplay.Turn.Actions;
+using Project.Gameplay.Gameplay.Turn.Actions.Builders;
 using Project.Gameplay.Gameplay.Turn.BonusMove;
 using Project.Gameplay.Gameplay.Turn.Conditions;
 using Project.Gameplay.Gameplay.Turn.Conditions.Impl;
@@ -145,7 +147,20 @@ namespace Project.Gameplay.Gameplay.Installers
                     new TargetIsEmptyCondition(),
                     new CanMoveCondition()
                 });
-            builder.Register<TurnStepFactory>(Lifetime.Singleton);
+            
+            // Action builders (new system)
+            builder.Register<ActionBuilderRegistry>(Lifetime.Singleton)
+                .WithParameter<IEnumerable<IActionBuilder>>(new IActionBuilder[]
+                {
+                    new MoveActionBuilder(),
+                    new AttackActionBuilder(),
+                    new MoveThenAttackActionBuilder(),
+                    new MoveToTargetActionBuilder(),
+                    new MoveToKilledTargetActionBuilder()
+                });
+            // SequentialActionBuilder registered in GameLifetimeScope via RegisterBuildCallback
+            // ActionBuilderContext registered in GameLifetimeScope (after VisualPipeline, ActionContextAccessor, etc.)
+            
             builder.Register<TurnPatternFactory>(Lifetime.Singleton);
             builder.Register<TurnPatternResolver>(Lifetime.Singleton);
             builder.Register<TurnExecutor>(Lifetime.Singleton).As<ITurnExecutor>();

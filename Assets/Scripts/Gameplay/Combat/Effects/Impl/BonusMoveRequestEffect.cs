@@ -10,7 +10,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
     /// - TurnSystem decides whether to grant the bonus move
     /// - DO NOT put actual movement logic here
     /// 
-    /// The actual move will be handled by subsequent turn steps.
+    /// The actual move will be handled by subsequent turn actions.
     /// </summary>
     public sealed class BonusMoveRequestEffect : ICombatEffect
     {
