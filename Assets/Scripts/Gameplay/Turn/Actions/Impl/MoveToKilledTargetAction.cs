@@ -46,11 +46,11 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
             return targetCell.IsFree;
         }
 
-        public IReadOnlyCollection<GridPosition> GetValidTargets(Figure actor, GridPosition from, BoardGrid grid)
+        public IReadOnlyCollection<ActionPreview> GetPreviews(Figure actor, GridPosition from, BoardGrid grid)
         {
             // This action is only valid after a kill, so we can't predict targets upfront.
             // Return empty set - the action will be evaluated by condition (LastAttackKilledTarget).
-            return new HashSet<GridPosition>();
+            return new HashSet<ActionPreview>();
         }
 
         public async UniTask ExecuteAsync(ActionContext context)

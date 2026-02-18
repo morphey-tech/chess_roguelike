@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using MessagePipe;
@@ -97,9 +98,20 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
             }
         }
 
-        public IReadOnlyCollection<GridPosition> GetValidTargets(Figure actor, GridPosition from, BoardGrid grid)
+        public IReadOnlyCollection<ActionPreview> GetPreviews(Figure actor, GridPosition from, BoardGrid grid)
         {
-            return _attackQueryService.GetTargets(actor, from, grid);
+            IList<ActionPreview> result = new List<ActionPreview>();
+            foreach (GridPosition enemyPos in _attackQueryService.GetTargets(actor, from, grid))
+            {
+                BoardCell enemyCell = grid.GetBoardCell(enemyPos);
+                result.Add(new ActionPreview
+                {
+                    MoveTo = enemyCell.Position,
+                    Target = enemyCell.OccupiedBy
+                });
+            }
+
+            return new ReadOnlyCollection<ActionPreview>(result);
         }
 
         public async UniTask ExecuteAsync(ActionContext context)

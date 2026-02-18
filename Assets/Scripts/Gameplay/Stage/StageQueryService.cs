@@ -59,26 +59,27 @@ namespace Project.Gameplay.Gameplay.Stage
                 ActionExecuted = false
             };
 
-            // Collect valid targets from all actions in the pattern.
-            // Categorize by semantics: cell occupied by enemy = attack target (red), empty cell = move target (white).
-            // This avoids bugs when action Id doesn't contain "attack" (e.g. melee_translate for knight).
             BoardGrid grid = _movementService.Grid;
-
             foreach (var patternDesc in actor.TurnPattern.Patterns)
             {
-                ICombatAction action = patternDesc.Action;
-                var validTargets = action.GetValidTargets(actor, pos, grid);
+                var action = patternDesc.Action;
 
-                foreach (var target in validTargets)
+                var previews = action.GetPreviews(actor, pos, grid);
+
+                foreach (var preview in previews)
                 {
-                    var cell = grid.GetBoardCell(target);
-                    if (cell?.OccupiedBy != null && cell.OccupiedBy.Team == enemyTeam)
-                        attackTargets.Add(target);
-                    else
-                        moveTargets.Add(target);
+                    if (preview.MoveTo.HasValue)
+                    {
+                        moveTargets.Add(preview.MoveTo.Value);
+                    }
+                    if (preview.Target != null)
+                    {
+                        BoardCell targetCell = grid.FindFigure(preview.Target)!;
+                        attackTargets.Add(targetCell.Position);
+                    }
                 }
             }
-
+            
             return new StageSelectionInfo(moveTargets, attackTargets);
         }
 

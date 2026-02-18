@@ -24,7 +24,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions
         /// All positions that are valid "To" for this action from the given actor position.
         /// Used by UI (highlight) and AI (candidate targets). Same logic as CanExecute.
         /// </summary>
-        IReadOnlyCollection<GridPosition> GetValidTargets(Figure actor, GridPosition from, BoardGrid grid);
+        IReadOnlyCollection<ActionPreview> GetPreviews(Figure actor, GridPosition from, BoardGrid grid);
 
         /// <summary>
         /// Execute the action. Call only when CanExecute(context) is true.

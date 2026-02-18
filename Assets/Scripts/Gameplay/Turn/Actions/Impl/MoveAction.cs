@@ -37,13 +37,13 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
             return _movementService.CanMove(context.From, context.To);
         }
 
-        public IReadOnlyCollection<GridPosition> GetValidTargets(Figure actor, GridPosition from, BoardGrid grid)
+        public IReadOnlyCollection<ActionPreview> GetPreviews(Figure actor, GridPosition from, BoardGrid grid)
         {
-            var targets = new HashSet<GridPosition>();
+            var targets = new HashSet<ActionPreview>();
             foreach (MovementStrategyResult move in _movementService.GetAvailableMoves(actor, from))
             {
                 if (move.CanOccupy() && move.IsFree)
-                    targets.Add(move.Position);
+                    targets.Add(new ActionPreview { MoveTo = move.Position });
             }
             return targets;
         }

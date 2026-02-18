@@ -32,13 +32,11 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
             return _actions[0].CanExecute(context);
         }
 
-        public IReadOnlyCollection<GridPosition> GetValidTargets(Figure actor, GridPosition from, BoardGrid grid)
+        public IReadOnlyCollection<ActionPreview> GetPreviews(Figure actor, GridPosition from, BoardGrid grid)
         {
-            // Return valid targets from first action (primary action)
-            if (_actions.Count == 0)
-                return new HashSet<GridPosition>();
-
-            return _actions[0].GetValidTargets(actor, from, grid);
+            return _actions.Count == 0 
+                ? new HashSet<ActionPreview>() 
+                : _actions[0].GetPreviews(actor, from, grid);
         }
 
         public async UniTask ExecuteAsync(ActionContext context)

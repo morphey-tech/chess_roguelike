@@ -41,18 +41,22 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
 
         public bool CanExecute(ActionContext context)
         {
-            return GetValidTargets(context.Actor, context.From, context.Grid).Contains(context.To);
+            return GetPreviews(context.Actor, context.From, context.Grid)
+                .Any(p => p.MoveTo == context.To);
         }
 
-        public IReadOnlyCollection<GridPosition> GetValidTargets(Figure actor, GridPosition from, BoardGrid grid)
+        public IReadOnlyCollection<ActionPreview> GetPreviews(Figure actor, GridPosition from, BoardGrid grid)
         {
-            var targets = new HashSet<GridPosition>();
+            var targets = new HashSet<ActionPreview>();
             Team enemyTeam = actor.Team == Team.Player ? Team.Enemy : Team.Player;
 
             foreach (Figure enemy in grid.GetFiguresByTeam(enemyTeam))
             {
                 BoardCell? cell = grid.FindFigure(enemy);
-                if (cell == null) continue;
+                if (cell == null)
+                {
+                    continue;
+                }
 
                 GridPosition enemyPos = cell.Position;
 
@@ -70,7 +74,11 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
                 {
                     if (_attackQueryService.GetTargets(actor, mid, grid).Contains(enemyPos))
                     {
-                        targets.Add(enemyPos);
+                        targets.Add(new ActionPreview
+                        {
+                            MoveTo = enemyPos,
+                            Target = enemy
+                        });
                         break;
                     }
                 }
@@ -78,7 +86,11 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
                 // Also check if we can attack from current position
                 if (_attackQueryService.GetTargets(actor, from, grid).Contains(enemyPos))
                 {
-                    targets.Add(enemyPos);
+                    targets.Add(new ActionPreview
+                    {
+                        MoveTo = enemyPos,
+                        Target = enemy
+                    });
                 }
             }
 

@@ -57,22 +57,27 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
             return movePos != null && context.Grid.GetBoardCell(movePos.Value).IsFree;
         }
 
-        public IReadOnlyCollection<GridPosition> GetValidTargets(Figure actor, GridPosition from, BoardGrid grid)
+        public IReadOnlyCollection<ActionPreview> GetPreviews(Figure actor, GridPosition from, BoardGrid grid)
         {
-            var targets = new HashSet<GridPosition>();
+            var targets = new HashSet<ActionPreview>();
             Team enemyTeam = actor.Team == Team.Player ? Team.Enemy : Team.Player;
 
             foreach (Figure enemy in grid.GetFiguresByTeam(enemyTeam))
             {
                 BoardCell? cell = grid.FindFigure(enemy);
-                if (cell == null) continue;
+                if (cell == null)
+                {
+                    continue;
+                }
 
                 GridPosition enemyPos = cell.Position;
 
                 // Use real CanAttack check instead of range-based check
                 // This handles profiled attacks (like Rook with StraightLine targeting) correctly
                 if (_attackQueryService.GetTargets(actor, from, grid).Contains(enemyPos))
+                {
                     continue; // Already can attack, skip
+                }
 
                 // Check if we can move toward this enemy to get in attack range
                 GridPosition? movePos = FindStraightStepToAttack(from, enemyPos, grid, actor.Stats.AttackRange);
@@ -81,7 +86,11 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
                     // Verify we can actually attack from the move position using real CanAttack check
                     if (_attackQueryService.GetTargets(actor, movePos.Value, grid).Contains(enemyPos))
                     {
-                        targets.Add(enemyPos);
+                        targets.Add(new ActionPreview
+                        {
+                            MoveTo = movePos,
+                            Target = enemy
+                        });
                     }
                 }
             }
