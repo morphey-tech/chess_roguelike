@@ -52,11 +52,13 @@ namespace Project.Gameplay.Gameplay.Combat
             if (target.Stats.CurrentHp <= 0)
                 return UniTask.CompletedTask;
 
-            var dmgCtx = new DamageContext(
+            DamageContext dmgCtx = new(
                 attacker,
                 target,
                 evt.Damage,
                 evt.IsCritical,
+                evt.IsDodged,
+                evt.IsCancelled,
                 evt.AttackId ?? "ranged",
                 Array.Empty<IDamageModifier>());
 

@@ -80,6 +80,13 @@
       "params": {
         "bonus_damage": 0.5
       }
+    },
+    {
+      "id": "agile_dodge",
+      "type": "agile_dodge",
+      "params": {
+        "chance": 0.5
+      }
     }
   ]
 }

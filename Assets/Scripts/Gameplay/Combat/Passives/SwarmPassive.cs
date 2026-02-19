@@ -9,7 +9,7 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
     /// <summary>
     /// +percent% Attack per allied neighbour. Adds a timed modifier to Stats — no damage math here.
     /// </summary>
-    public sealed class SwarmPassive : IPassive, IOnTurnStart
+    public sealed class SwarmPassive : IPassive, IOnBeforeHit
     {
         public string Id { get; }
         public int Priority => 100;
@@ -24,13 +24,13 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
             _duration = duration;
         }
 
-        public void OnTurnStart(Figure figure, TurnContext context)
+        public void OnBeforeHit(Figure owner, BeforeHitContext context)
         {
-            int allies = context.Grid.CountAlliesAround(figure);
+            int allies = context.Grid.CountAlliesAround(owner);
             float percentTotal = allies * _percentPerAlly;
             
             var modifier = new PercentModifier($"{Id}_swarm", percentTotal, 100, _duration, false);
-            figure.Stats.Attack.AddModifier(modifier);
+            owner.Stats.Attack.AddModifier(modifier);
         }
     }
 }

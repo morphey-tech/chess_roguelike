@@ -48,17 +48,23 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
 
         public void Apply(CombatEffectContext context)
         {
-            var before = new BeforeHitContext
+            BeforeHitContext before = new()
             {
                 Attacker = _attacker,
                 Target = _target,
+                Grid = context.Grid,
                 BaseDamage = _baseDamage
             };
 
             context.Passives.TriggerBeforeHit(_attacker, _target, before);
+            _target.Effects.TriggerBeforeHit(before);
+            _attacker.Effects.TriggerBeforeHit(before);
 
             float finalDamage = before.BaseDamage * before.DamageMultiplier + before.BonusDamage;
-            if (finalDamage < 0) finalDamage = 0;
+            if (finalDamage < 0)
+            {
+                finalDamage = 0;
+            }
 
             bool isProjectile = _delivery == DeliveryType.Projectile;
 
@@ -70,6 +76,8 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
                     _target,
                     finalDamage,
                     before.IsCritical,
+                    before.IsDodged,
+                    before.IsCancelled,
                     attackType,
                     Array.Empty<IDamageModifier>());
                 (DamageResult damageResult, bool died) = context.DamageApplier.ApplyNoDeath(damageContext);
@@ -94,7 +102,8 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
                     Grid = context.Grid,
                     DamageDealt = damageResult.Final,
                     TargetDied = died,
-                    WasCritical = before.IsCritical
+                    WasCritical = before.IsCritical,
+                    WasDodged = before.IsDodged
                 };
 
                 context.Passives.TriggerAfterHit(_attacker, _target, after);
@@ -123,6 +132,8 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
                     _targetPosition,
                     finalDamage,
                     before.IsCritical,
+                    before.IsDodged,
+                    before.IsCancelled,
                     _attackId));
 
                 context.Logger.Info($"{_attacker} projectile hit (deferred): raw={finalDamage} to {_target}. HP: {_target.Stats.CurrentHp}/{_target.Stats.MaxHp}");

@@ -16,6 +16,11 @@ namespace Project.Gameplay.Gameplay.Combat.Damage
 
         public DamageResult Calculate(DamageContext context)
         {
+            if (context.IsCancelled)
+            {
+                return DamageResult.MakeCancelled(context.IsDodged);
+            }
+            
             float current = context.RawDamage;
             float raw = current;
 
@@ -25,7 +30,7 @@ namespace Project.Gameplay.Gameplay.Combat.Damage
             }
 
             float final = current < 0 ? 0f : current;
-            return new DamageResult(raw, final, blocked: false, dodged: false);
+            return new DamageResult(raw, final, blocked: false, dodged: context.IsDodged, context.IsCancelled);
         }
     }
 }

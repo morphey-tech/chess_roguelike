@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Combat;
+using Project.Gameplay.Gameplay.Figures.StatusEffects;
 using Project.Gameplay.Gameplay.Turn;
 
 namespace Project.Gameplay.Gameplay.Figures
@@ -11,17 +12,14 @@ namespace Project.Gameplay.Gameplay.Figures
         public string MovementId { get; }
         public string AttackId { get; }
         public string TurnPatternsId { get; }
-        public FigureStats Stats { get; }
         public Team Team { get; }
-        public List<IPassive> Passives { get; } = new();
-        public TurnPattern? TurnPattern { get; private set; }
 
-        /// <summary>True if this figure moved this turn (reset at start of each team's turn). Used e.g. by Fortify.</summary>
+        public FigureStats Stats { get; }
+        public TurnPattern? TurnPattern { get; private set; }
+        public List<IPassive> BasePassives { get; } = new();
+        public StatusEffectSystem Effects { get; }
         public bool MovedThisTurn { get; set; }
-        
-        /// <summary>Previous position before movement. Used by passives to calculate movement distance.</summary>
         public GridPosition? PreviousPosition { get; set; }
-        
         public string? LootTableId { get; set; }
 
         public Figure(int id, string typeId, string movementId, string attackId,
@@ -33,6 +31,7 @@ namespace Project.Gameplay.Gameplay.Figures
             TurnPatternsId = turnPatternsId;
             Stats = stats;
             Team = team;
+            Effects = new(this);
         }
 
         public void SetTurnPatternSet(TurnPattern pattern)
@@ -46,7 +45,7 @@ namespace Project.Gameplay.Gameplay.Figures
             {
                 return;
             }
-            Passives.Add(passive);
+            BasePassives.Add(passive);
         }
 
         public override string ToString() => $"{TypeId}#{Id}";

@@ -28,7 +28,7 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
             if (!context.DidMove)
                 return;
 
-            Figure actor = context.Figure;
+            Figure actor = context.Actor;
             BoardGrid grid = context.Grid;
 
             GridPosition from = context.From;

@@ -30,7 +30,8 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
             if (_target == null || _target.Stats.CurrentHp <= 0)
                 return;
 
-            var dmgCtx = new DamageContext(_attacker, _target, _damage, false, "pierce", Array.Empty<IDamageModifier>());
+            DamageContext dmgCtx = new(_attacker, _target, _damage, false, false, false,
+                "pierce", Array.Empty<IDamageModifier>());
             (DamageResult result, _) = context.DamageApplier.Apply(context, dmgCtx);
 
             context.AddVisualEvent(new DamageVisualEvent(_target.Id, result.Final, false, "pierce"));

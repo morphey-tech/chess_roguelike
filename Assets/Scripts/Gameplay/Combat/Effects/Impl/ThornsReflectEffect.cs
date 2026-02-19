@@ -29,7 +29,8 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
             if (_target == null || _target.Stats.CurrentHp <= 0 || _reflectedDamage <= 0)
                 return;
 
-            var dmgCtx = new DamageContext(_source, _target, _reflectedDamage, false, "thorns", Array.Empty<IDamageModifier>());
+            DamageContext dmgCtx = new(_source, _target, _reflectedDamage, false, false,
+                false, "thorns", Array.Empty<IDamageModifier>());
             (DamageResult result, _) = context.DamageApplier.Apply(context, dmgCtx);
 
             context.AddVisualEvent(new DamageVisualEvent(_target.Id, result.Final, damageType: "thorns"));

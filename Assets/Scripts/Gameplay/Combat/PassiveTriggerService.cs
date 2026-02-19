@@ -73,7 +73,7 @@ namespace Project.Gameplay.Gameplay.Combat
         /// </summary>
         private IEnumerable<IPassive> GetAllPassives(Figure figure)
         {
-            IEnumerable<IPassive> figurePassives = figure.Passives;
+            IEnumerable<IPassive> figurePassives = figure.BasePassives;
             IReadOnlyList<IPassive> itemPassives = _economyService.GetAllItemPassives();
 
             return itemPassives.Count > 0

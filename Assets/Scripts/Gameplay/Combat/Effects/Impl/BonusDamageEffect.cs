@@ -31,7 +31,8 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
             if (_target == null || _target.Stats.CurrentHp <= 0 || _bonusDamage <= 0)
                 return;
 
-            var dmgCtx = new DamageContext(_attacker, _target, _bonusDamage, false, _source, Array.Empty<IDamageModifier>());
+            DamageContext dmgCtx = new(_attacker, _target, _bonusDamage, false, false,
+                false, _source, Array.Empty<IDamageModifier>());
             (DamageResult result, _) = context.DamageApplier.Apply(context, dmgCtx);
 
             context.AddVisualEvent(new DamageVisualEvent(_target.Id, result.Final, damageType: _source));

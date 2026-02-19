@@ -9,6 +9,8 @@ namespace Project.Gameplay.Gameplay.Combat.Damage
         public Figure Target { get; }
         public float RawDamage { get; }
         public bool IsCritical { get; }
+        public bool IsDodged { get; }
+        public bool IsCancelled { get; }
         public string AttackId { get; }
         public IReadOnlyList<IDamageModifier> Modifiers { get; }
 
@@ -17,6 +19,8 @@ namespace Project.Gameplay.Gameplay.Combat.Damage
             Figure target,
             float rawDamage,
             bool isCritical,
+            bool isDodged,
+            bool isCancelled,
             string attackId,
             IReadOnlyList<IDamageModifier> modifiers)
         {
@@ -24,6 +28,8 @@ namespace Project.Gameplay.Gameplay.Combat.Damage
             Target = target;
             RawDamage = rawDamage;
             IsCritical = isCritical;
+            IsDodged = isDodged;
+            IsCancelled = isCancelled;
             AttackId = attackId;
             Modifiers = modifiers;
         }

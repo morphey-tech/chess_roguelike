@@ -126,7 +126,7 @@ namespace Project.Gameplay.Gameplay.Figures
                     }
                 }
                 
-                if (figure.Passives.Count > 0)
+                if (figure.BasePassives.Count > 0)
                     _logger.Debug($"{figure} passives: {string.Join(", ", description.Passives)}");
             }
 

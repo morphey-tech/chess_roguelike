@@ -18,19 +18,25 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
         private readonly Figure _target;
         private readonly int _damage;
         private readonly bool _isCritical;
+        private readonly bool _isDodged;
+        private readonly bool _isCancelled;
 
-        public DealDamageEffect(Figure attacker, Figure target, int damage, bool isCritical = false)
+        public DealDamageEffect(Figure attacker, Figure target, int damage,
+            bool isCritical = false, bool isDodged = false, bool isCancelled = false)
         {
             _attacker = attacker;
             _target = target;
             _damage = damage;
             _isCritical = isCritical;
+            _isDodged = isDodged;
+            _isCancelled = isCancelled;
         }
 
         public void Apply(CombatEffectContext context)
         {
-            var dmgCtx = new DamageContext(_attacker, _target, _damage, _isCritical, "primary", Array.Empty<IDamageModifier>());
-            (DamageResult result, bool died) = context.DamageApplier.Apply(context, dmgCtx);
+            DamageContext dmgCtx = new(_attacker, _target, _damage, _isCritical, _isDodged, _isCancelled,
+                "primary", Array.Empty<IDamageModifier>());
+            (DamageResult result, bool _) = context.DamageApplier.Apply(context, dmgCtx);
 
             context.AddVisualEvent(new DamageVisualEvent(_target.Id, result.Final, _isCritical, "primary"));
             context.ActionContext.LastDamageDealt = result.Final;

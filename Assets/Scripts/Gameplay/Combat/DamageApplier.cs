@@ -1,10 +1,7 @@
-using System;
 using Cysharp.Threading.Tasks;
 using Project.Gameplay.Gameplay.Combat.Damage;
 using Project.Gameplay.Gameplay.Combat.Effects;
-using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
-using Project.Gameplay.Gameplay.Turn;
 using VContainer;
 
 namespace Project.Gameplay.Gameplay.Combat
@@ -20,7 +17,7 @@ namespace Project.Gameplay.Gameplay.Combat
         private readonly IFigureLifeService _lifeService;
 
         [Inject]
-        public DamageApplier(
+        private DamageApplier(
             IDamagePipeline pipeline,
             PassiveTriggerService passives,
             IFigureLifeService lifeService)
@@ -37,6 +34,11 @@ namespace Project.Gameplay.Gameplay.Combat
         public (DamageResult result, bool died) Apply(CombatEffectContext context, DamageContext dmgCtx)
         {
             DamageResult result = _pipeline.Calculate(dmgCtx);
+            if (result.Cancelled)
+            {
+                return (result, false);
+            }
+            
             bool died = dmgCtx.Target.Stats.TakeDamage(result.Final);
 
             if (died)
@@ -58,6 +60,10 @@ namespace Project.Gameplay.Gameplay.Combat
         public (DamageResult result, bool died) ApplyNoDeath(DamageContext dmgCtx)
         {
             DamageResult result = _pipeline.Calculate(dmgCtx);
+            if (result.Cancelled)
+            {
+                return (result, false);
+            }
             bool died = dmgCtx.Target.Stats.TakeDamage(result.Final);
             return (result, died);
         }
@@ -68,8 +74,12 @@ namespace Project.Gameplay.Gameplay.Combat
         public (DamageResult result, bool died) ApplyDamageOnly(DamageContext dmgCtx, BoardCell targetCell)
         {
             DamageResult result = _pipeline.Calculate(dmgCtx);
+            if (result.Cancelled)
+            {
+                return (result, false);
+            }
+            
             bool died = dmgCtx.Target.Stats.TakeDamage(result.Final);
-
             if (died)
             {
                 _passives.TriggerKill(dmgCtx.Attacker, dmgCtx.Target);
@@ -86,10 +96,8 @@ namespace Project.Gameplay.Gameplay.Combat
         public async UniTask<(DamageResult result, bool died)> ApplyDirectAsync(DamageContext dmgCtx, BoardCell targetCell)
         {
             (DamageResult result, bool died) = ApplyDamageOnly(dmgCtx, targetCell);
-
             if (died)
                 await _lifeService.HandleDeathDirectAsync(dmgCtx.Target, targetCell);
-
             return (result, died);
         }
     }

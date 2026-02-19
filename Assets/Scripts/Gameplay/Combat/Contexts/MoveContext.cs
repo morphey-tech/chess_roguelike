@@ -6,7 +6,7 @@ namespace Project.Gameplay.Gameplay.Combat.Contexts
 {
     public sealed class MoveContext
     {
-        public Figure Figure { get; set; }
+        public Figure Actor { get; set; }
         public GridPosition From { get; set; }
         public GridPosition To { get; set; }
         public BoardGrid Grid { get; set; }

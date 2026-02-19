@@ -119,7 +119,7 @@ namespace Project.Gameplay.Gameplay.Figures
             // Вызываем триггеры движения
             var moveContext = new MoveContext
             {
-                Figure = figure,
+                Actor = figure,
                 From = from,
                 To = to,
                 Grid = Grid,

@@ -130,15 +130,20 @@ namespace Project.Gameplay.Gameplay.Combat.Visual
         public GridPosition TargetPosition { get; }
         public float Damage { get; }
         public bool IsCritical { get; }
+        public bool IsDodged { get; }
+        public bool IsCancelled { get; }
         public string AttackId { get; }
 
-        public ProjectileHitApplyEvent(int attackerId, int targetId, GridPosition targetPosition, float damage, bool isCritical, string attackId)
+        public ProjectileHitApplyEvent(int attackerId, int targetId, GridPosition targetPosition,
+            float damage, bool isCritical, bool isDodged, bool isCancelled, string attackId)
         {
             AttackerId = attackerId;
             TargetId = targetId;
             TargetPosition = targetPosition;
             Damage = damage;
             IsCritical = isCritical;
+            IsDodged = isDodged;
+            IsCancelled = isCancelled;
             AttackId = attackId;
         }
     }
