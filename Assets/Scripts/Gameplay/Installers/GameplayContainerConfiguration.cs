@@ -106,6 +106,7 @@ namespace Project.Gameplay.Gameplay.Installers
                 {
                     new SimpleAttack(),
                     new RangedAttack(),
+                    new DiagonalAttack(),
                     new SplashAttack(),
                     new PierceAttack()
                 });

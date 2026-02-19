@@ -1,3 +1,4 @@
+using Project.Core.Core.Configs.Stats;
 using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Combat.Effects.Impl;
@@ -12,6 +13,7 @@ namespace Project.Gameplay.Gameplay.Attack.Strategies
     public sealed class SplashAttack : IAttackStrategy
     {
         public string Id => "splash";
+        public DeliveryType Delivery => DeliveryType.Instant;
 
         public bool CanAttack(Figure attacker, GridPosition from, GridPosition to, BoardGrid grid)
         {

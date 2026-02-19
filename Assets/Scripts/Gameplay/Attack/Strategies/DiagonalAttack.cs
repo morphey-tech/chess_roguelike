@@ -1,3 +1,4 @@
+using System;
 using Project.Core.Core.Configs.Stats;
 using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Combat;
@@ -6,12 +7,16 @@ using Project.Gameplay.Gameplay.Grid;
 
 namespace Project.Gameplay.Gameplay.Attack.Strategies
 {
-    public sealed class SimpleAttack : IAttackStrategy
+    /// <summary>
+    /// Diagonal attack strategy - can only attack targets on diagonal lines.
+    /// Used for Bishop figures.
+    /// </summary>
+    public sealed class DiagonalAttack : IAttackStrategy
     {
         public string Id => STRATEGY_ID;
-        public DeliveryType Delivery => DeliveryType.Instant;
+        public DeliveryType Delivery => DeliveryType.Projectile;
         
-        private const string STRATEGY_ID = "simple";
+        private const string STRATEGY_ID = "diagonal";
 
         public bool CanAttack(Figure attacker, GridPosition from, GridPosition to, BoardGrid grid)
         {
@@ -19,10 +24,16 @@ namespace Project.Gameplay.Gameplay.Attack.Strategies
             {
                 return false;
             }
+            if (!IsOnDiagonal(from, to))
+            {
+                return false;
+            }
+            
             if (!AttackUtils.IsInRange(from, to, attacker.Stats.AttackRange))
             {
                 return false;
             }
+            
             BoardCell targetCell = grid.GetBoardCell(to);
             return targetCell.OccupiedBy != null && targetCell.OccupiedBy.Team != attacker.Team;
         }
@@ -36,9 +47,20 @@ namespace Project.Gameplay.Gameplay.Attack.Strategies
                 AttackerPosition = attackerPos,
                 TargetPosition = defenderPos,
                 Grid = grid,
-                HitType = HitType.Melee,
-                AttackerMovesOnKill = true
+                HitType = HitType.Ranged,
+                AttackerMovesOnKill = false
             };
+        }
+
+        /// <summary>
+        /// Check if target is on a diagonal line from attacker.
+        /// Diagonal means row and column differences are equal.
+        /// </summary>
+        private static bool IsOnDiagonal(GridPosition from, GridPosition to)
+        {
+            int rowDiff = Math.Abs(to.Row - from.Row);
+            int colDiff = Math.Abs(to.Column - from.Column);
+            return rowDiff == colDiff && rowDiff > 0;
         }
     }
 }

@@ -1,3 +1,4 @@
+using Project.Core.Core.Configs.Stats;
 using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Figures;
@@ -8,6 +9,7 @@ namespace Project.Gameplay.Gameplay.Attack.Strategies
     public sealed class RangedAttack : IAttackStrategy
     {
         public string Id => STRATEGY_ID;
+        public DeliveryType Delivery => DeliveryType.Projectile;
         
         private const string STRATEGY_ID = "ranged";
 

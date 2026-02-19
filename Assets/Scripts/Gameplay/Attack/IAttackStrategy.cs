@@ -1,3 +1,4 @@
+using Project.Core.Core.Configs.Stats;
 using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Figures;
@@ -12,6 +13,11 @@ namespace Project.Gameplay.Gameplay.Attack
     public interface IAttackStrategy
     {
         string Id { get; }
+        
+        /// <summary>
+        /// Delivery type for this attack (Instant, Projectile, etc.)
+        /// </summary>
+        DeliveryType Delivery { get; }
         
         /// <summary>
         /// Checks if figure can attack from one position to another.

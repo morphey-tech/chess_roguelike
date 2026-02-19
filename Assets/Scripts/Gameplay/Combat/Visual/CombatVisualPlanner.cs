@@ -20,7 +20,7 @@ namespace Project.Gameplay.Gameplay.Combat.Visual
         {
             var commands = new List<IVisualCommand>();
 
-            if (visualEvents != null && visualEvents.Count > 0)
+            if (visualEvents is { Count: > 0 })
             {
                 var sorted = new List<ICombatVisualEvent>(visualEvents);
                 sorted.Sort((a, b) => a.Stage != b.Stage ? a.Stage.CompareTo(b.Stage) : a.OrderInStage.CompareTo(b.OrderInStage));

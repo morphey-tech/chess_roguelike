@@ -1,11 +1,9 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using DG.Tweening;
 using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
 using Project.Core.Core.Physics;
 using Project.Core.Core.World;
-using Project.Gameplay;
 using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Core.Core.Configs.Gameplay;
@@ -208,7 +206,6 @@ namespace Project.Unity.Unity.Views
 
         public void ShowDamageText(int figureId, DamageVisualContext ctx)
         {
-            UnityEngine.Debug.Log($"[FigurePresenter.ShowDamageText] figureId={figureId}, hasVisuals={_visuals.ContainsKey(figureId)}, damageText={_visuals.TryGetValue(figureId, out var v) && v.DamageText != null}");
             if (!_visuals.TryGetValue(figureId, out var visualSet))
                 return;
 

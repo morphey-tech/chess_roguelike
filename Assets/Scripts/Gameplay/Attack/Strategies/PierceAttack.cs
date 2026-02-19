@@ -1,3 +1,4 @@
+using Project.Core.Core.Configs.Stats;
 using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Combat.Effects.Impl;
@@ -12,6 +13,7 @@ namespace Project.Gameplay.Gameplay.Attack.Strategies
     public sealed class PierceAttack : IAttackStrategy
     {
         public string Id => "pierce";
+        public DeliveryType Delivery => DeliveryType.Projectile;
         
         private readonly int _maxPierceCount;
         private readonly float _pierceDamagePercent;

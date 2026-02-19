@@ -2,7 +2,6 @@ using System;
 using Project.Gameplay.Gameplay.Combat.Damage;
 using Project.Gameplay.Gameplay.Combat.Visual;
 using Project.Gameplay.Gameplay.Figures;
-using Project.Gameplay.Gameplay.Grid;
 
 namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
 {

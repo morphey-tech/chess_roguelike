@@ -116,8 +116,6 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
 
         public async UniTask ExecuteAsync(ActionContext context)
         {
-            UnityEngine.Debug.Log($"[AttackAction] ExecuteAsync: actor={context.Actor}, from={context.From}, to={context.To}, attackId={context.Actor.AttackId}");
-            
             if (!CanExecute(context))
                 return;
 
@@ -164,7 +162,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
                     context.To,
                     context.Grid);
                 hitContext.AttackId = attackStrategy.Id;
-                hitContext.Delivery = MapDelivery(attackStrategy.Id);
+                hitContext.Delivery = attackStrategy.Delivery;
                 hitContext.Pattern = HitPattern.Single;
             }
 
@@ -250,11 +248,6 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
                 AttackType.Magic => HitType.Magic,
                 _ => HitType.Melee
             };
-        }
-
-        private static DeliveryType MapDelivery(string attackId)
-        {
-            return attackId == "ranged" ? DeliveryType.Projectile : DeliveryType.Instant;
         }
     }
 }

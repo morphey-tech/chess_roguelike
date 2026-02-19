@@ -23,7 +23,7 @@
     {
       "id": "bishop",
       "movement_id": "bishop",
-      "attack_id": "ranged",
+      "attack_id": "diagonal",
       "stats_id": "bishop_stats",
       "turn_patterns_id": "ranged_default",
       "passives": ["first_shot"],
