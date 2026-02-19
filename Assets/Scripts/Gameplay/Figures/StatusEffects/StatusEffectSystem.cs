@@ -23,11 +23,11 @@ namespace Project.Gameplay.Gameplay.Figures.StatusEffects
                     && effect is StackableStatusEffect)
                 {
                     stackable.AddStack();
-                    //Update duration
                     return;
                 }
             }
             _effects[effect.Id] = effect;
+            effect.OnApply(_owner);
         }
 
         public void TriggerBeforeHit(BeforeHitContext ctx)
@@ -57,6 +57,7 @@ namespace Project.Gameplay.Gameplay.Figures.StatusEffects
             
             foreach (string key in expired)
             {
+                _effects[key].OnRemove(_owner);
                 _effects.Remove(key);
             }
         }

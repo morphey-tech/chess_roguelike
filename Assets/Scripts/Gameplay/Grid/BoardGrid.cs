@@ -6,6 +6,13 @@ namespace Project.Gameplay.Gameplay.Grid
 {
     public sealed class BoardGrid : IBoardGrid
     {
+        private static readonly (int dr, int dc)[] AdjacentOffsets =
+        {
+            (-1, -1), (-1, 0), (-1, 1),
+            (0, -1),           (0, 1),
+            (1, -1),  (1, 0),  (1, 1)
+        };
+
         private readonly BoardCell[,] _cells;
 
         public int Width { get; }
@@ -80,6 +87,21 @@ namespace Project.Gameplay.Gameplay.Grid
             {
                 if (cell.OccupiedBy?.Team == team)
                     yield return cell.OccupiedBy;
+            }
+        }
+
+        /// <summary>
+        /// Returns all valid adjacent cells around a position (8 directions).
+        /// </summary>
+        public IEnumerable<BoardCell> GetAdjacentCells(GridPosition position)
+        {
+            foreach (var (dr, dc) in AdjacentOffsets)
+            {
+                GridPosition neighbor = new(position.Row + dr, position.Column + dc);
+                if (IsInside(neighbor))
+                {
+                    yield return GetBoardCell(neighbor);
+                }
             }
         }
     }

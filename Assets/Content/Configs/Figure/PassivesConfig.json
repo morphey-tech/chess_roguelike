@@ -102,6 +102,16 @@
         "damage": 0.5,
         "max_stacks": 5
       }
+    },
+    {
+      "id": "inspiration",
+      "type": "inspiration",
+      "params": {
+        "attack_bonus": 2,
+        "defence_bonus": 2,
+        "evasion_bonus": 0.15,
+        "duration": 2
+      }
     }
   ]
 }

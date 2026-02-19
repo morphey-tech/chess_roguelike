@@ -61,9 +61,9 @@
       "description_id": "queen"
     },
     {
-      "id": "king",
+      "id": "king_white",
       "alias": "kg",
-      "asset_key": "rook_white_view",
+      "asset_key": "king_white_view",
       "description_id": "king"
     },
     {

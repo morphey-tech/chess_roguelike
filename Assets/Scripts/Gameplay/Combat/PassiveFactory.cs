@@ -17,6 +17,7 @@ namespace Project.Gameplay.Gameplay.Combat
         private const string AGILE_DODGE = "agile_dodge";
         private const string FIRST_SHOT = "first_shot";
         private const string FURY = "fury";
+        private const string INSPIRATION = "inspiration";
 
         public static IPassive? Create(PassiveConfig config)
         {
@@ -33,6 +34,12 @@ namespace Project.Gameplay.Gameplay.Combat
                 AGILE_DODGE => new AgileDodgePassive(config.Id, config.GetFloat("chance", 0.5f)),
                 FIRST_SHOT => new FirstShotPassive(config.Id, config.GetFloat("bonus_damage", 2f)),
                 FURY => new FuryPassive(config.Id, config.GetFloat("damage", 0.5f), config.GetInt("max_stacks", 5)),
+                INSPIRATION => new InspirationPassive(
+                    config.Id,
+                    config.GetFloat("attack_bonus", 2f),
+                    config.GetFloat("defence_bonus", 2f),
+                    config.GetFloat("evasion_bonus", 0.1f),
+                    config.GetInt("duration", 2)),
                 _ => null
             };
         }

@@ -54,7 +54,7 @@
       "attack_id": "simple",
       "stats_id": "king_stats",
       "turn_patterns_id": "melee_default",
-      "passives": [],
+      "passives": ["inspiration"],
       "load": 3
     },
     {
