@@ -1,56 +1,64 @@
 using System.Collections.Generic;
 using System.Linq;
 using Project.Gameplay.Gameplay.Combat.Contexts;
-using UnityEngine;
+using Sirenix.Utilities;
 
 namespace Project.Gameplay.Gameplay.Figures.StatusEffects
 {
     public sealed class StatusEffectSystem
     {
-        public IReadOnlyList<IStatusEffect> ActiveEffects => _effects; 
-        
         private readonly Figure _owner;
-        private readonly List<IStatusEffect> _effects = new();
+        private readonly Dictionary<string, IStatusEffect> _effects = new();
        
         public  StatusEffectSystem(Figure owner)
         {
             _owner = owner;
         }
         
-        public void Add(IStatusEffect effect)
+        public void AddOrStack(IStatusEffect effect)
         {
-            IStatusEffect? existing = _effects.FirstOrDefault(e => e.Id == effect.Id);
-            if (existing != null)
+            if (_effects.TryGetValue(effect.Id, out IStatusEffect existing))
             {
-                Debug.Log($"{_owner} already has effect {effect.Id}, skipping");
-                //Temporary not stackable
-                return;
+                if (existing is StackableStatusEffect stackable
+                    && effect is StackableStatusEffect)
+                {
+                    stackable.AddStack();
+                    //Update duration
+                    return;
+                }
             }
-            Debug.Log($"{_owner} gained effect {effect.Id}");
-            _effects.Add(effect);
-            effect.OnApply(_owner);
+            _effects[effect.Id] = effect;
         }
-        
-        public void Remove(IStatusEffect effect)
-        {
-            effect.OnRemove(_owner);
-            _effects.Remove(effect);
-        }
-        
+
         public void TriggerBeforeHit(BeforeHitContext ctx)
         {
-            _effects.ForEach(e => e.OnBeforeHit(_owner, ctx));
+            _effects.ForEach(e =>
+            {
+                e.Value.OnBeforeHit(_owner, ctx);
+            });
+            Cleanup();
+        }
+
+        public void TriggerAfterHit(AfterHitContext ctx)
+        {
+            _effects.ForEach(e =>
+            {
+                e.Value.OnAfterHit(_owner, ctx);
+            });
             Cleanup();
         }
         
         private void Cleanup()
         {
-            foreach (IStatusEffect statusEffect in _effects
-                         .Where(e => e.IsExpired).ToList())
+            List<string> expired = _effects
+                .Where(e => e.Value.IsExpired)
+                .Select(e => e.Key)
+                .ToList();
+            
+            foreach (string key in expired)
             {
-                Remove(statusEffect);
+                _effects.Remove(key);
             }
         }
-
     }
 }

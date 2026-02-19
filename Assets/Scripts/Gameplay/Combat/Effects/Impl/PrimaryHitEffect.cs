@@ -48,8 +48,6 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
 
         public void Apply(CombatEffectContext context)
         {
-            UnityEngine.Debug.Log($"[PrimaryHitEffect] Apply: attacker={_attacker}, target={_target}, baseDamage={_baseDamage}");
-            
             BeforeHitContext before = new()
             {
                 Attacker = _attacker,
@@ -59,10 +57,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
             };
 
             context.Passives.TriggerBeforeHit(_attacker, _target, before);
-            _target.Effects.TriggerBeforeHit(before);
-            _attacker.Effects.TriggerBeforeHit(before);
-            
-            UnityEngine.Debug.Log($"[PrimaryHitEffect] After triggers: IsDodged={before.IsDodged}, IsCancelled={before.IsCancelled}, DamageMultiplier={before.DamageMultiplier}");
+            context.ActionContext.Actor.Effects.TriggerBeforeHit(before);
 
             float finalDamage = before.BaseDamage * before.DamageMultiplier + before.BonusDamage;
             if (finalDamage < 0)
@@ -112,6 +107,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
                 };
 
                 context.Passives.TriggerAfterHit(_attacker, _target, after);
+                context.ActionContext.Actor.Effects.TriggerAfterHit(after);
                 foreach (ICombatEffect effect in after.Effects)
                 {
                     context.AddEffect(effect);

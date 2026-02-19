@@ -45,7 +45,7 @@
       "attack_id": "simple",
       "stats_id": "queen_stats",
       "turn_patterns_id": "melee_default",
-      "passives": ["lifesteal_50", "execute_30"],
+      "passives": ["fury"],
       "load": 4
     },
     {

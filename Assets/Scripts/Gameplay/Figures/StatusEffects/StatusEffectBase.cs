@@ -42,6 +42,10 @@ namespace Project.Gameplay.Gameplay.Figures.StatusEffects
         {
         }
 
+        public virtual void OnAfterHit(Figure owner, AfterHitContext ctx)
+        {
+        }
+
         protected bool TryConsumeUse()
         {
             if (RemainingUses == 0)

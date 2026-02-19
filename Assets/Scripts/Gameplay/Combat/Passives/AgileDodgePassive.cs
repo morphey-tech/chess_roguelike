@@ -19,7 +19,7 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
 
         void IOnMove.OnMove(MoveContext context)
         {
-            context.Actor.Effects.Add(new DodgeEffect(_chance, turns: 1, uses: 1));
+            context.Actor.Effects.AddOrStack(new DodgeEffect(_chance, turns: 1, uses: 1));
         }
     }
 }

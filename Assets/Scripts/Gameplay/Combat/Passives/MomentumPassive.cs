@@ -49,7 +49,7 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
 
             int moved = oldDist - newDist;
             float bonus = moved * _damagePerCell;
-            var modifier = new FlatModifier<float>($"{Id}_momentum", bonus, 0, 1, true);
+            var modifier = new FlatModifier<float>($"{Id}", bonus, 0, 1, true);
             actor.Stats.Attack.AddModifier(modifier);
         }
 

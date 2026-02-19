@@ -15,5 +15,6 @@ namespace Project.Gameplay.Gameplay.Figures.StatusEffects
         void OnTurnStart(Figure owner, TurnContext ctx);
         void OnTurnEnd(Figure owner, TurnContext ctx);
         void OnBeforeHit(Figure owner, BeforeHitContext ctx);
+        void OnAfterHit(Figure owner, AfterHitContext ctx);
     }
 }

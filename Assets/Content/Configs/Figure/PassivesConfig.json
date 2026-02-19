@@ -94,6 +94,14 @@
       "params": {
         "bonus_damage": 2
       }
+    },
+    {
+      "id": "fury",
+      "type": "fury",
+      "params": {
+        "damage": 0.5,
+        "max_stacks": 5
+      }
     }
   ]
 }
