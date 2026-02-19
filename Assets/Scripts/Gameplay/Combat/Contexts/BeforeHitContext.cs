@@ -10,7 +10,7 @@ namespace Project.Gameplay.Gameplay.Combat.Contexts
         public BoardGrid Grid { get; set; }
         public float BaseDamage { get; set; }
         public float DamageMultiplier { get; set; } = 1f;
-        public int BonusDamage { get; set; }
+        public float BonusDamage { get; set; }
         public bool IsCritical { get; set; }
         public bool IsDodged { get; set; }
         public bool IsCancelled { get; set; }

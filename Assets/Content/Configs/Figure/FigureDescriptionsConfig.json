@@ -26,7 +26,7 @@
       "attack_id": "ranged",
       "stats_id": "bishop_stats",
       "turn_patterns_id": "ranged_default",
-      "passives": ["lifesteal_25"],
+      "passives": ["first_shot"],
       "load": 2
     },
     {

@@ -116,6 +116,8 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
 
         public async UniTask ExecuteAsync(ActionContext context)
         {
+            UnityEngine.Debug.Log($"[AttackAction] ExecuteAsync: actor={context.Actor}, from={context.From}, to={context.To}, attackId={context.Actor.AttackId}");
+            
             if (!CanExecute(context))
                 return;
 

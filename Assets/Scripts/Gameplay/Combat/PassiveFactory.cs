@@ -15,6 +15,7 @@ namespace Project.Gameplay.Gameplay.Combat
         private const string RETREAT_ON_NO_KILL = "retreat_on_no_kill";
         private const string MOMENTUM = "momentum";
         private const string AGILE_DODGE = "agile_dodge";
+        private const string FIRST_SHOT = "first_shot";
 
         public static IPassive? Create(PassiveConfig config)
         {
@@ -29,6 +30,7 @@ namespace Project.Gameplay.Gameplay.Combat
                 RETREAT_ON_NO_KILL => new RetreatOnNoKillPassive(config.Id, config.GetInt("distance", 1)),
                 MOMENTUM => new MomentumPassive(config.Id, config.GetFloat("bonus_damage", 0.5f)),
                 AGILE_DODGE => new AgileDodgePassive(config.Id, config.GetFloat("chance", 0.5f)),
+                FIRST_SHOT => new FirstShotPassive(config.Id, config.GetFloat("bonus_damage", 2f)),
                 _ => null
             };
         }

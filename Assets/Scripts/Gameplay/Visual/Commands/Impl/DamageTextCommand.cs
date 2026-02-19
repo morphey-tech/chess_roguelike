@@ -24,6 +24,7 @@ namespace Project.Gameplay.Gameplay.Visual.Commands.Impl
 
         public UniTask ExecuteAsync(IPresenterProvider presenters)
         { 
+            UnityEngine.Debug.Log($"[DamageTextCommand] TargetId={_ctx.TargetId}, Amount={_ctx.Amount}, IsDodged={_ctx.IsDodged}");
             presenters.Figures.ShowDamageText(_ctx.TargetId,  _ctx);
             return UniTask.CompletedTask;
         }

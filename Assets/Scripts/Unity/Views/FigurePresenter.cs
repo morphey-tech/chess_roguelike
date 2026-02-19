@@ -208,6 +208,7 @@ namespace Project.Unity.Unity.Views
 
         public void ShowDamageText(int figureId, DamageVisualContext ctx)
         {
+            UnityEngine.Debug.Log($"[FigurePresenter.ShowDamageText] figureId={figureId}, hasVisuals={_visuals.ContainsKey(figureId)}, damageText={_visuals.TryGetValue(figureId, out var v) && v.DamageText != null}");
             if (!_visuals.TryGetValue(figureId, out var visualSet))
                 return;
 

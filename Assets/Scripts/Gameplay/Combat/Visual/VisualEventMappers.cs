@@ -64,6 +64,18 @@ namespace Project.Gameplay.Gameplay.Combat.Visual
         {
             var evt = (ProjectileHitApplyEvent)visualEvent;
             yield return new ProjectileHitApplyCommand(evt);
+            yield return new DamageTextCommand(new DamageVisualContext(
+                evt.TargetId,
+                evt.Damage,
+                evt.IsCritical,
+                evt.IsDodged,
+                evt.AttackId));
+            yield return new DamageCommand(new DamageVisualContext(
+                evt.TargetId,
+                evt.Damage,
+                evt.IsCritical,
+                evt.IsDodged,
+                evt.AttackId));
         }
     }
 

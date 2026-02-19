@@ -87,6 +87,13 @@
       "params": {
         "chance": 0.5
       }
+    },
+    {
+      "id": "first_shot",
+      "type": "first_shot",
+      "params": {
+        "bonus_damage": 2
+      }
     }
   ]
 }

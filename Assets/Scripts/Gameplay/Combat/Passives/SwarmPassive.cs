@@ -29,7 +29,7 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
             int allies = context.Grid.CountAlliesAround(owner);
             float percentTotal = allies * _percentPerAlly;
             
-            var modifier = new PercentModifier($"{Id}_swarm", percentTotal, 100, _duration, false);
+            var modifier = new PercentModifier(Id, percentTotal, 100, _duration, false);
             owner.Stats.Attack.AddModifier(modifier);
         }
     }
