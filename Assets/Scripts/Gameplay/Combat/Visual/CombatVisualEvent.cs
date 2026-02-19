@@ -34,13 +34,16 @@ namespace Project.Gameplay.Gameplay.Combat.Visual
         public int TargetId { get; }
         public float Amount { get; }
         public bool IsCritical { get; }
+        public bool IsDodged { get; }
         public string DamageType { get; }
 
-        public DamageVisualEvent(int targetId, float amount, bool isCritical = false, string damageType = null)
+        public DamageVisualEvent(int targetId, float amount, bool isCritical = false,
+            bool isDodged = false, string damageType = null)
         {
             TargetId = targetId;
             Amount = amount;
             IsCritical = isCritical;
+            IsDodged = isDodged;
             DamageType = damageType;
         }
     }

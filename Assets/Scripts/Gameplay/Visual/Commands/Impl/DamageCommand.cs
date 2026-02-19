@@ -21,6 +21,10 @@ namespace Project.Gameplay.Gameplay.Visual.Commands.Impl
 
         public UniTask ExecuteAsync(IPresenterProvider presenters)
         {
+            if (_ctx.IsDodged)
+            {
+                return  UniTask.CompletedTask;
+            }
             return presenters.Figures.PlayDamageEffectAsync(_ctx.TargetId);
         }
     }

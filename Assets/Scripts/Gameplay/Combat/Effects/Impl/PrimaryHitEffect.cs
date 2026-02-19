@@ -89,6 +89,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
                     _target.Id,
                     damageResult.Final,
                     before.IsCritical,
+                    before.IsDodged,
                     string.IsNullOrEmpty(_attackId) ? _delivery.ToString() : _attackId));
 
                 context.Logger.Info($"{_attacker} hit {_target} for {damageResult.Final} damage. HP: {_target.Stats.CurrentHp}/{_target.Stats.MaxHp}");

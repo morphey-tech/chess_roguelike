@@ -108,12 +108,14 @@ namespace Project.Gameplay.Gameplay.Combat.Visual
                 evt.TargetId,
                 evt.Amount,
                 evt.IsCritical,
+                evt.IsDodged,
                 evt.DamageType));
             
             yield return new DamageCommand(new DamageVisualContext(
                 evt.TargetId,
                 evt.Amount,
                 evt.IsCritical,
+                evt.IsDodged,
                 evt.DamageType));
         }
     }

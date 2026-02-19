@@ -29,7 +29,14 @@ namespace Project.Unity.UI.Components
 
     public void Play(DamageVisualContext ctx)
     {
-      _text.text = ctx.Amount.ToString();
+      if (ctx.IsDodged)
+      {
+        _text.text = "MISS";
+      }
+      else
+      {
+        _text.text = ctx.Amount.ToString();
+      }
     }
 
     public void OnAnimationEnd()

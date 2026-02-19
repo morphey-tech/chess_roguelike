@@ -34,7 +34,8 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
                 "splash", Array.Empty<IDamageModifier>());
             (DamageResult result, _) = context.DamageApplier.Apply(context, dmgCtx);
 
-            context.AddVisualEvent(new DamageVisualEvent(_target.Id, result.Final, false, "splash"));
+            context.AddVisualEvent(new DamageVisualEvent(_target.Id, result.Final, false,
+                false, "splash"));
             context.Logger.Info($"Splash hit {_target} for {result.Final} damage. HP: {_target.Stats.CurrentHp}/{_target.Stats.MaxHp}");
         }
     }
