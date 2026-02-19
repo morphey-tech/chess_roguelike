@@ -20,5 +20,8 @@ namespace Project.Core.Core.Configs.Stats
 
         [JsonProperty("defence")]
         public int Defence { get; set; }
+        
+        [JsonProperty("evasion")]
+        public int Evasion { get; set; }
     }
 }

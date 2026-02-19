@@ -19,18 +19,21 @@ namespace Project.Gameplay.Gameplay.Figures
         public FigureStat<float> Attack { get; }
         /// <summary>Defence stat: base + modifiers. Use .Value for combat formula.</summary>
         public FigureStat<float> Defence { get; }
+        public FigureStat<float> Evasion { get; }
 
         public int AttackRange => MaxAttackRange;
         public int MaxAttackRange => Attacks.Count == 0 ? 0 : Attacks.Max(a => a.Range);
         public bool IsDead => CurrentHp <= 0f;
 
-        public FigureStats(int maxHp, IReadOnlyList<AttackProfile>? attacks, float baseAttack, float baseDefence)
+        public FigureStats(int maxHp, IReadOnlyList<AttackProfile>? attacks,
+            float baseAttack, float baseDefence, float baseEvasion)
         {
             MaxHp = maxHp;
             CurrentHp = maxHp;
             Attacks = attacks ?? Array.Empty<AttackProfile>();
             Attack = new FigureStat<float>(baseAttack);
             Defence = new FigureStat<float>(baseDefence);
+            Evasion = new FigureStat<float>(baseEvasion);
         }
 
         /// <summary>
@@ -54,6 +57,7 @@ namespace Project.Gameplay.Gameplay.Figures
         {
             Attack.Tick();
             Defence.Tick();
+            Evasion.Tick();
         }
     }
 }

@@ -12,7 +12,9 @@
           "delivery": "Instant",
           "pattern": "Single"
         }
-      ]
+      ],
+      "defence": 0,
+      "evasion": 0
     },
     {
       "id": "knight_stats",
@@ -26,7 +28,9 @@
           "delivery": "Instant",
           "pattern": "Single"
         }
-      ]
+      ],
+      "defence": 0,
+      "evasion": 0
     },
     {
       "id": "bishop_stats",
@@ -41,7 +45,9 @@
           "pattern": "Single",
           "projectile_id": "arrow_basic"
         }
-      ]
+      ],
+      "defence": 0,
+      "evasion": 0
     },
     {
       "id": "rook_stats",
@@ -55,7 +61,9 @@
           "delivery": "Instant",
           "pattern": "Single"
         }
-      ]
+      ],
+      "defence": 0,
+      "evasion": 0
     },
     {
       "id": "queen_stats",
@@ -69,7 +77,9 @@
           "delivery": "Instant",
           "pattern": "Single"
         }
-      ]
+      ],
+      "defence": 0,
+      "evasion": 0
     },
     {
       "id": "king_stats",
@@ -83,7 +93,9 @@
           "delivery": "Instant",
           "pattern": "Single"
         }
-      ]
+      ],
+      "defence": 0,
+      "evasion": 0
     },
     {
       "id": "brutal_stats",
@@ -97,7 +109,9 @@
           "delivery": "Instant",
           "pattern": "Single"
         }
-      ]
+      ],
+      "defence": 0,
+      "evasion": 0
     },
     {
       "id": "slippery_stats",
@@ -111,7 +125,9 @@
           "delivery": "Instant",
           "pattern": "Single"
         }
-      ]
+      ],
+      "defence": 0,
+      "evasion": 0
     },
     {
       "id": "tank_stats",
@@ -125,7 +141,9 @@
           "delivery": "Instant",
           "pattern": "Single"
         }
-      ]
+      ],
+      "defence": 0,
+      "evasion": 0
     },
     {
       "id": "splash_stats",
@@ -139,7 +157,9 @@
           "delivery": "Instant",
           "pattern": "Single"
         }
-      ]
+      ],
+      "defence": 0,
+      "evasion": 0
     },
     {
       "id": "pierce_stats",
@@ -153,7 +173,9 @@
           "delivery": "Instant",
           "pattern": "Single"
         }
-      ]
+      ],
+      "defence": 0,
+      "evasion": 0
     },
     {
       "id": "ranger_stats",
@@ -176,7 +198,9 @@
           "pattern": "Single",
           "projectile_id": "arrow_basic"
         }
-      ]
+      ],
+      "defence": 0,
+      "evasion": 0
     }
   ]
 }

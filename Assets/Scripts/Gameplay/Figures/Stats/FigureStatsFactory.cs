@@ -48,9 +48,12 @@ namespace Project.Gameplay.Gameplay.Figures
                 }
             }
 
-            float baseAttack = cfg.Attack > 0 ? cfg.Attack : (attacks.Count > 0 ? attacks[0].Damage : 0);
+            float baseAttack = cfg.Attack > 0 ? 
+                cfg.Attack : (attacks.Count > 0 ? attacks[0].Damage : 0);
             float baseDefence = cfg.Defence;
-            return new FigureStats(cfg.MaxHp, attacks, baseAttack, baseDefence);
+            float baseEvasion = cfg.Evasion;
+            return new FigureStats(cfg.MaxHp, attacks, baseAttack,
+                baseDefence, baseEvasion);
         }
 
         public void ClearCache()
