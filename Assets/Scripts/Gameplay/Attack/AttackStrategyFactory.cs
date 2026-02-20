@@ -13,6 +13,7 @@ namespace Project.Gameplay.Gameplay.Attack
         private readonly Dictionary<string, IAttackStrategy> _strategies;
         private readonly IAttackStrategy _fallback;
         private readonly ILogger<AttackStrategyFactory> _logger;
+        private static AttackStrategyFactory _instance;
 
         public AttackStrategyFactory(
             IEnumerable<IAttackStrategy> strategies,
@@ -21,9 +22,12 @@ namespace Project.Gameplay.Gameplay.Attack
             _strategies = strategies.ToDictionary(s => s.Id);
             _fallback = new SimpleAttack();
             _logger = logService.CreateLogger<AttackStrategyFactory>();
+            _instance = this;
             
             _logger.Info($"Registered attack strategies: {string.Join(", ", _strategies.Keys)}");
         }
+
+        public static AttackStrategyFactory Instance => _instance;
 
         public IAttackStrategy Get(string attackId)
         {

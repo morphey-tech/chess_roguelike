@@ -18,6 +18,7 @@ namespace Project.Gameplay.Gameplay.Combat
         private const string FIRST_SHOT = "first_shot";
         private const string FURY = "fury";
         private const string INSPIRATION = "inspiration";
+        private const string PROVOCATION = "provocation";
 
         public static IPassive? Create(PassiveConfig config)
         {
@@ -40,6 +41,7 @@ namespace Project.Gameplay.Gameplay.Combat
                     config.GetFloat("defence_bonus", 2f),
                     config.GetFloat("evasion_bonus", 0.1f),
                     config.GetInt("duration", 2)),
+                PROVOCATION => new ProvocationPassive(config.Id),
                 _ => null
             };
         }

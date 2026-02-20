@@ -72,7 +72,7 @@
       "attack_id": "simple",
       "stats_id": "tank_stats",
       "turn_patterns_id": "melee_default",
-      "passives": ["fortify_tank"],
+      "passives": ["provocation"],
       "load": 4
     },
     {

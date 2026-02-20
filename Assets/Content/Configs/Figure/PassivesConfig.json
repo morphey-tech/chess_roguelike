@@ -112,6 +112,11 @@
         "evasion_bonus": 0.15,
         "duration": 2
       }
+    },
+    {
+      "id": "provocation",
+      "type": "provocation",
+      "params": {}
     }
   ]
 }

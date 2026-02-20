@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Project.Gameplay.Gameplay.Attack;
+using Project.Gameplay.Gameplay.Attack.Rules;
 using Project.Gameplay.Gameplay.Attack.Strategies;
 using Project.Gameplay.Gameplay.Board;
 using Project.Gameplay.Gameplay.Board.Capacity;
@@ -99,6 +100,16 @@ namespace Project.Gameplay.Gameplay.Installers
             builder.Register<AttackResolver>(Lifetime.Singleton).As<IAttackResolver>();
             builder.Register<TargetingService>(Lifetime.Singleton).As<ITargetingService>();
             builder.Register<EngagementRuleService>(Lifetime.Singleton).As<IEngagementRuleService>();
+
+            // Attack rules
+            builder.Register<AttackRuleService>(Lifetime.Singleton)
+                .WithParameter<IEnumerable<IAttackRule>>(new IAttackRule[]
+                {
+                    new RangeRule(),
+                    new DisarmRule(),
+                    new StealthRule(),
+                    new TauntRule()
+                });
 
             // Attack strategies
             builder.Register<AttackStrategyFactory>(Lifetime.Singleton)
