@@ -50,12 +50,12 @@
     },
     {
       "id": "king",
-      "movement_id": "pawn",
+      "movement_id": "king",
       "attack_id": "simple",
       "stats_id": "king_stats",
       "turn_patterns_id": "melee_default",
-      "passives": ["inspiration"],
-      "load": 3
+      "passives": ["royal_presence"],
+      "load": 4
     },
     {
       "id": "slippery",

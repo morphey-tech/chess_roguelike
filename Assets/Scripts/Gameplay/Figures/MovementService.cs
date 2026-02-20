@@ -116,6 +116,9 @@ namespace Project.Gameplay.Gameplay.Figures
             toCell.PlaceFigure(figure);
             toCell.Effects.OnEnter(toCell);
 
+            // Set moved flag
+            figure.MovedThisTurn = true;
+
             // Вызываем триггеры движения
             var moveContext = new MoveContext
             {

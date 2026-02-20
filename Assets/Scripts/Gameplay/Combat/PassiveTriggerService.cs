@@ -56,6 +56,9 @@ namespace Project.Gameplay.Gameplay.Combat
             foreach (Figure figure in team)
             {
                 Execute<IOnTurnStart>(figure, p => p.OnTurnStart(figure, context));
+                
+                // Trigger status effects OnTurnStart for timer decrement
+                figure.Effects.TriggerTurnStart(figure, context);
             }
         }
 

@@ -1,4 +1,5 @@
 using Project.Gameplay.Gameplay.Combat.Contexts;
+using Project.Gameplay.Gameplay.Figures;
 
 namespace Project.Gameplay.Gameplay.Figures.StatusEffects
 {
@@ -11,15 +12,17 @@ namespace Project.Gameplay.Gameplay.Figures.StatusEffects
 
         protected int RemainingTurns;
         protected int RemainingUses;
+        protected Team? OwnerTeam;
 
         public StatusEffectBase(int turns = -1, int uses = -1)
         {
             RemainingTurns = turns;
             RemainingUses = uses;
         }
-        
+
         public virtual void OnApply(Figure owner)
         {
+            OwnerTeam = owner.Team;
         }
 
         public virtual void OnRemove(Figure owner)
@@ -28,7 +31,8 @@ namespace Project.Gameplay.Gameplay.Figures.StatusEffects
 
         public virtual void OnTurnStart(Figure owner, TurnContext ctx)
         {
-            if (RemainingTurns > 0)
+            // Only decrement turns at start of owner's team turn
+            if (OwnerTeam == ctx.Team && RemainingTurns > 0)
             {
                 RemainingTurns--;
             }

@@ -34,6 +34,13 @@ namespace Project.Gameplay.Gameplay.Attack.Strategies
             {
                 return false;
             }
+
+            // Check that path to first target is clear (no figures blocking)
+            if (!IsPathClear(from, to, grid))
+            {
+                return false;
+            }
+
             BoardCell targetCell = grid.GetBoardCell(to);
             return targetCell.OccupiedBy != null && targetCell.OccupiedBy.Team != attacker.Team;
         }
@@ -85,6 +92,38 @@ namespace Project.Gameplay.Gameplay.Attack.Strategies
             }
 
             return context;
+        }
+
+        /// <summary>
+        /// Check if straight line path is clear (no figures blocking except target).
+        /// </summary>
+        private bool IsPathClear(GridPosition from, GridPosition to, BoardGrid grid)
+        {
+            int dr = to.Row - from.Row;
+            int dc = to.Column - from.Column;
+
+            // Only check straight lines (horizontal or vertical)
+            if (dr != 0 && dc != 0)
+                return true; // Not a straight line, skip check (for diagonal attacks)
+
+            int stepR = dr == 0 ? 0 : (dr > 0 ? 1 : -1);
+            int stepC = dc == 0 ? 0 : (dc > 0 ? 1 : -1);
+
+            GridPosition current = new(from.Row + stepR, from.Column + stepC);
+
+            while (current.Row != to.Row || current.Column != to.Column)
+            {
+                if (!grid.IsInside(current))
+                    return false;
+
+                BoardCell cell = grid.GetBoardCell(current);
+                if (cell.OccupiedBy != null)
+                    return false; // Blocked by a figure
+
+                current = new(current.Row + stepR, current.Column + stepC);
+            }
+
+            return true;
         }
     }
 }

@@ -122,6 +122,14 @@
       "id": "desperation",
       "type": "desperation",
       "params": {}
+    },
+    {
+      "id": "royal_presence",
+      "type": "royal_presence",
+      "params": {
+        "damage_bonus": 1,
+        "aura_radius": 2
+      }
     }
   ]
 }

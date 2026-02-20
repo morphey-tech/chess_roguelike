@@ -20,6 +20,7 @@ namespace Project.Gameplay.Gameplay.Combat
         private const string INSPIRATION = "inspiration";
         private const string PROVOCATION = "provocation";
         private const string DESPERATION = "desperation";
+        private const string ROYAL_PRESENCE = "royal_presence";
 
         public static IPassive? Create(PassiveConfig config)
         {
@@ -44,6 +45,7 @@ namespace Project.Gameplay.Gameplay.Combat
                     config.GetInt("duration", 2)),
                 PROVOCATION => new ProvocationPassive(config.Id),
                 DESPERATION => new DesperationPassive(config.Id),
+                ROYAL_PRESENCE => new RoyalPresencePassive(config.Id, config.GetFloat("damage_bonus", 1f), config.GetInt("aura_radius", 2)),
                 _ => null
             };
         }

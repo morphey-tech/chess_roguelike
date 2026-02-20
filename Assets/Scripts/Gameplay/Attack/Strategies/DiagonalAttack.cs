@@ -28,12 +28,18 @@ namespace Project.Gameplay.Gameplay.Attack.Strategies
             {
                 return false;
             }
-            
+
             if (!AttackUtils.IsInRange(from, to, attacker.Stats.AttackRange))
             {
                 return false;
             }
-            
+
+            // Check that path is clear (no figures blocking)
+            if (!IsPathClear(from, to, grid))
+            {
+                return false;
+            }
+
             BoardCell targetCell = grid.GetBoardCell(to);
             return targetCell.OccupiedBy != null && targetCell.OccupiedBy.Team != attacker.Team;
         }
@@ -50,6 +56,31 @@ namespace Project.Gameplay.Gameplay.Attack.Strategies
                 HitType = HitType.Ranged,
                 AttackerMovesOnKill = false
             };
+        }
+
+        /// <summary>
+        /// Check if path is clear (no figures blocking except target).
+        /// </summary>
+        private bool IsPathClear(GridPosition from, GridPosition to, BoardGrid grid)
+        {
+            int dr = Math.Sign(to.Row - from.Row);
+            int dc = Math.Sign(to.Column - from.Column);
+
+            GridPosition current = new(from.Row + dr, from.Column + dc);
+
+            while (current.Row != to.Row || current.Column != to.Column)
+            {
+                if (!grid.IsInside(current))
+                    return false;
+
+                BoardCell cell = grid.GetBoardCell(current);
+                if (cell.OccupiedBy != null)
+                    return false; // Blocked by a figure
+
+                current = new(current.Row + dr, current.Column + dc);
+            }
+
+            return true;
         }
 
         /// <summary>

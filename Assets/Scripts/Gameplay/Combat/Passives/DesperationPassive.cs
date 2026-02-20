@@ -8,12 +8,12 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
 {
     /// <summary>
     /// Desperation: if no allies nearby, base damage = 1.
-    /// Uses stat modifier to set attack to 1 (preserves bonus damage from other passives like Swarm).
+    /// Adds a flat modifier to set Attack to 1. Swarm bonus is added separately.
     /// </summary>
     public sealed class DesperationPassive : IPassive, IOnBeforeHit
     {
         public string Id { get; }
-        public int Priority => 50; // Execute BEFORE Swarm to set base first
+        public int Priority => 50; // Execute BEFORE Swarm (Priority 100)
 
         public DesperationPassive(string id)
         {
@@ -26,10 +26,15 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
 
             if (allies == 0)
             {
-                // No allies nearby: set attack to 1 via modifier
-                // This effectively sets base damage to 1 (before defence subtraction)
-                // Swarm bonus will be added on top as a separate modifier
-                var modifier = new CombatFlatModifier(Id, 1f - owner.Stats.Attack.Value, 0, 1, false);
+                // No allies nearby: set Attack to 1 via modifier
+                // Remove old modifier first to avoid stacking
+                owner.Stats.Attack.RemoveModifiersById(Id);
+                
+                // Calculate the delta needed to bring Attack to 1
+                float currentAttack = owner.Stats.Attack.Value;
+                float delta = 1f - currentAttack;
+                
+                var modifier = new CombatFlatModifier(Id, delta, 0, 1, false);
                 owner.Stats.Attack.AddModifier(modifier);
             }
         }

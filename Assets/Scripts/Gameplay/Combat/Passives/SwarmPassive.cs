@@ -29,6 +29,9 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
             int allies = context.Grid.CountAlliesAround(owner);
             int totalBonus = allies * _damagePerAlly;
 
+            // Remove old modifier first to avoid stacking from previous attacks
+            owner.Stats.Attack.RemoveModifiersById(Id);
+            
             var modifier = new CombatFlatModifier(Id, totalBonus, 0, _duration, false);
             owner.Stats.Attack.AddModifier(modifier);
         }

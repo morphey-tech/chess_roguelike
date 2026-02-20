@@ -24,7 +24,18 @@ public abstract class LazySingleton<T> : MonoBehaviour where T: MonoBehaviour
       return null;*/
     var ownerObject = new GameObject($"{typeof(T).Name} (singleton)");
     DontDestroyOnLoad(ownerObject);
-    return ownerObject.AddComponent<T>();;
+    return ownerObject.AddComponent<T>();
+  }
+
+  private void OnDestroy()
+  {
+    _instance = null;
+  }
+
+  private void OnApplicationQuit()
+  {
+    _instance = null;
+    Destroy(gameObject);
   }
 }
 }

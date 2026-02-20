@@ -93,7 +93,8 @@ namespace Project.Gameplay.Gameplay.Installers
                     new KnightMovement(),
                     new RookMovement(),
                     new BishopMovement(),
-                    new QueenMovement()
+                    new QueenMovement(),
+                    new KingMovement()
                 });
 
             builder.Register<FigureStatsFactory>(Lifetime.Singleton).As<IFigureStatsFactory>().AsSelf();
