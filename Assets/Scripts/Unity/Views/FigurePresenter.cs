@@ -224,6 +224,12 @@ namespace Project.Unity.Unity.Views
             health?.Hide();
         }
 
+        public void SetDamagePreview(int figureId, float? damage)
+        {
+            FigureHealthPresenter? health = GetHealthPresenter(figureId);
+            health?.SetDamagePreview(damage);
+        }
+
         public async UniTask PlayDeathEffectAsync(int figureId)
         {
             HideFigureHealthBar(figureId);

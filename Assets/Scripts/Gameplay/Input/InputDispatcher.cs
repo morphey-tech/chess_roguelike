@@ -141,6 +141,7 @@ namespace Project.Gameplay.Gameplay.Input
 
             _hoveredFigureId = hoveredFigureId;
             _figureHoverChangedPublisher.Publish(new FigureHoverChangedMessage(hoveredFigureId));
+            Debug.LogError(hoveredFigureId);
         }
 
         private void OnEndTurnPerformed(InputAction.CallbackContext context)

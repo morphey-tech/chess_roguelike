@@ -20,6 +20,7 @@ namespace Project.Gameplay.Gameplay.Figures
         UniTask PlayHealEffectAsync(int figureId);
         void ShowFigureHealthBar(int figureId);
         void HideFigureHealthBar(int figureId);
+        void SetDamagePreview(int figureId, float? damage);
         UniTask PlayDeathEffectAsync(int figureId);
         UniTask PlayPushEffectAsync(int figureId, GridPosition from, GridPosition to);
         void ShowDamageText(int figureId, DamageVisualContext ctx);

@@ -195,6 +195,7 @@ namespace Project.Unity.Unity.Installers
             builder.Register<PrepareInputHandler>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
             builder.Register<PrepareVisualSyncService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
             builder.Register<HpBarVisibilityService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
+            builder.Register<DamagePreviewService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
         }
 
         private void OnContainerBuilt(IObjectResolver resolver)
@@ -214,6 +215,7 @@ namespace Project.Unity.Unity.Installers
             resolver.Resolve<PrepareInputHandler>();
             resolver.Resolve<PrepareVisualSyncService>();
             resolver.Resolve<HpBarVisibilityService>();
+            resolver.Resolve<DamagePreviewService>();
             resolver.Resolve<HandFigureClickHandler>();
             
             // UI must be force-resolved so its constructor runs InitAsync

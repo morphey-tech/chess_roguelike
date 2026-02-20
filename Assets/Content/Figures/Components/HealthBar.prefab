@@ -179,8 +179,8 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5979524942743401112}
-  - {fileID: 6092284987486145057}
   - {fileID: 6190711099368451561}
+  - {fileID: 6092284987486145057}
   - {fileID: 371326850550062511}
   - {fileID: 3264953104775882790}
   m_Father: {fileID: 4222815311219110104}
@@ -243,6 +243,7 @@ MonoBehaviour:
   _damageFill: {fileID: 6796217201219028448}
   _dividerContainer: {fileID: 371326850550062511}
   _dividerTemplate: {fileID: 1463630965394532323, guid: 8f49dff5e2bb27377ba97ba34d821a08, type: 3}
+  _dividerWidth: 2
 --- !u!1 &5170462711074860251
 GameObject:
   m_ObjectHideFlags: 0
@@ -484,7 +485,7 @@ MonoBehaviour:
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 0
-  m_FillAmount: 0.752
+  m_FillAmount: 1
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0

@@ -45,14 +45,6 @@ namespace Project.Unity.Unity.Views.Presentations
             }
 
             _healthView.SetHp(_figure.Stats.CurrentHp);
-            
-            // Billboard effect - rotate HP bar to face camera
-            Transform healthTransform = _healthView.transform;
-            Camera mainCamera = Camera.main;
-            if (mainCamera != null)
-            {
-                healthTransform.forward = mainCamera.transform.forward;
-            }
         }
 
         public void Hide()
@@ -76,6 +68,21 @@ namespace Project.Unity.Unity.Views.Presentations
                 canvasGroup.alpha = visible ? 1f : 0f;
                 canvasGroup.interactable = visible;
                 canvasGroup.blocksRaycasts = visible;
+            }
+        }
+
+        public void SetDamagePreview(float? predictedHp)
+        {
+            if (_healthView == null)
+                return;
+
+            if (predictedHp.HasValue)
+            {
+                _healthView.SetDamagePreview(predictedHp.Value);
+            }
+            else
+            {
+                _healthView.ClearDamagePreview();
             }
         }
 
