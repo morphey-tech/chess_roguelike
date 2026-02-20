@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Project.Core.Core.Grid;
+using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Presentations;
 
 namespace Project.Gameplay.Gameplay.Grid
@@ -14,6 +15,7 @@ namespace Project.Gameplay.Gameplay.Grid
         };
 
         private readonly BoardCell[,] _cells;
+        private readonly Dictionary<int, BoardCell> _figureLookup;
 
         public int Width { get; }
         public int Height { get; }
@@ -24,6 +26,8 @@ namespace Project.Gameplay.Gameplay.Grid
             Height = height;
 
             _cells = new BoardCell[height, width];
+            _figureLookup = new Dictionary<int, BoardCell>();
+
             for (int r = 0; r < height; r++)
             {
                 for (int c = 0; c < width; c++)
@@ -72,7 +76,7 @@ namespace Project.Gameplay.Gameplay.Grid
             return null;
         }
 
-        public IEnumerable<Figures.Figure> GetAllFigures()
+        public IEnumerable<Figure> GetAllFigures()
         {
             foreach (BoardCell? cell in AllCells())
             {
@@ -81,7 +85,33 @@ namespace Project.Gameplay.Gameplay.Grid
             }
         }
 
-        public IEnumerable<Figures.Figure> GetFiguresByTeam(Figures.Team team)
+        public Figure? GetFigureById(int id)
+        {
+            if (_figureLookup.TryGetValue(id, out BoardCell? cell))
+            {
+                return cell.OccupiedBy;
+            }
+            return null;
+        }
+
+        public void PlaceFigure(Figure figure, GridPosition position)
+        {
+            var cell = GetBoardCell(position);
+            _figureLookup[figure.Id] = cell;
+            cell.SetOccupant(figure);
+        }
+
+        public void RemoveFigure(Figure figure)
+        {
+            var cell = FindFigure(figure);
+            if (cell != null)
+            {
+                _figureLookup.Remove(figure.Id);
+                cell.SetOccupant(null);
+            }
+        }
+
+        public IEnumerable<Figure> GetFiguresByTeam(Team team)
         {
             foreach (BoardCell? cell in AllCells())
             {
@@ -95,7 +125,7 @@ namespace Project.Gameplay.Gameplay.Grid
         /// </summary>
         public IEnumerable<BoardCell> GetAdjacentCells(GridPosition position)
         {
-            foreach (var (dr, dc) in AdjacentOffsets)
+            foreach ((int dr, int dc) in AdjacentOffsets)
             {
                 GridPosition neighbor = new(position.Row + dr, position.Column + dc);
                 if (IsInside(neighbor))

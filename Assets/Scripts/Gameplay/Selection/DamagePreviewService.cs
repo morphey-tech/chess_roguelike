@@ -1,10 +1,9 @@
 using System;
 using System.Linq;
-using System.Threading;
-using Cysharp.Threading.Tasks;
 using MessagePipe;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Attack.Rules;
+using Project.Gameplay.Gameplay.Combat.Damage;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Input.Messages;
 using Project.Gameplay.Gameplay.Run;
@@ -16,35 +15,38 @@ namespace Project.Gameplay.Gameplay.Selection
 {
     /// <summary>
     /// Shows damage preview on HP bar when hovering over enemy figure.
-    /// Calculates damage based on current selected friendly figure's attack.
+    /// Uses the same damage pipeline as real combat (in preview mode).
     /// </summary>
     public sealed class DamagePreviewService : IDisposable
     {
         private readonly IFigurePresenter _figurePresenter;
         private readonly RunHolder _runHolder;
         private readonly AttackRuleService _attackRuleService;
+        private readonly IDamagePipeline _damagePipeline;
         private readonly IDisposable _subscriptions;
         private readonly ILogger<DamagePreviewService> _logger;
 
         private int? _hoveredFigureId;
         private int? _selectedFriendlyFigureId;
-        private int? _lastPreviewFigureId; // ✅ Храним ID фигуры, которой показан превью
-        private readonly CancellationTokenSource _disposeCts = new();
+        private int? _lastPreviewFigureId;
 
         [Inject]
         private DamagePreviewService(
             IFigurePresenter figurePresenter,
             RunHolder runHolder,
             AttackRuleService attackRuleService,
+            IDamagePipeline damagePipeline,
             ISubscriber<FigureSelectedMessage> selectedSubscriber,
             ISubscriber<FigureDeselectedMessage> deselectedSubscriber,
             ISubscriber<FigureHoverChangedMessage> hoverChangedSubscriber,
             ISubscriber<TurnChangedMessage> turnChangedSubscriber,
+            ISubscriber<FigureBoardRemovedMessage> figureRemovedSubscriber,
             ILogService logService)
         {
             _figurePresenter = figurePresenter;
             _runHolder = runHolder;
             _attackRuleService = attackRuleService;
+            _damagePipeline = damagePipeline;
             _logger = logService.CreateLogger<DamagePreviewService>();
 
             _logger.Debug("[DamagePreviewService] Initialized");
@@ -54,32 +56,21 @@ namespace Project.Gameplay.Gameplay.Selection
             deselectedSubscriber.Subscribe(OnFigureDeselected).AddTo(bag);
             hoverChangedSubscriber.Subscribe(OnHoverChanged).AddTo(bag);
             turnChangedSubscriber.Subscribe(OnTurnChanged).AddTo(bag);
+            figureRemovedSubscriber.Subscribe(OnFigureBoardRemoved).AddTo(bag);
             _subscriptions = bag.Build();
         }
 
         private void OnFigureSelected(FigureSelectedMessage message)
         {
             _logger.Debug($"[DamagePreview] OnFigureSelected: FigureId={message.Figure?.Id}, Team={message.Figure?.Team}");
-
-            if (message.Figure != null)
-            {
-                _selectedFriendlyFigureId = message.Figure.Id;
-                _logger.Debug($"[DamagePreview] Selected figure: {_selectedFriendlyFigureId}, Team={message.Figure.Team}");
-            }
-            else
-            {
-                _selectedFriendlyFigureId = null;
-                _logger.Debug("[DamagePreview] Selection cleared (null figure)");
-            }
-
+            _selectedFriendlyFigureId = message.Figure?.Id;
             UpdateDamagePreview();
         }
 
         private void OnFigureDeselected(FigureDeselectedMessage message)
         {
-            // ✅ FIX: Безопасная проверка на null
             _logger.Debug($"[DamagePreview] OnFigureDeselected: FigureId={message.Figure?.Id}");
-
+            
             if (message.Figure == null || _selectedFriendlyFigureId == message.Figure.Id)
             {
                 _selectedFriendlyFigureId = null;
@@ -104,11 +95,30 @@ namespace Project.Gameplay.Gameplay.Selection
             UpdateDamagePreview();
         }
 
+        private void OnFigureBoardRemoved(FigureBoardRemovedMessage message)
+        {
+            _logger.Debug($"[DamagePreview] OnFigureBoardRemoved: FigureId={message.FigureId}");
+            
+            // Если удалена фигура, на которой показан превью — очищаем
+            if (_lastPreviewFigureId == message.FigureId)
+            {
+                _figurePresenter.SetDamagePreview(_lastPreviewFigureId.Value, null);
+                _lastPreviewFigureId = null;
+            }
+            
+            // Если удалена выбранная фигура — сбрасываем превью
+            if (_selectedFriendlyFigureId == message.FigureId)
+            {
+                _selectedFriendlyFigureId = null;
+                UpdateDamagePreview();
+            }
+        }
+
         private void UpdateDamagePreview()
         {
             _logger.Debug($"[DamagePreview] UpdatePreview: hovered={_hoveredFigureId?.ToString() ?? "null"}, selected={_selectedFriendlyFigureId?.ToString() ?? "null"}, lastPreview={_lastPreviewFigureId?.ToString() ?? "null"}");
 
-            // ✅ FIX: Очищаем ПРЕДЫДУЩИЙ превью при смене цели
+            // Очищаем предыдущий превью при смене цели
             if (_lastPreviewFigureId.HasValue && _lastPreviewFigureId != _hoveredFigureId)
             {
                 _logger.Debug($"[DamagePreview] Clearing old preview for FigureId={_lastPreviewFigureId}");
@@ -123,38 +133,59 @@ namespace Project.Gameplay.Gameplay.Selection
                 return;
             }
 
-            var grid = _runHolder.Current?.CurrentStage?.Grid;
-            if (grid == null)
+            // Пытаемся получить валидный превью
+            if (!TryGetValidPreview(out var damage))
             {
-                _logger.Warning("[DamagePreview] Grid is null!");
-                return;
-            }
-
-            var attacker = grid.GetAllFigures().FirstOrDefault(f => f.Id == _selectedFriendlyFigureId.Value);
-            var target = grid.GetAllFigures().FirstOrDefault(f => f.Id == _hoveredFigureId.Value);
-
-            if (attacker == null)
-            {
-                _logger.Warning($"[DamagePreview] Attacker not found: Id={_selectedFriendlyFigureId}");
-                return;
-            }
-
-            if (target == null)
-            {
-                _logger.Warning($"[DamagePreview] Target not found: Id={_hoveredFigureId}");
-                return;
-            }
-
-            // Don't show preview when hovering over own figure or same figure
-            if (target.Team == attacker.Team)
-            {
-                _logger.Debug($"[DamagePreview] Target is friendly ({target.Team}) - clearing preview");
+                _logger.Debug("[DamagePreview] No valid preview — cleared");
                 _figurePresenter.SetDamagePreview(_hoveredFigureId.Value, null);
                 _lastPreviewFigureId = null;
                 return;
             }
 
-            _logger.Debug($"[DamagePreview] Attacker={attacker.Id}(Id:{attacker.Id}), Target={target.Id}(Id:{target.Id})");
+            // Показываем превью и запоминаем ID
+            _figurePresenter.SetDamagePreview(_hoveredFigureId.Value, damage);
+            _lastPreviewFigureId = _hoveredFigureId;
+            _logger.Debug($"[DamagePreview] Preview SET for FigureId={_hoveredFigureId}: DMG={damage}");
+        }
+
+        /// <summary>
+        /// Tries to get valid damage preview. Returns true if preview is available.
+        /// </summary>
+        private bool TryGetValidPreview(out float damage)
+        {
+            damage = 0f;
+
+            var grid = _runHolder.Current?.CurrentStage?.Grid;
+            if (grid == null)
+            {
+                _logger.Warning("[DamagePreview] Grid is null!");
+                return false;
+            }
+
+            // Используем O(1) поиск вместо O(n)
+            var attacker = grid.GetFigureById(_selectedFriendlyFigureId.Value);
+            var target = grid.GetFigureById(_hoveredFigureId.Value);
+
+            if (attacker == null)
+            {
+                _logger.Warning($"[DamagePreview] Attacker not found: Id={_selectedFriendlyFigureId}");
+                return false;
+            }
+
+            if (target == null)
+            {
+                _logger.Warning($"[DamagePreview] Target not found: Id={_hoveredFigureId}");
+                return false;
+            }
+
+            // Не показываем превью для своих фигур
+            if (target.Team == attacker.Team)
+            {
+                _logger.Debug($"[DamagePreview] Target is friendly ({target.Team}) - clearing preview");
+                return false;
+            }
+
+            _logger.Debug($"[DamagePreview] Attacker={attacker.Id}, Target={target.Id}");
 
             var attackerCell = grid.FindFigure(attacker);
             var targetCell = grid.FindFigure(target);
@@ -162,7 +193,7 @@ namespace Project.Gameplay.Gameplay.Selection
             if (attackerCell == null || targetCell == null)
             {
                 _logger.Warning("[DamagePreview] AttackerCell or TargetCell is null!");
-                return;
+                return false;
             }
 
             var attackContext = new AttackRuleContext(
@@ -175,22 +206,29 @@ namespace Project.Gameplay.Gameplay.Selection
             if (!_attackRuleService.CanAttack(attackContext))
             {
                 _logger.Debug($"[DamagePreview] Attack not valid — clearing preview for FigureId={_hoveredFigureId}");
-                _figurePresenter.SetDamagePreview(_hoveredFigureId.Value, null);
-                return;
+                return false;
             }
 
-            // === РАСЧЕТ УРОНА ===
-            float attack = attacker.Stats.Attack.Value;
-            float defence = target.Stats.Defence.Value;
-            float damage = Mathf.Max(1f, attack - defence);
+            // === РАСЧЕТ УРОНА ЧЕРЕЗ PIPELINE (preview mode) ===
+            float rawDamage = Mathf.Max(1f, attacker.Stats.Attack.Value - target.Stats.Defence.Value);
+            
+            var dmgCtx = new DamageContext(
+                attacker,
+                target,
+                rawDamage,
+                isPreview: true);
 
-            _logger.Debug($"[DamagePreview] CALC: ATK={attack}, DEF={defence}, DMG={damage}, HP={target.Stats.CurrentHp}");
+            var result = _damagePipeline.Calculate(dmgCtx);
 
-            // ✅ Показываем превью (передаем ВЕЛИЧИНУ УРОНА) и запоминаем ID
-            _figurePresenter.SetDamagePreview(_hoveredFigureId.Value, damage);
-            _lastPreviewFigureId = _hoveredFigureId;
+            _logger.Debug($"[DamagePreview] PIPELINE: Raw={rawDamage}, Final={result.Final}, Cancelled={result.Cancelled}");
 
-            _logger.Debug($"[DamagePreview] Preview SET for FigureId={_hoveredFigureId}: DMG={damage}");
+            if (result.Cancelled)
+            {
+                return false;
+            }
+
+            damage = result.Final;
+            return true;
         }
 
         public void Dispose()
@@ -204,8 +242,6 @@ namespace Project.Gameplay.Gameplay.Selection
                 _lastPreviewFigureId = null;
             }
 
-            _disposeCts.Cancel();
-            _disposeCts.Dispose();
             _subscriptions?.Dispose();
 
             _logger.Debug("[DamagePreviewService] Disposed");

@@ -3,6 +3,7 @@ using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Combat.Contexts;
+using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Movement;
 using Project.Gameplay.Movement;
@@ -112,8 +113,8 @@ namespace Project.Gameplay.Gameplay.Figures
             // Сохраняем предыдущую позицию для пассивок
             figure.PreviousPosition = from;
 
-            fromCell.RemoveFigure();
-            toCell.PlaceFigure(figure);
+            Grid.RemoveFigure(figure);
+            Grid.PlaceFigure(figure, to);
             toCell.Effects.OnEnter(toCell);
 
             // Set moved flag

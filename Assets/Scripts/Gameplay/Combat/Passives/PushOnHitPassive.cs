@@ -62,10 +62,9 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
                 if (pushCell.IsFree)
                 {
                     // Move in grid (state change)
-                    BoardCell fromCell = context.Grid.GetBoardCell(targetPos);
-                    fromCell.RemoveFigure();
-                    pushCell.PlaceFigure(context.Target);
-                    
+                    context.Grid.RemoveFigure(context.Target);
+                    context.Grid.PlaceFigure(context.Target, pushTo);
+
                     // Add effect for visual update
                     context.Effects.Add(new PushEffect(owner, context.Target, targetPos, pushTo));
                     Debug.Log($"[PushOnHit] {context.Target} pushed to ({pushTo.Row},{pushTo.Column})");

@@ -13,16 +13,18 @@ namespace Project.Gameplay.Gameplay.Combat.Damage
         public bool IsCancelled { get; }
         public string AttackId { get; }
         public IReadOnlyList<IDamageModifier> Modifiers { get; }
+        public bool IsPreview { get; }
 
         public DamageContext(
             Figure attacker,
             Figure target,
             float rawDamage,
-            bool isCritical,
-            bool isDodged,
-            bool isCancelled,
-            string attackId,
-            IReadOnlyList<IDamageModifier> modifiers)
+            bool isCritical = false,
+            bool isDodged = false,
+            bool isCancelled = false,
+            string attackId = "",
+            IReadOnlyList<IDamageModifier>? modifiers = null,
+            bool isPreview = false)
         {
             Attacker = attacker;
             Target = target;
@@ -31,7 +33,8 @@ namespace Project.Gameplay.Gameplay.Combat.Damage
             IsDodged = isDodged;
             IsCancelled = isCancelled;
             AttackId = attackId;
-            Modifiers = modifiers;
+            Modifiers = modifiers ?? System.Array.Empty<IDamageModifier>();
+            IsPreview = isPreview;
         }
     }
 }

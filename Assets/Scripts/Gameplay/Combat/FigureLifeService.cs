@@ -22,6 +22,7 @@ namespace Project.Gameplay.Gameplay.Combat
         private readonly LootService _lootService;
         private readonly ILootPresenter _lootPresenter;
         private readonly IPublisher<FigureDeathMessage> _deathPublisher;
+        private readonly IPublisher<FigureBoardRemovedMessage> _boardRemovedPublisher;
         private readonly BoardCapacityService _capacityService;
 
         [Inject]
@@ -30,12 +31,14 @@ namespace Project.Gameplay.Gameplay.Combat
             LootService lootService,
             ILootPresenter lootPresenter,
             IPublisher<FigureDeathMessage> deathPublisher,
+            IPublisher<FigureBoardRemovedMessage> boardRemovedPublisher,
             BoardCapacityService capacityService)
         {
             _figurePresenter = figurePresenter;
             _lootService = lootService;
             _lootPresenter = lootPresenter;
             _deathPublisher = deathPublisher;
+            _boardRemovedPublisher = boardRemovedPublisher;
             _capacityService = capacityService;
         }
 
@@ -44,6 +47,7 @@ namespace Project.Gameplay.Gameplay.Combat
             context.Logger?.Info($"{unit} died!");
 
             cell?.RemoveFigure();
+            _boardRemovedPublisher.Publish(new FigureBoardRemovedMessage(unit.Id, unit.Team));
             context.AddVisualEvent(new DeathVisualEvent(unit.Id, null));
 
             if (!string.IsNullOrEmpty(unit.LootTableId))
@@ -62,6 +66,7 @@ namespace Project.Gameplay.Gameplay.Combat
         public void HandleDeathDomainOnly(Figure unit, BoardCell cell)
         {
             cell?.RemoveFigure();
+            _boardRemovedPublisher.Publish(new FigureBoardRemovedMessage(unit.Id, unit.Team));
             _deathPublisher.Publish(new FigureDeathMessage(unit.Id, unit.Team, unit.LootTableId, fromCombat: true));
             if (unit.Team == Team.Player)
                 _capacityService.ReleaseByType(unit.TypeId);
@@ -70,6 +75,7 @@ namespace Project.Gameplay.Gameplay.Combat
         public async UniTask HandleDeathDirectAsync(Figure unit, BoardCell cell)
         {
             cell?.RemoveFigure();
+            _boardRemovedPublisher.Publish(new FigureBoardRemovedMessage(unit.Id, unit.Team));
 
             _figurePresenter.HideFigureHealthBar(unit.Id);
             await _figurePresenter.PlayDeathEffectAsync(unit.Id);
