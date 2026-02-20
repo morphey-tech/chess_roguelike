@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
 using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Combat.Contexts;
 using Project.Gameplay.Gameplay.Combat.Triggers;
@@ -9,7 +7,7 @@ using Project.Gameplay.Gameplay.Grid;
 namespace Project.Gameplay.Gameplay.Combat.Passives
 {
     /// <summary>
-    /// Splash: Deals 50% damage to up to 2 enemies adjacent to the primary target.
+    /// Splash: Deals 50% damage to up to 2 enemies in straight line (left/right) from the primary target.
     /// </summary>
     public class SplashPassive : IPassive, IOnAfterHit
     {
@@ -28,30 +26,45 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
                 return;
 
             var grid = context.Grid;
-            float baseDamage = context.DamageDealt;
+            
+            // Calculate splash damage from attacker's attack stat
+            float baseDamage = context.Attacker.Stats.Attack.Value;
             int splashDamage = (int)(baseDamage * 0.5f);
-            int found = 0;
 
-            // Find up to 2 enemies adjacent to the target
+            // Find enemies in straight line (left and right) from target
             var targetCell = grid.FindFigure(context.Target);
             if (targetCell == null)
                 return;
 
-            foreach (var cell in grid.GetAdjacentCells(targetCell.Position))
+            // Check left (-1 column)
+            GridPosition leftPos = new(targetCell.Position.Row, targetCell.Position.Column - 1);
+            if (grid.IsInside(leftPos))
             {
-                if (found >= 2)
-                    break;
-
-                if (cell.OccupiedBy != null && 
-                    cell.OccupiedBy.Team != context.Attacker.Team && 
-                    cell.OccupiedBy != context.Target)
+                var leftCell = grid.GetBoardCell(leftPos);
+                if (leftCell.OccupiedBy != null && 
+                    leftCell.OccupiedBy.Team != context.Attacker.Team &&
+                    leftCell.OccupiedBy != context.Target)
                 {
-                    // Add splash damage effect
                     context.AddEffect(new Combat.Effects.Impl.SplashDamageEffect(
-                        context.Attacker, 
-                        cell.OccupiedBy, 
+                        context.Attacker,
+                        leftCell.OccupiedBy,
                         splashDamage));
-                    found++;
+                }
+            }
+
+            // Check right (+1 column)
+            GridPosition rightPos = new(targetCell.Position.Row, targetCell.Position.Column + 1);
+            if (grid.IsInside(rightPos))
+            {
+                var rightCell = grid.GetBoardCell(rightPos);
+                if (rightCell.OccupiedBy != null && 
+                    rightCell.OccupiedBy.Team != context.Attacker.Team &&
+                    rightCell.OccupiedBy != context.Target)
+                {
+                    context.AddEffect(new Combat.Effects.Impl.SplashDamageEffect(
+                        context.Attacker,
+                        rightCell.OccupiedBy,
+                        splashDamage));
                 }
             }
         }
