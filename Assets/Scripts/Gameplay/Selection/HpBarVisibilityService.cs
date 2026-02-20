@@ -64,7 +64,7 @@ namespace Project.Gameplay.Gameplay.Selection
         {
             _config = await _configProvider.Get<GameplayConfig>("gameplay_conf", _disposeCts.Token) ?? new GameplayConfig();
             RefreshAll();
-            _logger.Info($"HP bar policy loaded: mode={_config.HpBarVisibilityMode}, scope={_config.HpBarTeamScope}");
+            _logger.Info($"HP bar policy loaded: allies={_config.HpBarVisibilityModeAllies}, enemies={_config.HpBarVisibilityModeEnemies}");
         }
 
         private void OnFigureSelected(FigureSelectedMessage message)
@@ -142,8 +142,8 @@ namespace Project.Gameplay.Gameplay.Selection
             if (figure == null || figure.Stats.IsDead)
                 return false;
             return HpBarVisibilityPolicy.ShouldShow(
-                _config.HpBarVisibilityMode,
-                _config.HpBarTeamScope,
+                _config.HpBarVisibilityModeAllies,
+                _config.HpBarVisibilityModeEnemies,
                 figure.Team,
                 isHovered: _hoveredFigureId == figure.Id,
                 hasFriendlySelection: _selectedFriendlyFigureId.HasValue);

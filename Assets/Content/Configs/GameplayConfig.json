@@ -2,6 +2,6 @@
   "hideEnemiesDuringPrepare": true,
   "figureSpawnDuration": 0.3,
   "prepareSlotSpawnDelay": 0.05,
-  "hpBarVisibilityMode": "OnHoverOrSelection",
-  "hpBarTeamScope": "EnemiesOnly"
+  "hpBarVisibilityModeAllies": "Always",
+  "hpBarVisibilityModeEnemies": "OnHoverOrSelection"
 }

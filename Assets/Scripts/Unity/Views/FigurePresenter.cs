@@ -389,8 +389,8 @@ namespace Project.Unity.Unity.Views
                 return;
 
             bool visible = HpBarVisibilityPolicy.ShouldShow(
-                config.HpBarVisibilityMode,
-                config.HpBarTeamScope,
+                config.HpBarVisibilityModeAllies,
+                config.HpBarVisibilityModeEnemies,
                 figure.Team,
                 isHovered: false,
                 hasFriendlySelection: false);
