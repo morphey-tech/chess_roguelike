@@ -39,14 +39,15 @@ namespace Project.Gameplay.Gameplay.Attack.Strategies
                 AttackerMovesOnKill = true
             };
 
-            // Find up to 2 adjacent enemies and add splash effects
-            int splashDamage = (int)attacker.Stats.Attack.Value;
+            // Find up to 2 adjacent enemies and add splash effects (50% damage)
+            float baseDamage = attacker.Stats.Attack.Value;
+            int splashDamage = (int)(baseDamage * 0.5f);
             int found = 0;
-            
+
             foreach (BoardCell cell in grid.GetAdjacentCells(defenderPos))
             {
                 if (found >= 2) break;
-                
+
                 if (cell.OccupiedBy != null && cell.OccupiedBy.Team != attacker.Team && cell.OccupiedBy != defender)
                 {
                     context.Effects.Add(new SplashDamageEffect(attacker, cell.OccupiedBy, splashDamage));

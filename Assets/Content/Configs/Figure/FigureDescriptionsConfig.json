@@ -59,7 +59,7 @@
     },
     {
       "id": "slippery",
-      "movement_id": "pawn",
+      "movement_id": "slippery",
       "attack_id": "simple",
       "stats_id": "slippery_stats",
       "turn_patterns_id": "melee_default",
@@ -77,7 +77,7 @@
     },
     {
       "id": "splash",
-      "movement_id": "pawn",
+      "movement_id": "splasher",
       "attack_id": "splash",
       "stats_id": "splash_stats",
       "turn_patterns_id": "melee_default",
