@@ -28,17 +28,23 @@ namespace Project.Gameplay.Gameplay.Movement.Strategies
                 for (int i = 1; i < 20; i++)
                 {
                     GridPosition to = new(from.Row + dr * i, from.Column + dc * i);
-                    
+
                     if (!grid.IsInside(to))
                         break;
-                    
+
                     var cell = grid.GetBoardCell(to);
-                    var result = new MovementStrategyResult(figure, to, true, cell.OccupiedBy);
-                    if (!result.CanOccupy()) 
-                        break;
                     
-                    yield return result;
-                    break;
+                    if (cell.OccupiedBy != null)
+                    {
+                        // Enemy piece - can capture
+                        if (cell.OccupiedBy.Team != figure.Team)
+                            yield return new MovementStrategyResult(figure, to, true, cell.OccupiedBy);
+                        // Blocked by own piece - stop
+                        break;
+                    }
+
+                    // Empty cell - can move
+                    yield return new MovementStrategyResult(figure, to, true, null);
                 }
             }
         }
