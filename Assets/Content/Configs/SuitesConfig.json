@@ -4,10 +4,10 @@
       "id": "default",
       "figures": [
         "king_white",
-        "tank",
-        "rook_white",
-        "knight_white",
-        "bishop_white"
+        "pawn_white",
+        "pawn_white",
+        "pawn_white",
+        "rook_white"
       ]
     }
   ]

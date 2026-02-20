@@ -108,7 +108,8 @@ namespace Project.Gameplay.Gameplay.Installers
                     new RangeRule(),
                     new DisarmRule(),
                     new StealthRule(),
-                    new TauntRule()
+                    new TauntRule(),
+                    new DesperationRule()
                 });
 
             // Attack strategies
@@ -119,7 +120,8 @@ namespace Project.Gameplay.Gameplay.Installers
                     new RangedAttack(),
                     new DiagonalAttack(),
                     new SplashAttack(),
-                    new PierceAttack()
+                    new PierceAttack(),
+                    new PawnAttack()
                 });
 
             // Combat

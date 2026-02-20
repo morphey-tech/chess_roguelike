@@ -1,6 +1,7 @@
 using MessagePipe;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Attack;
+using Project.Gameplay.Gameplay.Attack.Rules;
 using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Combat.Visual;
 using Project.Gameplay.Gameplay.Figures;
@@ -39,5 +40,6 @@ namespace Project.Gameplay.Gameplay.Turn.Actions
         Turn.ActionContextAccessor ContextAccessor { get; }
         ILogService LogService { get; }
         IAttackQueryService AttackQueryService { get; }
+        AttackRuleService AttackRuleService { get; }
     }
 }

@@ -2,9 +2,9 @@
   "content": [
     {
       "id": "swarm",
-      "type": "attack_for_ally",
+      "type": "swarm",
       "params": {
-        "percent": 100,
+        "damage": 1,
         "duration": 1
       }
     },
@@ -116,6 +116,11 @@
     {
       "id": "provocation",
       "type": "provocation",
+      "params": {}
+    },
+    {
+      "id": "desperation",
+      "type": "desperation",
       "params": {}
     }
   ]

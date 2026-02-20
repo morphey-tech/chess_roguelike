@@ -56,10 +56,18 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
                 BaseDamage = _baseDamage
             };
 
+            // Trigger passives FIRST - they apply modifiers to stats
             context.Passives.TriggerBeforeHit(_attacker, _target, before);
             context.ActionContext.Actor.Effects.TriggerBeforeHit(before);
 
-            float finalDamage = before.BaseDamage * before.DamageMultiplier + before.BonusDamage;
+            // NOW calculate final damage after all modifiers are applied
+            float atk = _attacker.Stats.Attack.Value;
+            float def = _target.Stats.Defence.Value;
+            float finalDamage = Math.Max(1f, atk - def);
+            
+            // Apply multiplier and bonus damage from passives
+            finalDamage = finalDamage * before.DamageMultiplier + before.BonusDamage;
+            
             if (finalDamage < 0)
             {
                 finalDamage = 0;

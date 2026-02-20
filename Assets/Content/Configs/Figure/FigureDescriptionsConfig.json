@@ -3,10 +3,10 @@
     {
       "id": "pawn",
       "movement_id": "pawn",
-      "attack_id": "simple",
+      "attack_id": "pawn",
       "stats_id": "pawn_stats",
       "turn_patterns_id": "melee_default",
-      "passives": ["swarm"],
+      "passives": ["swarm", "desperation"],
       "load": 1,
       "loot_table_id": "goblin_basic"
     },

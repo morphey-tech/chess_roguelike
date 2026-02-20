@@ -23,6 +23,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Builders
                 builderContext.FigureLifeService,
                 builderContext.ContextAccessor,
                 builderContext.AttackQueryService,
+                builderContext.AttackRuleService,
                 builderContext.LogService.CreateLogger<AttackAction>());
         }
     }

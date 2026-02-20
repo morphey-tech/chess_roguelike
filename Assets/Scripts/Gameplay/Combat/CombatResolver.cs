@@ -28,11 +28,11 @@ namespace Project.Gameplay.Gameplay.Combat
             Figure attacker = context.Attacker ?? throw new NullReferenceException(nameof(context.Attacker));
             Figure target = context.Target ?? throw new NullReferenceException(nameof(context.Target));
 
-            float atk = attacker.Stats.Attack.Value;
-            float def = target.Stats.Defence.Value;
-            float baseDamage = Math.Max(1f, atk - def);
-            
-            _logger.Debug($"Damage calc: ATK={atk} DEF={def} BaseDamage={baseDamage}");
+            // Use raw damage from attack profile - actual damage calculated in PrimaryHitEffect
+            // after passives apply their modifiers
+            float rawDamage = attacker.Stats.Attack.Value;
+
+            _logger.Debug($"Damage calc: ATK={rawDamage}");
 
             var effects = new List<ICombatEffect>();
             effects.Add(new PrimaryHitEffect(
@@ -40,7 +40,7 @@ namespace Project.Gameplay.Gameplay.Combat
                 target,
                 context.AttackerPosition,
                 context.TargetPosition,
-                baseDamage,
+                rawDamage,
                 context.AttackId,
                 context.Delivery,
                 context.ProjectileConfigId));

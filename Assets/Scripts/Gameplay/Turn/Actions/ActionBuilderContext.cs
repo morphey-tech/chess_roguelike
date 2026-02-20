@@ -1,6 +1,7 @@
 using MessagePipe;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Attack;
+using Project.Gameplay.Gameplay.Attack.Rules;
 using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Combat.Visual;
 using Project.Gameplay.Gameplay.Figures;
@@ -28,6 +29,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions
         public Turn.ActionContextAccessor ContextAccessor { get; }
         public ILogService LogService { get; }
         public IAttackQueryService AttackQueryService { get; }
+        public AttackRuleService AttackRuleService { get; }
 
         public ActionBuilderContext(
             MovementService movementService,
@@ -43,7 +45,8 @@ namespace Project.Gameplay.Gameplay.Turn.Actions
             IFigureLifeService figureLifeService,
             Turn.ActionContextAccessor contextAccessor,
             ILogService logService,
-            IAttackQueryService attackQueryService)
+            IAttackQueryService attackQueryService,
+            AttackRuleService attackRuleService)
         {
             MovementService = movementService;
             AttackFactory = attackFactory;
@@ -59,6 +62,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions
             ContextAccessor = contextAccessor;
             LogService = logService;
             AttackQueryService = attackQueryService;
+            AttackRuleService = attackRuleService;
         }
     }
 }

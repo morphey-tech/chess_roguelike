@@ -16,12 +16,13 @@ using Project.Gameplay.Gameplay.Visual;
 using Project.Gameplay.Gameplay.Visual.Commands;
 using Project.Core.Core.Configs.Stats;
 using Project.Core.Core.Grid;
+using Project.Gameplay.Gameplay.Attack.Rules;
 
 namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
 {
     /// <summary>
     /// Executes attack action.
-    /// 
+    ///
     /// PIPELINE:
     /// 1. Domain: CombatResolver creates effects (no visuals)
     /// 2. Domain: Effects apply game logic, record visual events
@@ -44,6 +45,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
         private readonly IFigureLifeService _figureLifeService;
         private readonly ActionContextAccessor _contextAccessor;
         private readonly IAttackQueryService _attackQueryService;
+        private readonly AttackRuleService _attackRuleService;
         private readonly ILogger<AttackAction> _logger;
 
         public AttackAction(
@@ -60,6 +62,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
             IFigureLifeService figureLifeService,
             ActionContextAccessor contextAccessor,
             IAttackQueryService attackQueryService,
+            AttackRuleService attackRuleService,
             ILogger<AttackAction> logger)
         {
             Id = id;
@@ -75,6 +78,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
             _figureLifeService = figureLifeService;
             _contextAccessor = contextAccessor;
             _attackQueryService = attackQueryService;
+            _attackRuleService = attackRuleService;
             _logger = logger;
         }
 
@@ -93,8 +97,14 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
             }
             else
             {
-                IAttackStrategy attackStrategy = _attackFactory.Get(context.Actor.AttackId);
-                return attackStrategy.CanAttack(context.Actor, context.From, context.To, context.Grid);
+                // Use AttackRuleService to validate attack (includes DesperationRule, TauntRule, etc.)
+                var attackContext = new AttackRuleContext(
+                    context.Actor,
+                    defender,
+                    context.From,
+                    context.To,
+                    context.Grid);
+                return _attackRuleService.CanAttack(attackContext);
             }
         }
 
@@ -151,10 +161,17 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
             }
             else
             {
-                IAttackStrategy attackStrategy = _attackFactory.Get(context.Actor.AttackId);
-                if (!attackStrategy.CanAttack(context.Actor, context.From, context.To, context.Grid))
+                // Use AttackRuleService to validate attack (includes DesperationRule, TauntRule, etc.)
+                var attackContext = new AttackRuleContext(
+                    context.Actor,
+                    defender,
+                    context.From,
+                    context.To,
+                    context.Grid);
+                if (!_attackRuleService.CanAttack(attackContext))
                     return;
 
+                IAttackStrategy attackStrategy = _attackFactory.Get(context.Actor.AttackId);
                 hitContext = attackStrategy.CreateHitContext(
                     context.Actor,
                     defender,

@@ -19,12 +19,13 @@ namespace Project.Gameplay.Gameplay.Combat
         private const string FURY = "fury";
         private const string INSPIRATION = "inspiration";
         private const string PROVOCATION = "provocation";
+        private const string DESPERATION = "desperation";
 
         public static IPassive? Create(PassiveConfig config)
         {
             return config.Type switch
             {
-                SWARM or ATTACK_FOR_ALLY => new SwarmPassive(config.Id, config.GetFloat("percent", 5f), config.GetInt("duration", 1)),
+                SWARM or ATTACK_FOR_ALLY => new SwarmPassive(config.Id, config.GetInt("damage", 1), config.GetInt("duration", 1)),
                 LIFE_STEAL => new LifestealPassive(config.Id, config.GetFloat("percent", 0.5f)),
                 EXECUTE => new ExecutePassive(config.Id, config.GetFloat("threshold", 0.3f), config.GetFloat("multiplier", 2f)),
                 CRITICAL => new CriticalPassive(config.Id, config.GetFloat("chance", 0.2f), config.GetFloat("multiplier", 2f)),
@@ -42,6 +43,7 @@ namespace Project.Gameplay.Gameplay.Combat
                     config.GetFloat("evasion_bonus", 0.1f),
                     config.GetInt("duration", 2)),
                 PROVOCATION => new ProvocationPassive(config.Id),
+                DESPERATION => new DesperationPassive(config.Id),
                 _ => null
             };
         }
