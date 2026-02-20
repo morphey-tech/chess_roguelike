@@ -96,7 +96,11 @@ namespace Project.Gameplay.Gameplay.Installers
                     new QueenMovement(),
                     new KingMovement(),
                     new SlipperyMovement(),
-                    new SplasherMovement()
+                    new SplasherMovement(),
+                    new PierceMovement(),
+                    new TankMovement(),
+                    new PusherMovement(),
+                    new RangerMovement()
                 });
 
             builder.Register<FigureStatsFactory>(Lifetime.Singleton).As<IFigureStatsFactory>().AsSelf();

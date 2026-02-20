@@ -68,7 +68,7 @@
     },
     {
       "id": "tank",
-      "movement_id": "pawn",
+      "movement_id": "tank",
       "attack_id": "simple",
       "stats_id": "tank_stats",
       "turn_patterns_id": "melee_default",
@@ -86,7 +86,7 @@
     },
     {
       "id": "pierce",
-      "movement_id": "pawn",
+      "movement_id": "pierce",
       "attack_id": "pierce",
       "stats_id": "pierce_stats",
       "turn_patterns_id": "melee_default",
@@ -95,7 +95,7 @@
     },
     {
       "id": "pusher",
-      "movement_id": "pawn",
+      "movement_id": "pusher",
       "attack_id": "simple",
       "stats_id": "pusher_stats",
       "turn_patterns_id": "melee_default",
@@ -104,7 +104,7 @@
     },
     {
       "id": "ranger",
-      "movement_id": "pawn",
+      "movement_id": "ranger",
       "attack_id": "profiled",
       "stats_id": "ranger_stats",
       "turn_patterns_id": "archer_set",
