@@ -9,6 +9,7 @@ using Project.Gameplay.Gameplay.Board.Capacity;
 using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.Gameplay.Grid;
+using Project.Gameplay.Gameplay.Movement;
 using Project.Gameplay.Gameplay.Turn;
 using Project.Gameplay.Presentations;
 using VContainer;
@@ -22,10 +23,11 @@ namespace Project.Gameplay.Gameplay.Figures
         private readonly IFigureStatsFactory _statsFactory;
         private readonly TurnPatternFactory _turnPatternFactory;
         private readonly BoardCapacityService _capacityService;
+        private readonly MovementStrategyFactory _movementStrategyFactory;
         private readonly IPublisher<FigureSpawnedMessage> _spawnedPublisher;
         private readonly IFigureRegistry _figureRegistry;
         private readonly ILogger<FigureSpawnService> _logger;
-        
+
         private FigureConfigRepository? _figureConfigCache;
         private FigureDescriptionConfigRepository? _descriptionConfigCache;
         private PassiveConfigRepository? _passiveConfigCache;
@@ -37,6 +39,7 @@ namespace Project.Gameplay.Gameplay.Figures
             IFigureStatsFactory statsFactory,
             TurnPatternFactory turnPatternFactory,
             BoardCapacityService capacityService,
+            MovementStrategyFactory movementStrategyFactory,
             IPublisher<FigureSpawnedMessage> spawnedPublisher,
             IFigureRegistry figureRegistry,
             ILogService logService)
@@ -46,6 +49,7 @@ namespace Project.Gameplay.Gameplay.Figures
             _statsFactory = statsFactory;
             _turnPatternFactory = turnPatternFactory;
             _capacityService = capacityService;
+            _movementStrategyFactory = movementStrategyFactory;
             _spawnedPublisher = spawnedPublisher;
             _figureRegistry = figureRegistry;
             _logger = logService.CreateLogger<FigureSpawnService>();
@@ -100,13 +104,21 @@ namespace Project.Gameplay.Gameplay.Figures
 
             FigureStats stats = _statsFactory.Create(description.StatsId);
 
+            // Create PatternMovement if movement_pattern is specified
+            string movementId = description.MovementId;
+            if (description.MovementPattern != null && description.MovementId == "pattern")
+            {
+                movementId = description.MovementPattern.Id;
+                _movementStrategyFactory.CreatePattern(description.MovementPattern);
+            }
+
             Figure figure = new(
-                IdGetter.MakeId(), 
+                IdGetter.MakeId(),
                 figureId,
-                description.MovementId, 
-                description.AttackId, 
+                movementId,
+                description.AttackId,
                 description.TurnPatternsId,
-                stats, 
+                stats,
                 team);
 
             if (!string.IsNullOrEmpty(description.LootTableId))

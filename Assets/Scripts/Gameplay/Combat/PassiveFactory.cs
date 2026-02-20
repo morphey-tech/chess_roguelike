@@ -21,6 +21,11 @@ namespace Project.Gameplay.Gameplay.Combat
         private const string PROVOCATION = "provocation";
         private const string DESPERATION = "desperation";
         private const string ROYAL_PRESENCE = "royal_presence";
+        private const string ESCAPE = "escape";
+        private const string IMPACT = "impact";
+        private const string MELEE_OVERRIDE = "ranger_provocation";
+        private const string SPLASH = "splash";
+        private const string PIERCE = "pierce";
 
         public static IPassive? Create(PassiveConfig config)
         {
@@ -46,6 +51,11 @@ namespace Project.Gameplay.Gameplay.Combat
                 PROVOCATION => new ProvocationPassive(config.Id),
                 DESPERATION => new DesperationPassive(config.Id),
                 ROYAL_PRESENCE => new RoyalPresencePassive(config.Id, config.GetFloat("damage_bonus", 1f), config.GetInt("aura_radius", 2)),
+                ESCAPE => new EscapePassive(config.Id),
+                IMPACT => new ImpactPassive(config.Id, config.GetInt("bonus_damage", 2)),
+                MELEE_OVERRIDE => new MeleeOverridePasssive(config.Id, config.GetFloat("melee_damage_multiplier", 0.5f)),
+                SPLASH => new SplashPassive(config.Id),
+                PIERCE => new PiercePassive(config.Id),
                 _ => null
             };
         }

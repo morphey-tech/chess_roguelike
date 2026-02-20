@@ -91,16 +91,7 @@ namespace Project.Gameplay.Gameplay.Installers
                 {
                     new PawnMovement(),
                     new KnightMovement(),
-                    new RookMovement(),
-                    new BishopMovement(),
-                    new QueenMovement(),
-                    new KingMovement(),
-                    new SlipperyMovement(),
-                    new SplasherMovement(),
-                    new PierceMovement(),
-                    new TankMovement(),
-                    new PusherMovement(),
-                    new RangerMovement()
+                    new SplasherMovement()
                 });
 
             builder.Register<FigureStatsFactory>(Lifetime.Singleton).As<IFigureStatsFactory>().AsSelf();
@@ -126,8 +117,6 @@ namespace Project.Gameplay.Gameplay.Installers
                     new SimpleAttack(),
                     new RangedAttack(),
                     new DiagonalAttack(),
-                    new SplashAttack(),
-                    new PierceAttack(),
                     new PawnAttack()
                 });
 

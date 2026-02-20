@@ -67,7 +67,7 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
                     pushCell.PlaceFigure(context.Target);
                     
                     // Add effect for visual update
-                    context.Effects.Add(new PushEffect(context.Target, targetPos, pushTo));
+                    context.Effects.Add(new PushEffect(owner, context.Target, targetPos, pushTo));
                     Debug.Log($"[PushOnHit] {context.Target} pushed to ({pushTo.Row},{pushTo.Column})");
                     return;
                 }

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Project.Core.Core.Configs.Figure;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Movement.Strategies;
 
@@ -7,6 +8,7 @@ namespace Project.Gameplay.Gameplay.Movement
 {
     /// <summary>
     /// Factory for movement strategies. Maps movement ID to strategy.
+    /// Supports PatternMovement via MovementPatternConfig.
     /// </summary>
     public sealed class MovementStrategyFactory
     {
@@ -21,7 +23,7 @@ namespace Project.Gameplay.Gameplay.Movement
             _strategies = strategies.ToDictionary(s => s.Id);
             _fallback = new PawnMovement();
             _logger = logService.CreateLogger<MovementStrategyFactory>();
-            
+
             _logger.Info($"Registered strategies: {string.Join(", ", _strategies.Keys)}");
         }
 
@@ -40,6 +42,11 @@ namespace Project.Gameplay.Gameplay.Movement
 
             _logger.Warning($"Unknown movementId '{movementId}', using fallback pawn");
             return _fallback;
+        }
+
+        public IMovementStrategy CreatePattern(MovementPatternConfig pattern)
+        {
+            return new PatternMovement(pattern);
         }
     }
 }

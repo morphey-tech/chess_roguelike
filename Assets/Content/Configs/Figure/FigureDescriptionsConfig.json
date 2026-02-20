@@ -2,7 +2,14 @@
   "content": [
     {
       "id": "pawn",
-      "movement_id": "pawn",
+      "movement_id": "pattern",
+      "movement_pattern": {
+        "id": "pawn",
+        "directions": "straight",
+        "min_distance": 1,
+        "max_distance": 1,
+        "jump_over": false
+      },
       "attack_id": "pawn",
       "stats_id": "pawn_stats",
       "turn_patterns_id": "melee_default",
@@ -22,7 +29,14 @@
     },
     {
       "id": "bishop",
-      "movement_id": "bishop",
+      "movement_id": "pattern",
+      "movement_pattern": {
+        "id": "bishop",
+        "directions": "diagonal",
+        "min_distance": 1,
+        "max_distance": 7,
+        "jump_over": false
+      },
       "attack_id": "diagonal",
       "stats_id": "bishop_stats",
       "turn_patterns_id": "ranged_default",
@@ -31,17 +45,30 @@
     },
     {
       "id": "rook",
-      "movement_id": "rook",
+      "movement_id": "pattern",
+      "movement_pattern": {
+        "id": "rook",
+        "directions": "straight",
+        "min_distance": 1,
+        "max_distance": 7,
+        "jump_over": false
+      },
       "attack_id": "simple",
       "stats_id": "rook_stats",
       "turn_patterns_id": "melee_translate",
       "passives": ["momentum"],
       "load": 3
-      
     },
     {
       "id": "queen",
-      "movement_id": "queen",
+      "movement_id": "pattern",
+      "movement_pattern": {
+        "id": "queen",
+        "directions": "all",
+        "min_distance": 1,
+        "max_distance": 7,
+        "jump_over": false
+      },
       "attack_id": "simple",
       "stats_id": "queen_stats",
       "turn_patterns_id": "melee_default",
@@ -50,7 +77,14 @@
     },
     {
       "id": "king",
-      "movement_id": "king",
+      "movement_id": "pattern",
+      "movement_pattern": {
+        "id": "king",
+        "directions": "all",
+        "min_distance": 1,
+        "max_distance": 1,
+        "jump_over": false
+      },
       "attack_id": "simple",
       "stats_id": "king_stats",
       "turn_patterns_id": "melee_default",
@@ -59,57 +93,93 @@
     },
     {
       "id": "slippery",
-      "movement_id": "slippery",
+      "movement_id": "pattern",
+      "movement_pattern": {
+        "id": "slippery",
+        "directions": "all",
+        "min_distance": 1,
+        "max_distance": 1,
+        "jump_over": false,
+        "extra_straight_distance": 2
+      },
       "attack_id": "simple",
       "stats_id": "slippery_stats",
       "turn_patterns_id": "melee_default",
-      "passives": ["retreat_slippery"],
-      "load": 2
+      "passives": ["escape"],
+      "load": 3
     },
     {
       "id": "tank",
-      "movement_id": "tank",
+      "movement_id": "pattern",
+      "movement_pattern": {
+        "id": "tank",
+        "directions": "straight",
+        "min_distance": 1,
+        "max_distance": 1,
+        "jump_over": false
+      },
       "attack_id": "simple",
       "stats_id": "tank_stats",
       "turn_patterns_id": "melee_default",
       "passives": ["provocation"],
-      "load": 4
+      "load": 5
     },
     {
       "id": "splash",
       "movement_id": "splasher",
-      "attack_id": "splash",
+      "attack_id": "simple",
       "stats_id": "splash_stats",
       "turn_patterns_id": "melee_default",
-      "passives": [],
-      "load": 3
-    },
-    {
-      "id": "pierce",
-      "movement_id": "pierce",
-      "attack_id": "pierce",
-      "stats_id": "pierce_stats",
-      "turn_patterns_id": "melee_default",
-      "passives": [],
-      "load": 3
-    },
-    {
-      "id": "pusher",
-      "movement_id": "pusher",
-      "attack_id": "simple",
-      "stats_id": "pusher_stats",
-      "turn_patterns_id": "melee_default",
-      "passives": ["push_on_hit"],
+      "passives": ["splash"],
       "load": 4
     },
     {
+      "id": "pierce",
+      "movement_id": "pattern",
+      "movement_pattern": {
+        "id": "pierce",
+        "directions": "straight",
+        "min_distance": 2,
+        "max_distance": 2,
+        "jump_over": false
+      },
+      "attack_id": "simple",
+      "stats_id": "pierce_stats",
+      "turn_patterns_id": "melee_default",
+      "passives": ["pierce"],
+      "load": 4
+    },
+    {
+      "id": "pusher",
+      "movement_id": "pattern",
+      "movement_pattern": {
+        "id": "pusher",
+        "directions": "straight",
+        "min_distance": 1,
+        "max_distance": 2,
+        "jump_over": false
+      },
+      "attack_id": "simple",
+      "stats_id": "pusher_stats",
+      "turn_patterns_id": "melee_default",
+      "passives": ["impact"],
+      "load": 3
+    },
+    {
       "id": "ranger",
-      "movement_id": "ranger",
+      "movement_id": "pattern",
+      "movement_pattern": {
+        "id": "ranger",
+        "directions": "all",
+        "min_distance": 1,
+        "max_distance": 2,
+        "jump_over": false
+      },
       "attack_id": "profiled",
       "stats_id": "ranger_stats",
       "turn_patterns_id": "archer_set",
-      "passives": [],
-      "load": 3
+      "passives": ["melee_override"],
+      "load": 4
     }
   ]
 }

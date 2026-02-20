@@ -8,9 +8,7 @@ using Project.Gameplay.Movement;
 namespace Project.Gameplay.Gameplay.Movement.Strategies
 {
     /// <summary>
-    /// Splasher movement:
-    /// - 1 cell in any direction (8 directions)
-    /// - OR 2 cells forward (based on team)
+    /// Splasher movement: 1 cell in any direction OR 2 cells forward (based on team).
     /// </summary>
     public sealed class SplasherMovement : IMovementStrategy
     {
@@ -45,10 +43,16 @@ namespace Project.Gameplay.Gameplay.Movement.Strategies
             GridPosition forward2 = new(from.Row + forwardDr * 2, from.Column);
             if (grid.IsInside(forward2))
             {
-                var cell = grid.GetBoardCell(forward2);
-                var result = new MovementStrategyResult(figure, forward2, true, cell.OccupiedBy);
-                if (result.CanOccupy())
-                    yield return result;
+                // Check intermediate cell is empty
+                GridPosition intermediate = new(from.Row + forwardDr, from.Column);
+                var intermediateCell = grid.GetBoardCell(intermediate);
+                if (intermediateCell.OccupiedBy == null)
+                {
+                    var cell = grid.GetBoardCell(forward2);
+                    var result = new MovementStrategyResult(figure, forward2, true, cell.OccupiedBy);
+                    if (result.CanOccupy())
+                        yield return result;
+                }
             }
         }
 
@@ -68,10 +72,12 @@ namespace Project.Gameplay.Gameplay.Movement.Strategies
             if (!isValid)
                 return MovementStrategyResult.MakeUnreachable(figure, to, null);
 
-            // Check if path is clear for 2-cell forward move
+            // Check path clear for 2-cell forward move
             if (Math.Abs(dr) == 2 && dc == 0)
             {
-                if (!IsPathClear(from, to, grid, forwardDr))
+                GridPosition intermediate = new(from.Row + forwardDr, from.Column);
+                var intermediateCell = grid.GetBoardCell(intermediate);
+                if (intermediateCell.OccupiedBy != null)
                     return MovementStrategyResult.MakeUnreachable(figure, to, null);
             }
 
@@ -94,18 +100,6 @@ namespace Project.Gameplay.Gameplay.Movement.Strategies
             }
 
             return false;
-        }
-
-        private bool IsPathClear(GridPosition from, GridPosition to, BoardGrid grid, int forwardDr)
-        {
-            // Check the cell between from and to
-            GridPosition middle = new(from.Row + forwardDr, from.Column);
-            
-            if (!grid.IsInside(middle))
-                return false;
-
-            BoardCell cell = grid.GetBoardCell(middle);
-            return cell.OccupiedBy == null;
         }
     }
 }

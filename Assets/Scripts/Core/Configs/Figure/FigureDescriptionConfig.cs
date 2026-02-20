@@ -29,5 +29,8 @@ namespace Project.Core.Core.Configs.Figure
 
         [JsonProperty("loot_table_id")]
         public string LootTableId { get; set; } = string.Empty;
+
+        [JsonProperty("movement_pattern")]
+        public MovementPatternConfig? MovementPattern { get; set; }
     }
 }

@@ -130,6 +130,35 @@
         "damage_bonus": 1,
         "aura_radius": 2
       }
+    },
+    {
+      "id": "escape",
+      "type": "escape",
+      "params": {}
+    },
+    {
+      "id": "impact",
+      "type": "impact",
+      "params": {
+        "bonus_damage": 2
+      }
+    },
+    {
+      "id": "melee_override",
+      "type": "melee_override",
+      "params": {
+        "melee_damage_multiplier": 0.5
+      }
+    },
+    {
+      "id": "splash",
+      "type": "splash",
+      "params": {}
+    },
+    {
+      "id": "pierce",
+      "type": "pierce",
+      "params": {}
     }
   ]
 }

@@ -181,18 +181,18 @@
       "id": "ranger_stats",
       "max_hp": 8,
       "attacks": [
-        { 
+        {
           "type": "Melee",
-          "damage": 1,
+          "damage": 4,
           "range": 1,
           "targeting": "Adjacent",
           "delivery": "Instant",
           "pattern": "Single"
         },
-        { 
+        {
           "type": "Ranged",
           "damage": 4,
-          "range": 4,
+          "range": 3,
           "targeting": "StraightLine",
           "delivery": "Projectile",
           "pattern": "Single",
