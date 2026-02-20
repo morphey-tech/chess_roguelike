@@ -45,6 +45,14 @@ namespace Project.Unity.Unity.Views.Presentations
             }
 
             _healthView.SetHp(_figure.Stats.CurrentHp);
+            
+            // Billboard effect - rotate HP bar to face camera
+            Transform healthTransform = _healthView.transform;
+            Camera mainCamera = Camera.main;
+            if (mainCamera != null)
+            {
+                healthTransform.forward = mainCamera.transform.forward;
+            }
         }
 
         public void Hide()

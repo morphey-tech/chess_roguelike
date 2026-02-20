@@ -181,6 +181,7 @@ RectTransform:
   - {fileID: 5979524942743401112}
   - {fileID: 6092284987486145057}
   - {fileID: 6190711099368451561}
+  - {fileID: 371326850550062511}
   - {fileID: 3264953104775882790}
   m_Father: {fileID: 4222815311219110104}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -240,6 +241,43 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity::Project.Unity.UI.Components.Game.HealthBar
   _mainFill: {fileID: 8214239523545591648}
   _damageFill: {fileID: 6796217201219028448}
+  _dividerContainer: {fileID: 371326850550062511}
+  _dividerTemplate: {fileID: 1463630965394532323, guid: 8f49dff5e2bb27377ba97ba34d821a08, type: 3}
+--- !u!1 &5170462711074860251
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 371326850550062511}
+  m_Layer: 5
+  m_Name: DeviderContainer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &371326850550062511
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5170462711074860251}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2904334175709428778}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &6080107751102167380
 GameObject:
   m_ObjectHideFlags: 0
@@ -332,7 +370,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 20
+  m_fontSize: 10.2
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
