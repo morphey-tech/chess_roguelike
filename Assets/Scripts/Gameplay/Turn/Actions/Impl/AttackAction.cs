@@ -40,6 +40,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
         private readonly PassiveTriggerService _passives;
         private readonly VisualPipeline _visualPipeline;
         private readonly IPublisher<FigureDeathMessage> _deathPublisher;
+        private readonly IPublisher<FigureAttackStartedMessage> _attackStartedPublisher;
         private readonly LootService _lootService;
         private readonly DamageApplier _damageApplier;
         private readonly IFigureLifeService _figureLifeService;
@@ -57,6 +58,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
             PassiveTriggerService passives,
             VisualPipeline visualPipeline,
             IPublisher<FigureDeathMessage> deathPublisher,
+            IPublisher<FigureAttackStartedMessage> attackStartedPublisher,
             LootService lootService,
             DamageApplier damageApplier,
             IFigureLifeService figureLifeService,
@@ -73,6 +75,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
             _passives = passives;
             _visualPipeline = visualPipeline;
             _deathPublisher = deathPublisher;
+            _attackStartedPublisher = attackStartedPublisher;
             _lootService = lootService;
             _damageApplier = damageApplier;
             _figureLifeService = figureLifeService;
@@ -184,6 +187,9 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
             }
 
             context.ActionExecuted = true;
+
+            // Публикуем сообщение о начале атаки (для скрытия превью урона)
+            _attackStartedPublisher.Publish(new FigureAttackStartedMessage(context.Actor.Id, defender.Id));
 
             // === DOMAIN PHASE ===
             CombatResult result = _combatResolver.Resolve(hitContext);

@@ -8,6 +8,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
 {
     /// <summary>
     /// Applies splash damage via DamageApplier. Смерть обрабатывает LifeService.
+    /// Все сплеш цели получают урон одновременно (через IsParallel = true).
     /// </summary>
     public sealed class SplashDamageEffect : ICombatEffect
     {
@@ -15,28 +16,42 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
         public int OrderInPhase => 0;
 
         private readonly Figure _attacker;
-        private readonly Figure _target;
+        private readonly Figure[] _targets;
         private readonly int _damage;
 
-        public SplashDamageEffect(Figure attacker, Figure target, int damage)
+        public SplashDamageEffect(Figure attacker, Figure[] targets, int damage)
         {
             _attacker = attacker;
-            _target = target;
+            _targets = targets;
             _damage = damage;
         }
 
         public void Apply(CombatEffectContext context)
         {
-            if (_target == null || _target.Stats.CurrentHp <= 0)
+            if (_targets == null || _targets.Length == 0)
                 return;
 
-            DamageContext dmgCtx = new(_attacker, _target, _damage, false, false, false,
-                "splash", Array.Empty<IDamageModifier>());
-            (DamageResult result, _) = context.DamageApplier.Apply(context, dmgCtx);
+            // Применяем урон всем целям и создаём визуальные события с IsParallel = true
+            foreach (var target in _targets)
+            {
+                if (target == null || target.Stats.CurrentHp <= 0)
+                    continue;
 
-            context.AddVisualEvent(new DamageVisualEvent(_target.Id, result.Final, false,
-                false, "splash"));
-            context.Logger.Info($"Splash hit {_target} for {result.Final} damage. HP: {_target.Stats.CurrentHp}/{_target.Stats.MaxHp}");
+                DamageContext dmgCtx = new(_attacker, target, _damage, false, false, false,
+                    "splash", Array.Empty<IDamageModifier>());
+                (DamageResult result, _) = context.DamageApplier.Apply(context, dmgCtx);
+
+                // IsParallel = true — команды будут выполнены параллельно
+                context.AddVisualEvent(new DamageVisualEvent(
+                    target.Id,
+                    result.Final,
+                    isCritical: false,
+                    isDodged: false,
+                    damageType: "splash",
+                    isParallel: true));
+
+                context.Logger.Info($"Splash hit {target} for {result.Final} damage. HP: {target.Stats.CurrentHp}/{target.Stats.MaxHp}");
+            }
         }
     }
 }

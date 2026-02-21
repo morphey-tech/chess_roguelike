@@ -18,6 +18,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Builders
                 builderContext.Passives,
                 builderContext.VisualPipeline,
                 builderContext.DeathPublisher,
+                builderContext.AttackStartedPublisher,
                 builderContext.LootService,
                 builderContext.DamageApplier,
                 builderContext.FigureLifeService,

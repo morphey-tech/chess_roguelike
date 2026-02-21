@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Visual;
@@ -46,23 +47,52 @@ namespace Project.Gameplay.Gameplay.Visual.Commands
                     IVisualCommand command = queue.Commands[i];
                     _logger.Debug($"▶ [{i}] {command.DebugName} (mode={command.Mode})");
 
-                    try
+                    if (command.Mode == VisualCommandMode.Parallel)
                     {
-                        if (command.Mode == VisualCommandMode.Blocking)
+                        // Собираем все последовательные Parallel команды
+                        var parallelCommands = new List<IVisualCommand> { command };
+                        int j = i + 1;
+                        while (j < queue.Commands.Count && queue.Commands[j].Mode == VisualCommandMode.Parallel)
                         {
-                            await command.ExecuteAsync(_presenters);
+                            _logger.Debug($"▶ [{j}] {queue.Commands[j].DebugName} (mode={queue.Commands[j].Mode}) [parallel group]");
+                            parallelCommands.Add(queue.Commands[j]);
+                            j++;
+                        }
+
+                        // Выполняем все Parallel команды параллельно
+                        if (parallelCommands.Count > 1)
+                        {
+                            _logger.Debug($"Executing {parallelCommands.Count} commands in parallel");
+                            UniTask[] tasks = parallelCommands.Select(ExecuteSingleCommandAsync).ToArray();
+                            await UniTask.WhenAll(tasks);
                         }
                         else
                         {
-                            RunBackground(command.ExecuteAsync(_presenters), command.DebugName);
+                            await ExecuteSingleCommandAsync(command);
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.Error($"Visual command error: {command.DebugName} - {ex.Message}");
-                    }
 
-                    i++;
+                        i = j;
+                    }
+                    else
+                    {
+                        try
+                        {
+                            if (command.Mode == VisualCommandMode.Blocking)
+                            {
+                                await command.ExecuteAsync(_presenters);
+                            }
+                            else
+                            {
+                                RunBackground(command.ExecuteAsync(_presenters), command.DebugName);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.Error($"Visual command error: {command.DebugName} - {ex.Message}");
+                        }
+
+                        i++;
+                    }
                 }
 
                 _logger.Debug($"=== Visual Pipeline Complete ===");
@@ -73,6 +103,18 @@ namespace Project.Gameplay.Gameplay.Visual.Commands
             }
 
             queue.Clear();
+        }
+
+        private async UniTask ExecuteSingleCommandAsync(IVisualCommand command)
+        {
+            try
+            {
+                await command.ExecuteAsync(_presenters);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Visual command error: {command.DebugName} - {ex.Message}");
+            }
         }
 
         public async UniTask ExecuteAsync(IReadOnlyList<IVisualCommand> commands)

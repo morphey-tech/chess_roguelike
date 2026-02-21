@@ -30,21 +30,24 @@ namespace Project.Gameplay.Gameplay.Combat.Visual
     public sealed class DamageVisualEvent : ICombatVisualEvent
     {
         public CombatVisualStage Stage => CombatVisualStage.Hit;
-        public int OrderInStage => 0;
+        public int OrderInStage { get; }
         public int TargetId { get; }
         public float Amount { get; }
         public bool IsCritical { get; }
         public bool IsDodged { get; }
         public string DamageType { get; }
+        public bool IsParallel { get; }
 
         public DamageVisualEvent(int targetId, float amount, bool isCritical = false,
-            bool isDodged = false, string damageType = null)
+            bool isDodged = false, string damageType = null, int orderInStage = 0, bool isParallel = false)
         {
             TargetId = targetId;
             Amount = amount;
             IsCritical = isCritical;
             IsDodged = isDodged;
             DamageType = damageType;
+            OrderInStage = orderInStage;
+            IsParallel = isParallel;
         }
     }
 

@@ -1,10 +1,12 @@
 using System;
+using System.Collections.Generic;
 using MessagePipe;
 using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
 using Project.Core.Core.Physics;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Input.Messages;
+using Project.Gameplay.Gameplay.Run;
 using Project.Gameplay.Presentations;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -26,6 +28,7 @@ namespace Project.Gameplay.Gameplay.Input
         private readonly IPublisher<CancelRequestedMessage> _cancelPublisher;
         private readonly IPublisher<FigureHoverChangedMessage> _figureHoverChangedPublisher;
         private readonly ILogger<InputDispatcher> _logger;
+        private readonly RunHolder _runHolder;
 
         private InputActionMap _gameplayMap;
         private InputAction _clickAction;
@@ -35,6 +38,9 @@ namespace Project.Gameplay.Gameplay.Input
 
         private Camera _camera;
         private int? _hoveredFigureId;
+        
+        // Reusable buffer for RaycastNonAlloc (max 16 figures in ray path)
+        private readonly RaycastHit[] _raycastBuffer = new RaycastHit[16];
 
         public InputDispatcher(
             InputActionAsset inputActions,
@@ -43,6 +49,7 @@ namespace Project.Gameplay.Gameplay.Input
             IPublisher<EndTurnRequestedMessage> endTurnPublisher,
             IPublisher<CancelRequestedMessage> cancelPublisher,
             IPublisher<FigureHoverChangedMessage> figureHoverChangedPublisher,
+            RunHolder runHolder,
             ILogService logService)
         {
             _inputActions = inputActions;
@@ -51,6 +58,7 @@ namespace Project.Gameplay.Gameplay.Input
             _endTurnPublisher = endTurnPublisher;
             _cancelPublisher = cancelPublisher;
             _figureHoverChangedPublisher = figureHoverChangedPublisher;
+            _runHolder = runHolder;
             _logger = logService.CreateLogger<InputDispatcher>();
         }
 
@@ -93,13 +101,13 @@ namespace Project.Gameplay.Gameplay.Input
 
             // Always publish raw click for services that need it (PrepareService, etc.)
             _rawClickPublisher.Publish(new RawClickMessage(ray, screenPos));
-            UpdateHoveredFigure(ray);
+            UpdateHoveredFigure(ray, screenPos);
 
             // Also publish cell click if we hit a cell
             if (Physics.Raycast(ray, out RaycastHit hit, PhysicsSettings.DefaultRaycastDistance, PhysicsSettings.CellLayerMask))
             {
                 Vector3 p = hit.point;
-                
+
                 // Клетки спавнятся на (col, 0, row) - это центр клетки
                 int col = Mathf.FloorToInt(p.x + 0.5f);
                 int row = Mathf.FloorToInt(p.z + 0.5f);
@@ -121,18 +129,71 @@ namespace Project.Gameplay.Gameplay.Input
 
             Vector2 screenPos = _pointAction.ReadValue<Vector2>();
             Ray ray = _camera.ScreenPointToRay(screenPos);
-            UpdateHoveredFigure(ray);
+            UpdateHoveredFigure(ray, screenPos);
         }
 
-        private void UpdateHoveredFigure(Ray ray)
+        private void UpdateHoveredFigure(Ray ray, Vector2 screenPos)
         {
             int? hoveredFigureId = null;
-            if (Physics.Raycast(ray, out RaycastHit hit, PhysicsSettings.DefaultRaycastDistance, PhysicsSettings.FigureLayerMask))
+            
+            // Сначала пытаемся попасть в клетку — это даст нам "правильную" позицию
+            if (Physics.Raycast(ray, out RaycastHit cellHit, PhysicsSettings.DefaultRaycastDistance, PhysicsSettings.CellLayerMask))
             {
-                EntityLink entityLink = hit.collider.GetComponentInParent<EntityLink>();
-                if (entityLink?.GetEntity() is Figure figure)
+                // Получаем позицию клетки
+                Vector3 p = cellHit.point;
+                int col = Mathf.FloorToInt(p.x + 0.5f);
+                int row = Mathf.FloorToInt(p.z + 0.5f);
+                
+                // Теперь ищем фигуру именно на этой клетке через RaycastAll
+                // Сортируем по distance и берём первую фигуру на нужной клетке
+                int hitCount = Physics.RaycastNonAlloc(
+                    ray,
+                    _raycastBuffer,
+                    PhysicsSettings.DefaultRaycastDistance,
+                    PhysicsSettings.FigureLayerMask);
+                
+                if (hitCount > 0)
                 {
-                    hoveredFigureId = figure.Id;
+                    System.Array.Sort(_raycastBuffer, 0, hitCount, RaycastHitComparer.Instance);
+                    
+                    for (int i = 0; i < hitCount; i++)
+                    {
+                        EntityLink entityLink = _raycastBuffer[i].collider.GetComponentInParent<EntityLink>();
+                        if (entityLink?.GetEntity() is Figure figure)
+                        {
+                            // Проверяем, что фигура находится на этой клетке
+                            var cell = _runHolder.Current?.CurrentStage?.Grid?.FindFigure(figure);
+                            if (cell != null && cell.Position.Row == row && cell.Position.Column == col)
+                            {
+                                hoveredFigureId = figure.Id;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // Если не попали в клетку, просто берём ближайшую фигуру по raycast
+                int hitCount = Physics.RaycastNonAlloc(
+                    ray,
+                    _raycastBuffer,
+                    PhysicsSettings.DefaultRaycastDistance,
+                    PhysicsSettings.FigureLayerMask);
+                
+                if (hitCount > 0)
+                {
+                    System.Array.Sort(_raycastBuffer, 0, hitCount, RaycastHitComparer.Instance);
+                    
+                    for (int i = 0; i < hitCount; i++)
+                    {
+                        EntityLink entityLink = _raycastBuffer[i].collider.GetComponentInParent<EntityLink>();
+                        if (entityLink?.GetEntity() is Figure figure)
+                        {
+                            hoveredFigureId = figure.Id;
+                            break;
+                        }
+                    }
                 }
             }
 
@@ -141,7 +202,12 @@ namespace Project.Gameplay.Gameplay.Input
 
             _hoveredFigureId = hoveredFigureId;
             _figureHoverChangedPublisher.Publish(new FigureHoverChangedMessage(hoveredFigureId));
-            Debug.LogError(hoveredFigureId);
+        }
+        
+        private sealed class RaycastHitComparer : IComparer<RaycastHit>
+        {
+            public static readonly RaycastHitComparer Instance = new();
+            public int Compare(RaycastHit x, RaycastHit y) => x.distance.CompareTo(y.distance);
         }
 
         private void OnEndTurnPerformed(InputAction.CallbackContext context)

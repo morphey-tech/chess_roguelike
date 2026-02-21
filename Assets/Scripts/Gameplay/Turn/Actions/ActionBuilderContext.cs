@@ -23,6 +23,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions
         public PassiveTriggerService Passives { get; }
         public VisualPipeline VisualPipeline { get; }
         public IPublisher<FigureDeathMessage> DeathPublisher { get; }
+        public IPublisher<FigureAttackStartedMessage> AttackStartedPublisher { get; }
         public LootService LootService { get; }
         public DamageApplier DamageApplier { get; }
         public IFigureLifeService FigureLifeService { get; }
@@ -40,6 +41,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions
             PassiveTriggerService passives,
             VisualPipeline visualPipeline,
             IPublisher<FigureDeathMessage> deathPublisher,
+            IPublisher<FigureAttackStartedMessage> attackStartedPublisher,
             LootService lootService,
             DamageApplier damageApplier,
             IFigureLifeService figureLifeService,
@@ -56,6 +58,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions
             Passives = passives;
             VisualPipeline = visualPipeline;
             DeathPublisher = deathPublisher;
+            AttackStartedPublisher = attackStartedPublisher;
             LootService = lootService;
             DamageApplier = damageApplier;
             FigureLifeService = figureLifeService;

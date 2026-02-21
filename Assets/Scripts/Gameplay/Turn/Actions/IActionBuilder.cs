@@ -34,6 +34,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions
         PassiveTriggerService Passives { get; }
         VisualPipeline VisualPipeline { get; }
         IPublisher<FigureDeathMessage> DeathPublisher { get; }
+        IPublisher<Figures.FigureAttackStartedMessage> AttackStartedPublisher { get; }
         LootService LootService { get; }
         DamageApplier DamageApplier { get; }
         IFigureLifeService FigureLifeService { get; }

@@ -5,8 +5,9 @@ namespace Project.Gameplay.Gameplay.Visual.Commands
 {
     public enum VisualCommandMode
     {
-        Blocking,
-        Background
+        Blocking,    // Выполняется и ожидается перед следующей
+        Background,  // Запускается и забывается (fire-and-forget)
+        Parallel     // Выполняется параллельно с другими Parallel командами
     }
 
     /// <summary>

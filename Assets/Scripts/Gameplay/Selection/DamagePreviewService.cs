@@ -41,6 +41,7 @@ namespace Project.Gameplay.Gameplay.Selection
             ISubscriber<FigureHoverChangedMessage> hoverChangedSubscriber,
             ISubscriber<TurnChangedMessage> turnChangedSubscriber,
             ISubscriber<FigureBoardRemovedMessage> figureRemovedSubscriber,
+            ISubscriber<FigureAttackStartedMessage> attackStartedSubscriber,
             ILogService logService)
         {
             _figurePresenter = figurePresenter;
@@ -57,13 +58,24 @@ namespace Project.Gameplay.Gameplay.Selection
             hoverChangedSubscriber.Subscribe(OnHoverChanged).AddTo(bag);
             turnChangedSubscriber.Subscribe(OnTurnChanged).AddTo(bag);
             figureRemovedSubscriber.Subscribe(OnFigureBoardRemoved).AddTo(bag);
+            attackStartedSubscriber.Subscribe(OnAttackStarted).AddTo(bag);
             _subscriptions = bag.Build();
         }
 
         private void OnFigureSelected(FigureSelectedMessage message)
         {
             _logger.Debug($"[DamagePreview] OnFigureSelected: FigureId={message.Figure?.Id}, Team={message.Figure?.Team}");
-            _selectedFriendlyFigureId = message.Figure?.Id;
+            
+            // Запоминаем только дружественную фигуру (Player)
+            if (message.Figure?.Team == Team.Player)
+            {
+                _selectedFriendlyFigureId = message.Figure?.Id;
+            }
+            else
+            {
+                _selectedFriendlyFigureId = null;
+            }
+            
             UpdateDamagePreview();
         }
 
@@ -111,6 +123,20 @@ namespace Project.Gameplay.Gameplay.Selection
             {
                 _selectedFriendlyFigureId = null;
                 UpdateDamagePreview();
+            }
+        }
+
+        private void OnAttackStarted(FigureAttackStartedMessage message)
+        {
+            _logger.Debug($"[DamagePreview] OnAttackStarted: Attacker={message.AttackerId}, Target={message.TargetId}");
+            
+            // Скрываем превью с цели атаки
+            _figurePresenter.SetDamagePreview(message.TargetId, null);
+            
+            // Если превью был показан на этой фигуре — сбрасываем
+            if (_lastPreviewFigureId == message.TargetId)
+            {
+                _lastPreviewFigureId = null;
             }
         }
 

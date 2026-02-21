@@ -115,20 +115,22 @@ namespace Project.Gameplay.Gameplay.Combat.Visual
         public IEnumerable<IVisualCommand> Map(ICombatVisualEvent visualEvent)
         {
             var evt = (DamageVisualEvent)visualEvent;
-            
+
+            var mode = evt.IsParallel ? VisualCommandMode.Parallel : VisualCommandMode.Blocking;
+
             yield return new DamageTextCommand(new DamageVisualContext(
                 evt.TargetId,
                 evt.Amount,
                 evt.IsCritical,
                 evt.IsDodged,
-                evt.DamageType));
-            
+                evt.DamageType), mode);
+
             yield return new DamageCommand(new DamageVisualContext(
                 evt.TargetId,
                 evt.Amount,
                 evt.IsCritical,
                 evt.IsDodged,
-                evt.DamageType));
+                evt.DamageType), mode);
         }
     }
 

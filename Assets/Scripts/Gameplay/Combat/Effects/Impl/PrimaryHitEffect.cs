@@ -3,6 +3,7 @@ using Project.Core.Core.Configs.Stats;
 using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Combat.Contexts;
 using Project.Gameplay.Gameplay.Combat.Damage;
+using Project.Gameplay.Gameplay.Combat.Passives;
 using Project.Gameplay.Gameplay.Combat.Visual;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
@@ -92,12 +93,16 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
 
                 AddPrimaryDeliveryEvent(context, damageResult.Final, before.IsCritical);
 
+                // Проверяем, есть ли у атакующего сплеш — если да, то визуал будет параллельным
+                bool hasSplash = HasSplashPassive(_attacker);
+                
                 context.AddVisualEvent(new DamageVisualEvent(
                     _target.Id,
                     damageResult.Final,
                     before.IsCritical,
                     before.IsDodged,
-                    string.IsNullOrEmpty(_attackId) ? _delivery.ToString() : _attackId));
+                    string.IsNullOrEmpty(_attackId) ? _delivery.ToString() : _attackId,
+                    isParallel: hasSplash));
 
                 context.Logger.Info($"{_attacker} hit {_target} for {damageResult.Final} damage. HP: {_target.Stats.CurrentHp}/{_target.Stats.MaxHp}");
 
@@ -194,5 +199,14 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
             }
         }
 
+        private static bool HasSplashPassive(Figure figure)
+        {
+            foreach (IPassive passive in figure.BasePassives)
+            {
+                if (passive is SplashPassive)
+                    return true;
+            }
+            return false;
+        }
     }
 }

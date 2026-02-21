@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using Project.Gameplay.Gameplay.Visual;
+using Project.Gameplay.Gameplay.Visual.Commands;
 using Project.Gameplay.Gameplay.Visual.Commands.Contexts;
 
 namespace Project.Gameplay.Gameplay.Visual.Commands.Impl
@@ -10,13 +11,15 @@ namespace Project.Gameplay.Gameplay.Visual.Commands.Impl
     public sealed class DamageCommand : IVisualCommand
     {
         private readonly DamageVisualContext _ctx;
+        private readonly VisualCommandMode _mode;
 
         public string DebugName => $"Damage(target={_ctx.TargetId}, amount={_ctx.Amount}{(_ctx.IsCritical ? ", CRIT" : "")}{(_ctx.DamageType != null ? $", type={_ctx.DamageType}" : "")})";
-        public VisualCommandMode Mode => VisualCommandMode.Blocking;
+        public VisualCommandMode Mode => _mode;
 
-        public DamageCommand(DamageVisualContext ctx)
+        public DamageCommand(DamageVisualContext ctx, VisualCommandMode mode = VisualCommandMode.Blocking)
         {
             _ctx = ctx;
+            _mode = mode;
         }
 
         public UniTask ExecuteAsync(IPresenterProvider presenters)
