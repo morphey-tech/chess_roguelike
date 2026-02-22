@@ -34,13 +34,13 @@ namespace Project.Core.Core.ShrinkingZone.Messages
     /// <summary>
     /// Сообщение о получении урона юнитом от зоны
     /// </summary>
-    public readonly struct UnitTakeZoneDamageMessage
+    public readonly struct FigureTakeZoneDamageMessage
     {
         public readonly IZoneDamageTarget Target;
         public readonly int Damage;
         public readonly GridPosition Position;
 
-        public UnitTakeZoneDamageMessage(IZoneDamageTarget target, int damage, GridPosition position)
+        public FigureTakeZoneDamageMessage(IZoneDamageTarget target, int damage, GridPosition position)
         {
             Target = target;
             Damage = damage;

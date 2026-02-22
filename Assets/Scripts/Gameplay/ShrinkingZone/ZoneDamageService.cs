@@ -33,7 +33,7 @@ namespace Project.Gameplay.ShrinkingZone
             RunHolder runHolder,
             VisualPipeline visualPipeline,
             ICombatVisualPlanner visualPlanner,
-            ISubscriber<UnitTakeZoneDamageMessage> damageSubscriber,
+            ISubscriber<FigureTakeZoneDamageMessage> damageSubscriber,
             ILogService logService)
         {
             _figureLifeService = figureLifeService;
@@ -45,11 +45,13 @@ namespace Project.Gameplay.ShrinkingZone
             DisposableBagBuilder bag = DisposableBag.CreateBuilder();
             damageSubscriber.Subscribe(OnZoneDamageTaken).AddTo(bag);
             _subscriptions = bag.Build();
+            
+            _logger.Debug("[ZONE DAMAGE] ZoneDamageService initialized and subscribed to FigureTakeZoneDamageMessage");
         }
 
-        private async void OnZoneDamageTaken(UnitTakeZoneDamageMessage msg)
+        private async void OnZoneDamageTaken(FigureTakeZoneDamageMessage msg)
         {
-            _logger.Debug($"[ZONE DAMAGE] Applying {msg.Damage} damage to target at ({msg.Position.Row},{msg.Position.Column})");
+            _logger.Debug($"[ZONE DAMAGE] Received FigureTakeZoneDamageMessage: target={msg.Target}, damage={msg.Damage}, position=({msg.Position.Row},{msg.Position.Column})");
 
             // Находим фигуру на доске
             var grid = GetCurrentGrid();
@@ -67,6 +69,7 @@ namespace Project.Gameplay.ShrinkingZone
             }
 
             Figure figure = cell.OccupiedBy;
+            _logger.Debug($"[ZONE DAMAGE] Found figure {figure.Id} at ({msg.Position.Row},{msg.Position.Column})");
 
             // Применяем урон через Stats
             bool died = figure.Stats.TakeDamage(msg.Damage);

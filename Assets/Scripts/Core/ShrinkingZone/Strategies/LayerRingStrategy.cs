@@ -28,15 +28,23 @@ namespace Project.Core.Core.ShrinkingZone.Strategies
             int boardSize = context.BoardSize;
             int minSize = context.SafeZoneMinSize;
 
-            // Максимальный слой, до которого можно сужаться
-            int maxLayer = (boardSize / 2) - minSize;
+            // Максимальный слой: (boardSize - minSize) / 2
+            int maxLayer = (boardSize - minSize) / 2;
             if (layer > maxLayer)
                 yield break;
 
-            int topRow = layer;
-            int bottomRow = boardSize - 1 - layer;
-            int leftCol = layer;
-            int rightCol = boardSize - 1 - layer;
+            // Warning клетки — это следующий слой после текущего (граница)
+            // Если зона ещё не сжалась (step 0), warning на текущем слое
+            // Если зона сжалась (step 1+), warning на следующем слое
+            int warningLayer = step >= 3 ? layer + 1 : layer;
+            
+            if (warningLayer > maxLayer)
+                yield break;
+
+            int topRow = warningLayer;
+            int bottomRow = boardSize - 1 - warningLayer;
+            int leftCol = warningLayer;
+            int rightCol = boardSize - 1 - warningLayer;
 
             // Warning rows на шаге 0
             if (step == 0)
@@ -73,38 +81,43 @@ namespace Project.Core.Core.ShrinkingZone.Strategies
             int boardSize = context.BoardSize;
             int minSize = context.SafeZoneMinSize;
 
-            // Максимальный слой
-            int maxLayer = (boardSize / 2) - minSize;
+            // Максимальный слой: (boardSize - minSize) / 2
+            int maxLayer = (boardSize - minSize) / 2;
             if (layer > maxLayer)
                 yield break;
 
-            int topRow = layer;
-            int bottomRow = boardSize - 1 - layer;
-            int leftCol = layer;
-            int rightCol = boardSize - 1 - layer;
-
-            // Danger rows на шагах 1 и 2
-            if (step >= 1)
+            // Danger клетки включают ВСЕ слои от 0 до текущего
+            // Это означает, что внешние кольца остаются опасными при сужении
+            for (int l = 0; l <= layer; l++)
             {
-                // Верхний ряд danger
-                for (int col = leftCol; col <= rightCol; col++)
-                    positions.Add(new GridPosition(topRow, col));
+                int topRow = l;
+                int bottomRow = boardSize - 1 - l;
+                int leftCol = l;
+                int rightCol = boardSize - 1 - l;
 
-                // Нижний ряд danger
-                for (int col = leftCol; col <= rightCol; col++)
-                    positions.Add(new GridPosition(bottomRow, col));
-            }
+                // Danger rows на шагах 1+
+                if (step >= 1)
+                {
+                    // Верхний ряд danger
+                    for (int col = leftCol; col <= rightCol; col++)
+                        positions.Add(new GridPosition(topRow, col));
 
-            // Danger cols на шаге 2
-            if (step >= 2)
-            {
-                // Левая колонка danger (кроме углов, которые уже в danger rows)
-                for (int row = topRow + 1; row < bottomRow; row++)
-                    positions.Add(new GridPosition(row, leftCol));
+                    // Нижний ряд danger
+                    for (int col = leftCol; col <= rightCol; col++)
+                        positions.Add(new GridPosition(bottomRow, col));
+                }
 
-                // Правая колонка danger (кроме углов)
-                for (int row = topRow + 1; row < bottomRow; row++)
-                    positions.Add(new GridPosition(row, rightCol));
+                // Danger cols на шагах 2+
+                if (step >= 2)
+                {
+                    // Левая колонка danger (кроме углов, которые уже в danger rows)
+                    for (int row = topRow + 1; row < bottomRow; row++)
+                        positions.Add(new GridPosition(row, leftCol));
+
+                    // Правая колонка danger (кроме углов)
+                    for (int row = topRow + 1; row < bottomRow; row++)
+                        positions.Add(new GridPosition(row, rightCol));
+                }
             }
 
             foreach (var pos in positions)
@@ -113,7 +126,8 @@ namespace Project.Core.Core.ShrinkingZone.Strategies
 
         public bool HasNextStep(ZoneContext context)
         {
-            int maxLayer = (context.BoardSize / 2) - context.SafeZoneMinSize;
+            // Максимальный слой: (boardSize - minSize) / 2
+            int maxLayer = (context.BoardSize - context.SafeZoneMinSize) / 2;
 
             // Если есть следующий шаг в текущем слое (даже если это финальный слой)
             if (context.StepInLayer < StepsPerLayer - 1)
@@ -129,7 +143,8 @@ namespace Project.Core.Core.ShrinkingZone.Strategies
 
         public bool AdvanceStep(ref ZoneContext context)
         {
-            int maxLayer = (context.BoardSize / 2) - context.SafeZoneMinSize;
+            // Максимальный слой: (boardSize - minSize) / 2
+            int maxLayer = (context.BoardSize - context.SafeZoneMinSize) / 2;
 
             // Если есть следующий шаг в текущем слое (даже если это финальный слой)
             if (context.StepInLayer < StepsPerLayer - 1)

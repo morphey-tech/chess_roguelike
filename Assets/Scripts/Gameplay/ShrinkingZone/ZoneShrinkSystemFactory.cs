@@ -44,15 +44,16 @@ namespace Project.Gameplay.ShrinkingZone
             var strategy = _resolver.Resolve<IZoneShrinkStrategy>();
             var stateChangedPublisher = _resolver.Resolve<IPublisher<ZoneStateChangedMessage>>();
             var cellsUpdatedPublisher = _resolver.Resolve<IPublisher<ZoneCellsUpdatedMessage>>();
-            var damagePublisher = _resolver.Resolve<IPublisher<UnitTakeZoneDamageMessage>>();
+            var damagePublisher = _resolver.Resolve<IPublisher<FigureTakeZoneDamageMessage>>();
             var battleStartedSubscriber = _resolver.Resolve<ISubscriber<ZoneBattleStartedMessage>>();
             var turnStartedSubscriber = _resolver.Resolve<ISubscriber<ZoneTurnStartedMessage>>();
             var damageDealtSubscriber = _resolver.Resolve<ISubscriber<ZoneDamageDealtMessage>>();
             var figureTurnEndedSubscriber = _resolver.Resolve<ISubscriber<ZoneFigureTurnEndedMessage>>();
 
             Debug.Log($"[ZONE FACTORY] Creating ZoneShrinkSystem with strategy={strategy?.GetType().Name}");
+            Debug.Log($"[ZONE FACTORY] Resolved subscribers: battleStarted={battleStartedSubscriber != null}, turnStarted={turnStartedSubscriber != null}");
 
-            return new ZoneShrinkSystem(
+            var system = new ZoneShrinkSystem(
                 config,
                 strategy,
                 stateChangedPublisher,
@@ -62,6 +63,9 @@ namespace Project.Gameplay.ShrinkingZone
                 turnStartedSubscriber,
                 damageDealtSubscriber,
                 figureTurnEndedSubscriber);
+            
+            Debug.Log($"[ZONE FACTORY] ZoneShrinkSystem created successfully");
+            return system;
         }
     }
 }

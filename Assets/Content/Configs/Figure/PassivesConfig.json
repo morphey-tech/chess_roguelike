@@ -100,7 +100,7 @@
       "type": "fury",
       "params": {
         "damage": 0.5,
-        "max_stacks": 5
+        "max_stacks": 4
       }
     },
     {

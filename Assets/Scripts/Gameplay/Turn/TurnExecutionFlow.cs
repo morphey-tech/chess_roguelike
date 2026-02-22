@@ -2,6 +2,7 @@ using System;
 using Cysharp.Threading.Tasks;
 using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
+using Project.Core.Core.ShrinkingZone.Core;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Interaction;
@@ -97,8 +98,8 @@ namespace Project.Gameplay.Gameplay.Turn
                 _logger.Info($"Turn executed. Final pos: ({result.ActorFinalPosition.Row},{result.ActorFinalPosition.Column}), " +
                              $"BonusMove: {(result.BonusMoveDistance.HasValue ? result.BonusMoveDistance.Value.ToString() : "none")}");
 
-                // 2. Notify zone system about figure turn ended
-                _zoneBattle.OnFigureTurnEnded(actor, result.ActorFinalPosition.Row, result.ActorFinalPosition.Column);
+                // 2. Проверить, попала ли фигура в danger зону, и нанести урон
+                CheckZoneDamage(actor, result.ActorFinalPosition);
 
                 // 3. Delegate bonus move to session (if granted)
                 if (result.BonusMoveDistance.HasValue && result.BonusMoveDistance.Value > 0)
@@ -106,7 +107,7 @@ namespace Project.Gameplay.Gameplay.Turn
                     await _bonusMoveSession.RunAsync(actor, result.ActorFinalPosition, result.BonusMoveDistance.Value, grid);
                 }
 
-                // 3. End the turn
+                // 4. End the turn
                 _turnService.EndTurn();
             }
             catch (Exception ex)
@@ -119,6 +120,19 @@ namespace Project.Gameplay.Gameplay.Turn
         private BoardGrid? GetCurrentGrid()
         {
             return _runHolder.Current?.CurrentStage?.Grid;
+        }
+
+        /// <summary>
+        /// Проверяет, попала ли фигура в danger зону, и наносит урон
+        /// </summary>
+        private void CheckZoneDamage(Figure figure, GridPosition position)
+        {
+            var status = _zoneBattle.GetCellStatus(position.Row, position.Column);
+            if (status == CellStatus.Danger)
+            {
+                _logger.Debug($"[ZONE] Figure {figure.Id} entered danger zone at ({position.Row},{position.Column}), applying damage");
+                _zoneBattle.ApplyZoneDamage(figure, position);
+            }
         }
     }
 }

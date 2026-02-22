@@ -44,6 +44,19 @@ namespace Project.Gameplay.Gameplay.Movement
             return _fallback;
         }
 
+        public void RegisterPattern(string id, IMovementStrategy strategy)
+        {
+            if (!_strategies.ContainsKey(id))
+            {
+                _strategies.Add(id, strategy);
+                _logger.Info($"Registered pattern movement: {id}");
+            }
+            else
+            {
+                _logger.Debug($"Pattern movement '{id}' already registered");
+            }
+        }
+
         public IMovementStrategy CreatePattern(MovementPatternConfig pattern)
         {
             return new PatternMovement(pattern);

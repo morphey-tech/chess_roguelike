@@ -6,7 +6,6 @@ using Project.Core.Core.Grid;
 using Project.Core.Core.ShrinkingZone.Config;
 using Project.Core.Core.ShrinkingZone.Core;
 using Project.Core.Core.ShrinkingZone.Messages;
-using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.ShrinkingZone.Messages;
 using UnityEngine;
 using VContainer;
@@ -29,7 +28,7 @@ namespace Project.Gameplay.ShrinkingZone
         private readonly IZoneShrinkStrategy _strategy;
         private readonly IPublisher<ZoneStateChangedMessage> _stateChangedPublisher;
         private readonly IPublisher<ZoneCellsUpdatedMessage> _cellsUpdatedPublisher;
-        private readonly IPublisher<UnitTakeZoneDamageMessage> _damagePublisher;
+        private readonly IPublisher<FigureTakeZoneDamageMessage> _damagePublisher;
         private readonly IDisposable _subscriptions;
 
         private ZoneState _state = ZoneState.Inactive;
@@ -47,7 +46,7 @@ namespace Project.Gameplay.ShrinkingZone
             IZoneShrinkStrategy strategy,
             IPublisher<ZoneStateChangedMessage> stateChangedPublisher,
             IPublisher<ZoneCellsUpdatedMessage> cellsUpdatedPublisher,
-            IPublisher<UnitTakeZoneDamageMessage> damagePublisher,
+            IPublisher<FigureTakeZoneDamageMessage> damagePublisher,
             ISubscriber<ZoneBattleStartedMessage> battleStartedSubscriber,
             ISubscriber<ZoneTurnStartedMessage> turnStartedSubscriber,
             ISubscriber<ZoneDamageDealtMessage> damageDealtSubscriber,
@@ -90,24 +89,28 @@ namespace Project.Gameplay.ShrinkingZone
 
         private void OnTurnStarted(int turn)
         {
-            Debug.Log($"[ZONE SYSTEM] Turn {turn} started, state={_state}, activation_turn={_activationTurn}");
+            Debug.Log($"[ZONE SYSTEM] Turn {turn} started, state={_state}, activation_turn={_activationTurn}, firstDamageTurn={_firstDamageTurn?.ToString() ?? "null"}, layer={_currentLayer}, step={_stepInLayer}");
 
             if (_state == ZoneState.Inactive && turn >= _activationTurn)
             {
                 _state = ZoneState.Active;
                 _firstDamageTurn = turn;
+                // Начинаем с step=1, чтобы сразу были danger клетки
+                _stepInLayer = 1;
                 UpdateZoneCells();
-                Debug.Log($"[ZONE SYSTEM] Zone ACTIVATED at turn {turn}");
+                Debug.Log($"[ZONE SYSTEM] Zone ACTIVATED at turn {turn}, layer={_currentLayer}, step={_stepInLayer}, dangerCells={_dangerCells.Count}, warningCells={_warningCells.Count}");
                 PublishStateChange(_state);
             }
 
             if (_state == ZoneState.Active && _firstDamageTurn.HasValue)
             {
                 int turnsSinceActivation = turn - _firstDamageTurn.Value;
+                Debug.Log($"[ZONE SYSTEM] Checking shrink: turnsSinceActivation={turnsSinceActivation}, shrinkInterval={_config.ShrinkInterval}, shouldShrink={turnsSinceActivation > 0 && turnsSinceActivation % _config.ShrinkInterval == 0}");
                 if (turnsSinceActivation > 0 && turnsSinceActivation % _config.ShrinkInterval == 0)
                 {
-                    Debug.Log($"[ZONE SYSTEM] Shrinking zone: layer={_currentLayer}, step={_stepInLayer}");
+                    Debug.Log($"[ZONE SYSTEM] Shrinking zone: BEFORE layer={_currentLayer}, step={_stepInLayer}");
                     AdvanceZone();
+                    Debug.Log($"[ZONE SYSTEM] Shrinking zone: AFTER layer={_currentLayer}, step={_stepInLayer}");
                 }
             }
         }
@@ -127,20 +130,9 @@ namespace Project.Gameplay.ShrinkingZone
 
         private void OnFigureTurnEnded(ZoneFigureTurnEndedMessage msg)
         {
-            if (_state != ZoneState.Active)
-                return;
-
-            var status = GetCellStatus(msg.Row, msg.Col);
-            Debug.Log($"[ZONE SYSTEM] Figure turn ended at ({msg.Row},{msg.Col}), status={status}");
-
-            if (IsDangerCell(msg.Row, msg.Col))
-            {
-                int damage = CalculateDamage(msg.Target.MaxHP);
-                Debug.Log($"[ZONE SYSTEM] Dealing {damage} damage to figure (maxHP={msg.Target.MaxHP})");
-                // Урон применяется в ZoneDamageService через UnitTakeZoneDamageMessage
-                _damagePublisher.Publish(new UnitTakeZoneDamageMessage(
-                    msg.Target, damage, new GridPosition(msg.Row, msg.Col)));
-            }
+            // Урон теперь наносится в начале хода команды всем фигурам в зоне (ZoneBattleService)
+            // Этот метод оставлен для возможного будущего расширения
+            Debug.Log($"[ZONE SYSTEM] Figure turn ended at ({msg.Row},{msg.Col})");
         }
 
         public CellStatus GetCellStatus(int row, int col)
@@ -153,6 +145,9 @@ namespace Project.Gameplay.ShrinkingZone
                 return CellStatus.Warning;
             return CellStatus.Safe;
         }
+
+        public int GetDangerCellsCount() => _dangerCells.Count;
+        public int GetWarningCellsCount() => _warningCells.Count;
 
         public ZoneState GetCurrentState() => _state;
 
@@ -168,7 +163,7 @@ namespace Project.Gameplay.ShrinkingZone
             return _config.MinTurn;
         }
 
-        private int CalculateDamage(int unitMaxHP)
+        public int CalculateDamage(int unitMaxHP)
         {
             int flatDamage = _config.ZoneDamageFlat;
             int percentDamage = Mathf.FloorToInt(unitMaxHP * _config.ZoneDamagePercent);
@@ -188,7 +183,16 @@ namespace Project.Gameplay.ShrinkingZone
             _warningCells = _strategy.GetWarningCells(context).ToHashSet();
             _dangerCells = _strategy.GetDangerCells(context).ToHashSet();
 
-            Debug.Log($"[ZONE SYSTEM] Cells updated: {_warningCells.Count} warning, {_dangerCells.Count} danger");
+            Debug.Log($"[ZONE SYSTEM] Cells updated: layer={_currentLayer}, step={_stepInLayer}, {_warningCells.Count} warning, {_dangerCells.Count} danger");
+            
+            // Логируем ВСЕ danger клетки для отладки
+            string dangerCellsStr = string.Join(", ", _dangerCells.Select(c => $"({c.Row},{c.Column})"));
+            Debug.Log($"[ZONE SYSTEM] Danger cells: {dangerCellsStr}");
+            
+            // Логируем ВСЕ warning клетки для отладки
+            string warningCellsStr = string.Join(", ", _warningCells.Select(c => $"({c.Row},{c.Column})"));
+            Debug.Log($"[ZONE SYSTEM] Warning cells: {warningCellsStr}");
+            
             _cellsUpdatedPublisher.Publish(new ZoneCellsUpdatedMessage(
                 _warningCells.ToArray(),
                 _dangerCells.ToArray()

@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using MessagePipe;
 using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
+using Project.Core.Core.ShrinkingZone.Core;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Input.Messages;
@@ -28,6 +29,7 @@ namespace Project.Gameplay.Gameplay.Turn.BonusMove
     {
         private readonly IBonusMoveController _domainController;
         private readonly VisualPipeline _visualPipeline;
+        private readonly ShrinkingZone.ZoneBattleService _zoneBattle;
         private readonly IPublisher<BonusMoveStartedMessage> _startedPublisher;
         private readonly IPublisher<BonusMoveCompletedMessage> _completedPublisher;
         private readonly ILogger<BonusMoveSession> _logger;
@@ -43,6 +45,7 @@ namespace Project.Gameplay.Gameplay.Turn.BonusMove
         public BonusMoveSession(
             IBonusMoveController domainController,
             VisualPipeline visualPipeline,
+            ShrinkingZone.ZoneBattleService zoneBattle,
             ISubscriber<CellClickedMessage> cellClickedSubscriber,
             IPublisher<BonusMoveStartedMessage> startedPublisher,
             IPublisher<BonusMoveCompletedMessage> completedPublisher,
@@ -50,12 +53,13 @@ namespace Project.Gameplay.Gameplay.Turn.BonusMove
         {
             _domainController = domainController;
             _visualPipeline = visualPipeline;
+            _zoneBattle = zoneBattle;
             _startedPublisher = startedPublisher;
             _completedPublisher = completedPublisher;
             _logger = logService.CreateLogger<BonusMoveSession>();
 
             _subscription = cellClickedSubscriber.Subscribe(OnCellClicked);
-            
+
             _logger.Info("BonusMoveSession created");
         }
 
@@ -136,6 +140,19 @@ namespace Project.Gameplay.Gameplay.Turn.BonusMove
             {
                 scope.Enqueue(new MoveCommand(new MoveVisualContext(_actor.Id, to)));
                 await scope.PlayAsync();
+            }
+            
+            // Проверить урон от зоны после бонусного движения
+            CheckZoneDamage(_actor, to);
+        }
+
+        private void CheckZoneDamage(Figure figure, GridPosition position)
+        {
+            var status = _zoneBattle.GetCellStatus(position.Row, position.Column);
+            if (status == CellStatus.Danger)
+            {
+                _logger.Debug($"[ZONE] Bonus move: {figure.Id} entered danger zone at ({position.Row},{position.Column})");
+                _zoneBattle.ApplyZoneDamage(figure, position);
             }
         }
 

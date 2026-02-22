@@ -109,7 +109,8 @@ namespace Project.Gameplay.Gameplay.Figures
             if (description.MovementPattern != null && description.MovementId == "pattern")
             {
                 movementId = description.MovementPattern.Id;
-                _movementStrategyFactory.CreatePattern(description.MovementPattern);
+                var patternMovement = _movementStrategyFactory.CreatePattern(description.MovementPattern);
+                _movementStrategyFactory.RegisterPattern(movementId, patternMovement);
             }
 
             Figure figure = new(

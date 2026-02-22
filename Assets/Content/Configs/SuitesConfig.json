@@ -3,11 +3,11 @@
     {
       "id": "default",
       "figures": [
-        "splash",
-        "bishop_white",
         "pawn_white",
         "pawn_white",
-        "queen_white"
+        "pawn_white",
+        "pawn_white",
+        "pawn_white"
       ]
     }
   ]
