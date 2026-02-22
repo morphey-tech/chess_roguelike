@@ -4,6 +4,7 @@ using MessagePipe;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Prepare;
 using Project.Gameplay.Gameplay.Prepare.Messages;
+using Project.Gameplay.Gameplay.Stage.Messages;
 
 namespace Project.Gameplay.Gameplay.Stage.Phase
 {
@@ -14,7 +15,8 @@ namespace Project.Gameplay.Gameplay.Stage.Phase
     public sealed class PreparePlacementPhase : IStagePhase, IDisposable
     {
         private readonly PrepareService _prepareService;
-        private readonly ISubscriber<PreparePhaseCompletedMessage> _completedSubscriber;
+        private readonly ISubscriber<PreparePhaseCompletedMessage> _prepareCompletedSubscriber;
+        private readonly IPublisher<PhaseCompletedMessage> _phaseCompletedPublisher;
         private readonly ILogger<PreparePlacementPhase> _logger;
 
         private StageContext _context;
@@ -22,18 +24,20 @@ namespace Project.Gameplay.Gameplay.Stage.Phase
 
         public PreparePlacementPhase(
             PrepareService prepareService,
-            ISubscriber<PreparePhaseCompletedMessage> completedSubscriber,
+            ISubscriber<PreparePhaseCompletedMessage> prepareCompletedSubscriber,
+            IPublisher<PhaseCompletedMessage> phaseCompletedPublisher,
             ILogService logService)
         {
             _prepareService = prepareService;
-            _completedSubscriber = completedSubscriber;
+            _prepareCompletedSubscriber = prepareCompletedSubscriber;
+            _phaseCompletedPublisher = phaseCompletedPublisher;
             _logger = logService.CreateLogger<PreparePlacementPhase>();
         }
 
         public async UniTask<PhaseResult> ExecuteAsync(StageContext context)
         {
             _context = context;
-            _subscription = _completedSubscriber.Subscribe(OnPrepareCompleted);
+            _subscription = _prepareCompletedSubscriber.Subscribe(OnPrepareCompleted);
 
             _logger.Info("PreparePlacementPhase starting");
             IPreparePlacementRules rules = new FrontRowsPlacementRules(context.Grid, allowedRows: 2);
@@ -49,6 +53,7 @@ namespace Project.Gameplay.Gameplay.Stage.Phase
             _subscription = null;
 
             _context?.CompletePhase?.Invoke(PhaseResult.Continue);
+            _phaseCompletedPublisher.Publish(new PhaseCompletedMessage(PhaseIds.PreparePlacement));
         }
 
         void IDisposable.Dispose()

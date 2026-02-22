@@ -7,6 +7,7 @@ using Project.Core.Core.Scene;
 using Project.Gameplay.Gameplay.Run;
 using Project.Gameplay.Gameplay.Stage.Messages;
 using Project.Gameplay.UI;
+using VContainer;
 
 namespace Project.Gameplay.Gameplay.Stage.Flow
 {
@@ -24,7 +25,8 @@ namespace Project.Gameplay.Gameplay.Stage.Flow
         private readonly IDisposable _subscription;
         private int _isHandling;
 
-        public RunFlowService(
+        [Inject]
+        private RunFlowService(
             RunHolder runHolder,
             StageReloadService stageReloadService,
             IGameUiService uiService,
@@ -38,8 +40,8 @@ namespace Project.Gameplay.Gameplay.Stage.Flow
             _uiService = uiService;
             _sceneService = sceneService;
             _transitionService = transitionService;
-            _logger = logService.CreateLogger<RunFlowService>();
             _subscription = stageCompletedSubscriber.Subscribe(OnStageCompleted);
+            _logger = logService.CreateLogger<RunFlowService>();
         }
 
         private void OnStageCompleted(StageCompletedMessage message)
@@ -94,9 +96,7 @@ namespace Project.Gameplay.Gameplay.Stage.Flow
                 case StageFlowAction.NextStage:
                 {
                     await _transitionService.PlayTransitionAsync();
-                    var run = _runHolder.Current;
-                    if (run == null)
-                        return;
+                    Run.Run run = _runHolder.Current;
 
                     _stageReloadService.PrepareForStageTransition(resetRunStateToHand: true);
 

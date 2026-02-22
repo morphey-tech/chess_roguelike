@@ -19,5 +19,8 @@ namespace Project.Core.Core.Configs.Stage
         [JsonProperty("board_id")]
         public string BoardId { get; set; }
         
+        [JsonProperty("zone_shrink_id")]
+        public string ZoneShrinkId { get; set; }
+        
     }
 }

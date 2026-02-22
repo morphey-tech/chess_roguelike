@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using Project.Core.Core.ShrinkingZone.Core;
+using Project.Core.Core.ShrinkingZone.Strategies;
 using Project.Gameplay.Gameplay.Attack;
 using Project.Gameplay.Gameplay.Attack.Rules;
 using Project.Gameplay.Gameplay.Attack.Strategies;
@@ -26,7 +28,9 @@ using Project.Gameplay.Gameplay.Turn.Conditions;
 using Project.Gameplay.Gameplay.Turn.Conditions.Impl;
 using Project.Gameplay.Gameplay.Turn.Execution;
 using Project.Gameplay.Gameplay.UI;
+using Project.Gameplay.ShrinkingZone;
 using VContainer;
+using VContainer.Unity;
 
 namespace Project.Gameplay.Gameplay.Installers
 {
@@ -59,6 +63,27 @@ namespace Project.Gameplay.Gameplay.Installers
             builder.Register<InteractionController>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
             builder.Register<TurnExecutionFlow>(Lifetime.Singleton).As<ITurnController>();
 
+            //Zone
+            builder.Register<LayerRingStrategy>(Lifetime.Singleton)
+                .As<IZoneShrinkStrategy>();
+            builder.Register<ZoneShrinkSystemFactory>(Lifetime.Singleton)
+                .As<IZoneShrinkSystemFactory>();
+            builder.Register<ZoneCellEvaluator>(Lifetime.Singleton)
+                .AsSelf()
+                .As<IZoneCellEvaluator>();
+            builder.Register<ZoneBattleService>(Lifetime.Singleton)
+                .AsImplementedInterfaces()
+                .AsSelf();
+            builder.Register<ZoneInitService>(Lifetime.Singleton)
+                .AsImplementedInterfaces()
+                .AsSelf();
+            builder.Register<ZoneHighlightRenderer>(Lifetime.Singleton)
+                .AsImplementedInterfaces()
+                .AsSelf();
+            builder.Register<ZoneDamageService>(Lifetime.Singleton)
+                .AsImplementedInterfaces()
+                .AsSelf();
+            
             // Stage
             builder.Register<StageQueryService>(Lifetime.Singleton).As<IStageQueryService>();
             builder.Register<AttackQueryService>(Lifetime.Singleton).As<IAttackQueryService>();

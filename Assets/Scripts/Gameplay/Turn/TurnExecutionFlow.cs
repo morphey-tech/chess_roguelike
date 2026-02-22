@@ -34,6 +34,7 @@ namespace Project.Gameplay.Gameplay.Turn
         private readonly IBonusMoveSession _bonusMoveSession;
         private readonly TurnService _turnService;
         private readonly RunHolder _runHolder;
+        private readonly ShrinkingZone.ZoneBattleService _zoneBattle;
         private readonly ILogger<TurnExecutionFlow> _logger;
 
         [Inject]
@@ -43,6 +44,7 @@ namespace Project.Gameplay.Gameplay.Turn
             IBonusMoveSession bonusMoveSession,
             TurnService turnService,
             RunHolder runHolder,
+            ShrinkingZone.ZoneBattleService zoneBattle,
             ILogService logService)
         {
             _interactionLock = interactionLock;
@@ -50,6 +52,7 @@ namespace Project.Gameplay.Gameplay.Turn
             _bonusMoveSession = bonusMoveSession;
             _turnService = turnService;
             _runHolder = runHolder;
+            _zoneBattle = zoneBattle;
             _logger = logService.CreateLogger<TurnExecutionFlow>();
         }
 
@@ -94,7 +97,10 @@ namespace Project.Gameplay.Gameplay.Turn
                 _logger.Info($"Turn executed. Final pos: ({result.ActorFinalPosition.Row},{result.ActorFinalPosition.Column}), " +
                              $"BonusMove: {(result.BonusMoveDistance.HasValue ? result.BonusMoveDistance.Value.ToString() : "none")}");
 
-                // 2. Delegate bonus move to session (if granted)
+                // 2. Notify zone system about figure turn ended
+                _zoneBattle.OnFigureTurnEnded(actor, result.ActorFinalPosition.Row, result.ActorFinalPosition.Column);
+
+                // 3. Delegate bonus move to session (if granted)
                 if (result.BonusMoveDistance.HasValue && result.BonusMoveDistance.Value > 0)
                 {
                     await _bonusMoveSession.RunAsync(actor, result.ActorFinalPosition, result.BonusMoveDistance.Value, grid);

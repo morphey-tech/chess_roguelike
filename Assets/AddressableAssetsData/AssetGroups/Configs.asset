@@ -49,6 +49,11 @@ MonoBehaviour:
     m_SerializedLabels:
     - configs
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3d2235b9ebff9f00aa27d03ed3c3f92e
+    m_Address: shrinking_zone_conf
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 42bf2a48d2a64b038584eb1f8c7b6e17
     m_Address: stats_conf
     m_ReadOnly: 0

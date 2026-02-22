@@ -1,26 +1,32 @@
-using System.Threading;
-using Cysharp.Threading.Tasks;
+using System;
+using MessagePipe;
 using Project.Core.Core.Logging;
 using Project.Gameplay;
 using Project.Gameplay.Components;
 using Project.Gameplay.Presentations;
+using Project.Gameplay.ShrinkingZone;
+using Shapes;
+using UniRx;
 using UnityEngine;
-using UnityEngine.Serialization;
 using VContainer;
 
 namespace Project.Unity.Unity.Views.Presentations
 {
     public class CellHighlightPresenter : MonoBehaviour, IPresenter
     {
-        [FormerlySerializedAs("_renderer")]
-        [Header("Highlight")]
+        [Header("Actions")]
         [SerializeField] private GameObject _highlightRenderer;
         [SerializeField] private GameObject _attackRenderer;
-
+        
+        [Header("Zone")]
+        [SerializeField] private ShapeRenderer _zonePreviewRenderer;
+        [SerializeField] private Color _zoneWarningColor;
+        [SerializeField] private Color _zoneDangersColor;
+        
         private ILogger<CellHighlightPresenter> _logger;
         
         private EntityLink _link = null!;
-        private CancellationToken _destroyToken;
+        private IDisposable? _disposable;
 
         [Inject]
         private void Construct(ILogService logger)
@@ -31,40 +37,42 @@ namespace Project.Unity.Unity.Views.Presentations
         public void Init(EntityLink link)
         {
             _link = link;
-            _destroyToken = this.GetCancellationTokenOnDestroy();
-            RunLoopAsync().Forget();
+            DisposableBagBuilder bag = DisposableBag.CreateBuilder();
+            _link.GetEntity().Components.ObserveAdd().Subscribe(OnComponentAdded);
+            _link.GetEntity().Components.ObserveRemove().Subscribe(OnComponentRemoved);
+            _disposable = bag.Build();
         }
 
-        private async UniTaskVoid RunLoopAsync()
+        private void OnComponentAdded(CollectionAddEvent<IEntityComponent> evt)
         {
-            await UniTask.WaitUntil(LinkIsExist, cancellationToken: _destroyToken);
-
-            while (!_destroyToken.IsCancellationRequested)
+            SetDefaultHighlight();
+            switch (evt.Value)
             {
-                Entity entity = _link.GetEntity();
-                SetDefault();
-                if (entity.Exists<HighlightTag>())
-                {
+                case HighlightTag _:
                     SetHighlight();
-                }
-                else if (entity.Exists<AttackHighlightTag>())
-                {
+                    break;
+                case AttackHighlightTag _:
                     SetAttackHighlight();
-                }
-                else
-                {
-                    SetDefault();
-                }
-                await UniTask.Yield(_destroyToken);
+                    break;
+                case ZoneWarningTag _:
+                    ShowWarningsZone();
+                    break;
+                case ZoneDangerTag _:
+                    ShowDangerousZone();
+                    break;
             }
         }
 
-        private bool LinkIsExist()
+        private void OnComponentRemoved(CollectionRemoveEvent<IEntityComponent> evt)
         {
-            return _link != null;
+            Entity entity = _link.GetEntity();
+            if (!entity.Exists<HighlightTag>() && !entity.Exists<AttackHighlightTag>())
+            {
+                SetDefaultHighlight();
+            }
         }
-        
-        private void SetDefault()
+
+        private void SetDefaultHighlight()
         {
             if (_highlightRenderer != null)
                 _highlightRenderer.SetActive(false);
@@ -86,6 +94,23 @@ namespace Project.Unity.Unity.Views.Presentations
                 _highlightRenderer.SetActive(false);
             if (_attackRenderer != null)
                 _attackRenderer.SetActive(true);
+        }
+
+        private void ShowWarningsZone()
+        {
+            _zonePreviewRenderer.gameObject.SetActive(true);
+            _zonePreviewRenderer.Color = _zoneWarningColor;
+        }
+
+        private void ShowDangerousZone()
+        {
+            _zonePreviewRenderer.gameObject.SetActive(true);
+            _zonePreviewRenderer.Color = _zoneDangersColor;
+        }
+
+        private void OnDestroy()
+        {
+            _disposable?.Dispose();
         }
     }
 }

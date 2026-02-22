@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using MessagePipe;
+using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Components;
 using Project.Gameplay.Gameplay.Figures;
@@ -20,7 +22,7 @@ namespace Project.Gameplay.Gameplay.Stage
     /// - SelectTag management on figures
     /// - Reacting to turn changes for cleanup
     /// </summary>
-    public class StageService : IStartable, IDisposable
+    public class StageService : IDisposable
     {
         private readonly IStageQueryService _query;
         private readonly IStageHighlightRenderer _renderer;
@@ -59,13 +61,6 @@ namespace Project.Gameplay.Gameplay.Stage
             bonusMoveStartedSubscriber.Subscribe(OnBonusMoveStarted).AddTo(bag);
             bonusMoveCompletedSubscriber.Subscribe(OnBonusMoveCompleted).AddTo(bag);
             _subscriptions = bag.Build();
-
-            _logger.Info("StageService created");
-        }
-
-        void IStartable.Start()
-        {
-            _logger.Info("StageService started");
         }
 
         private void OnFigureSpawned(FigureSpawnedMessage message)
@@ -76,30 +71,31 @@ namespace Project.Gameplay.Gameplay.Stage
         private void OnBonusMoveStarted(BonusMoveStartedMessage message)
         {
             _mode = StageMode.BonusMove;
-            _logger.Debug($"Bonus move started for {message.Actor}, showing highlights");
-            var moveTargets = _query.GetBonusMoveTargets();
+            IReadOnlyCollection<GridPosition> moveTargets = _query.GetBonusMoveTargets();
             _renderer.Show(StageSelectionInfo.ForMoves(moveTargets));
+            _logger.Debug($"Bonus move started for {message.Actor}, showing highlights");
         }
 
         private void OnBonusMoveCompleted(BonusMoveCompletedMessage message)
         {
             _mode = StageMode.Normal;
-            _logger.Debug($"Bonus move completed for {message.Actor}, clearing highlights");
             _renderer.Clear();
+            _logger.Debug($"Bonus move completed for {message.Actor}, clearing highlights");
         }
 
         private void OnFigureSelected(FigureSelectedMessage message)
         {
-            // Don't change highlights during bonus move
             if (_mode == StageMode.BonusMove)
+            {
                 return;
+            }
 
             if (message.Figure != null)
             {
-                _logger.Debug($"Figure {message.Figure.Id} selected at ({message.Position.Row}, {message.Position.Column})");
                 StageSelectionInfo info = _query.GetSelectionInfo(message.Figure, message.Position);
                 _renderer.Show(StageSelectionInfo.ForCombat(info.MoveTargets, info.AttackTargets));
                 message.Figure.EnsureComponent(new SelectTag());
+                _logger.Debug($"Figure {message.Figure.Id} selected at ({message.Position.Row}, {message.Position.Column})");
             }
             else
             {
@@ -111,9 +107,6 @@ namespace Project.Gameplay.Gameplay.Stage
         private void OnFigureDeselected(FigureDeselectedMessage message)
         {
             message.Figure.Del<SelectTag>();
-            
-            // Clear highlights immediately when figure is deselected
-            // (before move animation starts)
             if (_mode != StageMode.BonusMove)
             {
                 _renderer.Clear();
@@ -122,13 +115,9 @@ namespace Project.Gameplay.Gameplay.Stage
 
         private void OnTurnChanged(TurnChangedMessage message)
         {
-            _logger.Info($"Turn {message.TurnNumber}: {message.CurrentTeam}'s turn");
-            
-            // Reset highlight state
             _mode = StageMode.Normal;
-            
-            // Clear any pending highlights
             _renderer.Clear();
+            _logger.Info($"Turn {message.TurnNumber}: {message.CurrentTeam}'s turn");
         }
 
         void IDisposable.Dispose()

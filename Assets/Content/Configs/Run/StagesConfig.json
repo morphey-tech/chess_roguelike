@@ -4,19 +4,22 @@
       "id": "tutorial_1",
       "type": "Duel",
       "type_config" : "duel_tutorial_1",
-      "board_id" : "0"
+      "board_id" : "0",
+      "zone_shrink_id" : "default_zone"
     },
     {
       "id": "tutorial_2",
       "type": "Duel",
       "type_config" : "duel_tutorial_2",
-      "board_id" : "0"
+      "board_id" : "0",
+      "zone_shrink_id" : "default_zone"
     },
     {
       "id": "duel_level_1",
       "type": "Duel",
       "type_config" : "duel_level_1",
-      "board_id" : "0"
+      "board_id" : "0",
+      "zone_shrink_id" : "default_zone"
     }
   ]
 }

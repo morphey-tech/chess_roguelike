@@ -4,20 +4,11 @@ using LiteUI.UI.Service;
 using MessagePipe;
 using Project.Core.Core.Logging;
 using Project.Core.Core.World;
-using Project.Core.Window;
-using Project.Gameplay.Gameplay.Attack;
-using Project.Gameplay.Gameplay.Attack.Strategies;
 using Project.Gameplay.Gameplay.Board;
 using Project.Gameplay.Gameplay.Combat;
-using Project.Gameplay.Gameplay.Combat.Damage;
-using Project.Gameplay.Gameplay.Combat.Visual;
 using Project.Gameplay.Gameplay.Figures;
-using Project.Gameplay.Gameplay.Input;
 using Project.Gameplay.Gameplay.Interaction;
-using Project.Gameplay.Gameplay.Movement;
-using Project.Gameplay.Gameplay.Movement.Strategies;
 using Project.Gameplay.Gameplay.Prepare;
-using Project.Gameplay.Gameplay.Run;
 using Project.Gameplay.Gameplay.Selection;
 using Project.Gameplay.Gameplay.Stage;
 using Project.Gameplay.Gameplay.Stage.Flow;
@@ -25,18 +16,15 @@ using Project.Gameplay.Gameplay.Stage.Phase;
 using Project.Gameplay.Gameplay.Turn;
 using Project.Gameplay.Gameplay.Turn.Actions;
 using Project.Gameplay.Gameplay.Turn.BonusMove;
-using Project.Gameplay.Gameplay.Turn.Conditions;
-using Project.Gameplay.Gameplay.Turn.Conditions.Impl;
-using Project.Gameplay.Gameplay.Turn.Execution;
 using Project.Gameplay.Gameplay.Visual;
 using Project.Gameplay.Gameplay.Visual.Commands;
 using Project.Gameplay.Gameplay.Installers;
-using Project.Gameplay.Gameplay.Loot;
 using Project.Gameplay.Gameplay.Shutdown;
 using Project.Gameplay.UI;
 using Project.Unity.Unity.Debug;
 using Project.Unity.UI;
 using Project.Gameplay.Presentations;
+using Project.Gameplay.ShrinkingZone;
 using Project.Unity.Unity.Bootstrap;
 using Project.Unity.Unity.Prepare;
 using Project.Unity.Unity.Views;
@@ -217,7 +205,11 @@ namespace Project.Unity.Unity.Installers
             resolver.Resolve<HpBarVisibilityService>();
             resolver.Resolve<DamagePreviewService>();
             resolver.Resolve<HandFigureClickHandler>();
-            
+            resolver.Resolve<ZoneBattleService>();
+            resolver.Resolve<ZoneInitService>();
+            resolver.Resolve<ZoneHighlightRenderer>();
+            resolver.Resolve<ZoneDamageService>();
+
             // UI must be force-resolved so its constructor runs InitAsync
             // (loads WindowsController prefab). Without this, static UI methods
             // throw "UI is not valid" because _controller is never set.

@@ -1,32 +1,40 @@
 using System.Collections.Generic;
 using System.Linq;
 using Project.Gameplay.Components;
+using UniRx;
 
 namespace Project.Gameplay
 {
-    // Сомневаюсь что это будет так
     public class Entity
     {
         public int Id { get; }
+        public ReactiveCollection<IEntityComponent> Components { get; } = new();
 
-        private readonly List<IEntityComponent> _components = new();
-        
-        public Entity(int id) => Id = id;
+        public Entity(int id)
+        {
+            Id = id;
+        }
 
         public T EnsureComponent<T>(T component) where T : IEntityComponent
         {
-            _components.Add(component);
+            Components.Add(component);
             return component;
         }
 
         public void Del<T>() where T : IEntityComponent
         {
-            _components.RemoveAll(c => c is T);
+            for (int i = Components.Count - 1; i >= 0; i--)
+            {
+                if (Components[i] is T)
+                {
+                    Components.RemoveAt(i);
+                }
+            }
         }
 
         public bool Exists<T>() where T : IEntityComponent
         {
-           return _components.Any(c => c is T);
+           return Components.Any(c => c is T);
         }
     }
 }

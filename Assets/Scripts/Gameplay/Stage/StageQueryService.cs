@@ -16,13 +16,10 @@ namespace Project.Gameplay.Gameplay.Stage
     public sealed class StageQueryService : IStageQueryService
     {
         private readonly MovementService _movementService;
-        private readonly IAttackQueryService _attackQuery;
         private readonly IBonusMoveController _bonusMoveController;
-        private readonly TurnPatternResolver _patternResolver;
-        private readonly ILogger<StageQueryService> _logger;
 
         [Inject]
-        public StageQueryService(
+        private StageQueryService(
             MovementService movementService,
             IAttackQueryService attackQuery,
             IBonusMoveController bonusMoveController,
@@ -30,43 +27,29 @@ namespace Project.Gameplay.Gameplay.Stage
             ILogService logService)
         {
             _movementService = movementService;
-            _attackQuery = attackQuery;
             _bonusMoveController = bonusMoveController;
-            _patternResolver = patternResolver;
-            _logger = logService.CreateLogger<StageQueryService>();
         }
 
         public StageSelectionInfo GetSelectionInfo(Figure? actor, GridPosition pos)
         {
-            if (actor == null || actor.TurnPattern == null)
-                return new StageSelectionInfo(null, null);
-
-            // Use actions from TurnPattern to get valid targets (single source of truth)
-            var moveTargets = new HashSet<GridPosition>();
-            var attackTargets = new HashSet<GridPosition>();
-
-            // Build context for pattern resolution
-            Team enemyTeam = actor.Team == Team.Player ? Team.Enemy : Team.Player;
-            var enemies = _movementService.Grid.GetFiguresByTeam(enemyTeam).ToList();
-            var context = new ActionContext
+            if (actor?.TurnPattern == null)
             {
-                Actor = actor,
-                Grid = _movementService.Grid,
-                From = pos,
-                To = pos, // Will be set per action
-                Enemies = enemies,
-                MovementService = _movementService,
-                ActionExecuted = false
-            };
+                return new StageSelectionInfo(null, null);
+            }
+
+            HashSet<GridPosition> moveTargets = new HashSet<GridPosition>();
+            HashSet<GridPosition> attackTargets = new HashSet<GridPosition>();
+
+            Team enemyTeam = actor.Team == Team.Player ? Team.Enemy : Team.Player;
+            List<Figure> enemies = _movementService.Grid.GetFiguresByTeam(enemyTeam).ToList();
 
             BoardGrid grid = _movementService.Grid;
-            foreach (var patternDesc in actor.TurnPattern.Patterns)
+            foreach (TurnPatternDescription? patternDesc in actor.TurnPattern.Patterns)
             {
-                var action = patternDesc.Action;
+                ICombatAction action = patternDesc.Action;
+                IReadOnlyCollection<ActionPreview> previews = action.GetPreviews(actor, pos, grid);
 
-                var previews = action.GetPreviews(actor, pos, grid);
-
-                foreach (var preview in previews)
+                foreach (ActionPreview? preview in previews)
                 {
                     if (preview.MoveTo.HasValue)
                     {
