@@ -10,7 +10,8 @@ namespace Project.Gameplay.Gameplay.Grid
         public Figure? OccupiedBy { get; private set; }
         public CellEffectContainer Effects { get; }
 
-        public bool IsFree => OccupiedBy == null;
+        public IFigureView? OccupiedBy2 { get; private set; }
+        public bool IsFree => OccupiedBy == null && OccupiedBy2 == null;
 
         public BoardCell(int id, GridPosition position) : base(id)
         {
@@ -23,9 +24,15 @@ namespace Project.Gameplay.Gameplay.Grid
             OccupiedBy = figure;
         }
 
+        public void PlaceFigure(IFigureView figure)
+        {
+            OccupiedBy2 = figure;
+        }
+        
         public void RemoveFigure()
         {
             OccupiedBy = null;
+            OccupiedBy2 = null;
         }
     }
 }

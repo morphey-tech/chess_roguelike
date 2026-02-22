@@ -47,7 +47,7 @@ namespace Project.Gameplay.Gameplay.Interaction
         private ClickIntent ResolveWithoutSelection(InteractionContext context, BoardCell clickedCell)
         {
             // No selection: can only select a friendly figure
-            if (IsFriendly(clickedCell, context.CurrentTeam))
+           // if (IsFriendly(clickedCell, context.CurrentTeam))
             {
                 return ClickIntent.Select(clickedCell.OccupiedBy, clickedCell.Position);
             }

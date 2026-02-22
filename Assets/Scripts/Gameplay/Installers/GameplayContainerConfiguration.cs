@@ -71,6 +71,7 @@ namespace Project.Gameplay.Gameplay.Installers
 
             // Stage phases (PrepareZoneCachePhase, PreparePlacementPhase, PrepareService need Unity — register in Unity)
             builder.Register<BoardSpawnPhase>(Lifetime.Transient);
+            builder.Register<InfinityPhase>(Lifetime.Transient);
             builder.Register<GameplayInitPhase>(Lifetime.Transient);
             builder.Register<BattleDuelPhase>(Lifetime.Transient);
             

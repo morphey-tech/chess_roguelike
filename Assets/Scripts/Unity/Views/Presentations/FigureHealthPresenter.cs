@@ -12,12 +12,12 @@ namespace Project.Unity.Unity.Views.Presentations
         [SerializeField] private Color _enemyTeamColor =  Color.red;
         
         [SerializeField] private HealthBar _viewTemplate;
-        [SerializeField] private Transform _pivot;
-        
+
         private EntityLink _entityLink;
         private HealthBar _healthView;
         private Figure? _figure;
         private CanvasGroup? _canvasGroup;
+        private FigureView _figure2;
 
         public void Init(EntityLink link)
         {
@@ -27,24 +27,33 @@ namespace Project.Unity.Unity.Views.Presentations
             
             _entityLink = link; 
             _figure = figure;
-            _healthView = Gameplay.Gameplay.UI.UIService.GetOrCreate<WorldUIWindow>().Add(_viewTemplate, _pivot);
+            _healthView = Gameplay.Gameplay.UI.UIService.GetOrCreate<WorldUIWindow>().Add(_viewTemplate, transform);
 
             var color = _figure.Team == Team.Player ? _playerTeamColor : _enemyTeamColor;
             _healthView.Init(_figure.Stats.CurrentHp, _figure.Stats.MaxHp, color);
         }
 
+        public void Init2(FigureView figure)
+        {
+            _figure2 = figure;
+            var color = _figure2.Team == Team.Player ? _playerTeamColor : _enemyTeamColor;
+            _healthView = Gameplay.Gameplay.UI.UIService.GetOrCreate<WorldUIWindow>().Add(_viewTemplate, transform);
+            _healthView.Init(_figure2.CurrentHp, _figure2.MaxHp, color); 
+        }
+
         private void Update()
         {
-            if (_figure == null || _healthView == null)
+            if (_figure2 == null || _healthView == null)
                 return;
 
-            if (_figure.Stats.IsDead)
+            /*
+            if (_figure2 == n)
             {
                 RemoveBar();
                 return;
-            }
+            }*/
 
-            _healthView.SetHp(_figure.Stats.CurrentHp);
+            _healthView.SetHp(_figure2.CurrentHp);
         }
 
         public void Hide()

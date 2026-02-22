@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using Project.Core.Core.Grid;
+using Project.Core.Core.Physics;
 using Project.Gameplay.Presentations;
+using UnityEngine;
 
 namespace Project.Gameplay.Gameplay.Grid
 {
@@ -43,6 +45,21 @@ namespace Project.Gameplay.Gameplay.Grid
         {
             return _cells[position.Row, position.Column];
         }
+        
+        public static Vector3 GetCellTopPosition(GridPosition gridPos)
+        {
+            const float surfaceY = 0f;
+
+            Vector3 rayOrigin = new(gridPos.Column, PhysicsSettings.CellRaycastHeight, gridPos.Row);
+
+            if (Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hit,
+                    PhysicsSettings.CellRaycastHeight * 2f, PhysicsSettings.CellLayerMask))
+            {
+                return hit.point;
+            }
+
+            return new Vector3(gridPos.Column, surfaceY, gridPos.Row);
+        }
 
         public IEnumerable<BoardCell> AllCells()
         {
@@ -73,6 +90,8 @@ namespace Project.Gameplay.Gameplay.Grid
                     yield return cell.OccupiedBy;
             }
         }
+        
+
 
         public IEnumerable<Figures.Figure> GetFiguresByTeam(Figures.Team team)
         {

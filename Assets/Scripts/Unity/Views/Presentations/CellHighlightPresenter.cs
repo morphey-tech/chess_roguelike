@@ -32,7 +32,25 @@ namespace Project.Unity.Unity.Views.Presentations
         {
             _link = link;
             _destroyToken = this.GetCancellationTokenOnDestroy();
-            RunLoopAsync().Forget();
+      //      RunLoopAsync().Forget();
+        }
+
+        private void Update()
+        {
+            Entity entity = _link.GetEntity();
+            SetDefault();
+            if (entity.Exists<HighlightTag>())
+            {
+                SetHighlight();
+            }
+            else if (entity.Exists<AttackHighlightTag>())
+            {
+                SetAttackHighlight();
+            }
+            else
+            {
+                SetDefault();
+            }
         }
 
         private async UniTaskVoid RunLoopAsync()

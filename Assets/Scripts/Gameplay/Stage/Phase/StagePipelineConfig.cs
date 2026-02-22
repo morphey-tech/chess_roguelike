@@ -14,10 +14,11 @@ namespace Project.Gameplay.Gameplay.Stage.Phase
                 {
                     typeof(PrepareZoneCachePhase),   // только для стейджей с prepare — греем кэш до доски
                     typeof(BoardSpawnPhase),
-                    typeof(PreparePlacementPhase),
+                    typeof(InfinityPhase)
+                    /*typeof(PreparePlacementPhase),
                     typeof(FiguresSpawnPhase),
                     typeof(GameplayInitPhase),
-                    typeof(BattleDuelPhase)
+                    typeof(BattleDuelPhase)*/
                 }
             }
         };

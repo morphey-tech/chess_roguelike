@@ -9,25 +9,21 @@ namespace Project.Unity.Unity.Views.Presentations
         [SerializeField] private Color _color;
         [SerializeField] private float _width;
         
-        private EntityLink _link;
+        private FigureView Figure;
         private Outline[] _outlines = System.Array.Empty<Outline>();
-        
-        public void Init(EntityLink link)
+
+        private void Start()
         {
-            _link = link; 
+            Figure = GetComponent<FigureView>();
+            InitSelecting();
         }
 
         private void Update()
         {
-            if (_link == null || _outlines.Length == 0)
-                return;
-
-            var entity = _link.GetEntity();
-            bool enabled = entity.Exists<SelectTag>();
             foreach (Outline outline in _outlines)
             {
                 if (outline != null)
-                    outline.enabled = enabled;
+                    outline.enabled = Figure.Selected;
             }
         }
 
@@ -50,6 +46,11 @@ namespace Project.Unity.Unity.Views.Presentations
                 list.Add(outline);
             }
             _outlines = list.ToArray();
+        }
+
+        public void Init(EntityLink link)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

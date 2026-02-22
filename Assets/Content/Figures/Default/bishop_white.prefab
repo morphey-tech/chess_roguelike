@@ -9,6 +9,12 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 700778397425556649}
+  - component: {fileID: 7239636494782392462}
+  - component: {fileID: 7197477996322166435}
+  - component: {fileID: -6675370851273160961}
+  - component: {fileID: 4492710845629544541}
+  - component: {fileID: -3800509714041553346}
+  - component: {fileID: -5727464875605715315}
   m_Layer: 7
   m_Name: bishop_white
   m_TagString: Untagged
@@ -32,6 +38,89 @@ Transform:
   - {fileID: 7633544046288959015}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7239636494782392462
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 740290869039254118}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc390e3d77833841d9da531a00113eb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity::Project.Unity.FigureView
+  _maxHp: 5
+--- !u!114 &7197477996322166435
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 740290869039254118}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 332e3bd131476eb439dadbe6e9e2723c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity::Project.Unity.Presentations.FigureSelectPresenter
+  _color: {r: 1, g: 1, b: 1, a: 1}
+  _width: 5
+--- !u!114 &-6675370851273160961
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 740290869039254118}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7950d869319f4ed69a8e0c8e56cc9aba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity::Project.Unity.BishopMoveComponent
+--- !u!114 &4492710845629544541
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 740290869039254118}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f4af1147ff146ff92587440a25884c8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity::Project.Unity.BishopAttackComponent
+--- !u!114 &-3800509714041553346
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 740290869039254118}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1609962fcd7b5c24385d92b6dd682688, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity::Project.Unity.Presentations.FigureHitPresenter
+  _hitDuration: 0.1
+  _hitShake: 0.1
+  _flashCount: 2
+  _flashDuration: 0.1
+  _flashColor: {r: 1, g: 0, b: 0, a: 1}
+--- !u!114 &-5727464875605715315
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 740290869039254118}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 20023a15bfdf4b74893dcf28720a24b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity::Project.Unity.Presentations.FigureHealthPresenter
+  _playerTeamColor: {r: 0, g: 1, b: 0, a: 1}
+  _enemyTeamColor: {r: 1, g: 0, b: 0, a: 1}
+  _viewTemplate: {fileID: 8073077205331353932, guid: 397047c327b269a4ebac25835a79c7e3, type: 3}
 --- !u!1001 &5493969085778690489
 PrefabInstance:
   m_ObjectHideFlags: 0

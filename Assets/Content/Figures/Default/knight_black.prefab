@@ -9,6 +9,12 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 700778397425556649}
+  - component: {fileID: -3493109827574535826}
+  - component: {fileID: -6395886730790244094}
+  - component: {fileID: -1929949330802687888}
+  - component: {fileID: -7931654623392094768}
+  - component: {fileID: -644496305249807513}
+  - component: {fileID: -1041952036448391060}
   m_Layer: 7
   m_Name: knight_black
   m_TagString: Untagged
@@ -32,6 +38,89 @@ Transform:
   - {fileID: 4744616949976918203}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &-3493109827574535826
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 740290869039254118}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc390e3d77833841d9da531a00113eb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity::Project.Unity.FigureView
+  _maxHp: 5
+--- !u!114 &-6395886730790244094
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 740290869039254118}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 332e3bd131476eb439dadbe6e9e2723c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity::Project.Unity.Presentations.FigureSelectPresenter
+  _color: {r: 1, g: 1, b: 1, a: 1}
+  _width: 5
+--- !u!114 &-1929949330802687888
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 740290869039254118}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7bdc4ca5c8cb4d0ea016ded336f5d6b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity::Project.Unity.KnightMoveComponent
+--- !u!114 &-7931654623392094768
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 740290869039254118}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7462346afbd40f88cd4adb5a6f4910f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity::Project.Unity.KnightAttackComponent
+--- !u!114 &-644496305249807513
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 740290869039254118}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1609962fcd7b5c24385d92b6dd682688, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity::Project.Unity.Presentations.FigureHitPresenter
+  _hitDuration: 0.1
+  _hitShake: 0.1
+  _flashCount: 2
+  _flashDuration: 0.1
+  _flashColor: {r: 1, g: 0, b: 0, a: 1}
+--- !u!114 &-1041952036448391060
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 740290869039254118}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 20023a15bfdf4b74893dcf28720a24b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity::Project.Unity.Presentations.FigureHealthPresenter
+  _playerTeamColor: {r: 0, g: 1, b: 0, a: 1}
+  _enemyTeamColor: {r: 1, g: 0, b: 0, a: 1}
+  _viewTemplate: {fileID: 8073077205331353932, guid: 397047c327b269a4ebac25835a79c7e3, type: 3}
 --- !u!1001 &8032658486455184823
 PrefabInstance:
   m_ObjectHideFlags: 0

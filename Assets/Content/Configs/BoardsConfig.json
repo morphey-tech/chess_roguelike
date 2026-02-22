@@ -2,18 +2,20 @@
   "content": [
     {
       "id": "0",
-      "width": 8,
-      "height": 8,
+      "width": 10,
+      "height": 10,
       "cells_appear_id": "rain_drop",
       "cells": [
-        "[W][B][W][B][W][B][W][B]",
-        "[B][W][B][W][B][W][B][W]",
-        "[W][B][W][B][W][B][W][B]",
-        "[B][W][B][W][B][W][B][W]",
-        "[W][B][W][B][W][B][W][B]",
-        "[B][W][B][W][B][W][B][W]",
-        "[W][B][W][B][W][B][W][B]",
-        "[B][W][B][W][B][W][B][W]"
+        "[W][B][W][B][W][B][W][B][W][B]",
+        "[B][W][B][W][B][W][B][W][B][W]",
+        "[W][B][W][B][W][B][W][B][W][B]",
+        "[B][W][B][W][B][W][B][W][B][W]",
+        "[W][B][W][B][W][B][W][B][W][B]",
+        "[B][W][B][W][B][W][B][W][B][W]",
+        "[W][B][W][B][W][B][W][B][W][B]",
+        "[B][W][B][W][B][W][B][W][B][W]",
+        "[W][B][W][B][W][B][W][B][W][B]",
+        "[B][W][B][W][B][W][B][W][B][W]"
       ],
       "base_capacity": 8,
       "max_capacity" : 20,
