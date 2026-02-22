@@ -2,12 +2,12 @@
   "content": [
     {
       "id": "default_zone",
-      "min_turn": 3,
-      "max_turn": 6,
-      "shrink_interval": 2,
-      "zone_damage_flat": 5,
+      "min_turn": 5,
+      "max_turn": 8,
+      "shrink_interval": 3,
+      "zone_damage_flat": 1,
       "zone_damage_percent": 0.1,
-      "safe_zone_min_size": 2,
+      "safe_zone_min_size": 4,
       "board_size": 8
     },
     {

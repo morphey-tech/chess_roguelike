@@ -114,14 +114,14 @@ namespace Project.Core.Core.ShrinkingZone.Strategies
         public bool HasNextStep(ZoneContext context)
         {
             int maxLayer = (context.BoardSize / 2) - context.SafeZoneMinSize;
-            
-            // Если достигнут минимальный размер, дальше сужать нельзя
-            if (context.CurrentLayer >= maxLayer)
-                return false;
 
-            // Если есть следующий шаг в текущем слое
+            // Если есть следующий шаг в текущем слое (даже если это финальный слой)
             if (context.StepInLayer < StepsPerLayer - 1)
                 return true;
+
+            // Если достигнут минимальный размер и последний шаг в слое, дальше сужать нельзя
+            if (context.CurrentLayer >= maxLayer)
+                return false;
 
             // Если есть следующий слой
             return context.CurrentLayer < maxLayer;
@@ -131,16 +131,16 @@ namespace Project.Core.Core.ShrinkingZone.Strategies
         {
             int maxLayer = (context.BoardSize / 2) - context.SafeZoneMinSize;
 
-            // Если достигнут минимальный размер
-            if (context.CurrentLayer >= maxLayer)
-                return false;
-
-            // Если есть следующий шаг в текущем слое
+            // Если есть следующий шаг в текущем слое (даже если это финальный слой)
             if (context.StepInLayer < StepsPerLayer - 1)
             {
                 context.StepInLayer++;
                 return true;
             }
+
+            // Если достигнут минимальный размер и последний шаг в слое, дальше сужать нельзя
+            if (context.CurrentLayer >= maxLayer)
+                return false;
 
             // Переход к следующему слою
             if (context.CurrentLayer < maxLayer)
