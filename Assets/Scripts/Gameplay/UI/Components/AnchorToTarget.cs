@@ -101,9 +101,14 @@ namespace Project.Unity.UI.Components
     private void Construct(IAnchorToTargetTicker ticker)
     {
       _ticker = ticker;
-      _ticker.Register(this);
+      
+      // Регистрируем если объект уже активен
+      if (gameObject.activeInHierarchy)
+      {
+        _ticker.Register(this);
+      }
     }
-    
+
     public ClampBorders GetClampBorders()
     {
       return new()
@@ -385,11 +390,20 @@ namespace Project.Unity.UI.Components
     {
       _target = null;
       _targetPosition = null;
+      
+      // Регистрируем если тикер уже доступен (после Construct)
+      if (_ticker != null)
+      {
+        _ticker.Register(this);
+      }
     }
 
     private void OnDisable()
     {
-      _ticker.Unregister(this);
+      if (_ticker != null)
+      {
+        _ticker.Unregister(this);
+      }
     }
   }
 }

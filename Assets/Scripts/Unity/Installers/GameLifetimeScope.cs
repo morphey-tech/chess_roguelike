@@ -98,6 +98,8 @@ namespace Project.Unity.Unity.Installers
 
         private void ConfigureViews(IContainerBuilder builder)
         {
+            // AnchorToTargetTicker — это ILateTickable, не MonoBehaviour
+            // RegisterEntryPoint создаст экземпляр и будет вызывать LateTick()
             builder.RegisterEntryPoint<AnchorToTargetTicker>()
                 .As<IAnchorToTargetTicker>();
             
