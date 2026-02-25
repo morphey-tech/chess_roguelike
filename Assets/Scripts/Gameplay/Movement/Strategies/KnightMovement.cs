@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using System;
+using System.Linq;
 using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
@@ -14,7 +14,7 @@ namespace Project.Gameplay.Gameplay.Movement.Strategies
     {
         public string Id => "knight";
 
-        private static readonly (int row, int col)[] Offsets =
+        private static readonly (int dr, int dc)[] Offsets =
         {
             (-2, -1), (-2, 1),
             (-1, -2), (-1, 2),
@@ -29,31 +29,34 @@ namespace Project.Gameplay.Gameplay.Movement.Strategies
                 GridPosition to = new(from.Row + dr, from.Column + dc);
 
                 if (!grid.IsInside(to))
-                   continue;
-                
-                var cell = grid.GetBoardCell(to);
-                var result = new MovementStrategyResult(figure, to, true, cell.OccupiedBy);
-                if (!result.CanOccupy()) 
+                {
                     continue;
-                
+                }
+
+                BoardCell cell = grid.GetBoardCell(to);
+                MovementStrategyResult result = new(figure, to, true, cell.OccupiedBy);
+                if (!result.CanOccupy())
+                {
+                    continue;
+                }
+
                 yield return result;
             }
         }
 
         public MovementStrategyResult GetFor(Figure figure, GridPosition from, GridPosition to, BoardGrid grid)
         {
-            int dr = Math.Abs(to.Row - from.Row);
-            int dc = Math.Abs(to.Column - from.Column);
+            int dr = to.Row - from.Row;
+            int dc = to.Column - from.Column;
 
-            bool isLShape = (dr == 2 && dc == 1) || (dr == 1 && dc == 2);
+            bool isLShape = Offsets.Any(d => d.dr == dr && d.dc == dc);
 
-            if (!isLShape)
+            if (!isLShape || !grid.IsInside(to))
+            {
                 return MovementStrategyResult.MakeUnreachable(figure, to, null);
-            
-            if(!grid.IsInside(to))
-                return MovementStrategyResult.MakeUnreachable(figure, to, null);
+            }
 
-            var cell = grid.GetBoardCell(to);
+            BoardCell cell = grid.GetBoardCell(to);
             return new MovementStrategyResult(figure, to, true, cell.OccupiedBy);
         }
     }

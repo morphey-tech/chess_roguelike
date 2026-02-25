@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Project.Unity.UI.Extensions;
 using UnityEngine;
 using UI = Project.Core.Window;
+using VContainer;
 
 namespace Project.Unity.UI.Components
 {
@@ -41,6 +42,8 @@ namespace Project.Unity.UI.Components
     [SerializeField] private bool _useSafeArea = true;
     [SerializeField] private bool _avoidance;
     [SerializeField] private float _lerpSpeed;
+
+    private IAnchorToTargetTicker _ticker = null!;
 
     private Transform _target;
     private Vector3? _targetPosition;
@@ -94,6 +97,13 @@ namespace Project.Unity.UI.Components
 
     public float CameraDistance { get; private set; }
 
+    [Inject]
+    private void Construct(IAnchorToTargetTicker ticker)
+    {
+      _ticker = ticker;
+      _ticker.Register(this);
+    }
+    
     public ClampBorders GetClampBorders()
     {
       return new()
@@ -132,7 +142,7 @@ namespace Project.Unity.UI.Components
 
     public void SetTarget(Transform target, bool needUpdate = true)
     {
-      if(target == _target)
+      if (target == _target)
         return;
 
       _target = target;
@@ -191,13 +201,14 @@ namespace Project.Unity.UI.Components
 
       if (!_targetPosition.HasValue && _target == null)
       {
-        _rectTransform.anchoredPosition = Gameplay.Gameplay.UI.UIService.Canvas.ViewportToCanvasPosition(_nonTargetViewportPosition);
+        _rectTransform.anchoredPosition =
+          Gameplay.Gameplay.UI.UIService.Canvas.ViewportToCanvasPosition(_nonTargetViewportPosition);
         return;
       }
 
       //Camera main = CameraManager.Main ?? Camera.main;
       Camera main = Camera.main;
-      
+
       Vector3 targetPosition = Vector3.zero;
       if (_targetIsRect)
       {
@@ -211,7 +222,9 @@ namespace Project.Unity.UI.Components
       else
       {
         targetPosition = _targetPosition ?? _target.position + _target.rotation * _worldLocalOffset;
-        targetPosition = Gameplay.Gameplay.UI.UIService.Canvas.WorldToCanvasPosition(targetPosition + _worldOffset, main) + _anchorOffset;
+        targetPosition =
+          Gameplay.Gameplay.UI.UIService.Canvas.WorldToCanvasPosition(targetPosition + _worldOffset, main) +
+          _anchorOffset;
       }
 
       IsOnScreen = ScreenRect.Contains(targetPosition);
@@ -301,7 +314,7 @@ namespace Project.Unity.UI.Components
         {
           bool offsetByX = true;
 
-          if(CanAvoidByX && CanAvoidByY)
+          if (CanAvoidByX && CanAvoidByY)
             offsetByX = offsetX < offsetY;
           else if (CanAvoidByX)
             offsetByX = true;
@@ -326,15 +339,15 @@ namespace Project.Unity.UI.Components
     {
       result.Clear();
 
-      if(CanvasGroup.alpha == 0)
+      if (CanvasGroup.alpha == 0)
         return;
 
       foreach (AnchorToTarget target in _avoidanceTargets)
       {
-        if(!target.gameObject.activeSelf)
+        if (!target.gameObject.activeSelf)
           continue;
 
-        if(target.CanvasGroup != null && target.CanvasGroup.alpha == 0)
+        if (target.CanvasGroup != null && target.CanvasGroup.alpha == 0)
           continue;
 
         Vector2 dir = (position - target.TargetCanvasPosition);
@@ -355,12 +368,12 @@ namespace Project.Unity.UI.Components
 
     public void AddAvoidanceTarget(AnchorToTarget target)
     {
-      if(target == this)
+      if (target == this)
         return;
 
-      if(_avoidanceTargets.Contains(target))
+      if (_avoidanceTargets.Contains(target))
         return;
-      
+
       _avoidanceTargets.Add(target);
     }
 
@@ -372,13 +385,11 @@ namespace Project.Unity.UI.Components
     {
       _target = null;
       _targetPosition = null;
-      AnchorToTargetTicker.Instance.Register(this);
     }
 
     private void OnDisable()
     {
-      if (AnchorToTargetTicker.Instance != null)
-        AnchorToTargetTicker.Instance.Unregister(this);
+      _ticker.Unregister(this);
     }
   }
 }

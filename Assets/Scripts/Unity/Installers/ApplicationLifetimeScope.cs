@@ -1,6 +1,7 @@
 using Project.Core.Core.Logging;
 using Project.Core.Window;
 using Project.Gameplay.Gameplay.Assets;
+using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.Gameplay.Economy;
 using Project.Gameplay.Gameplay.Logging;
@@ -13,6 +14,8 @@ using Project.Unity.Unity.Debug;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
+using IRandomService = Project.Core.Core.Random.IRandomService;
+using RandomService = Project.Core.Core.Random.RandomService;
 
 namespace Project.Unity.Unity.Installers
 {
@@ -32,6 +35,10 @@ namespace Project.Unity.Unity.Installers
             builder.Register<LogService>(Lifetime.Singleton)
                 .WithParameter(_minLogLevel)
                 .AsImplementedInterfaces()
+                .AsSelf();
+
+            builder.Register<RandomService>(Lifetime.Singleton)
+                .As<IRandomService>()
                 .AsSelf();
 
             builder.Register<AssetService>(Lifetime.Scoped)
@@ -56,7 +63,8 @@ namespace Project.Unity.Unity.Installers
             builder.Register<PlayerMetaProgressSaveAdapter>(Lifetime.Singleton)
                 .AsImplementedInterfaces()
                 .AsSelf();
-            
+
+            builder.Register<PassiveFactory>(Lifetime.Singleton);
             builder.Register<ItemFactory>(Lifetime.Singleton);
             builder.Register<EconomyService>(Lifetime.Singleton)
                 .AsSelf();

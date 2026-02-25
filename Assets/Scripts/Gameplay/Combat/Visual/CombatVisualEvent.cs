@@ -3,30 +3,6 @@ using Project.Gameplay.Gameplay.Loot;
 
 namespace Project.Gameplay.Gameplay.Combat.Visual
 {
-    /// <summary>
-    /// Порядок визуала: PreHit → Hit → Death → Loot → Cleanup.
-    /// Внутри Stage команды сортируются по OrderInStage.
-    /// </summary>
-    public enum CombatVisualStage
-    {
-        PreHit = 0,  // melee: Attack; ranged: FlyProjectile
-        Hit = 1,     // melee: Damage; ranged: Impact(0), Cleanup(1), ProjectileHitApply(2) [+ при смерти Death/Loot из очереди]
-        Death = 2,   // DeathCommand (HideHpBar → PlayDeath → RemoveFigure)
-        Loot = 3,    // LootCommand
-        Cleanup = 4  // не используется для projectile (Cleanup в Hit)
-    }
-
-    /// <summary>
-    /// Domain-side visual event. Planner сортирует по Stage, затем OrderInStage.
-    /// Melee: PreHit(Attack) → Hit(Damage) → [Death, Loot при убийстве].
-    /// Ranged: PreHit(Fly) → Hit(Impact=0, Cleanup=1, ProjectileHitApply=2) → при убийстве дописываются Death, Loot.
-    /// </summary>
-    public interface ICombatVisualEvent
-    {
-        CombatVisualStage Stage { get; }
-        int OrderInStage { get; }
-    }
-
     public sealed class DamageVisualEvent : ICombatVisualEvent
     {
         public CombatVisualStage Stage => CombatVisualStage.Hit;
@@ -35,11 +11,11 @@ namespace Project.Gameplay.Gameplay.Combat.Visual
         public float Amount { get; }
         public bool IsCritical { get; }
         public bool IsDodged { get; }
-        public string DamageType { get; }
-        public bool IsParallel { get; }
+        public string? DamageType { get; }
+        public bool? IsParallel { get; }
 
         public DamageVisualEvent(int targetId, float amount, bool isCritical = false,
-            bool isDodged = false, string damageType = null, int orderInStage = 0, bool isParallel = false)
+            bool isDodged = false, string? damageType = null, int orderInStage = 0, bool? isParallel = false)
         {
             TargetId = targetId;
             Amount = amount;
@@ -76,10 +52,10 @@ namespace Project.Gameplay.Gameplay.Combat.Visual
         public GridPosition To { get; }
         public int TargetId { get; }
         public string ProjectileConfigId { get; }
-        public string AttackType { get; }
+        public string? AttackType { get; }
         public float Damage { get; }
         public bool IsCritical { get; }
-        public string ImpactFxId { get; }
+        public string? ImpactFxId { get; }
 
         public ProjectileVisualEvent(
             int attackerId,
@@ -89,8 +65,8 @@ namespace Project.Gameplay.Gameplay.Combat.Visual
             string projectileConfigId,
             float damage,
             bool isCritical,
-            string impactFxId = null,
-            string attackType = null)
+            string? impactFxId = null,
+            string? attackType = null)
         {
             AttackerId = attackerId;
             From = from;
@@ -243,9 +219,9 @@ namespace Project.Gameplay.Gameplay.Combat.Visual
         public CombatVisualStage Stage => CombatVisualStage.Death;
         public int OrderInStage => 0;
         public int FigureId { get; }
-        public string Reason { get; }
+        public string? Reason { get; }
 
-        public DeathVisualEvent(int figureId, string reason = null)
+        public DeathVisualEvent(int figureId, string? reason = null)
         {
             FigureId = figureId;
             Reason = reason;

@@ -25,8 +25,10 @@ namespace Project.Gameplay.Gameplay.Figures
             {
                 RemoveExpiredModifiers();
                 T result = _baseValue;
-                foreach (var mod in _mods.OrderBy(x => x.Priority))
+                foreach (IStatModifier<T>? mod in _mods.OrderBy(x => x.Priority))
+                {
                     result = mod.Apply(result);
+                }
                 return result;
             }
         }
@@ -34,14 +36,17 @@ namespace Project.Gameplay.Gameplay.Figures
         /// <summary>
         /// Add modifier. Replaces existing if not stackable, otherwise adds to stack.
         /// </summary>
-        public void AddModifier(IStatModifier<T> mod)
+        public void AddModifier(IStatModifier<T>? mod)
         {
-            if (mod == null) return;
-
-            var existing = _mods.FirstOrDefault(m => m.Id == mod.Id);
-            if (existing != null && !existing.Stackable)
+            if (mod == null)
             {
-                var index = _mods.IndexOf(existing);
+                return;
+            }
+
+            IStatModifier<T>? existing = _mods.FirstOrDefault(m => m.Id == mod.Id);
+            if (existing is { Stackable: false })
+            {
+                int index = _mods.IndexOf(existing);
                 _mods[index] = mod;
             }
             else
@@ -63,9 +68,11 @@ namespace Project.Gameplay.Gameplay.Figures
         /// </summary>
         public bool RemoveModifiersById(string id)
         {
-            if (string.IsNullOrEmpty(id)) return false;
-            
-            var removed = _mods.RemoveAll(m => m.Id == id);
+            if (string.IsNullOrEmpty(id))
+            {
+                return false;
+            }
+            int removed = _mods.RemoveAll(m => m.Id == id);
             return removed > 0;
         }
 
@@ -74,7 +81,7 @@ namespace Project.Gameplay.Gameplay.Figures
         /// </summary>
         public void Tick()
         {
-            foreach (var mod in _mods)
+            foreach (IStatModifier<T>? mod in _mods)
             {
                 mod.Tick();
             }

@@ -5,7 +5,7 @@ using Cysharp.Threading.Tasks;
 using MessagePipe;
 using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
-using Project.Gameplay.Gameplay.Async;
+using Project.Gameplay.Gameplay.Extensions;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Input.Messages;
@@ -61,7 +61,7 @@ namespace Project.Gameplay.Gameplay.Prepare
             Reset();
 
             _sessionCts = new CancellationTokenSource();
-            var context = new PrepareContext(
+            PrepareContext context = new(
                 runState,
                 grid,
                 rules,
@@ -97,7 +97,7 @@ namespace Project.Gameplay.Gameplay.Prepare
 
         private async UniTask SpawnPrepareZoneAsync(PrepareContext context)
         {
-            List<PrepareZoneFigureData> figureDataList = new List<PrepareZoneFigureData>();
+            List<PrepareZoneFigureData> figureDataList = new();
             foreach (FigureState fig in context.RunState.FiguresInHand)
             {
                 figureDataList.Add(new PrepareZoneFigureData(fig.Id, fig.TypeId));
@@ -160,7 +160,9 @@ namespace Project.Gameplay.Gameplay.Prepare
 
             context.State.Select(message.FigureId);
             if (context.State.SelectedFigureId != message.FigureId)
+            {
                 return;
+            }
 
             context.PreviousSelectedId = message.FigureId;
             _selectionChangedPublisher.Publish(new PrepareSelectionChangedMessage(message.FigureId, true));
@@ -210,7 +212,9 @@ namespace Project.Gameplay.Gameplay.Prepare
         {
             PreparePlacementResult result = await _placementController.PlaceSelectedAsync(context, pos, context.CancellationToken);
             if (!result.Processed || _context != context)
+            {
                 return;
+            }
 
             _highlightService.ApplyDirty(context, new[] { pos });
 
@@ -225,7 +229,9 @@ namespace Project.Gameplay.Gameplay.Prepare
         {
             bool success = await _placementController.UnplaceAtAsync(context, pos, context.CancellationToken);
             if (!success || _context != context)
+            {
                 return;
+            }
 
             _highlightService.ApplyDirty(context, new[] { pos });
         }
@@ -276,7 +282,9 @@ namespace Project.Gameplay.Gameplay.Prepare
             CancelSession();
 
             if (clearVisuals)
+            {
                 _visualResetPublisher.Publish(new PrepareVisualResetMessage());
+            }
         }
 
         private void CancelSession()

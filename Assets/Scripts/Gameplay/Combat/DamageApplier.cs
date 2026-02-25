@@ -97,7 +97,9 @@ namespace Project.Gameplay.Gameplay.Combat
         {
             (DamageResult result, bool died) = ApplyDamageOnly(dmgCtx, targetCell);
             if (died)
+            {
                 await _lifeService.HandleDeathDirectAsync(dmgCtx.Target, targetCell);
+            }
             return (result, died);
         }
     }

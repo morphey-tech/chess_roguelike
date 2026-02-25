@@ -18,15 +18,24 @@ namespace Project.Gameplay.Gameplay.Economy
 
         public void Add(string id, int value)
         {
-            if (value <= 0) return;
+            if (value <= 0)
+            {
+                return;
+            }
             _data[id] = Get(id) + value;
         }
 
         public bool TrySpend(string id, int value)
         {
-            if (value <= 0) return true;
+            if (value <= 0)
+            {
+                return true;
+            }
             int current = Get(id);
-            if (current < value) return false;
+            if (current < value)
+            {
+                return false;
+            }
             _data[id] = current - value;
             return true;
         }
@@ -36,10 +45,16 @@ namespace Project.Gameplay.Gameplay.Economy
         /// </summary>
         public bool TrySpend(ResourceCost cost)
         {
-            if (cost?.Costs == null || cost.Costs.Count == 0) return true;
+            if (cost?.Costs == null || cost.Costs.Count == 0)
+            {
+                return true;
+            }
             foreach (KeyValuePair<string, int> kvp in cost.Costs)
             {
-                if (Get(kvp.Key) < kvp.Value) return false;
+                if (Get(kvp.Key) < kvp.Value)
+                {
+                    return false;
+                }
             }
             foreach (KeyValuePair<string, int> kvp in cost.Costs)
             {
@@ -53,7 +68,10 @@ namespace Project.Gameplay.Gameplay.Economy
         /// </summary>
         public void Spend(ResourceCost cost)
         {
-            if (cost?.Costs == null) return;
+            if (cost?.Costs == null)
+            {
+                return;
+            }
             foreach (KeyValuePair<string, int> kvp in cost.Costs)
             {
                 TrySpend(kvp.Key, kvp.Value);
@@ -72,10 +90,16 @@ namespace Project.Gameplay.Gameplay.Economy
 
         public bool Has(ResourceCost cost)
         {
-            if (cost?.Costs == null) return true;
+            if (cost?.Costs == null)
+            {
+                return true;
+            }
             foreach (KeyValuePair<string, int> kvp in cost.Costs)
             {
-                if (Get(kvp.Key) < kvp.Value) return false;
+                if (Get(kvp.Key) < kvp.Value)
+                {
+                    return false;
+                }
             }
             return true;
         }
@@ -88,7 +112,11 @@ namespace Project.Gameplay.Gameplay.Economy
         public void Load(Dictionary<string, int>? data)
         {
             _data.Clear();
-            if (data == null) return;
+            if (data == null)
+            {
+                return;
+            }
+
             foreach (KeyValuePair<string, int> kvp in data)
             {
                 _data[kvp.Key] = kvp.Value;

@@ -2,8 +2,8 @@ using System;
 using Cysharp.Threading.Tasks;
 using MessagePipe;
 using Project.Core.Core.Logging;
-using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Figures;
+using VContainer;
 using VContainer.Unity;
 
 namespace Project.Gameplay.Gameplay.Loot
@@ -19,7 +19,8 @@ namespace Project.Gameplay.Gameplay.Loot
         private readonly ILogger _logger;
         private IDisposable? _subscription;
 
-        public EnemyDeathLootHandler(
+        [Inject]
+        private EnemyDeathLootHandler(
             LootService lootService,
             ISubscriber<FigureDeathMessage> deathSubscriber,
             ILogService logService)
@@ -29,7 +30,7 @@ namespace Project.Gameplay.Gameplay.Loot
             _logger = logService.CreateLogger<EnemyDeathLootHandler>();
         }
 
-        public void Start()
+        void IStartable.Start()
         {
             _subscription = _deathSubscriber.Subscribe(OnFigureDeath);
             _logger.Debug("EnemyDeathLootHandler subscribed to FigureDeathMessage");
@@ -38,16 +39,21 @@ namespace Project.Gameplay.Gameplay.Loot
         private void OnFigureDeath(FigureDeathMessage message)
         {
             if (message.Team != Team.Enemy)
+            {
                 return;
+            }
             if (message.FromCombat)
+            {
                 return; // Loot already handled by LootVisualEvent → LootPresenter
+            }
             if (string.IsNullOrEmpty(message.LootTableId))
+            {
                 return;
-
+            }
             _lootService.RollAsync(message.LootTableId).Forget();
         }
 
-        public void Dispose()
+        void IDisposable.Dispose()
         {
             _subscription?.Dispose();
             _subscription = null;

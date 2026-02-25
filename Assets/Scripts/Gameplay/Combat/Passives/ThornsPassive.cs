@@ -24,8 +24,9 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
         public void OnAfterHit(Figure owner, AfterHitContext context)
         {
             if (owner != context.Target)
+            {
                 return;
-
+            }
             int reflect = (int)(context.DamageDealt * _reflectPercent);
             if (reflect > 0)
             {

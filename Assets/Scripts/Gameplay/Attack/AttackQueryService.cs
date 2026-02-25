@@ -12,7 +12,7 @@ namespace Project.Gameplay.Gameplay.Attack
         private readonly AttackRuleService _ruleService;
 
         [Inject]
-        public AttackQueryService(AttackRuleService ruleService)
+        private AttackQueryService(AttackRuleService ruleService)
         {
             _ruleService = ruleService;
         }
@@ -20,8 +20,9 @@ namespace Project.Gameplay.Gameplay.Attack
         public IReadOnlyCollection<GridPosition> GetTargets(Figure? actor, GridPosition from, BoardGrid? grid)
         {
             if (actor == null || grid == null)
+            {
                 return new List<GridPosition>();
-
+            }
             return _ruleService.GetValidTargets(actor, from, grid);
         }
     }

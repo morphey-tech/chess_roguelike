@@ -6,7 +6,6 @@ namespace Project.Core.Core.Configs
 {
     public abstract class ConfigRepository<T> where T : class
     {
-
         public IReadOnlyList<T> All => Items ?? Array.Empty<T>();
         
         protected abstract IReadOnlyList<T>? Items { get; }

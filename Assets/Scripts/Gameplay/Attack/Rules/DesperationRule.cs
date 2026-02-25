@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Combat.Passives;
@@ -18,33 +17,21 @@ namespace Project.Gameplay.Gameplay.Attack.Rules
 
         public bool Validate(AttackRuleContext context)
         {
-            var attacker = context.Attacker;
+            Figure attacker = context.Attacker;
 
-            // Check if attacker has Desperation passive
             if (!attacker.BasePassives.Any(p => p is DesperationPassive))
-                return true; // Let other rules handle
-
-            var grid = context.Grid;
-            int allies = grid.CountAlliesAround(attacker);
-
-            // If no allies nearby, allow attack in any adjacent cell (8 directions)
-            if (allies == 0)
             {
-                // Check if target is adjacent (any direction including diagonals)
-                return IsAdjacent(context.From, context.To);
+                return true; // Let other rules handle
             }
 
-            // If allies exist, use normal attack rules (let other rules handle it)
+            BoardGrid grid = context.Grid;
+            int allies = grid.CountAlliesAround(attacker);
+
+            if (allies == 0)
+            {
+                return context.From.IsAdjacentTo(context.To);
+            }
             return true;
-        }
-
-        private bool IsAdjacent(GridPosition from, GridPosition to)
-        {
-            int dr = to.Row - from.Row;
-            int dc = to.Column - from.Column;
-
-            // Adjacent means max(|dr|, |dc|) == 1 and not both zero (8 directions)
-            return Math.Max(Math.Abs(dr), Math.Abs(dc)) == 1;
         }
     }
 }

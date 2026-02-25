@@ -3,11 +3,8 @@ using Newtonsoft.Json;
 
 namespace Project.Core.Core.Configs.Figure
 {
-    /// <summary>
-    /// Movement pattern configuration for PatternMovement strategy.
-    /// </summary>
     [Serializable]
-    public class MovementPatternConfig
+    public sealed class MovementPatternConfig
     {
         /// <summary>Unique identifier for this movement pattern.</summary>
         [JsonProperty("id")]

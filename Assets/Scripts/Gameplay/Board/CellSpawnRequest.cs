@@ -1,5 +1,4 @@
 using Project.Core.Core.Grid;
-using Project.Gameplay;
 
 namespace Project.Gameplay.Gameplay.Board
 {

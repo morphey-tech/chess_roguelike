@@ -1,6 +1,5 @@
 using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Combat.Contexts;
-using Project.Gameplay.Gameplay.Combat.Effects;
 using Project.Gameplay.Gameplay.Combat.Effects.Impl;
 using Project.Gameplay.Gameplay.Combat.Triggers;
 using Project.Gameplay.Gameplay.Figures;
@@ -17,7 +16,7 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
     {
         public string Id { get; }
         public int Priority => 50;
-        
+
         private readonly int _bonusDamageIfBlocked;
 
         public PushOnHitPassive(string id, int bonusDamageIfBlocked)
@@ -42,7 +41,7 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
 
             GridPosition attackerPos = context.AttackerPosition;
             GridPosition targetPos = context.TargetPosition;
-            
+
             if (!attackerPos.IsValid || !targetPos.IsValid)
             {
                 Debug.Log($"[PushOnHit] Skipped: invalid positions");
@@ -50,11 +49,10 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
             }
 
             // Calculate push direction (away from attacker)
-            int pushRow = targetPos.Row + (targetPos.Row - attackerPos.Row);
-            int pushCol = targetPos.Column + (targetPos.Column - attackerPos.Column);
-            GridPosition pushTo = new(pushRow, pushCol);
+            (int dirRow, int dirCol) = context.GetAttackDirection();
+            GridPosition pushTo = new(targetPos.Row + dirRow, targetPos.Column + dirCol);
 
-            Debug.Log($"[PushOnHit] Trying to push {context.Target} from ({targetPos.Row},{targetPos.Column}) to ({pushRow},{pushCol})");
+            Debug.Log($"[PushOnHit] Trying to push {context.Target} from ({targetPos.Row},{targetPos.Column}) to ({pushTo.Row},{pushTo.Column})");
 
             if (context.Grid.IsInside(pushTo))
             {
@@ -70,10 +68,8 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
                     Debug.Log($"[PushOnHit] {context.Target} pushed to ({pushTo.Row},{pushTo.Column})");
                     return;
                 }
-                else
-                {
-                    Debug.Log($"[PushOnHit] Push blocked: cell occupied by {pushCell.OccupiedBy}");
-                }
+
+                Debug.Log($"[PushOnHit] Push blocked: cell occupied by {pushCell.OccupiedBy}");
             }
             else
             {

@@ -1,3 +1,5 @@
+using Project.Gameplay.Gameplay.Turn.Actions.Impl;
+
 namespace Project.Gameplay.Gameplay.Turn.Actions.Builders
 {
     public sealed class MoveActionBuilder : IActionBuilder
@@ -7,7 +9,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Builders
         public ICombatAction Build(ActionConfig config, IActionBuilderContext builderContext)
         {
             string id = string.IsNullOrEmpty(config.Id) ? config.Type : config.Id;
-            return new Actions.Impl.MoveAction(id, builderContext.MovementService, builderContext.VisualPipeline);
+            return new MoveAction(id, builderContext.MovementService, builderContext.VisualPipeline);
         }
     }
 }

@@ -5,7 +5,7 @@ namespace Project.Gameplay.Gameplay.Run
     /// </summary>
     public class RunHolder
     {
-        public Run Current { get; private set; }
+        public Run? Current { get; private set; }
 
         public void Set(Run run)
         {

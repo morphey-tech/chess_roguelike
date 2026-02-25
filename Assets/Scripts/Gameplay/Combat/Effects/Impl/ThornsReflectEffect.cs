@@ -14,7 +14,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
         public int OrderInPhase => 30; // After bonus damage
 
         private readonly Figure _source;
-        private readonly Figure _target;
+        private readonly Figure? _target;
         private readonly int _reflectedDamage;
 
         public ThornsReflectEffect(Figure source, Figure target, int reflectedDamage)
@@ -27,7 +27,9 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
         public void Apply(CombatEffectContext context)
         {
             if (_target == null || _target.Stats.CurrentHp <= 0 || _reflectedDamage <= 0)
+            {
                 return;
+            }
 
             DamageContext dmgCtx = new(_source, _target, _reflectedDamage, false, false,
                 false, "thorns", Array.Empty<IDamageModifier>());

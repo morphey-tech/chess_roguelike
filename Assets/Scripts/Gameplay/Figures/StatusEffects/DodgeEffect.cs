@@ -1,5 +1,5 @@
+using Project.Core.Core.Random;
 using Project.Gameplay.Gameplay.Combat.Contexts;
-using UnityEngine;
 
 namespace Project.Gameplay.Gameplay.Figures.StatusEffects
 {
@@ -8,10 +8,15 @@ namespace Project.Gameplay.Gameplay.Figures.StatusEffects
         public override string Id => "dodge";
 
         private readonly float _chance;
-        
-        public DodgeEffect(float chance, int turns = -1, int uses = -1) : base(turns, uses)
+        private readonly IRandomService _random;
+
+        public DodgeEffect(float chance,
+            IRandomService random,
+            int turns = -1,
+            int uses = -1) : base(turns, uses)
         {
             _chance = chance;
+            _random = random;
         }
 
         public override void OnBeforeHit(Figure owner, BeforeHitContext ctx)
@@ -23,8 +28,8 @@ namespace Project.Gameplay.Gameplay.Figures.StatusEffects
             if (!TryConsumeUse())
             {
                 return;
-            }            
-            if (Random.value < _chance)
+            }
+            if (_random.Chance(_chance))
             {
                 ctx.IsDodged = true;
                 ctx.IsCancelled = true;

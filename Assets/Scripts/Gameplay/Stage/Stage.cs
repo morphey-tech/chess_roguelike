@@ -25,7 +25,7 @@ namespace Project.Gameplay.Gameplay.Stage
         private readonly StageConfig _config;
         private readonly PlayerRunStateModel _runState;
         private readonly List<IStagePhase> _phases;
-        private readonly ZoneInitService _zoneInitService;
+        private readonly StormInitService _stormInitService;
         private readonly IPublisher<StageCompletedMessage> _completedPublisher;
         private readonly ILogger<Stage> _logger;
 
@@ -39,7 +39,7 @@ namespace Project.Gameplay.Gameplay.Stage
             BoardGrid grid,
             PlayerRunStateModel runState,
             IEnumerable<IStagePhase> phases,
-            ZoneInitService zoneInitService,
+            StormInitService stormInitService,
             IPublisher<StageCompletedMessage> completedPublisher,
             ILogService logService)
         {
@@ -47,7 +47,7 @@ namespace Project.Gameplay.Gameplay.Stage
             Grid = grid;
             _runState = runState;
             _phases = new List<IStagePhase>(phases);
-            _zoneInitService = zoneInitService;
+            _stormInitService = stormInitService;
             _completedPublisher = completedPublisher;
             _logger = logService.CreateLogger<Stage>();
         }
@@ -57,7 +57,7 @@ namespace Project.Gameplay.Gameplay.Stage
             _logger.Info($"Stage {Id} beginning, board: {BoardId}, phases: {_phases.Count}");
             _context = new StageContext(this, _config, _runState);
             _context.CompletePhase = OnPhaseCompleted;
-            _zoneInitService.SetCurrentStageZoneConfig(_config.ZoneShrinkId);
+            _stormInitService.SetCurrentStageZoneConfig(_config.StormId);
             await RunPhasesAsync();
         }
 

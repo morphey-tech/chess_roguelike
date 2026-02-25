@@ -2,6 +2,7 @@ using System.Linq;
 using Project.Gameplay.Gameplay.Combat.Passives;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
+using VContainer;
 
 namespace Project.Gameplay.Gameplay.Attack.Rules
 {
@@ -11,7 +12,15 @@ namespace Project.Gameplay.Gameplay.Attack.Rules
     /// </summary>
     public sealed class RangeRule : IAttackRule
     {
+        private readonly AttackStrategyFactory _strategyFactory;
+
         public int Priority => 0;
+
+        [Inject]
+        private RangeRule(AttackStrategyFactory strategyFactory)
+        {
+            _strategyFactory = strategyFactory;
+        }
 
         public bool Validate(AttackRuleContext context)
         {
@@ -21,9 +30,11 @@ namespace Project.Gameplay.Gameplay.Attack.Rules
                 BoardGrid grid = context.Grid;
                 int allies = grid.CountAlliesAround(attacker);
                 if (allies == 0)
+                {
                     return true; // Desperation allows any adjacent target
+                }
             }
-            IAttackStrategy strategy = AttackStrategyFactory.Instance.Get(context.Attacker.AttackId);
+            IAttackStrategy strategy = _strategyFactory.Get(context.Attacker.AttackId);
             return strategy.CanAttack(context.Attacker, context.From, context.To, context.Grid);
         }
     }

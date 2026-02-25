@@ -71,25 +71,35 @@ namespace Project.Gameplay.Gameplay.Economy
         /// Applies a loot result to run economy (resources + items).
         /// Called by LootPresenter after visual, or by apply-only presenter.
         /// </summary>
-        public void ApplyLootResult(LootResult result)
+        public void ApplyLootResult(LootResult? result)
         {
             if (result == null || result.IsEmpty)
+            {
                 return;
+            }
 
             int resCount = result.Resources.Count;
             int itemCount = result.Items.Count;
             _logger.Info($"Loot received: {resCount} resource(s), {itemCount} item(s)");
 
-            foreach (var r in result.Resources)
+            foreach (ResourceDrop? r in result.Resources)
             {
-                if (string.IsNullOrEmpty(r.Id) || r.Amount <= 0) continue;
+                if (string.IsNullOrEmpty(r.Id) || r.Amount <= 0)
+                {
+                    continue;
+                }
+
                 RunResources.Add(r.Id, r.Amount);
                 _logger.Debug($"Loot: +{r.Amount} {r.Id}");
             }
 
-            foreach (var i in result.Items)
+            foreach (ItemDrop? i in result.Items)
             {
-                if (string.IsNullOrEmpty(i.ConfigId)) continue;
+                if (string.IsNullOrEmpty(i.ConfigId))
+                {
+                    continue;
+                }
+
                 AddItemSync(i.ConfigId);
             }
         }

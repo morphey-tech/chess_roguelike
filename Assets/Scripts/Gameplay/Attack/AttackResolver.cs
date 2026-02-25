@@ -1,8 +1,10 @@
+using System.Collections.Generic;
 using System.Linq;
 using Project.Core.Core.Configs.Stats;
 using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
+using VContainer;
 
 namespace Project.Gameplay.Gameplay.Attack
 {
@@ -11,28 +13,28 @@ namespace Project.Gameplay.Gameplay.Attack
         private readonly ITargetingService _targeting;
         private readonly IEngagementRuleService _engagement;
 
-        public AttackResolver(ITargetingService targeting, IEngagementRuleService engagement)
+        [Inject]
+        private AttackResolver(ITargetingService targeting, IEngagementRuleService engagement)
         {
             _targeting = targeting;
             _engagement = engagement;
         }
 
-        public AttackProfile Resolve(Figure attacker, GridPosition from, GridPosition to, BoardGrid grid)
+        public AttackProfile? Resolve(Figure attacker, GridPosition from, GridPosition to, BoardGrid grid)
         {
             if (attacker?.Stats?.Attacks == null || attacker.Stats.Attacks.Count == 0)
+            {
                 return null;
+            }
 
             bool engaged = _engagement.IsEngaged(attacker, grid);
 
-            var candidates = attacker.Stats.Attacks
+            List<AttackProfile> candidates = attacker.Stats.Attacks
                 .Where(a => !engaged || a.Type == AttackType.Melee)
                 .Where(a => _targeting.CanTarget(from, to, a, grid, attacker.Team))
                 .ToList();
 
-            if (candidates.Count == 0)
-                return null;
-
-            return candidates.OrderByDescending(a => a.Damage).First();
+            return candidates.Count == 0 ? null : candidates.OrderByDescending(a => a.Damage).First();
         }
     }
 }

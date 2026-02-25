@@ -11,8 +11,9 @@ namespace Project.Gameplay.Gameplay.Combat.Damage
         public float Modify(DamageContext context, float value)
         {
             if (!context.IsCritical)
+            {
                 return value;
-
+            }
             return value * CritMultiplier;
         }
     }

@@ -1,4 +1,3 @@
-using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Figures;
 
 namespace Project.Gameplay.Gameplay.Selection

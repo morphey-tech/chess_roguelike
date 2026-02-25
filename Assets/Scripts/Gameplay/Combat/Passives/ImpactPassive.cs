@@ -3,6 +3,7 @@ using Project.Gameplay.Gameplay.Combat.Contexts;
 using Project.Gameplay.Gameplay.Combat.Effects.Impl;
 using Project.Gameplay.Gameplay.Combat.Triggers;
 using Project.Gameplay.Gameplay.Figures;
+using Project.Gameplay.Gameplay.Grid;
 
 namespace Project.Gameplay.Gameplay.Combat.Passives
 {
@@ -27,48 +28,23 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
         {
             // Only trigger if owner was the attacker
             if (owner != context.Attacker)
+            {
                 return;
+            }
 
-            var grid = context.Grid;
-            
-            // Calculate push direction (from attacker to target)
-            int dirRow = context.TargetPosition.Row - context.AttackerPosition.Row;
-            int dirCol = context.TargetPosition.Column - context.AttackerPosition.Column;
+            BoardGrid grid = context.Grid;
+            (int dirRow, int dirCol) = context.GetAttackDirection();
 
-            if (dirRow != 0)
-                dirRow = dirRow > 0 ? 1 : -1;
-            if (dirCol != 0)
-                dirCol = dirCol > 0 ? 1 : -1;
-
-            // Calculate push target position
             GridPosition pushTo = new(context.TargetPosition.Row + dirRow, context.TargetPosition.Column + dirCol);
-            
-            // Check if push position is valid
-            bool hasCollision = false;
-            
-            if (!grid.IsInside(pushTo))
-            {
-                // Hit wall
-                hasCollision = true;
-            }
-            else
-            {
-                var pushCell = grid.GetBoardCell(pushTo);
-                if (pushCell.OccupiedBy != null)
-                {
-                    // Hit figure (enemy or ally)
-                    hasCollision = true;
-                }
-            }
+            bool hasCollision = grid.HasCollision(pushTo);
 
-            // Add push effect with bonus damage on collision
-            var pushEffect = new PushEffect(
+            PushEffect pushEffect = new(
                 context.Attacker,
                 context.Target,
                 context.TargetPosition,
                 pushTo,
                 hasCollision ? _bonusDamage : 0);
-            
+
             context.AddEffect(pushEffect);
         }
     }

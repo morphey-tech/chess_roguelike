@@ -91,24 +91,24 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
             Figure defender = targetCell?.OccupiedBy;
 
             if (defender == null || defender.Team == context.Actor.Team)
+            {
                 return false;
+            }
 
             if (context.Actor.AttackId == "profiled")
             {
                 AttackProfile? profile = _attackResolver.Resolve(context.Actor, context.From, context.To, context.Grid);
                 return profile != null;
             }
-            else
-            {
-                // Use AttackRuleService to validate attack (includes DesperationRule, TauntRule, etc.)
-                var attackContext = new AttackRuleContext(
-                    context.Actor,
-                    defender,
-                    context.From,
-                    context.To,
-                    context.Grid);
-                return _attackRuleService.CanAttack(attackContext);
-            }
+
+            // Use AttackRuleService to validate attack (includes DesperationRule, TauntRule, etc.)
+            AttackRuleContext attackContext = new(
+                context.Actor,
+                defender,
+                context.From,
+                context.To,
+                context.Grid);
+            return _attackRuleService.CanAttack(attackContext);
         }
 
         public IReadOnlyCollection<ActionPreview> GetPreviews(Figure actor, GridPosition from, BoardGrid grid)
@@ -130,13 +130,17 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
         public async UniTask ExecuteAsync(ActionContext context)
         {
             if (!CanExecute(context))
+            {
                 return;
+            }
 
             BoardCell targetCell = context.Grid.GetBoardCell(context.To);
             Figure defender = targetCell?.OccupiedBy;
 
             if (defender == null || defender.Team == context.Actor.Team)
+            {
                 return;
+            }
 
             HitContext hitContext;
 
@@ -144,7 +148,9 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
             {
                 AttackProfile? profile = _attackResolver.Resolve(context.Actor, context.From, context.To, context.Grid);
                 if (profile == null)
+                {
                     return;
+                }
 
                 hitContext = new HitContext
                 {
@@ -165,14 +171,16 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
             else
             {
                 // Use AttackRuleService to validate attack (includes DesperationRule, TauntRule, etc.)
-                var attackContext = new AttackRuleContext(
+                AttackRuleContext attackContext = new(
                     context.Actor,
                     defender,
                     context.From,
                     context.To,
                     context.Grid);
                 if (!_attackRuleService.CanAttack(attackContext))
+                {
                     return;
+                }
 
                 IAttackStrategy attackStrategy = _attackFactory.Get(context.Actor.AttackId);
                 hitContext = attackStrategy.CreateHitContext(
@@ -197,7 +205,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
             await _lootService.EnsureLoadedAsync();
             using VisualScope scope = _visualPipeline.BeginScope();
 
-            var visualEvents = new List<ICombatVisualEvent>();
+            List<ICombatVisualEvent> visualEvents = new();
             CombatEffectContext effectContext = new(
                 context,
                 context.Grid,
@@ -230,7 +238,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
 
         private void ApplyEffects(IEnumerable<ICombatEffect> effects, CombatEffectContext context)
         {
-            var queue = new Queue<ICombatEffect>(effects);
+            Queue<ICombatEffect> queue = new(effects);
             int effectIndex = 0;
 
             _logger.Debug($"=== Effect Pipeline Start ({queue.Count} effects) ===");
@@ -238,14 +246,12 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
             while (queue.Count > 0)
             {
                 ICombatEffect effect = queue.Dequeue();
-
                 _logger.Debug($"[{effectIndex++}] {effect.GetType().Name} (Phase: {effect.Phase}, Order: {effect.OrderInPhase})");
-
                 effect.Apply(context);
 
                 if (context.PendingEffects.Count > 0)
                 {
-                    var sorted = context.PendingEffects
+                    List<ICombatEffect> sorted = context.PendingEffects
                         .OrderBy(e => e.Phase)
                         .ThenBy(e => e.OrderInPhase)
                         .ToList();

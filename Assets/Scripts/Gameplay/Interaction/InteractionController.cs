@@ -42,7 +42,7 @@ namespace Project.Gameplay.Gameplay.Interaction
         public bool HasSelection => SelectedFigure != null;
 
         [Inject]
-        public InteractionController(
+        private InteractionController(
             IInteractionLock interactionLock,
             IClickIntentResolver intentResolver,
             ITurnController turnController,

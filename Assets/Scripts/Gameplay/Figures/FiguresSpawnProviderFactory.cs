@@ -1,4 +1,5 @@
 using Project.Gameplay.Gameplay.Stage;
+using VContainer;
 
 namespace Project.Gameplay.Gameplay.Figures
 {
@@ -7,7 +8,8 @@ namespace Project.Gameplay.Gameplay.Figures
         private readonly DuelFiguresSpawnProvider _duelProvider;
         private readonly EmptyFiguresSpawnProvider _emptyProvider;
 
-        public FiguresSpawnProviderFactory(
+        [Inject]
+        private FiguresSpawnProviderFactory(
             DuelFiguresSpawnProvider duelProvider,
             EmptyFiguresSpawnProvider emptyProvider)
         {

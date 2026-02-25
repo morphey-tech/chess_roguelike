@@ -15,7 +15,7 @@ namespace Project.Gameplay.Gameplay.Interaction
         private readonly ILogger<ClickIntentResolver> _logger;
 
         [Inject]
-        public ClickIntentResolver(ILogService logService)
+        private ClickIntentResolver(ILogService logService)
         {
             _logger = logService.CreateLogger<ClickIntentResolver>();
         }
@@ -44,7 +44,7 @@ namespace Project.Gameplay.Gameplay.Interaction
             return ResolveWithSelection(context, clickedCell);
         }
 
-        private ClickIntent ResolveWithoutSelection(InteractionContext context, BoardCell clickedCell)
+        private static ClickIntent ResolveWithoutSelection(InteractionContext context, BoardCell clickedCell)
         {
             // No selection: can only select a friendly figure
             if (IsFriendly(clickedCell, context.CurrentTeam))
@@ -83,7 +83,7 @@ namespace Project.Gameplay.Gameplay.Interaction
         /// Checks if a cell contains a figure the current team can control.
         /// Abstracted to handle future cases: mind-control, neutral figures, etc.
         /// </summary>
-        private bool IsFriendly(BoardCell cell, Team currentTeam)
+        private static bool IsFriendly(BoardCell cell, Team currentTeam)
         {
             return !cell.IsFree && cell.OccupiedBy?.Team == currentTeam;
         }

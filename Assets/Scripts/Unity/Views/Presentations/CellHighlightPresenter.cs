@@ -54,10 +54,10 @@ namespace Project.Unity.Unity.Views.Presentations
                 case AttackHighlightTag _:
                     SetAttackHighlight();
                     break;
-                case ZoneWarningTag _:
+                case StormWarningTag _:
                     ShowWarningsZone();
                     break;
-                case ZoneDangerTag _:
+                case StormDangerTag _:
                     ShowDangerousZone();
                     break;
             }

@@ -17,6 +17,6 @@ namespace Project.Gameplay.Gameplay.Interaction
         /// Multiple acquisitions are supported (reference-counted).
         /// </summary>
         /// <param name="reason">Optional reason for debugging/logging.</param>
-        IDisposable Acquire(string reason = null);
+        IDisposable Acquire(string? reason = null);
     }
 }

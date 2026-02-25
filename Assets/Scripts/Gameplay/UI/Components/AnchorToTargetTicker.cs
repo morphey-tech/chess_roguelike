@@ -1,32 +1,35 @@
 using System.Collections.Generic;
-using Project.Core;
 using UnityEngine;
+using VContainer.Unity;
 
 namespace Project.Unity.UI.Components
 {
-  [DefaultExecutionOrder(300)]
-  public class AnchorToTargetTicker : LazySingleton<AnchorToTargetTicker>
-  {
-    private List<AnchorToTarget> _objects = new();
-
-    private void LateUpdate()
+    [DefaultExecutionOrder(300)]
+    public sealed class AnchorToTargetTicker : IAnchorToTargetTicker, ILateTickable
     {
-      for (int i = _objects.Count - 1; i >= 0; i--)
-      {
-        var target = _objects[i];
-        if (target != null && target.isActiveAndEnabled)
-          target.Tick();
-      }
-    }
+        private readonly List<AnchorToTarget> _objects = new();
 
-    public void Register(AnchorToTarget obj)
-    {
-      _objects.Add(obj);
-    }
+        void ILateTickable.LateTick()
+        {
+            for (int i = _objects.Count - 1; i >= 0; i--)
+            {
+                AnchorToTarget? target = _objects[i];
+                if (target != null && target.isActiveAndEnabled)
+                {
+                    target.Tick();
+                }
+            }
+        }
 
-    public void Unregister(AnchorToTarget obj)
-    {
-      _objects.Remove(obj);
+        void IAnchorToTargetTicker.Register(AnchorToTarget obj)
+        {
+            _objects.Add(obj);
+        }
+
+        void IAnchorToTargetTicker.Unregister(AnchorToTarget obj)
+        {
+            _objects.Remove(obj);
+        }
+
     }
-  }
 }

@@ -22,7 +22,7 @@ namespace Project.Gameplay.Gameplay.Interaction
             _logger.Info("InteractionLockService created");
         }
 
-        public IDisposable Acquire(string reason = null)
+        public IDisposable Acquire(string? reason = null)
         {
             _lockCount++;
             _logger.Debug($"Lock acquired (count: {_lockCount}){(reason != null ? $", reason: {reason}" : "")}");

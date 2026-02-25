@@ -24,7 +24,7 @@ namespace Project.Gameplay.Gameplay.Combat.Visual
         public Type EventType => typeof(ProjectileVisualEvent);
         public IEnumerable<IVisualCommand> Map(ICombatVisualEvent visualEvent)
         {
-            var evt = (ProjectileVisualEvent)visualEvent;
+            ProjectileVisualEvent evt = (ProjectileVisualEvent)visualEvent;
             yield return new FlyProjectileCommand(new ProjectileVisualContext(
                 evt.AttackerId,
                 evt.TargetId,
@@ -43,7 +43,7 @@ namespace Project.Gameplay.Gameplay.Combat.Visual
         public Type EventType => typeof(ProjectileImpactEvent);
         public IEnumerable<IVisualCommand> Map(ICombatVisualEvent visualEvent)
         {
-            var evt = (ProjectileImpactEvent)visualEvent;
+            ProjectileImpactEvent evt = (ProjectileImpactEvent)visualEvent;
             yield return new ImpactCommand(new ImpactVisualContext(evt.Position, evt.ImpactFxId));
         }
     }
@@ -62,7 +62,7 @@ namespace Project.Gameplay.Gameplay.Combat.Visual
         public Type EventType => typeof(ProjectileHitApplyEvent);
         public IEnumerable<IVisualCommand> Map(ICombatVisualEvent visualEvent)
         {
-            var evt = (ProjectileHitApplyEvent)visualEvent;
+            ProjectileHitApplyEvent evt = (ProjectileHitApplyEvent)visualEvent;
             yield return new ProjectileHitApplyCommand(evt);
             yield return new DamageTextCommand(new DamageVisualContext(
                 evt.TargetId,
@@ -99,7 +99,7 @@ namespace Project.Gameplay.Gameplay.Combat.Visual
         public Type EventType => typeof(WaveVisualEvent);
         public IEnumerable<IVisualCommand> Map(ICombatVisualEvent visualEvent)
         {
-            var evt = (WaveVisualEvent)visualEvent;
+            WaveVisualEvent evt = (WaveVisualEvent)visualEvent;
             yield return new WaveCommand(new WaveVisualContext(
                 evt.AttackerId,
                 evt.TargetId,
@@ -114,9 +114,8 @@ namespace Project.Gameplay.Gameplay.Combat.Visual
         public Type EventType => typeof(DamageVisualEvent);
         public IEnumerable<IVisualCommand> Map(ICombatVisualEvent visualEvent)
         {
-            var evt = (DamageVisualEvent)visualEvent;
-
-            var mode = evt.IsParallel ? VisualCommandMode.Parallel : VisualCommandMode.Blocking;
+            DamageVisualEvent evt = (DamageVisualEvent)visualEvent;
+            VisualCommandMode mode = evt.IsParallel.HasValue ? VisualCommandMode.Parallel : VisualCommandMode.Blocking;
 
             yield return new DamageTextCommand(new DamageVisualContext(
                 evt.TargetId,
@@ -139,7 +138,7 @@ namespace Project.Gameplay.Gameplay.Combat.Visual
         public Type EventType => typeof(HealVisualEvent);
         public IEnumerable<IVisualCommand> Map(ICombatVisualEvent visualEvent)
         {
-            var evt = (HealVisualEvent)visualEvent;
+            HealVisualEvent evt = (HealVisualEvent)visualEvent;
             yield return new HealCommand(new HealVisualContext(evt.TargetId, evt.Amount));
         }
     }
@@ -149,7 +148,7 @@ namespace Project.Gameplay.Gameplay.Combat.Visual
         public Type EventType => typeof(PushVisualEvent);
         public IEnumerable<IVisualCommand> Map(ICombatVisualEvent visualEvent)
         {
-            var evt = (PushVisualEvent)visualEvent;
+            PushVisualEvent evt = (PushVisualEvent)visualEvent;
             yield return new PushCommand(new PushVisualContext(evt.TargetId, evt.From, evt.To));
         }
     }
@@ -159,7 +158,7 @@ namespace Project.Gameplay.Gameplay.Combat.Visual
         public Type EventType => typeof(MoveVisualEvent);
         public IEnumerable<IVisualCommand> Map(ICombatVisualEvent visualEvent)
         {
-            var evt = (MoveVisualEvent)visualEvent;
+            MoveVisualEvent evt = (MoveVisualEvent)visualEvent;
             yield return new MoveCommand(new MoveVisualContext(evt.FigureId, evt.To));
         }
     }
@@ -169,7 +168,7 @@ namespace Project.Gameplay.Gameplay.Combat.Visual
         public Type EventType => typeof(DeathVisualEvent);
         public IEnumerable<IVisualCommand> Map(ICombatVisualEvent visualEvent)
         {
-            var evt = (DeathVisualEvent)visualEvent;
+            DeathVisualEvent evt = (DeathVisualEvent)visualEvent;
             yield return new DeathCommand(new DeathVisualContext(evt.FigureId, evt.Reason));
         }
     }
@@ -179,7 +178,7 @@ namespace Project.Gameplay.Gameplay.Combat.Visual
         public Type EventType => typeof(LootVisualEvent);
         public IEnumerable<IVisualCommand> Map(ICombatVisualEvent visualEvent)
         {
-            var evt = (LootVisualEvent)visualEvent;
+            LootVisualEvent evt = (LootVisualEvent)visualEvent;
             yield return new LootCommand(new LootVisualContext(evt.DropPosition, evt.Loot));
         }
     }

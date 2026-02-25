@@ -14,7 +14,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
         public int OrderInPhase => 10;
 
         private readonly Figure _attacker;
-        private readonly Figure _target;
+        private readonly Figure? _target;
         private readonly int _damage;
 
         public PierceDamageEffect(Figure attacker, Figure target, int damage)
@@ -27,7 +27,9 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
         public void Apply(CombatEffectContext context)
         {
             if (_target == null || _target.Stats.CurrentHp <= 0)
+            {
                 return;
+            }
 
             DamageContext dmgCtx = new(_attacker, _target, _damage, false, false, false,
                 "pierce", Array.Empty<IDamageModifier>());

@@ -7,10 +7,8 @@ namespace Project.Core.Core.Configs.Economy
     [Serializable]
     public sealed class ItemConfigRepository : ConfigRepository<ItemConfig>
     {
-        private ItemConfig[] _items = Array.Empty<ItemConfig>();
-
         [JsonProperty("content")]
-        public ItemConfig[] Items_
+        public ItemConfig[] Content
         {
             get => _items;
             set { _items = value ?? Array.Empty<ItemConfig>(); ResetIndex(); }
@@ -18,5 +16,7 @@ namespace Project.Core.Core.Configs.Economy
 
         protected override IReadOnlyList<ItemConfig>? Items => _items;
         protected override string GetKey(ItemConfig item) => item.Id;
+
+        private ItemConfig[] _items = Array.Empty<ItemConfig>();
     }
 }

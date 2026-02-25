@@ -24,7 +24,9 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
         public void OnAfterHit(Figure owner, AfterHitContext context)
         {
             if (owner != context.Attacker)
+            {
                 return;
+            }
 
             int heal = (int)(context.DamageDealt * _percent);
             if (heal > 0)

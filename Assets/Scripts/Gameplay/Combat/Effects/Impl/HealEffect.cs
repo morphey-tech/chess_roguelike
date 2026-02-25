@@ -33,11 +33,13 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
 
         public void Apply(CombatEffectContext context)
         {
-            if (_healedAmount > 0)
+            if (_healedAmount <= 0)
             {
-                context.AddVisualEvent(new HealVisualEvent(_target.Id, _healedAmount));
-                context.Logger.Info($"{_target} healed for {_healedAmount}. HP: {_target.Stats.CurrentHp}/{_target.Stats.MaxHp}");
+                return;
             }
+
+            context.AddVisualEvent(new HealVisualEvent(_target.Id, _healedAmount));
+            context.Logger.Info($"{_target} healed for {_healedAmount}. HP: {_target.Stats.CurrentHp}/{_target.Stats.MaxHp}");
         }
     }
 }

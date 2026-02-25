@@ -1,3 +1,5 @@
+using Project.Gameplay.Gameplay.Turn.Actions.Impl;
+
 namespace Project.Gameplay.Gameplay.Turn.Actions.Builders
 {
     public sealed class MoveToTargetActionBuilder : IActionBuilder
@@ -6,7 +8,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Builders
 
         public ICombatAction Build(ActionConfig config, IActionBuilderContext builderContext)
         {
-            return new Actions.Impl.MoveToTargetAction(
+            return new MoveToTargetAction(
                 builderContext.MovementService,
                 builderContext.VisualPipeline,
                 builderContext.AttackQueryService,

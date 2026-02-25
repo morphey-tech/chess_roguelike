@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Project.Gameplay.Gameplay.Visual.Commands;
+using VContainer;
 
 namespace Project.Gameplay.Gameplay.Combat.Visual
 {
@@ -7,7 +8,8 @@ namespace Project.Gameplay.Gameplay.Combat.Visual
     {
         private readonly Dictionary<System.Type, IVisualEventMapper> _mappers;
 
-        public CombatVisualPlanner(IEnumerable<IVisualEventMapper> mappers)
+        [Inject]
+        private CombatVisualPlanner(IEnumerable<IVisualEventMapper> mappers)
         {
             _mappers = new Dictionary<System.Type, IVisualEventMapper>();
             foreach (IVisualEventMapper mapper in mappers)
@@ -18,11 +20,11 @@ namespace Project.Gameplay.Gameplay.Combat.Visual
 
         public VisualCombatPlan Build(CombatResult result, IReadOnlyList<ICombatVisualEvent> visualEvents)
         {
-            var commands = new List<IVisualCommand>();
+            List<IVisualCommand> commands = new();
 
             if (visualEvents is { Count: > 0 })
             {
-                var sorted = new List<ICombatVisualEvent>(visualEvents);
+                List<ICombatVisualEvent> sorted = new(visualEvents);
                 sorted.Sort((a, b) => a.Stage != b.Stage ? a.Stage.CompareTo(b.Stage) : a.OrderInStage.CompareTo(b.OrderInStage));
 
                 foreach (ICombatVisualEvent visualEvent in sorted)

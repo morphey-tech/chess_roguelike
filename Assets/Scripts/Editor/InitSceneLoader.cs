@@ -1,6 +1,7 @@
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Editor
 {
@@ -15,7 +16,7 @@ namespace Editor
         private const string PREF_KEY = "CGS_InitRunEnabled";
         private const string INIT_SCENE_PATH = "Assets/Scenes/InitScene.unity";
         
-        private static string _previousScene;
+        private static string? _previousScene;
 
         static InitSceneLoader()
         {
@@ -57,12 +58,10 @@ namespace Editor
             switch (state)
             {
                 case PlayModeStateChange.ExitingEditMode:
-                    // Перед запуском — запоминаем текущую сцену и переключаемся на Init
                     HandleExitingEditMode();
                     break;
                     
                 case PlayModeStateChange.EnteredEditMode:
-                    // После остановки — возвращаемся к предыдущей сцене
                     HandleEnteredEditMode();
                     break;
             }
@@ -70,24 +69,20 @@ namespace Editor
 
         private static void HandleExitingEditMode()
         {
-            // Проверяем существование Init сцены
             if (!System.IO.File.Exists(INIT_SCENE_PATH))
             {
                 Debug.LogError($"[CGS] Init scene not found at: {INIT_SCENE_PATH}");
                 return;
             }
 
-            // Запоминаем текущую сцену
-            var currentScene = EditorSceneManager.GetActiveScene();
+            Scene currentScene = EditorSceneManager.GetActiveScene();
             _previousScene = currentScene.path;
 
-            // Если уже на Init сцене — ничего не делаем
             if (currentScene.path == INIT_SCENE_PATH)
             {
                 return;
             }
 
-            // Сохраняем текущую сцену если есть изменения
             if (currentScene.isDirty)
             {
                 if (EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
@@ -96,20 +91,17 @@ namespace Editor
                 }
                 else
                 {
-                    // Пользователь отменил — не запускаем
                     EditorApplication.isPlaying = false;
                     return;
                 }
             }
 
-            // Переключаемся на Init сцену
             EditorSceneManager.OpenScene(INIT_SCENE_PATH);
-            Debug.Log($"[CGS] Switched to Init scene for play mode");
+            Debug.Log("[CGS] Switched to Init scene for play mode");
         }
 
         private static void HandleEnteredEditMode()
         {
-            // Возвращаемся к предыдущей сцене
             if (!string.IsNullOrEmpty(_previousScene) && 
                 _previousScene != INIT_SCENE_PATH &&
                 System.IO.File.Exists(_previousScene))
@@ -117,7 +109,6 @@ namespace Editor
                 EditorSceneManager.OpenScene(_previousScene);
                 Debug.Log($"[CGS] Returned to: {_previousScene}");
             }
-            
             _previousScene = null;
         }
     }

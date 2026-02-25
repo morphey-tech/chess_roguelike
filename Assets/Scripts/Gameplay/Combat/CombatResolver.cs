@@ -34,7 +34,7 @@ namespace Project.Gameplay.Gameplay.Combat
 
             _logger.Debug($"Damage calc: ATK={rawDamage}");
 
-            var effects = new List<ICombatEffect>();
+            List<ICombatEffect> effects = new();
             effects.Add(new PrimaryHitEffect(
                 attacker,
                 target,
@@ -49,7 +49,7 @@ namespace Project.Gameplay.Gameplay.Combat
             effects.AddRange(context.Effects);
 
             // Sort by Phase, then by OrderInPhase
-            var sortedEffects = effects
+            List<ICombatEffect> sortedEffects = effects
                 .OrderBy(e => e.Phase)
                 .ThenBy(e => e.OrderInPhase)
                 .ToList();

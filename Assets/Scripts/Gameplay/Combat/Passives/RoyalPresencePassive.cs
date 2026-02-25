@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using Project.Gameplay.Gameplay.Combat.Contexts;
 using Project.Gameplay.Gameplay.Combat.Triggers;
@@ -42,7 +43,7 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
                     return;
                 }
 
-                var alliesInRange = grid.GetFiguresInRadius(kingCell.Position, _auraRadius)
+                List<Figure> alliesInRange = grid.GetFiguresInRadius(kingCell.Position, _auraRadius)
                     .Where(f => f.Team == context.Actor.Team && f != context.Actor)
                     .ToList();
 

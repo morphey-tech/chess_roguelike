@@ -4,12 +4,14 @@ using Cysharp.Threading.Tasks;
 using MessagePipe;
 using Project.Core.Core.Configs.Gameplay;
 using Project.Core.Core.Logging;
-using Project.Gameplay.Gameplay.Async;
 using Project.Gameplay.Gameplay.Configs;
+using Project.Gameplay.Gameplay.Extensions;
 using Project.Gameplay.Gameplay.Figures;
+using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Input.Messages;
 using Project.Gameplay.Gameplay.Run;
 using Project.Gameplay.Gameplay.Turn;
+using VContainer;
 
 namespace Project.Gameplay.Gameplay.Selection
 {
@@ -29,7 +31,8 @@ namespace Project.Gameplay.Gameplay.Selection
         private int? _hoveredFigureId;
         private int? _selectedFriendlyFigureId;
 
-        public HpBarVisibilityService(
+        [Inject]
+        private HpBarVisibilityService(
             IFigurePresenter figurePresenter,
             RunHolder runHolder,
             ConfigProvider configProvider,
@@ -69,7 +72,7 @@ namespace Project.Gameplay.Gameplay.Selection
 
         private void OnFigureSelected(FigureSelectedMessage message)
         {
-            if (message.Figure != null && message.Figure.Team == Team.Player)
+            if (message.Figure is { Team: Team.Player })
             {
                 _selectedFriendlyFigureId = message.Figure.Id;
             }
@@ -118,9 +121,11 @@ namespace Project.Gameplay.Gameplay.Selection
 
         private void RefreshAll()
         {
-            var grid = _runHolder.Current?.CurrentStage?.Grid;
+            BoardGrid? grid = _runHolder.Current?.CurrentStage?.Grid;
             if (grid == null)
+            {
                 return;
+            }
 
             foreach (Figure figure in grid.GetAllFigures())
             {
@@ -132,15 +137,22 @@ namespace Project.Gameplay.Gameplay.Selection
         {
             bool shouldShow = ShouldShowBar(figure);
             if (shouldShow)
+            {
                 _figurePresenter.ShowFigureHealthBar(figure.Id);
+            }
             else
+            {
                 _figurePresenter.HideFigureHealthBar(figure.Id);
+            }
         }
 
-        private bool ShouldShowBar(Figure figure)
+        private bool ShouldShowBar(Figure? figure)
         {
             if (figure == null || figure.Stats.IsDead)
+            {
                 return false;
+            }
+
             return HpBarVisibilityPolicy.ShouldShow(
                 _config.HpBarVisibilityModeAllies,
                 _config.HpBarVisibilityModeEnemies,
@@ -149,7 +161,7 @@ namespace Project.Gameplay.Gameplay.Selection
                 hasFriendlySelection: _selectedFriendlyFigureId.HasValue);
         }
 
-        public void Dispose()
+        void IDisposable.Dispose()
         {
             _disposeCts.Cancel();
             _disposeCts.Dispose();

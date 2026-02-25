@@ -1,3 +1,5 @@
+using Project.Gameplay.Gameplay.Turn.Actions.Impl;
+
 namespace Project.Gameplay.Gameplay.Turn.Actions.Builders
 {
     public sealed class MoveThenAttackActionBuilder : IActionBuilder
@@ -9,16 +11,16 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Builders
             string id = string.IsNullOrEmpty(config.Id) ? config.Type : config.Id;
 
             // Build sub-actions
-            var moveConfig = new ActionConfig { Type = "move", Id = $"{id}.move" };
-            var attackConfig = new ActionConfig { Type = "attack", Id = $"{id}.attack" };
+            ActionConfig moveConfig = new() { Type = "move", Id = $"{id}.move" };
+            ActionConfig attackConfig = new() { Type = "attack", Id = $"{id}.attack" };
 
-            var moveBuilder = new MoveActionBuilder();
-            var attackBuilder = new AttackActionBuilder();
+            MoveActionBuilder moveBuilder = new();
+            AttackActionBuilder attackBuilder = new();
 
-            var moveAction = moveBuilder.Build(moveConfig, builderContext);
-            var attackAction = attackBuilder.Build(attackConfig, builderContext);
+            ICombatAction moveAction = moveBuilder.Build(moveConfig, builderContext);
+            ICombatAction attackAction = attackBuilder.Build(attackConfig, builderContext);
 
-            return new Impl.MoveThenAttackAction(
+            return new MoveThenAttackAction(
                 id,
                 builderContext.MovementService,
                 builderContext.AttackQueryService,

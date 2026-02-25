@@ -33,7 +33,6 @@ namespace Project.Gameplay.Gameplay.Board
             _logger = logService.CreateLogger<BoardSpawnService>();
         }
 
-        /// <summary>Только данные: загружает конфиг и создаёт грид без визуала. Для Run — доска не показывается до Stage.</summary>
         public async UniTask<BoardGrid> GetGridAsync(string boardId)
         {
             BoardConfigRepository repo = await _configProvider.Get<BoardConfigRepository>("boards_conf");
@@ -41,7 +40,6 @@ namespace Project.Gameplay.Gameplay.Board
             return new BoardGrid(board.Width, board.Height);
         }
 
-        /// <summary>Спавнит визуал доски по уже созданному гриду. Вызывается из BoardSpawnPhase.</summary>
         public async UniTask SpawnVisualAsync(BoardGrid grid, string boardId)
         {
             _logger.Info($"Spawning board visual {boardId}");
@@ -61,7 +59,7 @@ namespace Project.Gameplay.Gameplay.Board
 
         private static List<CellSpawnRequest> CollectCellRequests(BoardGrid grid, string[,] map)
         {
-            var list = new List<CellSpawnRequest>(grid.Width * grid.Height);
+            List<CellSpawnRequest> list = new(grid.Width * grid.Height);
             for (int r = 0; r < grid.Height; r++)
             {
                 for (int c = 0; c < grid.Width; c++)

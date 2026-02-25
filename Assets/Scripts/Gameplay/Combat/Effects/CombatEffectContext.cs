@@ -6,7 +6,6 @@ using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Combat.Visual;
 using Project.Gameplay.Gameplay.Turn;
 using Project.Gameplay.Gameplay.Loot;
-using Project.Gameplay.Gameplay.Combat;
 
 namespace Project.Gameplay.Gameplay.Combat.Effects
 {
@@ -65,10 +64,12 @@ namespace Project.Gameplay.Gameplay.Combat.Effects
         
         public void AddEffect(ICombatEffect effect) => PendingEffects.Add(effect);
 
-        public void AddVisualEvent(ICombatVisualEvent visualEvent)
+        public void AddVisualEvent(ICombatVisualEvent? visualEvent)
         {
             if (visualEvent != null)
+            {
                 VisualEvents.Add(visualEvent);
+            }
         }
     }
 }

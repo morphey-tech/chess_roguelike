@@ -14,7 +14,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
         public int OrderInPhase => 20; // After splash/pierce
 
         private readonly Figure _attacker;
-        private readonly Figure _target;
+        private readonly Figure? _target;
         private readonly int _bonusDamage;
         private readonly string _source;
 
@@ -29,7 +29,9 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
         public void Apply(CombatEffectContext context)
         {
             if (_target == null || _target.Stats.CurrentHp <= 0 || _bonusDamage <= 0)
+            {
                 return;
+            }
 
             DamageContext dmgCtx = new(_attacker, _target, _bonusDamage, false, false,
                 false, _source, Array.Empty<IDamageModifier>());

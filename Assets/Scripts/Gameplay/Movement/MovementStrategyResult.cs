@@ -24,7 +24,6 @@ namespace Project.Gameplay.Movement
         {
             return CanBeReached && (IsFree || OccupiedBy?.Team != Figure.Team);
         }
-
         
         public static MovementStrategyResult MakeEmpty() => new(null, default, false, null);
         public static MovementStrategyResult MakeUnreachable(Figure figure, GridPosition gridPosition, Figure? occupiedBy) =>

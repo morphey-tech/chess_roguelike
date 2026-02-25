@@ -18,10 +18,10 @@ namespace Project.Gameplay.Gameplay.Figures
         
         private SpawnPatternConfigRepository _patternCache;
         private FigureConfigRepository _figureCache;
-        private Dictionary<string, FigureConfig> _aliasToFigure;
+        private Dictionary<string, FigureConfig>? _aliasToFigure;
 
         [Inject]
-        public SpawnPatternParser(ConfigProvider configProvider, ILogService logService)
+        private SpawnPatternParser(ConfigProvider configProvider, ILogService logService)
         {
             _configProvider = configProvider;
             _logger = logService.CreateLogger<SpawnPatternParser>();
@@ -31,7 +31,7 @@ namespace Project.Gameplay.Gameplay.Figures
         {
             await EnsureLoadedAsync();
 
-            SpawnPatternConfig pattern = _patternCache.Get(patternId);
+            SpawnPatternConfig? pattern = _patternCache.Get(patternId);
             if (pattern == null)
             {
                 _logger.Error($"Spawn pattern not found: {patternId}");
@@ -43,7 +43,7 @@ namespace Project.Gameplay.Gameplay.Figures
 
         private List<EnemySpawnData> ParsePattern(SpawnPatternConfig pattern)
         {
-            var result = new List<EnemySpawnData>();
+            List<EnemySpawnData> result = new();
             int totalRows = pattern.Rows.Length;
 
             for (int row = 0; row < totalRows; row++)
@@ -57,7 +57,9 @@ namespace Project.Gameplay.Gameplay.Figures
                 {
                     string alias = aliases[col];
                     if (alias == ".")
+                    {
                         continue;
+                    }
 
                     if (!_aliasToFigure.TryGetValue(alias, out FigureConfig figure))
                     {
@@ -81,7 +83,9 @@ namespace Project.Gameplay.Gameplay.Figures
         private async UniTask EnsureLoadedAsync()
         {
             if (_aliasToFigure != null)
+            {
                 return;
+            }
 
             _patternCache = await _configProvider.Get<SpawnPatternConfigRepository>("spawn_patterns_conf");
             _figureCache = await _configProvider.Get<FigureConfigRepository>("figures_conf");

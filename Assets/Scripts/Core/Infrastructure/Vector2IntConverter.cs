@@ -11,7 +11,8 @@ namespace Project.Core.Core.Infrastructure
             writer.WriteValue($"{value.x},{value.y}");
         }
 
-        public override Vector2Int ReadJson(JsonReader reader, Type objectType, Vector2Int existingValue, bool hasExistingValue, JsonSerializer serializer)
+        public override Vector2Int ReadJson(JsonReader reader, Type objectType, Vector2Int existingValue,
+            bool hasExistingValue, JsonSerializer serializer)
         {
             string str = reader.Value.ToString();
             string[]? parts = str.Split(',');

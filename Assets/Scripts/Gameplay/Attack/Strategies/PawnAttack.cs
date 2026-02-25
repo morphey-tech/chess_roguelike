@@ -23,19 +23,20 @@ namespace Project.Gameplay.Gameplay.Attack.Strategies
         public bool CanAttack(Figure attacker, GridPosition from, GridPosition to, BoardGrid grid)
         {
             if (!grid.IsInside(to))
+            {
                 return false;
+            }
 
-            // Forward direction based on team
-            // Player moves to higher row (Z+ in Unity), Enemy to lower row
             int forwardDr = attacker.Team == Team.Player ? 1 : -1;
             int dr = to.Row - from.Row;
             int dc = to.Column - from.Column;
 
-            // Diagonal forward: (forward, -1) or (forward, +1)
             bool isDiagonalForward = (dr == forwardDr && Math.Abs(dc) == 1);
 
             if (!isDiagonalForward)
+            {
                 return false;
+            }
 
             BoardCell targetCell = grid.GetBoardCell(to);
             return targetCell.OccupiedBy != null && targetCell.OccupiedBy.Team != attacker.Team;

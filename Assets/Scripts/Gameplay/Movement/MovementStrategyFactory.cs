@@ -3,6 +3,7 @@ using System.Linq;
 using Project.Core.Core.Configs.Figure;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Movement.Strategies;
+using VContainer;
 
 namespace Project.Gameplay.Gameplay.Movement
 {
@@ -16,7 +17,8 @@ namespace Project.Gameplay.Gameplay.Movement
         private readonly IMovementStrategy _fallback;
         private readonly ILogger<MovementStrategyFactory> _logger;
 
-        public MovementStrategyFactory(
+        [Inject]
+        private MovementStrategyFactory(
             IEnumerable<IMovementStrategy> strategies,
             ILogService logService)
         {
@@ -46,9 +48,8 @@ namespace Project.Gameplay.Gameplay.Movement
 
         public void RegisterPattern(string id, IMovementStrategy strategy)
         {
-            if (!_strategies.ContainsKey(id))
+            if (_strategies.TryAdd(id, strategy))
             {
-                _strategies.Add(id, strategy);
                 _logger.Info($"Registered pattern movement: {id}");
             }
             else
@@ -57,7 +58,7 @@ namespace Project.Gameplay.Gameplay.Movement
             }
         }
 
-        public IMovementStrategy CreatePattern(MovementPatternConfig pattern)
+        public static IMovementStrategy CreatePattern(MovementPatternConfig pattern)
         {
             return new PatternMovement(pattern);
         }

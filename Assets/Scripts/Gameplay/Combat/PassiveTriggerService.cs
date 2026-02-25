@@ -35,13 +35,13 @@ namespace Project.Gameplay.Gameplay.Combat
 
         public void TriggerKill(Figure killer, Figure victim)
         {
-            var context = new KillContext { Killer = killer, Victim = victim };
+            KillContext context = new() { Killer = killer, Victim = victim };
             Execute<IOnKill>(killer, p => p.OnKill(context));
         }
 
         public void TriggerDeath(Figure victim, Figure killer)
         {
-            var context = new DeathContext { Victim = victim, Killer = killer };
+            DeathContext context = new() { Victim = victim, Killer = killer };
             Execute<IOnDeath>(victim, p => p.OnDeath(context));
         }
 
@@ -56,8 +56,6 @@ namespace Project.Gameplay.Gameplay.Combat
             foreach (Figure figure in team)
             {
                 Execute<IOnTurnStart>(figure, p => p.OnTurnStart(figure, context));
-                
-                // Trigger status effects OnTurnStart for timer decrement
                 figure.Effects.TriggerTurnStart(figure, context);
             }
         }
@@ -89,7 +87,9 @@ namespace Project.Gameplay.Gameplay.Combat
             foreach (IPassive passive in GetAllPassives(figure).OrderBy(p => p.Priority))
             {
                 if (passive is TTrigger trigger)
+                {
                     action(trigger);
+                }
             }
         }
 
@@ -98,7 +98,9 @@ namespace Project.Gameplay.Gameplay.Combat
             foreach (IPassive passive in GetAllPassives(owner).OrderBy(p => p.Priority))
             {
                 if (passive is TTrigger trigger)
+                {
                     action(trigger, owner);
+                }
             }
         }
     }

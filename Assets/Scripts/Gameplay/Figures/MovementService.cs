@@ -3,9 +3,9 @@ using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Combat.Contexts;
-using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Movement;
+using Project.Gameplay.Gameplay.Turn;
 using Project.Gameplay.Movement;
 using VContainer;
 
@@ -17,16 +17,19 @@ namespace Project.Gameplay.Gameplay.Figures
 
         private readonly MovementStrategyFactory _strategyFactory;
         private readonly PassiveTriggerService _passiveTriggerService;
+        private readonly TurnService _turnService;
         private readonly ILogger<MovementService> _logger;
 
         [Inject]
         private MovementService(
             MovementStrategyFactory strategyFactory,
             PassiveTriggerService passiveTriggerService,
+            TurnService turnService,
             ILogService logService)
         {
             _strategyFactory = strategyFactory;
             _passiveTriggerService = passiveTriggerService;
+            _turnService = turnService;
             _logger = logService.CreateLogger<MovementService>();
         }
 
@@ -63,7 +66,7 @@ namespace Project.Gameplay.Gameplay.Figures
                 return false;
 
             BoardCell fromCell = Grid.GetBoardCell(from);
-            Figure figure = fromCell.OccupiedBy;
+            Figure? figure = fromCell.OccupiedBy;
 
             if (figure == null)
             {
@@ -103,7 +106,7 @@ namespace Project.Gameplay.Gameplay.Figures
 
             BoardCell fromCell = Grid.GetBoardCell(from);
             BoardCell toCell = Grid.GetBoardCell(to);
-            Figure figure = fromCell.OccupiedBy;
+            Figure? figure = fromCell.OccupiedBy;
             if (figure == null)
             {
                 _logger.Warning($"No figure at ({from.Row},{from.Column})");
@@ -121,13 +124,13 @@ namespace Project.Gameplay.Gameplay.Figures
             figure.MovedThisTurn = true;
 
             // Вызываем триггеры движения
-            var moveContext = new MoveContext
+            MoveContext moveContext = new()
             {
                 Actor = figure,
                 From = from,
                 To = to,
                 Grid = Grid,
-                CurrentTurn = 0, // TODO: получить текущий ход из TurnService
+                CurrentTurn = _turnService.TurnNumber,
                 DidMove = true
             };
             _passiveTriggerService.TriggerMove(figure, moveContext);

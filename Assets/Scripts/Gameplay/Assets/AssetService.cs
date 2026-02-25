@@ -29,7 +29,7 @@ namespace Project.Gameplay.Gameplay.Assets
             _logger = logService.CreateLogger<AssetService>();
         }
         
-        public async UniTask<T> LoadAssetAsync<T>(string address) where T : UnityEngine.Object
+        public async UniTask<T?> LoadAssetAsync<T>(string address) where T : UnityEngine.Object
         {
             ThrowIfDisposed();
             
@@ -71,12 +71,12 @@ namespace Project.Gameplay.Gameplay.Assets
             }
         }
         
-        public UniTask<T> LoadAssetAsync<T>(AssetKey key) where T : UnityEngine.Object
+        public UniTask<T?> LoadAssetAsync<T>(AssetKey key) where T : UnityEngine.Object
         {
             return LoadAssetAsync<T>(key.Address);
         }
         
-        public async UniTask<GameObject> InstantiateAsync(string address, Vector3 position, Quaternion rotation, Transform parent = null)
+        public async UniTask<GameObject?> InstantiateAsync(string address, Vector3 position, Quaternion rotation, Transform parent = null)
         {
             ThrowIfDisposed();
             
@@ -111,13 +111,13 @@ namespace Project.Gameplay.Gameplay.Assets
             }
         }
         
-        public UniTask<GameObject> InstantiateAsync(AssetKey key, Vector3 position, Quaternion rotation, Transform parent = null)
+        public UniTask<GameObject?> InstantiateAsync(AssetKey key, Vector3 position, Quaternion rotation, Transform parent = null)
         {
             return InstantiateAsync(key.Address, position, rotation, parent);
         }
 
-        public GameObject InstantiateFromPrefab(GameObject prefab, Vector3 position, Quaternion rotation,
-            Transform parent = null)
+        public GameObject? InstantiateFromPrefab(GameObject prefab, Vector3 position, Quaternion rotation,
+            Transform? parent = null)
         {
             if (prefab == null)
             {
@@ -131,9 +131,12 @@ namespace Project.Gameplay.Gameplay.Assets
 
         public void Release<T>(T asset) where T : UnityEngine.Object
         {
-            if (asset == null) return;
-            
-            string addressToRemove = null;
+            if (asset == null)
+            {
+                return;
+            }
+
+            string? addressToRemove = null;
             foreach (KeyValuePair<string, AsyncOperationHandle> kvp in _loadedAssets)
             {
                 if (kvp.Value.Result as T == asset)
@@ -157,8 +160,11 @@ namespace Project.Gameplay.Gameplay.Assets
         
         public void ReleaseInstance(GameObject instance)
         {
-            if (instance == null) return;
-            
+            if (instance == null)
+            {
+                return;
+            }
+
             if (_instantiatedObjects.TryGetValue(instance, out AsyncOperationHandle<GameObject> handle))
             {
                 _logger.Debug($"Releasing instance: {instance.name}");
@@ -199,9 +205,11 @@ namespace Project.Gameplay.Gameplay.Assets
         public async UniTask PreloadAsync(string address)
         {
             ThrowIfDisposed();
-            
-            if (_preloadedAddresses.Contains(address)) return;
-            
+            if (_preloadedAddresses.Contains(address))
+            {
+                return;
+            }
+
             _logger.Debug($"Preloading: {address}");
             AsyncOperationHandle handle = Addressables.LoadAssetAsync<UnityEngine.Object>(address);
             await handle.ToUniTask();
@@ -216,7 +224,7 @@ namespace Project.Gameplay.Gameplay.Assets
         
         public async UniTask PreloadAsync(string[] addresses)
         {
-            List<UniTask> tasks = new List<UniTask>(addresses.Length);
+            List<UniTask> tasks = new(addresses.Length);
             
             foreach (string address in addresses)
             {
@@ -253,7 +261,7 @@ namespace Project.Gameplay.Gameplay.Assets
             }
         }
         
-        public async UniTask DownloadDependenciesAsync(string address, Action<float> onProgress = null)
+        public async UniTask DownloadDependenciesAsync(string address, Action<float>? onProgress = null)
         {
             try
             {
@@ -286,9 +294,11 @@ namespace Project.Gameplay.Gameplay.Assets
         
         public void Dispose()
         {
-            if (_disposed) return;
+            if (_disposed)
+            {
+                return;
+            }
             _disposed = true;
-            
             _logger.Info("Disposing AssetService");
             ReleaseAll();
         }

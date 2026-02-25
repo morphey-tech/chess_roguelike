@@ -69,7 +69,9 @@ namespace Project.Gameplay.Gameplay.Combat
             _boardRemovedPublisher.Publish(new FigureBoardRemovedMessage(unit.Id, unit.Team));
             _deathPublisher.Publish(new FigureDeathMessage(unit.Id, unit.Team, unit.LootTableId, fromCombat: true));
             if (unit.Team == Team.Player)
+            {
                 _capacityService.ReleaseByType(unit.TypeId);
+            }
         }
 
         public async UniTask HandleDeathDirectAsync(Figure unit, BoardCell cell)
@@ -84,13 +86,15 @@ namespace Project.Gameplay.Gameplay.Combat
             if (!string.IsNullOrEmpty(unit.LootTableId) && cell != null)
             {
                 LootResult lootResult = _lootService.Roll(unit.LootTableId);
-                if (lootResult != null && !lootResult.IsEmpty && _lootPresenter != null)
+                if (lootResult is { IsEmpty: false } && _lootPresenter != null)
                     await _lootPresenter.PresentAsync(new LootVisualContext(cell.Position, lootResult));
             }
 
             _deathPublisher.Publish(new FigureDeathMessage(unit.Id, unit.Team, unit.LootTableId, fromCombat: true));
             if (unit.Team == Team.Player)
+            {
                 _capacityService.ReleaseByType(unit.TypeId);
+            }
         }
     }
 }

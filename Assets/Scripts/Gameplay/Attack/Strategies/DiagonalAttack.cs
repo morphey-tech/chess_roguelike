@@ -1,4 +1,3 @@
-using System;
 using Project.Core.Core.Configs.Stats;
 using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Combat;
@@ -24,7 +23,7 @@ namespace Project.Gameplay.Gameplay.Attack.Strategies
             {
                 return false;
             }
-            if (!IsOnDiagonal(from, to))
+            if (!from.IsOnDiagonal(to))
             {
                 return false;
             }
@@ -34,8 +33,7 @@ namespace Project.Gameplay.Gameplay.Attack.Strategies
                 return false;
             }
 
-            // Check that path is clear (no figures blocking)
-            if (!IsPathClear(from, to, grid))
+            if (!grid.IsPathClear(from, to))
             {
                 return false;
             }
@@ -56,42 +54,6 @@ namespace Project.Gameplay.Gameplay.Attack.Strategies
                 HitType = HitType.Ranged,
                 AttackerMovesOnKill = false
             };
-        }
-
-        /// <summary>
-        /// Check if path is clear (no figures blocking except target).
-        /// </summary>
-        private bool IsPathClear(GridPosition from, GridPosition to, BoardGrid grid)
-        {
-            int dr = Math.Sign(to.Row - from.Row);
-            int dc = Math.Sign(to.Column - from.Column);
-
-            GridPosition current = new(from.Row + dr, from.Column + dc);
-
-            while (current.Row != to.Row || current.Column != to.Column)
-            {
-                if (!grid.IsInside(current))
-                    return false;
-
-                BoardCell cell = grid.GetBoardCell(current);
-                if (cell.OccupiedBy != null)
-                    return false; // Blocked by a figure
-
-                current = new(current.Row + dr, current.Column + dc);
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// Check if target is on a diagonal line from attacker.
-        /// Diagonal means row and column differences are equal.
-        /// </summary>
-        private static bool IsOnDiagonal(GridPosition from, GridPosition to)
-        {
-            int rowDiff = Math.Abs(to.Row - from.Row);
-            int colDiff = Math.Abs(to.Column - from.Column);
-            return rowDiff == colDiff && rowDiff > 0;
         }
     }
 }

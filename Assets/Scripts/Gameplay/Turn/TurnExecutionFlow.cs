@@ -2,7 +2,7 @@ using System;
 using Cysharp.Threading.Tasks;
 using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
-using Project.Core.Core.ShrinkingZone.Core;
+using Project.Core.Core.Storm.Core;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Interaction;
@@ -35,7 +35,7 @@ namespace Project.Gameplay.Gameplay.Turn
         private readonly IBonusMoveSession _bonusMoveSession;
         private readonly TurnService _turnService;
         private readonly RunHolder _runHolder;
-        private readonly ShrinkingZone.ZoneBattleService _zoneBattle;
+        private readonly ShrinkingZone.StormBattleService _stormBattle;
         private readonly ILogger<TurnExecutionFlow> _logger;
 
         [Inject]
@@ -45,7 +45,7 @@ namespace Project.Gameplay.Gameplay.Turn
             IBonusMoveSession bonusMoveSession,
             TurnService turnService,
             RunHolder runHolder,
-            ShrinkingZone.ZoneBattleService zoneBattle,
+            ShrinkingZone.StormBattleService stormBattle,
             ILogService logService)
         {
             _interactionLock = interactionLock;
@@ -53,7 +53,7 @@ namespace Project.Gameplay.Gameplay.Turn
             _bonusMoveSession = bonusMoveSession;
             _turnService = turnService;
             _runHolder = runHolder;
-            _zoneBattle = zoneBattle;
+            _stormBattle = stormBattle;
             _logger = logService.CreateLogger<TurnExecutionFlow>();
         }
 
@@ -127,11 +127,11 @@ namespace Project.Gameplay.Gameplay.Turn
         /// </summary>
         private void CheckZoneDamage(Figure figure, GridPosition position)
         {
-            var status = _zoneBattle.GetCellStatus(position.Row, position.Column);
-            if (status == CellStatus.Danger)
+            var status = _stormBattle.GetCellStatus(position.Row, position.Column);
+            if (status == StormCellStatus.Danger)
             {
-                _logger.Debug($"[ZONE] Figure {figure.Id} entered danger zone at ({position.Row},{position.Column}), applying damage");
-                _zoneBattle.ApplyZoneDamage(figure, position);
+                _logger.Debug($"Figure {figure.Id} entered danger zone at ({position.Row},{position.Column}), applying damage");
+                _stormBattle.ApplyZoneDamage(figure, position);
             }
         }
     }

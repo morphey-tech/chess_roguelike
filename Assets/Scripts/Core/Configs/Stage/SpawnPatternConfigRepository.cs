@@ -1,14 +1,11 @@
 using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using Project.Core.Core.Configs;
 
 namespace Project.Core.Core.Configs.Stage
 {
     public class SpawnPatternConfigRepository : ConfigRepository<SpawnPatternConfig>
     {
-        private SpawnPatternConfig[] _patterns = Array.Empty<SpawnPatternConfig>();
-
         [JsonProperty("content")]
         public SpawnPatternConfig[] Patterns
         {
@@ -18,5 +15,7 @@ namespace Project.Core.Core.Configs.Stage
 
         protected override IReadOnlyList<SpawnPatternConfig> Items => _patterns;
         protected override string GetKey(SpawnPatternConfig item) => item.Id;
+
+        private SpawnPatternConfig[] _patterns = Array.Empty<SpawnPatternConfig>();
     }
 }

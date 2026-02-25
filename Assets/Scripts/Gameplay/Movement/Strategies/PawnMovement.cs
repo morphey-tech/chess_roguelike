@@ -1,8 +1,8 @@
-using System;
 using System.Collections.Generic;
 using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
+using Project.Gameplay.Gameplay.Movement.Extensions;
 using Project.Gameplay.Movement;
 
 namespace Project.Gameplay.Gameplay.Movement.Strategies
@@ -19,50 +19,51 @@ namespace Project.Gameplay.Gameplay.Movement.Strategies
 
         public IEnumerable<MovementStrategyResult> GetAvailableMoves(Figure figure, GridPosition from, BoardGrid grid)
         {
-            // Forward direction based on team
-            // Player moves to higher row (Z+ in Unity), Enemy to lower row
             int forwardDr = figure.Team == Team.Player ? 1 : -1;
-            
-            // Forward, left, right (NOT backward)
-            var directions = new[]
-            {
-                (forwardDr, 0),      // Forward
-                (0, -1),             // Left
-                (0, 1)               // Right
+
+            (int, int)[] directions = {
+                (forwardDr, 0),
+                (0, -1),
+                (0, 1)
             };
 
             foreach ((int dr, int dc) in directions)
             {
                 GridPosition to = new(from.Row + dr, from.Column + dc);
                 if (!grid.IsInside(to))
+                {
                     continue;
+                }
 
-                var cell = grid.GetBoardCell(to);
-                var result = new MovementStrategyResult(figure, to, true, cell.OccupiedBy);
+                BoardCell cell = grid.GetBoardCell(to);
+                MovementStrategyResult result = new(figure, to, true, cell.OccupiedBy);
                 if (result.CanOccupy())
+                {
                     yield return result;
+                }
             }
         }
 
         public MovementStrategyResult GetFor(Figure figure, GridPosition from, GridPosition to, BoardGrid grid)
         {
+            if (!grid.IsInside(to))
+            {
+                return MovementStrategyResult.MakeUnreachable(figure, to, null);
+            }
+
             int forwardDr = figure.Team == Team.Player ? 1 : -1;
             int dr = to.Row - from.Row;
             int dc = to.Column - from.Column;
 
-            // Valid moves: forward (1 step), left/right (1 step)
-            bool isForward = (dr == forwardDr && dc == 0);
-            bool isSideways = (dr == 0 && Math.Abs(dc) == 1);
+            bool isForward = dr == forwardDr && dc == 0;
+            bool isSideways = dr == 0 && System.Math.Abs(dc) == 1;
 
             if (!isForward && !isSideways)
             {
                 return MovementStrategyResult.MakeUnreachable(figure, to, null);
             }
 
-            if (!grid.IsInside(to))
-                return MovementStrategyResult.MakeUnreachable(figure, to, null);
-
-            var cell = grid.GetBoardCell(to);
+            BoardCell cell = grid.GetBoardCell(to);
             return new MovementStrategyResult(figure, to, true, cell.OccupiedBy);
         }
     }

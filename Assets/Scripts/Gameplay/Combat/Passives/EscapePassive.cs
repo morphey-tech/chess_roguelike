@@ -22,7 +22,9 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
         {
             // Only trigger if owner was the target and didn't die
             if (owner != context.Target || context.TargetDied)
+            {
                 return;
+            }
 
             // Grant bonus move within 1 cell
             // This is handled by setting a flag that BonusMoveSession checks

@@ -39,11 +39,13 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
 
         public IReadOnlyCollection<ActionPreview> GetPreviews(Figure actor, GridPosition from, BoardGrid grid)
         {
-            var targets = new HashSet<ActionPreview>();
+            HashSet<ActionPreview> targets = new();
             foreach (MovementStrategyResult move in _movementService.GetAvailableMoves(actor, from))
             {
                 if (move.CanOccupy() && move.IsFree)
+                {
                     targets.Add(new ActionPreview { MoveTo = move.Position });
+                }
             }
             return targets;
         }
@@ -51,7 +53,9 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
         public async UniTask ExecuteAsync(ActionContext context)
         {
             if (!CanExecute(context))
+            {
                 return;
+            }
 
             // === DOMAIN ===
             _movementService.MoveFigure(context.From, context.To);

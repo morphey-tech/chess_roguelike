@@ -10,26 +10,25 @@ namespace Project.Gameplay.Gameplay.Examples
         public static void DemonstrateUsage()
         {
             // Create a stat with base value
-            var attackStat = new FigureStat<float>(10f);
+            FigureStat<float> attackStat = new(10f);
             
             // Add flat modifier (stackable)
-            var flatBuff = new FlatModifier<float>("sword_bonus", 5f, 0, -1, true);
+            FlatModifier<float> flatBuff = new("sword_bonus", 5f, 0, -1, true);
             attackStat.AddModifier(flatBuff);
             
             // Add percentage modifier (not stackable)
-            var rageBuff = new PercentModifier("rage", 50f, 100, 3, false);
+            PercentModifier rageBuff = new("rage", 50f, 100, 3, false);
             attackStat.AddModifier(rageBuff);
             
             // Value is calculated on-the-fly: (10 + 5) * 1.5 = 22.5
             float currentValue = attackStat.Value;
             
             // Try to add another rage buff (will replace the old one)
-            var newRageBuff = new PercentModifier("rage", 25f, 100, 5, false);
+            PercentModifier newRageBuff = new("rage", 25f, 100, 5, false);
             attackStat.AddModifier(newRageBuff);
             
-            // Add multiple stackable flat buffs
-            var strengthPotion1 = new FlatModifier<float>("strength_potion", 2f, 0, 10, true);
-            var strengthPotion2 = new FlatModifier<float>("strength_potion", 2f, 0, 10, true);
+            FlatModifier<float> strengthPotion1 = new("strength_potion", 2f, 0, 10, true);
+            FlatModifier<float> strengthPotion2 = new("strength_potion", 2f, 0, 10, true);
             attackStat.AddModifier(strengthPotion1);
             attackStat.AddModifier(strengthPotion2);
             

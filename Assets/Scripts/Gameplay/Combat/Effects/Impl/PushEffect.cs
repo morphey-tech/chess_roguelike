@@ -33,7 +33,6 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
             context.Logger.Info($"{_target} pushed from ({_fromPosition.Row}, {_fromPosition.Column}) to ({_toPosition.Row}, {_toPosition.Column})");
             context.AddVisualEvent(new PushVisualEvent(_target.Id, _fromPosition, _toPosition));
 
-            // Apply bonus damage if collision
             if (_bonusDamage > 0)
             {
                 DamageContext dmgCtx = new(_attacker, _target, _bonusDamage, false, false, false,

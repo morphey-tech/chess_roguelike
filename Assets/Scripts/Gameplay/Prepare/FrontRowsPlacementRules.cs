@@ -19,10 +19,21 @@ namespace Project.Gameplay.Gameplay.Prepare
 
         public bool CanPlace(GridPosition pos)
         {
-            if (_grid == null) return false;
-            if (!_grid.IsInside(pos)) return false;
-            if (pos.Row >= _allowedRows) return false;
-            
+            if (_grid == null)
+            {
+                return false;
+            }
+
+            if (!_grid.IsInside(pos))
+            {
+                return false;
+            }
+
+            if (pos.Row >= _allowedRows)
+            {
+                return false;
+            }
+
             BoardCell cell = _grid.GetBoardCell(pos);
             return cell.IsFree;
         }

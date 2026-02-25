@@ -24,6 +24,7 @@ namespace Project.Gameplay.Gameplay.Figures
         private readonly TurnPatternFactory _turnPatternFactory;
         private readonly BoardCapacityService _capacityService;
         private readonly MovementStrategyFactory _movementStrategyFactory;
+        private readonly PassiveFactory _passiveFactory;
         private readonly IPublisher<FigureSpawnedMessage> _spawnedPublisher;
         private readonly IFigureRegistry _figureRegistry;
         private readonly ILogger<FigureSpawnService> _logger;
@@ -40,6 +41,7 @@ namespace Project.Gameplay.Gameplay.Figures
             TurnPatternFactory turnPatternFactory,
             BoardCapacityService capacityService,
             MovementStrategyFactory movementStrategyFactory,
+            PassiveFactory passiveFactory,
             IPublisher<FigureSpawnedMessage> spawnedPublisher,
             IFigureRegistry figureRegistry,
             ILogService logService)
@@ -50,6 +52,7 @@ namespace Project.Gameplay.Gameplay.Figures
             _turnPatternFactory = turnPatternFactory;
             _capacityService = capacityService;
             _movementStrategyFactory = movementStrategyFactory;
+            _passiveFactory = passiveFactory;
             _spawnedPublisher = spawnedPublisher;
             _figureRegistry = figureRegistry;
             _logger = logService.CreateLogger<FigureSpawnService>();
@@ -106,10 +109,10 @@ namespace Project.Gameplay.Gameplay.Figures
 
             // Create PatternMovement if movement_pattern is specified
             string movementId = description.MovementId;
-            if (description.MovementPattern != null && description.MovementId == "pattern")
+            if (description is { MovementPattern: not null, MovementId: "pattern" })
             {
                 movementId = description.MovementPattern.Id;
-                var patternMovement = _movementStrategyFactory.CreatePattern(description.MovementPattern);
+                IMovementStrategy patternMovement = MovementStrategyFactory.CreatePattern(description.MovementPattern);
                 _movementStrategyFactory.RegisterPattern(movementId, patternMovement);
             }
 
@@ -134,11 +137,11 @@ namespace Project.Gameplay.Gameplay.Figures
                     PassiveConfig? passiveConfig = _passiveConfigCache.Get(passiveId);
                     if (passiveConfig != null)
                     {
-                        IPassive? passive = PassiveFactory.Create(passiveConfig);
+                        IPassive? passive = _passiveFactory.Create(passiveConfig);
                         figure.AddPassive(passive);
                     }
                 }
-                
+
                 if (figure.BasePassives.Count > 0)
                     _logger.Debug($"{figure} passives: {string.Join(", ", description.Passives)}");
             }

@@ -23,7 +23,7 @@ namespace Project.Gameplay.Gameplay.Combat
         private readonly LootService _lootService;
 
         [Inject]
-        public ProjectileHitApplyService(
+        private ProjectileHitApplyService(
             ActionContextAccessor contextAccessor,
             DamageApplier damageApplier,
             LootService lootService)
@@ -37,20 +37,23 @@ namespace Project.Gameplay.Gameplay.Combat
         {
             ActionContext ctx = _contextAccessor.Current;
             if (ctx?.Grid == null)
+            {
                 return UniTask.CompletedTask;
+            }
 
             BoardGrid grid = ctx.Grid;
             Figure attacker = FindFigureById(grid, evt.AttackerId);
             Figure target = FindFigureById(grid, evt.TargetId);
             if (target == null)
+            {
                 return UniTask.CompletedTask;
+            }
 
             BoardCell targetCell = grid.GetBoardCell(evt.TargetPosition);
-            if (targetCell?.OccupiedBy != target)
+            if (targetCell?.OccupiedBy != target || target.Stats.CurrentHp <= 0)
+            {
                 return UniTask.CompletedTask;
-
-            if (target.Stats.CurrentHp <= 0)
-                return UniTask.CompletedTask;
+            }
 
             DamageContext dmgCtx = new(
                 attacker,
@@ -69,19 +72,18 @@ namespace Project.Gameplay.Gameplay.Combat
 
             if (died && presenters.QueueAppender != null)
             {
-                var extra = new List<IVisualCommand>
+                List<IVisualCommand> extra = new List<IVisualCommand>
                 {
                     new DeathCommand(new DeathVisualContext(target.Id, null))
                 };
                 if (!string.IsNullOrEmpty(target.LootTableId))
                 {
                     LootResult lootResult = _lootService.Roll(target.LootTableId);
-                    if (lootResult != null && !lootResult.IsEmpty)
+                    if (lootResult is { IsEmpty: false })
                         extra.Add(new LootCommand(new LootVisualContext(targetCell.Position, lootResult)));
                 }
                 presenters.QueueAppender.EnqueueCommands(extra);
             }
-
             return UniTask.CompletedTask;
         }
 

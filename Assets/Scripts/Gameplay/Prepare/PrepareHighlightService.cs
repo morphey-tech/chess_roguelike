@@ -17,7 +17,9 @@ namespace Project.Gameplay.Gameplay.Prepare
             {
                 GridPosition pos = cell.Position;
                 if (context.Rules.CanPlace(pos))
+                {
                     context.AvailablePlacementPositions.Add(pos);
+                }
             }
         }
 
@@ -29,15 +31,20 @@ namespace Project.Gameplay.Gameplay.Prepare
             }
         }
 
-        public void ApplyDirty(PrepareContext context, IReadOnlyCollection<GridPosition> dirtyPositions)
+        public void ApplyDirty(PrepareContext context, IReadOnlyCollection<GridPosition>? dirtyPositions)
         {
             if (dirtyPositions == null || dirtyPositions.Count == 0)
+            {
                 return;
+            }
 
             foreach (GridPosition pos in dirtyPositions)
             {
                 if (!context.Grid.IsInside(pos))
+                {
                     continue;
+                }
+
                 ApplyOne(context, pos);
             }
         }

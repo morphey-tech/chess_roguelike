@@ -1,5 +1,4 @@
 using Project.Gameplay.Gameplay.Combat.Contexts;
-using Project.Gameplay.Gameplay.Figures;
 
 namespace Project.Gameplay.Gameplay.Figures.StatusEffects
 {

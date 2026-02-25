@@ -13,21 +13,8 @@ namespace Project.Gameplay.Gameplay.Attack
     public interface IAttackStrategy
     {
         string Id { get; }
-        
-        /// <summary>
-        /// Delivery type for this attack (Instant, Projectile, etc.)
-        /// </summary>
         DeliveryType Delivery { get; }
-        
-        /// <summary>
-        /// Checks if figure can attack from one position to another.
-        /// </summary>
         bool CanAttack(Figure attacker, GridPosition from, GridPosition to, BoardGrid grid);
-        
-        /// <summary>
-        /// Creates HitContext describing the attack.
-        /// Does NOT apply damage - that's handled by CombatResolver.
-        /// </summary>
         HitContext CreateHitContext(Figure attacker, Figure defender, GridPosition attackerPos, GridPosition defenderPos, BoardGrid grid);
     }
 }

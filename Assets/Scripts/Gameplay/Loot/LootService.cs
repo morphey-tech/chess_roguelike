@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Project.Core.Core.Configs.Loot;
 using Project.Core.Core.Logging;
+using Project.Core.Core.Random;
 using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.Gameplay.Economy;
-using UnityEngine;
+using VContainer;
 using ILogger = Project.Core.Core.Logging.ILogger;
 
 namespace Project.Gameplay.Gameplay.Loot
@@ -17,6 +18,7 @@ namespace Project.Gameplay.Gameplay.Loot
     {
         private readonly ConfigProvider _configProvider;
         private readonly EconomyService _economy;
+        private readonly IRandomService _random;
         private readonly ILogger _logger;
 
         private LootTableRepository? _repo;
@@ -24,10 +26,12 @@ namespace Project.Gameplay.Gameplay.Loot
         /// <summary>Drop rate multiplier for meta-lifetime items (e.g. 0.2 = 20% chance to drop).</summary>
         public float MetaItemDropRate { get; set; } = 1f;
 
-        public LootService(ConfigProvider configProvider, EconomyService economy, ILogService logService)
+        [Inject]
+        private LootService(ConfigProvider configProvider, EconomyService economy, ILogService logService, IRandomService random)
         {
             _configProvider = configProvider;
             _economy = economy;
+            _random = random;
             _logger = logService.CreateLogger<LootService>();
         }
 
@@ -36,7 +40,10 @@ namespace Project.Gameplay.Gameplay.Loot
         /// </summary>
         public async UniTask EnsureLoadedAsync()
         {
-            if (_repo != null) return;
+            if (_repo != null)
+            {
+                return;
+            }
             _repo = await _configProvider.Get<LootTableRepository>("loot_tables_conf");
         }
 
@@ -65,21 +72,27 @@ namespace Project.Gameplay.Gameplay.Loot
                 return null;
             }
 
-            var result = new LootResult();
+            LootResult result = new();
             for (int i = 0; i < table.Rolls; i++)
             {
                 LootEntryConfig? entry = RollEntry(table.Entries);
                 if (entry != null)
+                {
                     AddEntryToResult(entry, result);
+                }
             }
 
             if (!result.IsEmpty)
             {
-                var parts = new List<string>();
-                foreach (var r in result.Resources)
+                List<string> parts = new List<string>();
+                foreach (ResourceDrop? r in result.Resources)
+                {
                     parts.Add($"{r.Id} x{r.Amount}");
-                foreach (var i in result.Items)
+                }
+                foreach (ItemDrop? i in result.Items)
+                {
                     parts.Add($"item:{i.ConfigId}");
+                }
                 _logger.Info($"Loot dropped [{lootTableId}]: {string.Join(", ", parts)}");
             }
 
@@ -93,34 +106,46 @@ namespace Project.Gameplay.Gameplay.Loot
         {
             await EnsureLoadedAsync();
             LootResult? result = Roll(lootTableId);
-            if (result != null && !result.IsEmpty)
+            if (result is { IsEmpty: false })
+            {
                 _economy.ApplyLootResult(result);
+            }
         }
 
-        private static LootEntryConfig? RollEntry(LootEntryConfig[] entries)
+        private LootEntryConfig? RollEntry(LootEntryConfig[]? entries)
         {
-            if (entries == null || entries.Length == 0) return null;
+            if (entries == null || entries.Length == 0)
+            {
+                return null;
+            }
 
             int sum = 0;
             foreach (LootEntryConfig e in entries)
+            {
                 sum += e.Weight;
+            }
 
-            if (sum <= 0) return entries[0];
+            if (sum <= 0)
+            {
+                return entries[0];
+            }
 
-            int roll = UnityEngine.Random.Range(0, sum);
+            int roll = _random.Range(0, sum - 1);
             int acc = 0;
 
             foreach (LootEntryConfig e in entries)
             {
                 acc += e.Weight;
                 if (roll < acc)
+                {
                     return e;
+                }
             }
 
             return entries[0];
         }
 
-        private static void AddEntryToResult(LootEntryConfig entry, LootResult result)
+        private void AddEntryToResult(LootEntryConfig entry, LootResult result)
         {
             string type = entry.Type?.ToLowerInvariant() ?? "nothing";
 
@@ -128,7 +153,7 @@ namespace Project.Gameplay.Gameplay.Loot
             {
                 case "resource":
                     int amount = entry.Min < entry.Max
-                        ? UnityEngine.Random.Range(entry.Min, entry.Max + 1)
+                        ? _random.Range(entry.Min, entry.Max)
                         : entry.Min;
                     if (amount > 0 && !string.IsNullOrEmpty(entry.Id))
                         result.Resources.Add(new ResourceDrop(entry.Id, amount));

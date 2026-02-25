@@ -26,11 +26,15 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
         {
             // Only trigger when the owner is attacking
             if (owner != context.Attacker)
+            {
                 return;
+            }
 
             float hpPercent = (float)context.Target.Stats.CurrentHp / context.Target.Stats.MaxHp;
             if (hpPercent <= _hpThreshold)
+            {
                 context.DamageMultiplier *= _damageMultiplier;
+            }
         }
     }
 }

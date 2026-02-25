@@ -1,7 +1,6 @@
 using Cysharp.Threading.Tasks;
 using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Visual.Commands.Contexts;
-using UnityEngine;
 
 namespace Project.Gameplay.Gameplay.Figures
 {

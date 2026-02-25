@@ -6,6 +6,7 @@ using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Attack;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
+using Project.Gameplay.Movement;
 using UnityEngine;
 
 namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
@@ -51,7 +52,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
 
         public IReadOnlyCollection<ActionPreview> GetPreviews(Figure actor, GridPosition from, BoardGrid grid)
         {
-            var targets = new HashSet<ActionPreview>();
+            HashSet<ActionPreview> targets = new();
             Team enemyTeam = actor.Team == Team.Player ? Team.Enemy : Team.Player;
 
             foreach (Figure enemy in grid.GetFiguresByTeam(enemyTeam))
@@ -66,7 +67,9 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
 
                 // Only consider enemies on the same row or column (straight line)
                 if (from.Row != enemyPos.Row && from.Column != enemyPos.Column)
+                {
                     continue;
+                }
 
                 // Get all reachable cells along the line toward the enemy
                 IEnumerable<GridPosition> lineMoves = _movementService.GetAvailableMoves(actor, from)
@@ -106,7 +109,9 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
         public async UniTask ExecuteAsync(ActionContext context)
         {
             if (!CanExecute(context))
+            {
                 return;
+            }
 
             GridPosition attackTarget = context.To;
             GridPosition moveTo = ComputeMoveTo(context.Actor, context.From, attackTarget, context.Grid);
@@ -129,23 +134,27 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
         {
             // If we can attack from current position, don't move
             if (_attackQueryService.GetTargets(actor, from, grid).Contains(attackTarget))
+            {
                 return from;
+            }
 
             // Walk along the line toward attackTarget, find closest cell from which we can attack
             int dRow = attackTarget.Row - from.Row;
             int dCol = attackTarget.Column - from.Column;
 
             if (dRow != 0 && dCol != 0)
+            {
                 return from; // Not on same line
+            }
 
             // Get all reachable moves along the line
-            var lineMoves = _movementService.GetAvailableMoves(actor, from)
+            List<MovementStrategyResult> lineMoves = _movementService.GetAvailableMoves(actor, from)
                 .Where(m => m.CanOccupy() && m.IsFree && IsOnLine(from, attackTarget, m.Position))
                 .OrderBy(m => Attack.AttackUtils.GetDistance(from, m.Position))
                 .ToList();
 
             // Find the closest position from which we can attack
-            foreach (var move in lineMoves)
+            foreach (MovementStrategyResult move in lineMoves)
             {
                 if (_attackQueryService.GetTargets(actor, move.Position, grid).Contains(attackTarget))
                 {

@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.Linq;
+using Project.Gameplay.Gameplay.Turn.Actions.Impl;
 
 namespace Project.Gameplay.Gameplay.Turn.Actions.Builders
 {
@@ -18,15 +20,17 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Builders
             string id = string.IsNullOrEmpty(config.Id) ? config.Type : config.Id;
 
             if (config.SubActions == null || config.SubActions.Length == 0)
+            {
                 throw new System.Exception($"SequentialAction requires SubActions");
+            }
 
-            var actions = config.SubActions.Select(subConfig =>
+            List<ICombatAction> actions = config.SubActions.Select(subConfig =>
             {
                 IActionBuilder subBuilder = _builderRegistry.GetBuilder(subConfig.Type);
                 return subBuilder.Build(subConfig, builderContext);
             }).ToList();
 
-            return new Impl.SequentialAction(id, actions);
+            return new SequentialAction(id, actions);
         }
     }
 }

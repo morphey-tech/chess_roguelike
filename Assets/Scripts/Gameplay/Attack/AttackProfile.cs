@@ -10,7 +10,7 @@ namespace Project.Gameplay.Gameplay.Attack
         public TargetingType Targeting { get; }
         public DeliveryType Delivery { get; }
         public HitPattern Pattern { get; }
-        public string ProjectileConfigId { get; }
+        public string? ProjectileConfigId { get; }
 
         public AttackProfile(
             AttackType type,
@@ -19,7 +19,7 @@ namespace Project.Gameplay.Gameplay.Attack
             TargetingType targeting,
             DeliveryType delivery,
             HitPattern pattern,
-            string projectileConfigId = null)
+            string? projectileConfigId = null)
         {
             Type = type;
             Damage = damage;

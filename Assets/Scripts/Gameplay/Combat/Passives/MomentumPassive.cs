@@ -26,18 +26,21 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
         public void OnMove(MoveContext context)
         {
             if (!context.DidMove)
+            {
                 return;
+            }
 
             Figure actor = context.Actor;
             BoardGrid grid = context.Grid;
 
             GridPosition from = context.From;
             GridPosition to = context.To;
-
-            GridPosition? enemyPos = FindNearestEnemy(actor, grid);
+            GridPosition? enemyPos = grid.GetNearestEnemy(actor);
 
             if (!enemyPos.HasValue)
+            {
                 return;
+            }
 
             int oldDist = Attack.AttackUtils.GetDistance(from, enemyPos.Value);
             int newDist = Attack.AttackUtils.GetDistance(to, enemyPos.Value);
@@ -49,43 +52,8 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
 
             int moved = oldDist - newDist;
             float bonus = moved * _damagePerCell;
-            var modifier = new FlatModifier<float>($"{Id}", bonus, 0, 1, true);
+            FlatModifier<float> modifier = new($"{Id}", bonus, 0, 1, true);
             actor.Stats.Attack.AddModifier(modifier);
-        }
-
-        private static GridPosition? FindNearestEnemy(
-            Figure actor,
-            BoardGrid grid)
-        {
-            GridPosition? nearest = null;
-            int min = int.MaxValue;
-
-            foreach (BoardCell cell in grid.AllCells())
-            {
-                Figure other = cell.OccupiedBy;
-
-                if (other == null)
-                {
-                    continue;
-                }
-                if (other.Team == actor.Team)
-                {
-                    continue;
-                }
-
-                int d = Attack.AttackUtils.GetDistance(
-                    grid.FindFigure(actor).Position,
-                    cell.Position
-                );
-
-                if (d < min)
-                {
-                    min = d;
-                    nearest = cell.Position;
-                }
-            }
-
-            return nearest;
         }
     }
 }

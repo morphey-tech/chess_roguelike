@@ -12,7 +12,8 @@ namespace Project.Gameplay.Gameplay.Selection
             bool isHovered,
             bool hasFriendlySelection)
         {
-            var mode = team == Team.Player ? modeAllies : modeEnemies;
+            HpBarVisibilityMode mode = team == Team.Player 
+                ? modeAllies : modeEnemies;
 
             return mode switch
             {

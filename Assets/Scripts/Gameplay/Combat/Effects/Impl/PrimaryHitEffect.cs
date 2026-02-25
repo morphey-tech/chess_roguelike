@@ -94,6 +94,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
                 AddPrimaryDeliveryEvent(context, damageResult.Final, before.IsCritical);
 
                 // Проверяем, есть ли у атакующего сплеш — если да, то визуал будет параллельным
+                // Надо переделать что бы не разраслось потом на каждый чих проверокы
                 bool hasSplash = HasSplashPassive(_attacker);
                 
                 context.AddVisualEvent(new DamageVisualEvent(

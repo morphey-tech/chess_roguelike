@@ -41,24 +41,24 @@ namespace Project.Gameplay.Gameplay.Interaction
         /// <summary>
         /// Creates an intent representing no valid action.
         /// </summary>
-        public static ClickIntent None => new ClickIntent(CellClickIntent.None, null, null, null);
+        public static ClickIntent None => new(CellClickIntent.None, null, null, null);
 
         /// <summary>
         /// Creates an intent to select a figure.
         /// </summary>
         public static ClickIntent Select(Figure figure, GridPosition position) =>
-            new ClickIntent(CellClickIntent.SelectFigure, figure, null, position);
+            new(CellClickIntent.SelectFigure, figure, null, position);
 
         /// <summary>
         /// Creates an intent to move from one position to another.
         /// </summary>
         public static ClickIntent Move(GridPosition from, GridPosition to) =>
-            new ClickIntent(CellClickIntent.Move, null, from, to);
+            new(CellClickIntent.Move, null, from, to);
 
         /// <summary>
         /// Creates an intent to attack from one position to another.
         /// </summary>
         public static ClickIntent Attack(Figure target, GridPosition from, GridPosition to) =>
-            new ClickIntent(CellClickIntent.Attack, target, from, to);
+            new(CellClickIntent.Attack, target, from, to);
     }
 }

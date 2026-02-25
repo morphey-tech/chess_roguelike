@@ -48,7 +48,7 @@ namespace Project.Gameplay.Gameplay.Prepare
             bool success = false;
             try
             {
-                Figure figure = await _spawnService
+                Figure? figure = await _spawnService
                     .SpawnAsync(_grid, pos, figureTypeId, Team.Player)
                     .AttachExternalCancellation(cancellationToken);
                 if (figure == null)

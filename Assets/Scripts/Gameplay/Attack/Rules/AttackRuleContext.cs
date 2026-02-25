@@ -4,9 +4,6 @@ using Project.Gameplay.Gameplay.Grid;
 
 namespace Project.Gameplay.Gameplay.Attack.Rules
 {
-    /// <summary>
-    /// Context for attack rule validation.
-    /// </summary>
     public readonly struct AttackRuleContext
     {
         public Figure Attacker { get; }

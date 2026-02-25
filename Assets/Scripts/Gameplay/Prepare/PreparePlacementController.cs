@@ -58,17 +58,23 @@ namespace Project.Gameplay.Gameplay.Prepare
             CancellationToken cancellationToken)
         {
             if (_isPlacing)
+            {
                 return PreparePlacementResult.Ignored;
+            }
 
             _isPlacing = true;
             try
             {
                 if (!context.State.IsActive)
+                {
                     return PreparePlacementResult.Ignored;
+                }
 
-                var state = context.GetSelectedFigure();
+                FigureState? state = context.GetSelectedFigure();
                 if (state == null)
+                {
                     return PreparePlacementResult.Ignored;
+                }
 
                 bool canSpawn = await _capacityService.CanSpawnByTypeAsync(state.TypeId);
                 if (!canSpawn)
@@ -79,7 +85,7 @@ namespace Project.Gameplay.Gameplay.Prepare
 
                 context.PreviousSelectedId = null;
 
-                var transaction = new PreparePlacementTransaction(
+                PreparePlacementTransaction transaction = new(
                     context.State,
                     _preparePresenter,
                     _figureSpawnService,
@@ -95,7 +101,9 @@ namespace Project.Gameplay.Gameplay.Prepare
                 }
 
                 if (context.Rules.CanPlace(pos))
+                {
                     context.AvailablePlacementPositions.Add(pos);
+                }
 
                 return new PreparePlacementResult(true, false, false);
             }
@@ -111,22 +119,30 @@ namespace Project.Gameplay.Gameplay.Prepare
         public async UniTask<bool> UnplaceAtAsync(PrepareContext context, GridPosition pos, CancellationToken cancellationToken)
         {
             if (_isPlacing)
+            {
                 return false;
+            }
 
             _isPlacing = true;
             try
             {
                 if (!context.State.IsActive || !context.IsInputReady)
+                {
                     return false;
+                }
 
                 FigureState? figureState = context.RunState.GetFigureAtPosition(pos);
                 if (figureState == null)
+                {
                     return false;
+                }
 
                 BoardCell cell = context.Grid.GetBoardCell(pos);
                 Figure? figure = cell.OccupiedBy;
-                if (figure == null || figure.Team != Team.Player)
+                if (figure is not { Team: Team.Player })
+                {
                     return false;
+                }
 
                 context.State.ClearSelection();
                 if (context.PreviousSelectedId != null)
@@ -148,7 +164,9 @@ namespace Project.Gameplay.Gameplay.Prepare
                 await _preparePresenter.RestoreFigureAsync(figureState.Id).AttachExternalCancellation(cancellationToken);
 
                 if (context.Rules.CanPlace(pos))
+                {
                     context.AvailablePlacementPositions.Add(pos);
+                }
 
                 _logger.Info($"Unplaced {figureState.TypeId} from ({pos.Row}, {pos.Column})");
                 return true;
@@ -157,22 +175,6 @@ namespace Project.Gameplay.Gameplay.Prepare
             {
                 _isPlacing = false;
             }
-        }
-    }
-
-    public readonly struct PreparePlacementResult
-    {
-        public static PreparePlacementResult Ignored { get; } = new(false, false, false);
-
-        public bool Processed { get; }
-        public bool Success { get; }
-        public bool Completed { get; }
-
-        public PreparePlacementResult(bool processed, bool success, bool completed)
-        {
-            Processed = processed;
-            Success = success;
-            Completed = completed;
         }
     }
 }

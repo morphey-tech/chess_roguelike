@@ -4,9 +4,6 @@ using Project.Core.Core.Grid;
 
 namespace Project.Gameplay.Gameplay.Board
 {
-    /// <summary>
-    /// Port for board visualization. Gameplay knows nothing about Unity.
-    /// </summary>
     public interface IBoardPresenter
     {
         UniTask CreateBoardAssetAsync(string? assetKey, string? appearStrategyId);   

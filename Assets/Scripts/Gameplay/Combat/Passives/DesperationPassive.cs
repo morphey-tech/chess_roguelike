@@ -34,7 +34,7 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
                 float currentAttack = owner.Stats.Attack.Value;
                 float delta = 1f - currentAttack;
                 
-                var modifier = new CombatFlatModifier(Id, delta, 0, 1, false);
+                CombatFlatModifier modifier = new CombatFlatModifier(Id, delta, 0, 1, false);
                 owner.Stats.Attack.AddModifier(modifier);
             }
         }

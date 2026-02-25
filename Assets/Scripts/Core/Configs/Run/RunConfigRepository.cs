@@ -1,15 +1,12 @@
 using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using Project.Core.Core.Configs;
 
 namespace Project.Core.Core.Configs.Run
 {
     [Serializable]
     public class RunConfigRepository : ConfigRepository<RunConfig>
     {
-        private RunConfig[] _runs = Array.Empty<RunConfig>();
-
         [JsonProperty("content")]
         public RunConfig[] Runs
         {
@@ -19,5 +16,7 @@ namespace Project.Core.Core.Configs.Run
 
         protected override IReadOnlyList<RunConfig> Items => _runs;
         protected override string GetKey(RunConfig item) => item.Id;
+
+        private RunConfig[] _runs = Array.Empty<RunConfig>();
     }
 }

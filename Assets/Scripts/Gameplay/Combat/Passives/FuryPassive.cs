@@ -24,8 +24,10 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
         {
             // Only add stacks when owner is the attacker
             if (owner != context.Attacker)
+            {
                 return;
-                
+            }
+
             FuryEffect status = new(_damagePreStack, 1, _maxStacks);
             owner.Effects.AddOrStack(status);
         }

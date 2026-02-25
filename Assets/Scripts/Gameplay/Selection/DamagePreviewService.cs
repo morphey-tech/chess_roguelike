@@ -5,6 +5,7 @@ using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Attack.Rules;
 using Project.Gameplay.Gameplay.Combat.Damage;
 using Project.Gameplay.Gameplay.Figures;
+using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Input.Messages;
 using Project.Gameplay.Gameplay.Run;
 using Project.Gameplay.Gameplay.Turn;
@@ -65,17 +66,8 @@ namespace Project.Gameplay.Gameplay.Selection
         private void OnFigureSelected(FigureSelectedMessage message)
         {
             _logger.Debug($"[DamagePreview] OnFigureSelected: FigureId={message.Figure?.Id}, Team={message.Figure?.Team}");
-            
-            // Запоминаем только дружественную фигуру (Player)
-            if (message.Figure?.Team == Team.Player)
-            {
-                _selectedFriendlyFigureId = message.Figure?.Id;
-            }
-            else
-            {
-                _selectedFriendlyFigureId = null;
-            }
-            
+            _selectedFriendlyFigureId = message.Figure?.Team == Team.Player 
+                ? message.Figure?.Id : null;
             UpdateDamagePreview();
         }
 
@@ -180,17 +172,15 @@ namespace Project.Gameplay.Gameplay.Selection
         private bool TryGetValidPreview(out float damage)
         {
             damage = 0f;
-
-            var grid = _runHolder.Current?.CurrentStage?.Grid;
+            BoardGrid? grid = _runHolder.Current?.CurrentStage?.Grid;
             if (grid == null)
             {
                 _logger.Warning("[DamagePreview] Grid is null!");
                 return false;
             }
 
-            // Используем O(1) поиск вместо O(n)
-            var attacker = grid.GetFigureById(_selectedFriendlyFigureId.Value);
-            var target = grid.GetFigureById(_hoveredFigureId.Value);
+            Figure? attacker = grid.GetFigureById(_selectedFriendlyFigureId.Value);
+            Figure? target = grid.GetFigureById(_hoveredFigureId.Value);
 
             if (attacker == null)
             {
@@ -213,8 +203,8 @@ namespace Project.Gameplay.Gameplay.Selection
 
             _logger.Debug($"[DamagePreview] Attacker={attacker.Id}, Target={target.Id}");
 
-            var attackerCell = grid.FindFigure(attacker);
-            var targetCell = grid.FindFigure(target);
+            BoardCell? attackerCell = grid.FindFigure(attacker);
+            BoardCell? targetCell = grid.FindFigure(target);
 
             if (attackerCell == null || targetCell == null)
             {
@@ -222,7 +212,7 @@ namespace Project.Gameplay.Gameplay.Selection
                 return false;
             }
 
-            var attackContext = new AttackRuleContext(
+            AttackRuleContext attackContext = new(
                 attacker,
                 target,
                 attackerCell.Position,
@@ -235,16 +225,15 @@ namespace Project.Gameplay.Gameplay.Selection
                 return false;
             }
 
-            // === РАСЧЕТ УРОНА ЧЕРЕЗ PIPELINE (preview mode) ===
             float rawDamage = Mathf.Max(1f, attacker.Stats.Attack.Value - target.Stats.Defence.Value);
             
-            var dmgCtx = new DamageContext(
+            DamageContext dmgCtx = new(
                 attacker,
                 target,
                 rawDamage,
                 isPreview: true);
 
-            var result = _damagePipeline.Calculate(dmgCtx);
+            DamageResult result = _damagePipeline.Calculate(dmgCtx);
 
             _logger.Debug($"[DamagePreview] PIPELINE: Raw={rawDamage}, Final={result.Final}, Cancelled={result.Cancelled}");
 
@@ -257,11 +246,10 @@ namespace Project.Gameplay.Gameplay.Selection
             return true;
         }
 
-        public void Dispose()
+        void IDisposable.Dispose()
         {
             _logger.Debug("[DamagePreviewService] Disposing...");
 
-            // Очищаем все активные превью при уничтожении сервиса
             if (_lastPreviewFigureId.HasValue)
             {
                 _figurePresenter.SetDamagePreview(_lastPreviewFigureId.Value, null);
@@ -269,7 +257,6 @@ namespace Project.Gameplay.Gameplay.Selection
             }
 
             _subscriptions?.Dispose();
-
             _logger.Debug("[DamagePreviewService] Disposed");
         }
     }

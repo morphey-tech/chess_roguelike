@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using VContainer;
 
 namespace Project.Gameplay.Gameplay.Combat.Damage
 {
@@ -7,7 +8,8 @@ namespace Project.Gameplay.Gameplay.Combat.Damage
     {
         private readonly IReadOnlyList<IDamageModifier> _modifiers;
 
-        public DamagePipeline(IEnumerable<IDamageModifier> modifiers)
+        [Inject]
+        private DamagePipeline(IEnumerable<IDamageModifier> modifiers)
         {
             _modifiers = modifiers
                 .OrderBy(m => m.Order)

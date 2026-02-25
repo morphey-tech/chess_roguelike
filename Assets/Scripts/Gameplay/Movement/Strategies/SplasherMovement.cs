@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
+using Project.Gameplay.Gameplay.Movement.Extensions;
 using Project.Gameplay.Movement;
 
 namespace Project.Gameplay.Gameplay.Movement.Strategies
@@ -14,44 +15,39 @@ namespace Project.Gameplay.Gameplay.Movement.Strategies
     {
         public string Id => "splasher";
 
-        // All 8 directions for 1-cell move
-        private static readonly (int row, int col)[] AllDirections =
-        {
-            (-1, -1), (-1, 0), (-1, 1),
-            ( 0, -1),          ( 0, 1),
-            ( 1, -1), ( 1, 0), ( 1, 1)
-        };
-
         public IEnumerable<MovementStrategyResult> GetAvailableMoves(Figure figure, GridPosition from, BoardGrid grid)
         {
             int forwardDr = figure.Team == Team.Player ? 1 : -1;
 
-            // 1 cell in any direction
-            foreach ((int dr, int dc) in AllDirections)
+            foreach ((int dr, int dc) in MovementDirectionsExtensions.GetAdjacentDirections())
             {
                 GridPosition to = new(from.Row + dr, from.Column + dc);
                 if (!grid.IsInside(to))
+                {
                     continue;
+                }
 
-                var cell = grid.GetBoardCell(to);
-                var result = new MovementStrategyResult(figure, to, true, cell.OccupiedBy);
+                BoardCell cell = grid.GetBoardCell(to);
+                MovementStrategyResult result = new MovementStrategyResult(figure, to, true, cell.OccupiedBy);
                 if (result.CanOccupy())
+                {
                     yield return result;
+                }
             }
 
-            // 2 cells forward
             GridPosition forward2 = new(from.Row + forwardDr * 2, from.Column);
             if (grid.IsInside(forward2))
             {
-                // Check intermediate cell is empty
                 GridPosition intermediate = new(from.Row + forwardDr, from.Column);
-                var intermediateCell = grid.GetBoardCell(intermediate);
+                BoardCell intermediateCell = grid.GetBoardCell(intermediate);
                 if (intermediateCell.OccupiedBy == null)
                 {
-                    var cell = grid.GetBoardCell(forward2);
-                    var result = new MovementStrategyResult(figure, forward2, true, cell.OccupiedBy);
+                    BoardCell cell = grid.GetBoardCell(forward2);
+                    MovementStrategyResult result = new(figure, forward2, true, cell.OccupiedBy);
                     if (result.CanOccupy())
+                    {
                         yield return result;
+                    }
                 }
             }
         }
@@ -59,47 +55,40 @@ namespace Project.Gameplay.Gameplay.Movement.Strategies
         public MovementStrategyResult GetFor(Figure figure, GridPosition from, GridPosition to, BoardGrid grid)
         {
             if (!grid.IsInside(to))
+            {
                 return MovementStrategyResult.MakeUnreachable(figure, to, null);
+            }
 
             int dr = to.Row - from.Row;
             int dc = to.Column - from.Column;
-
             int forwardDr = figure.Team == Team.Player ? 1 : -1;
 
-            // Check if it's a valid move
-            bool isValid = IsValidSplasherMove(dr, dc, forwardDr);
-
-            if (!isValid)
+            if (!IsValidSplasherMove(dr, dc, forwardDr))
+            {
                 return MovementStrategyResult.MakeUnreachable(figure, to, null);
+            }
 
-            // Check path clear for 2-cell forward move
             if (Math.Abs(dr) == 2 && dc == 0)
             {
                 GridPosition intermediate = new(from.Row + forwardDr, from.Column);
-                var intermediateCell = grid.GetBoardCell(intermediate);
+                BoardCell intermediateCell = grid.GetBoardCell(intermediate);
                 if (intermediateCell.OccupiedBy != null)
+                {
                     return MovementStrategyResult.MakeUnreachable(figure, to, null);
+                }
             }
 
-            var cell = grid.GetBoardCell(to);
+            BoardCell cell = grid.GetBoardCell(to);
             return new MovementStrategyResult(figure, to, true, cell.OccupiedBy);
         }
 
-        private bool IsValidSplasherMove(int dr, int dc, int forwardDr)
+        private static bool IsValidSplasherMove(int dr, int dc, int forwardDr)
         {
-            // 1 cell in any direction
-            if (Math.Max(Math.Abs(dr), Math.Abs(dc)) == 1)
+            if (MovementDirectionsExtensions.IsAdjacentMove(dr, dc))
             {
                 return true;
             }
-
-            // 2 cells forward only
-            if (dr == forwardDr * 2 && dc == 0)
-            {
-                return true;
-            }
-
-            return false;
+            return dr == forwardDr * 2 && dc == 0;
         }
     }
 }

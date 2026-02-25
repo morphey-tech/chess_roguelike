@@ -2,6 +2,7 @@ using System;
 using MessagePipe;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Prepare.Messages;
+using VContainer;
 
 namespace Project.Gameplay.Gameplay.Prepare
 {
@@ -15,7 +16,8 @@ namespace Project.Gameplay.Gameplay.Prepare
         private readonly ILogger<PrepareVisualSyncService> _logger;
         private readonly IDisposable _subscriptions;
 
-        public PrepareVisualSyncService(
+        [Inject]
+        private PrepareVisualSyncService(
             IPreparePresenter presenter,
             ISubscriber<PrepareSelectionChangedMessage> selectionChangedSubscriber,
             ISubscriber<PrepareVisualResetMessage> visualResetSubscriber,
@@ -33,8 +35,9 @@ namespace Project.Gameplay.Gameplay.Prepare
         private void OnSelectionChanged(PrepareSelectionChangedMessage message)
         {
             if (string.IsNullOrEmpty(message.FigureId))
+            {
                 return;
-
+            }
             _presenter.SetSelected(message.FigureId, message.IsSelected);
         }
 

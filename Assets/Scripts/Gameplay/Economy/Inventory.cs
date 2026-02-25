@@ -10,13 +10,12 @@ namespace Project.Gameplay.Gameplay.Economy
     /// </summary>
     public sealed class Inventory
     {
-        private readonly List<Item> _items = new();
-        private readonly IReadOnlyList<IInventoryRule> _rules;
-
         public int Capacity { get; }
-
         public IReadOnlyList<Item> Items => _items;
         public int Count => _items.Count;
+        
+        private readonly List<Item> _items = new();
+        private readonly IReadOnlyList<IInventoryRule> _rules;
 
         public Inventory(int capacity = 999, IReadOnlyList<IInventoryRule>? rules = null)
         {
@@ -24,28 +23,43 @@ namespace Project.Gameplay.Gameplay.Economy
             _rules = rules ?? Array.Empty<IInventoryRule>();
         }
 
-        public bool CanAdd(Item item)
+        public bool CanAdd(Item? item)
         {
-            if (item == null) return false;
+            if (item == null)
+            {
+                return false;
+            }
 
             foreach (IInventoryRule rule in _rules)
             {
                 if (!rule.CanAdd(this, item))
+                {
                     return false;
+                }
             }
 
-            if (_items.Count >= Capacity) return false;
+            if (_items.Count >= Capacity)
+            {
+                return false;
+            }
+
             if (item.MaxStack > 1)
             {
                 Item? existing = _items.FirstOrDefault(i => i.ConfigId == item.ConfigId && i.CanStack);
-                if (existing != null) return true;
+                if (existing != null)
+                {
+                    return true;
+                }
             }
             return _items.Count + 1 <= Capacity;
         }
 
         public void Add(Item item)
         {
-            if (!CanAdd(item)) return;
+            if (!CanAdd(item))
+            {
+                return;
+            }
 
             if (item.MaxStack > 1)
             {
@@ -56,7 +70,9 @@ namespace Project.Gameplay.Gameplay.Economy
                 {
                     existing.StackCount += item.StackCount;
                     if (existing.StackCount > existing.MaxStack)
+                    {
                         existing.StackCount = existing.MaxStack;
+                    }
                     return;
                 }
             }
@@ -67,7 +83,10 @@ namespace Project.Gameplay.Gameplay.Economy
         public bool Remove(string instanceId)
         {
             Item? item = Find(instanceId);
-            if (item == null) return false;
+            if (item == null)
+            {
+                return false;
+            }
             _items.Remove(item);
             return true;
         }
@@ -75,7 +94,10 @@ namespace Project.Gameplay.Gameplay.Economy
         public bool RemoveByConfigId(string configId)
         {
             Item? item = _items.FirstOrDefault(i => i.ConfigId == configId);
-            if (item == null) return false;
+            if (item == null)
+            {
+                return false;
+            }
             _items.Remove(item);
             return true;
         }

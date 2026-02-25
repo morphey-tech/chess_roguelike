@@ -5,11 +5,13 @@ using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
 using Project.Core.Core.Physics;
 using Project.Gameplay.Gameplay.Figures;
+using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Input.Messages;
 using Project.Gameplay.Gameplay.Run;
 using Project.Gameplay.Presentations;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using VContainer;
 using VContainer.Unity;
 
 namespace Project.Gameplay.Gameplay.Input
@@ -34,7 +36,7 @@ namespace Project.Gameplay.Gameplay.Input
         private InputAction _clickAction;
         private InputAction _pointAction;
         private InputAction _endTurnAction;
-        private InputAction _cancelAction;
+        private InputAction? _cancelAction;
 
         private Camera _camera;
         private int? _hoveredFigureId;
@@ -42,7 +44,8 @@ namespace Project.Gameplay.Gameplay.Input
         // Reusable buffer for RaycastNonAlloc (max 16 figures in ray path)
         private readonly RaycastHit[] _raycastBuffer = new RaycastHit[16];
 
-        public InputDispatcher(
+        [Inject]
+        private InputDispatcher(
             InputActionAsset inputActions,
             IPublisher<RawClickMessage> rawClickPublisher,
             IPublisher<CellClickedMessage> cellClickedPublisher,
@@ -81,7 +84,9 @@ namespace Project.Gameplay.Gameplay.Input
             _pointAction.performed += OnPointPerformed;
             _endTurnAction.performed += OnEndTurnPerformed;
             if (_cancelAction != null)
+            {
                 _cancelAction.performed += OnCancelPerformed;
+            }
 
             _gameplayMap.Enable();
 
@@ -93,7 +98,10 @@ namespace Project.Gameplay.Gameplay.Input
             if (_camera == null)
             {
                 _camera = Camera.main;
-                if (_camera == null) return;
+                if (_camera == null)
+                {
+                    return;
+                }
             }
 
             Vector2 screenPos = _pointAction.ReadValue<Vector2>();
@@ -124,7 +132,10 @@ namespace Project.Gameplay.Gameplay.Input
             if (_camera == null)
             {
                 _camera = Camera.main;
-                if (_camera == null) return;
+                if (_camera == null)
+                {
+                    return;
+                }
             }
 
             Vector2 screenPos = _pointAction.ReadValue<Vector2>();
@@ -162,7 +173,7 @@ namespace Project.Gameplay.Gameplay.Input
                         if (entityLink?.GetEntity() is Figure figure)
                         {
                             // Проверяем, что фигура находится на этой клетке
-                            var cell = _runHolder.Current?.CurrentStage?.Grid?.FindFigure(figure);
+                            BoardCell? cell = _runHolder.Current?.CurrentStage?.Grid?.FindFigure(figure);
                             if (cell != null && cell.Position.Row == row && cell.Position.Column == col)
                             {
                                 hoveredFigureId = figure.Id;
@@ -183,7 +194,7 @@ namespace Project.Gameplay.Gameplay.Input
                 
                 if (hitCount > 0)
                 {
-                    System.Array.Sort(_raycastBuffer, 0, hitCount, RaycastHitComparer.Instance);
+                    Array.Sort(_raycastBuffer, 0, hitCount, RaycastHitComparer.Instance);
                     
                     for (int i = 0; i < hitCount; i++)
                     {
@@ -198,7 +209,9 @@ namespace Project.Gameplay.Gameplay.Input
             }
 
             if (_hoveredFigureId == hoveredFigureId)
+            {
                 return;
+            }
 
             _hoveredFigureId = hoveredFigureId;
             _figureHoverChangedPublisher.Publish(new FigureHoverChangedMessage(hoveredFigureId));

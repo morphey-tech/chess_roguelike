@@ -5,6 +5,7 @@ using Project.Core.Core.Configs.Stage;
 using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.Gameplay.Stage;
+using VContainer;
 
 namespace Project.Gameplay.Gameplay.Figures
 {
@@ -13,7 +14,8 @@ namespace Project.Gameplay.Gameplay.Figures
         private readonly ConfigProvider _configProvider;
         private readonly SpawnPatternParser _patternParser;
 
-        public DuelFiguresSpawnProvider(ConfigProvider configProvider, SpawnPatternParser patternParser)
+        [Inject]
+        private DuelFiguresSpawnProvider(ConfigProvider configProvider, SpawnPatternParser patternParser)
         {
             _configProvider = configProvider;
             _patternParser = patternParser;

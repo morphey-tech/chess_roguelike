@@ -2,6 +2,7 @@ using System;
 using Cysharp.Threading.Tasks;
 using Project.Core.Core.Configs.Run;
 using Project.Core.Core.Configs.Suites;
+using Project.Core.Core.Random;
 using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.Gameplay.Run;
 using Project.Gameplay.Gameplay.Save.Service;
@@ -19,6 +20,7 @@ namespace Project.Unity.Unity.Bootstrap
         private RunHolder _runHolder;
         private PlayerRunStateService _runStateService;
         private PlayerLoadoutService _loadoutService;
+        private RandomService _randomService;
 
         private const string DefaultRunId = "0";
 
@@ -29,6 +31,7 @@ namespace Project.Unity.Unity.Bootstrap
             _runHolder = Resolve<RunHolder>();
             _runStateService = Resolve<PlayerRunStateService>();
             _loadoutService = Resolve<PlayerLoadoutService>();
+            _randomService = Resolve<RandomService>();
         }
 
         protected override async UniTask OnBootstrapAsync()
@@ -53,7 +56,7 @@ namespace Project.Unity.Unity.Bootstrap
         private async UniTask InitializeRunStateAsync(RunConfig runConfig)
         {
             Log.Info($"InitializeRunStateAsync: HasRun={_runStateService.HasRun}");
-            
+
             // Skip if run state already exists (e.g. loading from save)
             if (_runStateService.HasRun)
             {
@@ -63,14 +66,15 @@ namespace Project.Unity.Unity.Bootstrap
 
             Log.Info($"Loading suite config for suiteId: {_loadoutService.Current.SuiteId}");
             SuiteConfig suiteConfig = await LoadSuiteConfigAsync();
-            
+
             string[] figureIds = suiteConfig.Figures;
             string firstStageId = runConfig.Stages[0];
-            
+
             Log.Info($"Suite '{suiteConfig.Id}' has {figureIds.Length} figures: [{string.Join(", ", figureIds)}]");
-            
+
             _runStateService.StartNew(_loadoutService.Current, figureIds, firstStageId);
-            Log.Info($"Initialized run state with {_runStateService.Current.Figures.Count} figures in hand, starting stage: {firstStageId}");
+            _randomService.SetSeed(_runStateService.Current.Seed);
+            Log.Info($"Initialized run state with {_runStateService.Current.Figures.Count} figures in hand, seed={_runStateService.Current.Seed}, starting stage: {firstStageId}");
         }
 
         private async UniTask<RunConfig> LoadRunConfigAsync(string runId)

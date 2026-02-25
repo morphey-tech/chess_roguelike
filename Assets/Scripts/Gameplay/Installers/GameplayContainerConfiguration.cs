@@ -1,6 +1,7 @@
 using System.Collections.Generic;
-using Project.Core.Core.ShrinkingZone.Core;
-using Project.Core.Core.ShrinkingZone.Strategies;
+using Project.Core.Core.Random;
+using Project.Core.Core.Storm.Core;
+using Project.Core.Core.Storm.Strategies;
 using Project.Gameplay.Gameplay.Attack;
 using Project.Gameplay.Gameplay.Attack.Rules;
 using Project.Gameplay.Gameplay.Attack.Strategies;
@@ -42,6 +43,9 @@ namespace Project.Gameplay.Gameplay.Installers
     {
         public static void Register(IContainerBuilder builder)
         {
+            // Core services
+            builder.Register<RandomService>(Lifetime.Singleton).As<IRandomService>();
+
             // Run & Stage
             builder.Register<RunHolder>(Lifetime.Singleton);
             builder.Register<RunFactory>(Lifetime.Singleton);
@@ -63,24 +67,24 @@ namespace Project.Gameplay.Gameplay.Installers
             builder.Register<InteractionController>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
             builder.Register<TurnExecutionFlow>(Lifetime.Singleton).As<ITurnController>();
 
-            //Zone
+            //Storm
             builder.Register<LayerRingStrategy>(Lifetime.Singleton)
-                .As<IZoneShrinkStrategy>();
-            builder.Register<ZoneShrinkSystemFactory>(Lifetime.Singleton)
-                .As<IZoneShrinkSystemFactory>();
-            builder.Register<ZoneCellEvaluator>(Lifetime.Singleton)
+                .As<IStormStrategy>();
+            builder.Register<StormSystemFactory>(Lifetime.Singleton)
+                .As<IStormSystemFactory>();
+            builder.Register<StormCellEvaluator>(Lifetime.Singleton)
                 .AsSelf()
-                .As<IZoneCellEvaluator>();
-            builder.Register<ZoneBattleService>(Lifetime.Singleton)
+                .As<IStormCellEvaluator>();
+            builder.Register<StormBattleService>(Lifetime.Singleton)
                 .AsImplementedInterfaces()
                 .AsSelf();
-            builder.Register<ZoneInitService>(Lifetime.Singleton)
+            builder.Register<StormInitService>(Lifetime.Singleton)
                 .AsImplementedInterfaces()
                 .AsSelf();
-            builder.Register<ZoneHighlightRenderer>(Lifetime.Singleton)
+            builder.Register<StormHighlightRenderer>(Lifetime.Singleton)
                 .AsImplementedInterfaces()
                 .AsSelf();
-            builder.Register<ZoneDamageService>(Lifetime.Singleton)
+            builder.Register<StormDamageService>(Lifetime.Singleton)
                 .AsImplementedInterfaces()
                 .AsSelf();
             
@@ -125,15 +129,12 @@ namespace Project.Gameplay.Gameplay.Installers
             builder.Register<EngagementRuleService>(Lifetime.Singleton).As<IEngagementRuleService>();
 
             // Attack rules
-            builder.Register<AttackRuleService>(Lifetime.Singleton)
-                .WithParameter<IEnumerable<IAttackRule>>(new IAttackRule[]
-                {
-                    new RangeRule(),
-                    new DisarmRule(),
-                    new StealthRule(),
-                    new TauntRule(),
-                    new DesperationRule()
-                });
+            builder.Register<RangeRule>(Lifetime.Transient).As<IAttackRule>();
+            builder.Register<TauntRule>(Lifetime.Transient).As<IAttackRule>();
+            builder.Register<DisarmRule>(Lifetime.Transient).As<IAttackRule>();
+            builder.Register<StealthRule>(Lifetime.Transient).As<IAttackRule>();
+            builder.Register<DesperationRule>(Lifetime.Transient).As<IAttackRule>();
+            builder.Register<AttackRuleService>(Lifetime.Singleton);
 
             // Attack strategies
             builder.Register<AttackStrategyFactory>(Lifetime.Singleton)
@@ -208,6 +209,7 @@ namespace Project.Gameplay.Gameplay.Installers
             builder.Register<FigureSpawnService>(Lifetime.Singleton);
             builder.Register<MovementService>(Lifetime.Singleton);
             builder.Register<UIService>(Lifetime.Singleton);
+            builder.Register<PassiveFactory>(Lifetime.Singleton);
         }
     }
 }

@@ -7,10 +7,8 @@ namespace Project.Core.Core.Configs.Economy
     [Serializable]
     public sealed class ResourceDefinitionRepository : ConfigRepository<ResourceDefinition>
     {
-        private ResourceDefinition[] _items = Array.Empty<ResourceDefinition>();
-
         [JsonProperty("content")]
-        public ResourceDefinition[] Items_
+        public ResourceDefinition[] Definitions
         {
             get => _items;
             set { _items = value ?? Array.Empty<ResourceDefinition>(); ResetIndex(); }
@@ -18,5 +16,7 @@ namespace Project.Core.Core.Configs.Economy
 
         protected override IReadOnlyList<ResourceDefinition>? Items => _items;
         protected override string GetKey(ResourceDefinition item) => item.Id;
+        
+        private ResourceDefinition[] _items = Array.Empty<ResourceDefinition>();
     }
 }

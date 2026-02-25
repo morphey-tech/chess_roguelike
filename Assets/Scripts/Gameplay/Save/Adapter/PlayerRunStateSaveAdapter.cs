@@ -1,3 +1,4 @@
+using Project.Core.Core.Random;
 using Project.Gameplay.Gameplay.Save.Service;
 
 namespace Project.Gameplay.Gameplay.Save.Adapter
@@ -7,10 +8,12 @@ namespace Project.Gameplay.Gameplay.Save.Adapter
         ISaveDataApplier
     {
         private readonly PlayerRunStateService _service;
+        private readonly RandomService _random;
 
-        public PlayerRunStateSaveAdapter(PlayerRunStateService service)
+        public PlayerRunStateSaveAdapter(PlayerRunStateService service, RandomService random)
         {
             _service = service;
+            _random = random;
         }
 
         public void Populate(SaveSnapshot snapshot)
@@ -28,6 +31,7 @@ namespace Project.Gameplay.Gameplay.Save.Adapter
                 return;
             }
             _service.Configure(snapshot.Run);
+            _random.SetSeed(snapshot.Run.Seed);
         }
     }
 }

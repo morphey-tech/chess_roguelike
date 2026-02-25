@@ -12,7 +12,9 @@ namespace Project.Gameplay.Gameplay.Attack
         {
             int distance = AttackUtils.GetDistance(from, to);
             if (!attack.CanHit(distance))
+            {
                 return false;
+            }
 
             return attack.Targeting switch
             {
@@ -46,15 +48,19 @@ namespace Project.Gameplay.Gameplay.Attack
             int stepC = System.Math.Sign(dc);
             int steps = System.Math.Max(System.Math.Abs(dr), System.Math.Abs(dc));
 
-            // exclude target cell
             for (int i = 1; i < steps; i++)
             {
                 GridPosition pos = new(from.Row + stepR * i, from.Column + stepC * i);
                 if (!grid.IsInside(pos))
+                {
                     return false;
+                }
+
                 BoardCell cell = grid.GetBoardCell(pos);
                 if (cell.OccupiedBy != null && cell.OccupiedBy.Team != attackerTeam)
+                {
                     return false;
+                }
             }
             return true;
         }

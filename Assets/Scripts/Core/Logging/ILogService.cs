@@ -2,9 +2,6 @@ using System;
 
 namespace Project.Core.Core.Logging
 {
-    /// <summary>
-    /// Интерфейс сервиса логирования
-    /// </summary>
     public interface ILogService
     {
         LogLevel MinLevel { get; set; }

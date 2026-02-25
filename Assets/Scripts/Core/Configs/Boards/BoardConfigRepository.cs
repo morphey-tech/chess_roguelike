@@ -1,15 +1,12 @@
 using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using Project.Core.Core.Configs;
 
 namespace Project.Core.Core.Configs.Boards
 {
     [Serializable]
     public class BoardConfigRepository : ConfigRepository<BoardConfig>
     {
-        private BoardConfig[] _boards = Array.Empty<BoardConfig>();
-
         [JsonProperty("content")]
         public BoardConfig[] Boards
         {
@@ -19,5 +16,7 @@ namespace Project.Core.Core.Configs.Boards
 
         protected override IReadOnlyList<BoardConfig> Items => _boards;
         protected override string GetKey(BoardConfig item) => item.Id;
+        
+        private BoardConfig[] _boards = Array.Empty<BoardConfig>();
     }
 }

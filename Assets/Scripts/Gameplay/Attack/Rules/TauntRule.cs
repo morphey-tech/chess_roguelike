@@ -1,8 +1,9 @@
+using System.Collections.Generic;
 using System.Linq;
-using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Combat.Passives;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
+using VContainer;
 
 namespace Project.Gameplay.Gameplay.Attack.Rules
 {
@@ -11,46 +12,43 @@ namespace Project.Gameplay.Gameplay.Attack.Rules
     /// </summary>
     public sealed class TauntRule : IAttackRule
     {
+        private readonly AttackStrategyFactory _strategyFactory;
+
         public int Priority => 100;
+
+        [Inject]
+        private TauntRule(AttackStrategyFactory strategyFactory)
+        {
+            _strategyFactory = strategyFactory;
+        }
 
         public bool Validate(AttackRuleContext context)
         {
-            var attacker = context.Attacker;
-            var grid = context.Grid;
+            Figure attacker = context.Attacker;
+            BoardGrid grid = context.Grid;
 
-            var enemyTeam = attacker.Team == Team.Player
+            Team enemyTeam = attacker.Team == Team.Player
                 ? Team.Enemy
                 : Team.Player;
 
-            var enemiesInRange = grid.GetFiguresByTeam(enemyTeam)
+            IAttackStrategy strategy = _strategyFactory.Get(attacker.AttackId);
+
+            List<Figure> enemiesInRange = grid.GetFiguresByTeam(enemyTeam)
                 .Where(e =>
                 {
                     var cell = grid.FindFigure(e);
                     if (cell == null)
                         return false;
 
-                    return IsInRange(attacker, context.From, cell.Position, grid);
+                    return strategy.CanAttack(attacker, context.From, cell.Position, grid);
                 })
                 .ToList();
 
-            var tauntTargets = enemiesInRange
+            List<Figure> tauntTargets = enemiesInRange
                 .Where(e => e.BasePassives.Any(p => p is ProvocationPassive))
                 .ToList();
 
-            if (tauntTargets.Count == 0)
-                return true;
-
-            return tauntTargets.Contains(context.Target);
-        }
-
-        private bool IsInRange(
-            Figure attacker,
-            GridPosition from,
-            GridPosition to,
-            BoardGrid grid)
-        {
-            var strategy = AttackStrategyFactory.Instance.Get(attacker.AttackId);
-            return strategy.CanAttack(attacker, from, to, grid);
+            return tauntTargets.Count == 0 || tauntTargets.Contains(context.Target);
         }
     }
 }

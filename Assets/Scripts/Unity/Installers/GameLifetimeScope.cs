@@ -31,6 +31,7 @@ using Project.Unity.Unity.Views;
 using Project.Unity.Unity.Views.Animations.Board;
 using Project.Unity.Unity.Views.Animations.Board.Strategies;
 using Project.Unity.Unity.World;
+using Project.Unity.UI.Components;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using VContainer;
@@ -46,7 +47,7 @@ namespace Project.Unity.Unity.Installers
         [Header("Collectors")]
         [SerializeField] private WorldObjectCollector _worldObjectCollector;
         [SerializeField] private UiObjectCollector _uiObjectCollector;
-        
+
         private IObjectResolver _resolver = null!;
         private ILogger<GameLifetimeScope> _logger = null!;
 
@@ -97,10 +98,12 @@ namespace Project.Unity.Unity.Installers
 
         private void ConfigureViews(IContainerBuilder builder)
         {
+            builder.RegisterEntryPoint<AnchorToTargetTicker>()
+                .As<IAnchorToTargetTicker>();
+            
             // Views are regular classes - they implement Core interfaces
             builder.Register<BoardPresenter>(Lifetime.Singleton)
-                .As<IBoardPresenter>()
-                .As<IGameShutdownCleanup>();
+                .AsImplementedInterfaces();
 
             // Board appear
             builder.Register<BoardAnimationFactory>(Lifetime.Singleton)
@@ -109,18 +112,15 @@ namespace Project.Unity.Unity.Installers
                     new NoneAnimationStrategy(),
                     new BoardCellsRainDropAnimationStrategy()
                 });
-            
+
             builder.Register<FigurePresenter>(Lifetime.Singleton)
-                .As<IFigurePresenter>()
-                .As<IGameShutdownCleanup>();
+                .AsImplementedInterfaces();
 
             builder.Register<ProjectilePresenter>(Lifetime.Singleton)
-                .As<IProjectilePresenter>()
-                .As<IGameShutdownCleanup>();
+                .AsImplementedInterfaces();
 
             builder.Register<LootPresenter>(Lifetime.Singleton)
-                .As<ILootPresenter>()
-                .As<IGameShutdownCleanup>();
+                .AsImplementedInterfaces();
 
             builder.Register<ActionContextAccessor>(Lifetime.Singleton);
 
@@ -137,8 +137,7 @@ namespace Project.Unity.Unity.Installers
             builder.Register<PrepareViewFactory>(Lifetime.Singleton);
             builder.Register<PrepareAnimationPlayer>(Lifetime.Singleton);
             builder.Register<PreparePresenter>(Lifetime.Singleton)
-                .As<IPreparePresenter>()
-                .As<IGameShutdownCleanup>();
+                .AsImplementedInterfaces();
 
             // Unity-side input handlers
             builder.Register<HandFigureClickHandler>(Lifetime.Singleton)
@@ -205,10 +204,10 @@ namespace Project.Unity.Unity.Installers
             resolver.Resolve<HpBarVisibilityService>();
             resolver.Resolve<DamagePreviewService>();
             resolver.Resolve<HandFigureClickHandler>();
-            resolver.Resolve<ZoneBattleService>();
-            resolver.Resolve<ZoneInitService>();
-            resolver.Resolve<ZoneHighlightRenderer>();
-            resolver.Resolve<ZoneDamageService>();
+            resolver.Resolve<StormBattleService>();
+            resolver.Resolve<StormInitService>();
+            resolver.Resolve<StormHighlightRenderer>();
+            resolver.Resolve<StormDamageService>();
 
             // UI must be force-resolved so its constructor runs InitAsync
             // (loads WindowsController prefab). Without this, static UI methods

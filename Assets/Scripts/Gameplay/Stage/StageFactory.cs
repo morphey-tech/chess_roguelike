@@ -12,17 +12,17 @@ namespace Project.Gameplay.Gameplay.Stage
 {
     public class StageFactory
     {
-        private readonly ZoneInitService _zoneInitService;
+        private readonly StormInitService _stormInitService;
         private readonly IPublisher<StageCompletedMessage> _completedPublisher;
         private readonly ILogService _logService;
 
         [Inject]
         private StageFactory(
-            ZoneInitService zoneInitService,
+            StormInitService stormInitService,
             IPublisher<StageCompletedMessage> completedPublisher,
             ILogService logService)
         {
-            _zoneInitService = zoneInitService;
+            _stormInitService = stormInitService;
             _completedPublisher = completedPublisher;
             _logService = logService;
         }
@@ -35,7 +35,7 @@ namespace Project.Gameplay.Gameplay.Stage
                 grid,
                 runState,
                 phases,
-                _zoneInitService,
+                _stormInitService,
                 _completedPublisher,
                 _logService);
         }

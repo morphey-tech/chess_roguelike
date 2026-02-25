@@ -13,26 +13,4 @@ namespace Project.Gameplay.Gameplay.Loot
 
         public bool IsEmpty => Resources.Count == 0 && Items.Count == 0;
     }
-
-    public sealed class ResourceDrop
-    {
-        public string Id { get; }
-        public int Amount { get; }
-
-        public ResourceDrop(string id, int amount)
-        {
-            Id = id;
-            Amount = amount;
-        }
-    }
-
-    public sealed class ItemDrop
-    {
-        public string ConfigId { get; }
-
-        public ItemDrop(string configId)
-        {
-            ConfigId = configId;
-        }
-    }
 }

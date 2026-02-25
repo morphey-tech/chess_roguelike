@@ -151,7 +151,10 @@ namespace Project.Gameplay.Gameplay.Bootstrap
 
         private void SetState(GameState newState)
         {
-            if (CurrentState == newState) return;
+            if (CurrentState == newState)
+            {
+                return;
+            }
 
             GameState previousState = CurrentState;
             CurrentState = newState;
@@ -170,9 +173,12 @@ namespace Project.Gameplay.Gameplay.Bootstrap
 
         public void Dispose()
         {
-            if (_disposed) return;
-            _disposed = true;
+            if (_disposed)
+            {
+                return;
+            }
 
+            _disposed = true;
             _onStateChanged.Dispose();
             _onInitProgress.Dispose();
             _initializables.Clear();

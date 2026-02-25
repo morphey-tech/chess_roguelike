@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 namespace Project.Core.Core.Configs.Figure
 {
     [Serializable]
-    public class FigureDescriptionConfig
+    public sealed class FigureDescriptionConfig
     {
         [JsonProperty("id")]
         public string Id { get; set; }

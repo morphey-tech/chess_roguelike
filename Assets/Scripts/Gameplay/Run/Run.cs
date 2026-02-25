@@ -66,7 +66,9 @@ namespace Project.Gameplay.Gameplay.Run
         {
             int nextIndex = _runStateService.Current?.CurrentStageIndex + 1 ?? GetCurrentStageIndex() + 1;
             if (nextIndex >= _config.Stages.Length)
+            {
                 return false;
+            }
 
             _runStateService.Current!.CurrentStageIndex = nextIndex;
             _runStateService.Current.StageId = _config.Stages[nextIndex];
@@ -106,7 +108,9 @@ namespace Project.Gameplay.Gameplay.Run
             {
                 int idx = _runStateService.Current.CurrentStageIndex;
                 if (idx >= 0 && idx < _config.Stages.Length)
+                {
                     return idx;
+                }
 
                 string currentStageId = _runStateService.Current.StageId ?? _config.Stages[0];
                 idx = Array.IndexOf(_config.Stages, currentStageId);
@@ -124,7 +128,10 @@ namespace Project.Gameplay.Gameplay.Run
             int stageIndex = GetCurrentStageIndex();
             string stageId = _config.Stages[stageIndex];
             if (_runStateService.Current != null)
+            {
                 _runStateService.Current.StageId = stageId;
+            }
+
             StageConfigRepository stageRepository = 
                 await _configProvider.Get<StageConfigRepository>("stages_conf");
             StageConfig? stageConfig = stageRepository.Get(stageId);

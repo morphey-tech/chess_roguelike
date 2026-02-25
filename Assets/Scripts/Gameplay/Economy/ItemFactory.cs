@@ -7,6 +7,7 @@ using static Project.Core.Core.Configs.Economy.ItemCategories;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Configs;
+using VContainer;
 
 namespace Project.Gameplay.Gameplay.Economy
 {
@@ -17,14 +18,17 @@ namespace Project.Gameplay.Gameplay.Economy
     public sealed class ItemFactory
     {
         private readonly ConfigProvider _configProvider;
+        private readonly PassiveFactory _passiveFactory;
         private readonly ILogger _logger;
 
         private ItemConfigRepository? _itemConfigCache;
         private PassiveConfigRepository? _passiveConfigCache;
 
-        public ItemFactory(ConfigProvider configProvider, ILogService logService)
+        [Inject]
+        private ItemFactory(ConfigProvider configProvider, PassiveFactory passiveFactory, ILogService logService)
         {
             _configProvider = configProvider;
+            _passiveFactory = passiveFactory;
             _logger = logService.CreateLogger<ItemFactory>();
         }
 
@@ -71,7 +75,7 @@ namespace Project.Gameplay.Gameplay.Economy
                         continue;
                     }
 
-                    IPassive? passive = PassiveFactory.Create(passiveConfig);
+                    IPassive? passive = _passiveFactory.Create(passiveConfig);
                     if (passive != null)
                     {
                         passives.Add(passive);

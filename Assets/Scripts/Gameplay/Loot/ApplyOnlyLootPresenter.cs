@@ -19,8 +19,10 @@ namespace Project.Gameplay.Gameplay.Loot
 
         public UniTask PresentAsync(LootVisualContext context)
         {
-            if (context?.Loot != null && !context.Loot.IsEmpty)
+            if (context?.Loot is { IsEmpty: false })
+            {
                 _economy.ApplyLootResult(context.Loot);
+            }
             return UniTask.CompletedTask;
         }
     }

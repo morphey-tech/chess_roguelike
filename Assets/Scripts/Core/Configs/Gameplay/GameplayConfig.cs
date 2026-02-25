@@ -3,18 +3,8 @@ using Newtonsoft.Json;
 
 namespace Project.Core.Core.Configs.Gameplay
 {
-    public enum HpBarVisibilityMode
-    {
-        Always,
-        OnHover,
-        OnHoverOrSelection
-    }
-
-    /// <summary>
-    /// Global gameplay settings.
-    /// </summary>
     [Serializable]
-    public class GameplayConfig
+    public sealed class GameplayConfig
     {
         /// <summary>
         /// If true, enemy figures are hidden during the placement phase.

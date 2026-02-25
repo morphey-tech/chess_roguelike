@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
@@ -59,7 +58,10 @@ namespace Project.Gameplay.Gameplay.Configs
             if (_configsCache.TryGetValue(key, out object? cached))
             {
                 if (cached is T typed)
+                {
                     return typed;
+                }
+
                 if (cached is string json)
                 {
                     T config = JsonConvert.DeserializeObject<T>(json, JsonDeserializerSettings)!;
@@ -78,7 +80,10 @@ namespace Project.Gameplay.Gameplay.Configs
             if (_configsCache.TryGetValue(key, out object? cached))
             {
                 if (cached is T typed)
+                {
                     return typed;
+                }
+
                 if (cached is string json)
                 {
                     T config = JsonConvert.DeserializeObject<T>(json, JsonDeserializerSettings)!;

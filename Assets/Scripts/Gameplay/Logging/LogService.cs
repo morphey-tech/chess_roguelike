@@ -30,17 +30,23 @@ namespace Project.Gameplay.Gameplay.Logging
         
         public void Log(LogLevel level, string category, string message)
         {
-            if (level < MinLevel) return;
-            
-            var logger = _loggerFactory.CreateLogger(category);
+            if (level < MinLevel)
+            {
+                return;
+            }
+
+            Microsoft.Extensions.Logging.ILogger logger = _loggerFactory.CreateLogger(category);
             logger.Log(ToMsLogLevel(level), "[{Category}] {Message}", category, message);
         }
         
         public void Log(LogLevel level, string category, string message, Exception exception)
         {
-            if (level < MinLevel) return;
-            
-            var logger = _loggerFactory.CreateLogger(category);
+            if (level < MinLevel)
+            {
+                return;
+            }
+
+            Microsoft.Extensions.Logging.ILogger logger = _loggerFactory.CreateLogger(category);
             logger.Log(ToMsLogLevel(level), exception, "[{Category}] {Message}", category, message);
         }
         
@@ -71,17 +77,6 @@ namespace Project.Gameplay.Gameplay.Logging
         public void Dispose()
         {
             _loggerFactory?.Dispose();
-        }
-    }
-
-    /// <summary>
-    /// Типизированная обёртка
-    /// </summary>
-    public class ZLoggerWrapper<T> : ZLoggerWrapper, Core.Core.Logging.ILogger<T>
-    {
-        public ZLoggerWrapper(Microsoft.Extensions.Logging.ILogger<T> logger) 
-            : base(logger, typeof(T).Name)
-        {
         }
     }
 }
