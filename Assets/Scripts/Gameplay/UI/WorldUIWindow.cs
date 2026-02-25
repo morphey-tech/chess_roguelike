@@ -33,25 +33,23 @@ namespace Project.Gameplay.UI
       _assetService = assetService;
     }
 
-    public T Add<T>(T template, Transform followTarget) where T : Component
+    public T? Add<T>(T template, Transform followTarget) where T : Component
     {
-      var result = _assetService.InstantiateFromPrefab(template.gameObject, Vector3.zero, Quaternion.identity)
-        .GetComponent<T>(); // Assets.Reuse(template);
+      T? result = _assetService.InstantiateFromPrefab(template.gameObject, Vector3.zero, Quaternion.identity)
+        ?.GetComponent<T>(); // Assets.Reuse(template);
       AddExisting(result, followTarget);
-
       return result;
     }
 
-    public T Add<T>(T template, Vector3 position, bool isRect = false) where T : Component
+    public T? Add<T>(T template, Vector3 position, bool isRect = false) where T : Component
     {
-      var result = _assetService.InstantiateFromPrefab(template.gameObject, Vector3.zero, Quaternion.identity)
-        .GetComponent<T>();
+      T? result = _assetService.InstantiateFromPrefab(template.gameObject, Vector3.zero, Quaternion.identity)
+        ?.GetComponent<T>();
       AddExisting(result, position, isRect);
-
       return result;
     }
 
-    public void AddExisting<T>(T instance, Transform followTarget) where T : Component
+    public void AddExisting<T>(T instance, Transform followTarget) where T : Component?
     {
       if (instance == null)
         return;
@@ -80,7 +78,7 @@ namespace Project.Gameplay.UI
       SyncAnchorsAvoidanceTargets();
     }
 
-    public void AddExisting<T>(T instance, Vector3 position, bool isRect = false) where T : Component
+    public void AddExisting<T>(T instance, Vector3 position, bool isRect = false) where T : Component?
     {
       if (instance == null)
         return;
