@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 using MessagePipe;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Combat;
@@ -84,11 +85,11 @@ namespace Project.Gameplay.Gameplay.Turn
             _logger.Info($"Turn ended: {previousTeam} -> {CurrentTeam}, Turn #{TurnNumber}");
         }
 
-        public void StartBattle()
+        public async UniTask StartBattle()
         {
             TurnNumber = 1;
             CurrentTeam = Team.Player;
-            _uiService.SetGamePhase();
+            await _uiService.SetGamePhase();
             _turnChangedPublisher.Publish(new TurnChangedMessage(CurrentTeam, TurnNumber));
         }
 

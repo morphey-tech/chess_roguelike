@@ -1,7 +1,10 @@
+using Cysharp.Threading.Tasks;
 using Project.Gameplay.Gameplay.Figures;
+using Project.Gameplay.Gameplay.UI;
 using Project.Gameplay.Presentations;
 using Project.Gameplay.UI;
 using Project.Unity.UI.Components.Game;
+using UniRx;
 using UnityEngine;
 
 namespace Project.Unity.Unity.Views.Presentations
@@ -10,41 +13,66 @@ namespace Project.Unity.Unity.Views.Presentations
     {
         [SerializeField] private Color _playerTeamColor = Color.green;
         [SerializeField] private Color _enemyTeamColor =  Color.red;
-        
+
         [SerializeField] private HealthBar _viewTemplate;
         [SerializeField] private Transform _pivot;
+
+        private static WorldUIWindow? _cachedWorldUi;
         
         private EntityLink _entityLink;
-        private HealthBar _healthView;
+        private HealthBar? _healthView;
         private Figure? _figure;
         private CanvasGroup? _canvasGroup;
+        private bool _initialized = false;
+        private CompositeDisposable? _disposables;
 
-        public void Init(EntityLink link)
+        public async UniTask Init(EntityLink link)
         {
-            // Таких преколов канешн не должно быть. Шо та с энтитей делать надо
             if(link.GetEntity() is not Figure figure)
-                return;
-            
-            _entityLink = link; 
-            _figure = figure;
-            _healthView = Gameplay.Gameplay.UI.UIService.GetOrCreate<WorldUIWindow>().Add(_viewTemplate, _pivot);
-
-            var color = _figure.Team == Team.Player ? _playerTeamColor : _enemyTeamColor;
-            _healthView.Init(_figure.Stats.CurrentHp, _figure.Stats.MaxHp, color);
-        }
-
-        private void Update()
-        {
-            if (_figure == null || _healthView == null)
-                return;
-
-            if (_figure.Stats.IsDead)
             {
-                RemoveBar();
                 return;
             }
 
-            _healthView.SetHp(_figure.Stats.CurrentHp);
+            _entityLink = link;
+            _figure = figure;
+            _initialized = true;
+            _disposables = new CompositeDisposable();
+            
+            if (_cachedWorldUi == null)
+            {
+                _cachedWorldUi = await UIService.GetOrCreateAsync<WorldUIWindow>();
+            }
+            
+            TryCreateHealthBar();
+            _figure.Stats.CurrentHp
+                .Skip(1)
+                .Subscribe(OnHpChanged)
+                .AddTo(_disposables);
+        }
+
+        private void OnHpChanged(float hp)
+        {
+            if (_healthView == null)
+            {
+                return;
+            }
+            _healthView.SetHp(hp);
+        }
+
+        private void TryCreateHealthBar()
+        {
+            if (_healthView != null || _figure == null || _cachedWorldUi == null)
+            {
+                return;
+            }
+
+            _healthView = _cachedWorldUi.Add(_viewTemplate, _pivot);
+            if (_healthView == null)
+            {
+                return;
+            }
+            Color color = _figure.Team == Team.Player ? _playerTeamColor : _enemyTeamColor;
+            _healthView.Init(_figure.Stats.CurrentHp.Value, _figure.Stats.MaxHp, color);
         }
 
         public void Hide()
@@ -89,13 +117,17 @@ namespace Project.Unity.Unity.Views.Presentations
         private CanvasGroup? GetOrCreateCanvasGroup()
         {
             if (_healthView == null)
+            {
                 return null;
+            }
 
             if (_canvasGroup == null || _canvasGroup.gameObject != _healthView.gameObject)
             {
                 _canvasGroup = _healthView.GetComponent<CanvasGroup>();
                 if (_canvasGroup == null)
+                {
                     _canvasGroup = _healthView.gameObject.AddComponent<CanvasGroup>();
+                }
             }
 
             return _canvasGroup;
@@ -103,9 +135,15 @@ namespace Project.Unity.Unity.Views.Presentations
 
         private void RemoveBar()
         {
-            if (_healthView == null)
+            if (_healthView == null || _cachedWorldUi == null)
+            {
                 return;
-            Gameplay.Gameplay.UI.UIService.GetOrCreate<WorldUIWindow>().Remove(_healthView);
+            }
+
+            // Отписываемся от всех подписок
+            _disposables?.Clear();
+
+            _cachedWorldUi.Remove(_healthView);
             _healthView = null;
             _figure = null;
             _canvasGroup = null;
@@ -113,6 +151,7 @@ namespace Project.Unity.Unity.Views.Presentations
 
         private void OnDestroy()
         {
+            _disposables?.Dispose();
             RemoveBar();
         }
     }

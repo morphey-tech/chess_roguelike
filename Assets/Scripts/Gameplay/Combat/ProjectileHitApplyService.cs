@@ -50,7 +50,7 @@ namespace Project.Gameplay.Gameplay.Combat
             }
 
             BoardCell targetCell = grid.GetBoardCell(evt.TargetPosition);
-            if (targetCell?.OccupiedBy != target || target.Stats.CurrentHp <= 0)
+            if (targetCell?.OccupiedBy != target || target.Stats.CurrentHp.Value <= 0)
             {
                 return UniTask.CompletedTask;
             }

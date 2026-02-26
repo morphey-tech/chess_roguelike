@@ -8,7 +8,7 @@ namespace Project.Gameplay.UI
     {
         UniTask ShowWorldUiAsync();
         UniTask ShowPreparePhaseAsync();
-        void SetGamePhase();
+        UniTask SetGamePhase();
         UniTask HideCombatUiAsync();
         UniTask<StageFlowAction> ShowVictoryScreenAsync(StageResult result);
         UniTask<StageFlowAction> ShowDefeatScreenAsync(StageResult result);

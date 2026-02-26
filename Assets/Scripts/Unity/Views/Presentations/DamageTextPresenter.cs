@@ -1,4 +1,5 @@
-using Cysharp.Threading.Tasks.Triggers;
+using Cysharp.Threading.Tasks;
+using Project.Gameplay.Gameplay.UI;
 using Project.Gameplay.Gameplay.Visual.Commands.Contexts;
 using Project.Gameplay.UI;
 using Project.Unity.UI.Components;
@@ -10,11 +11,18 @@ namespace Project.Unity.Presentations
     {
         [SerializeField] private DamageText _template;
         [SerializeField] private Transform _pivot;
-        
-        public void ShowFor(DamageVisualContext ctx)
+
+        private static WorldUIWindow? _cachedWorldUi;
+
+        public async UniTask ShowFor(DamageVisualContext ctx)
         {
-            var damageText = Gameplay.Gameplay.UI.UIService.GetOrCreate<WorldUIWindow>().Add(_template, _pivot);
-            damageText.Play(ctx);
+            if (_cachedWorldUi == null)
+            {
+                _cachedWorldUi = await UIService.GetOrCreateAsync<WorldUIWindow>();
+            }
+                
+            DamageText? damageText = _cachedWorldUi.Add(_template, _pivot);
+            damageText?.Play(ctx);
         }
 
     }

@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 using MessagePipe;
 using Project.Core.Core.Logging;
 using Project.Gameplay;
@@ -34,13 +35,14 @@ namespace Project.Unity.Unity.Views.Presentations
             _logger = logger.CreateLogger<CellHighlightPresenter>();
         }
         
-        public void Init(EntityLink link)
+        public UniTask Init(EntityLink link)
         {
             _link = link;
             DisposableBagBuilder bag = DisposableBag.CreateBuilder();
             _link.GetEntity().Components.ObserveAdd().Subscribe(OnComponentAdded);
             _link.GetEntity().Components.ObserveRemove().Subscribe(OnComponentRemoved);
             _disposable = bag.Build();
+            return UniTask.CompletedTask;
         }
 
         private void OnComponentAdded(CollectionAddEvent<IEntityComponent> evt)

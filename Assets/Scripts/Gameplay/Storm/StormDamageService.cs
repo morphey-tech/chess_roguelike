@@ -75,7 +75,7 @@ namespace Project.Gameplay.ShrinkingZone
             _logger.Debug($"Found figure {figure.Id} at ({msg.Position.Row},{msg.Position.Column})");
 
             bool died = figure.Stats.TakeDamage(msg.Damage);
-            _logger.Debug($"{figure.Id} took {msg.Damage} damage, HP: {figure.Stats.CurrentHp}/{figure.Stats.MaxHp}, died: {died}");
+            _logger.Debug($"{figure.Id} took {msg.Damage} damage, HP: {figure.Stats.CurrentHp.Value}/{figure.Stats.MaxHp}, died: {died}");
 
             await ShowDamageVisual(figure.Id, msg.Damage);
             if (died)

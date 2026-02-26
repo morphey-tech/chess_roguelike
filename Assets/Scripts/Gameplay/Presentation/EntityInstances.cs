@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace Project.Gameplay.Presentations
@@ -10,7 +11,7 @@ namespace Project.Gameplay.Presentations
   {
     private readonly Dictionary<int, EntityLink> _presentationsList = new();
 
-    public void InitEntity(Entity entity, GameObject instance)
+    public async UniTask InitEntity(Entity entity, GameObject instance)
     {
       try
       {
@@ -31,7 +32,7 @@ namespace Project.Gameplay.Presentations
           try
           {
             ((MonoBehaviour)presenter).enabled = true;
-            presenter.Init(link);
+            await presenter.Init(link);
             Debug.Log($"[PresentationManagerInstances] Initialized presenter {presenter.GetType().Name} on {instance.name}");
           }
           catch (Exception e)

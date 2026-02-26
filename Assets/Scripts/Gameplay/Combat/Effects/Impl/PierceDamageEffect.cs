@@ -26,7 +26,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
 
         public void Apply(CombatEffectContext context)
         {
-            if (_target == null || _target.Stats.CurrentHp <= 0)
+            if (_target == null || _target.Stats.CurrentHp.Value <= 0)
             {
                 return;
             }
@@ -37,7 +37,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
 
             context.AddVisualEvent(new DamageVisualEvent(_target.Id, result.Final, false, false,
                 "pierce"));
-            context.Logger.Info($"Pierce hit {_target} for {result.Final} damage. HP: {_target.Stats.CurrentHp}/{_target.Stats.MaxHp}");
+            context.Logger.Info($"Pierce hit {_target} for {result.Final} damage. HP: {_target.Stats.CurrentHp.Value}/{_target.Stats.MaxHp}");
         }
     }
 }

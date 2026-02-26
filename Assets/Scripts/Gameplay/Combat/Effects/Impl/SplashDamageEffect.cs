@@ -34,7 +34,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
             // Применяем урон всем целям и создаём визуальные события с IsParallel = true
             foreach (Figure target in _targets)
             {
-                if (target.Stats.CurrentHp <= 0)
+                if (target.Stats.CurrentHp.Value <= 0)
                 {
                     continue;
                 }
@@ -52,7 +52,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
                     damageType: "splash",
                     isParallel: true));
 
-                context.Logger.Info($"Splash hit {target} for {result.Final} damage. HP: {target.Stats.CurrentHp}/{target.Stats.MaxHp}");
+                context.Logger.Info($"Splash hit {target} for {result.Final} damage. HP: {target.Stats.CurrentHp.Value}/{target.Stats.MaxHp}");
             }
         }
     }

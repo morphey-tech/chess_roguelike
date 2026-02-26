@@ -101,7 +101,7 @@ namespace Project.Unity.Unity.Views
             _cellConfigCache ??= await _configProvider.Get<CellConfigRepository>("cells_conf");
 
             List<string> uniqueSkins = requests.Select(r => r.SkinId).Distinct().ToList();
-            var preloadTasks = new List<UniTask>(uniqueSkins.Count);
+            List<UniTask> preloadTasks = new(uniqueSkins.Count);
             foreach (string skinId in uniqueSkins)
             {
                 if (_cellPrefabCache.ContainsKey(skinId))
@@ -122,7 +122,7 @@ namespace Project.Unity.Unity.Views
                 await UniTask.WhenAll(preloadTasks);
             }
 
-            List<Transform> cellsTfm = new List<Transform>();
+            List<Transform> cellsTfm = new();
             foreach (CellSpawnRequest req in requests)
             {
                 if (!_cellPrefabCache.TryGetValue(req.SkinId, out GameObject prefab))
@@ -134,7 +134,7 @@ namespace Project.Unity.Unity.Views
                     req.Position.Column * CELL_SIZE,
                     0f,
                     req.Position.Row * CELL_SIZE);
-                EntityLink? cell = _entityService.SpawnViewFromPrefab(
+                EntityLink? cell = await _entityService.SpawnViewFromPrefab(
                     req.Entity,
                     prefab,
                     worldPos,

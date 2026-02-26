@@ -13,6 +13,12 @@ namespace Project.Core.Core.Configs.Gameplay
         public bool HideEnemiesDuringPrepare { get; set; } = true;
 
         /// <summary>
+        /// If true, HP bars are hidden during the preparation phase.
+        /// </summary>
+        [JsonProperty("hideHpBarsDuringPrepare")]
+        public bool HideHpBarsDuringPrepare { get; set; } = true;
+
+        /// <summary>
         /// Duration of figure spawn animation in seconds.
         /// </summary>
         [JsonProperty("figureSpawnDuration")]

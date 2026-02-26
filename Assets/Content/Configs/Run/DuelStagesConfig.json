@@ -1,16 +1,16 @@
 {
   "content": [
     {
-      "id": "duel_tutorial_1",
+      "id": "tutorial_1",
       "spawn_pattern_id": "tutorial_1"
     },
     {
-      "id": "duel_tutorial_2",
+      "id": "tutorial_2",
       "spawn_pattern_id": "tutorial_2"
     },
     {
-      "id": "duel_level_1",
-      "spawn_pattern_id": "level_1"
+      "id": "tutorial_3",
+      "spawn_pattern_id": "tutorial_3"
     },
     {
       "id": "duel_level_2",

@@ -78,14 +78,16 @@ namespace Project.Gameplay.Gameplay.Prepare
 
             try
             {
+                await _uiService.ShowWorldUiAsync().AttachExternalCancellation(context.CancellationToken);
                 await SpawnPrepareZoneAsync(context);
                 if (_context != context)
+                {
                     return;
+                }
 
                 _highlightService.BuildPlacementCache(context);
                 _highlightService.ApplyAll(context);
 
-                await _uiService.ShowWorldUiAsync().AttachExternalCancellation(context.CancellationToken);
                 await _uiService.ShowPreparePhaseAsync().AttachExternalCancellation(context.CancellationToken);
                 context.IsInputReady = true;
             }

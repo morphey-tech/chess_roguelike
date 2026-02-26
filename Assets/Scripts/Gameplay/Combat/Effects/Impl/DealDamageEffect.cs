@@ -43,7 +43,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
             context.ActionContext.LastDamageDealt = result.Final;
 
             string critText = _isCritical ? " (CRIT)" : "";
-            context.Logger.Info($"{_target} takes {result.Final} damage{critText}. HP: {_target.Stats.CurrentHp}/{_target.Stats.MaxHp}");
+            context.Logger.Info($"{_target} takes {result.Final} damage{critText}. HP: {_target.Stats.CurrentHp.Value}/{_target.Stats.MaxHp}");
         }
     }
 }

@@ -21,21 +21,25 @@ namespace Project.Gameplay.Presentations
     public async UniTask<EntityLink> SpawnView(Entity entity, AssetKey assetKey, Vector3 pos, Quaternion rot, Transform root)
     {
       GameObject? go = await _assetService.InstantiateAsync(assetKey, pos, rot, root);
-      _instances.InitEntity(entity, go);
+      await _instances.InitEntity(entity, go);
       return go.GetComponent<EntityLink>();
     }
 
     /// <summary>
     /// Spawns view from an already loaded prefab (sync instantiate).
     /// </summary>
-    public EntityLink? SpawnViewFromPrefab(Entity entity, GameObject prefab, Vector3 pos, Quaternion rot, Transform root)
+    public async UniTask<EntityLink?> SpawnViewFromPrefab(Entity entity, GameObject prefab, Vector3 pos, Quaternion rot, Transform root)
     {
       if (prefab == null)
+      {
         return null;
+      }
       GameObject? go = _assetService.InstantiateFromPrefab(prefab, pos, rot, root);
       if (go == null)
+      {
         return null;
-      _instances.InitEntity(entity, go);
+      }
+      await _instances.InitEntity(entity, go);
       return go.GetComponent<EntityLink>();
     }
 

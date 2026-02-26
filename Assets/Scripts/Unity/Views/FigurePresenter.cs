@@ -204,12 +204,17 @@ namespace Project.Unity.Unity.Views
             await PlaySimpleHealEffect(figureGO);
         }
 
-        public void ShowDamageText(int figureId, DamageVisualContext ctx)
+        public async UniTask ShowDamageText(int figureId, DamageVisualContext ctx)
         {
-            if (!_visuals.TryGetValue(figureId, out var visualSet))
+            if (!_visuals.TryGetValue(figureId, out FigureVisualSet? visualSet))
+            {
                 return;
-
-            visualSet.DamageText?.ShowFor(ctx);
+            }
+            if (visualSet.DamageText == null)
+            {
+                return;
+            }
+            await visualSet.DamageText.ShowFor(ctx);
         }
         
         public void ShowFigureHealthBar(int figureId)

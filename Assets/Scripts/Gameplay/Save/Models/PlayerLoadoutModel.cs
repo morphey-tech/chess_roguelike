@@ -6,7 +6,7 @@ namespace Project.Gameplay.Gameplay.Save.Models
     public sealed class PlayerLoadoutModel
     {
         public string KingId { get; set; } = "default";
-        public string SuiteId { get; set; } = "default";
+        public string SuiteId { get; set; } = "tutorial";
 
         public bool IsValid()
         {

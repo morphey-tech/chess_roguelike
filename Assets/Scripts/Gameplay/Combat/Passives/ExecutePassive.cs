@@ -30,7 +30,7 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
                 return;
             }
 
-            float hpPercent = (float)context.Target.Stats.CurrentHp / context.Target.Stats.MaxHp;
+            float hpPercent = context.Target.Stats.CurrentHp.Value / context.Target.Stats.MaxHp;
             if (hpPercent <= _hpThreshold)
             {
                 context.DamageMultiplier *= _damageMultiplier;

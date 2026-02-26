@@ -11,8 +11,9 @@ namespace Project.Unity.Unity.Views.Presentations
         [SerializeField] private float _spawnDuration = 0.3f;
         [SerializeField] private Ease _spawnEase = Ease.OutBack;
 
-        public void Init(EntityLink link)
+        public UniTask Init(EntityLink link)
         {
+            return UniTask.CompletedTask;
         }
 
         public async UniTaskVoid PlaySpawnAsync()

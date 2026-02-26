@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,7 +15,7 @@ namespace Project.Unity.UI.Components.Game
         [Header("Settings")]
         [SerializeField] private float _dividerWidth = 2f;
 
-        private Image[] _dividers = new Image[0];
+        private Image[] _dividers = Array.Empty<Image>();
         private float _current;
         private float _currentView;
         private float _damagePreview;

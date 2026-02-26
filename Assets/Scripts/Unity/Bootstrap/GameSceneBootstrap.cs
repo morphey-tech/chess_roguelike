@@ -22,7 +22,7 @@ namespace Project.Unity.Unity.Bootstrap
         private PlayerLoadoutService _loadoutService;
         private RandomService _randomService;
 
-        private const string DefaultRunId = "0";
+        private const string DefaultRunId = "tutorial";
 
         protected override void OnConstruct()
         {

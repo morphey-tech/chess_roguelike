@@ -39,7 +39,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
                     "impact", System.Array.Empty<IDamageModifier>());
                 (DamageResult result, _) = context.DamageApplier.Apply(context, dmgCtx);
                 
-                context.Logger.Info($"Impact bonus: {_target} takes {result.Final} damage. HP: {_target.Stats.CurrentHp}/{_target.Stats.MaxHp}");
+                context.Logger.Info($"Impact bonus: {_target} takes {result.Final} damage. HP: {_target.Stats.CurrentHp.Value}/{_target.Stats.MaxHp}");
             }
         }
     }

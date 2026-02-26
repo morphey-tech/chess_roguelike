@@ -105,7 +105,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
                     string.IsNullOrEmpty(_attackId) ? _delivery.ToString() : _attackId,
                     isParallel: hasSplash));
 
-                context.Logger.Info($"{_attacker} hit {_target} for {damageResult.Final} damage. HP: {_target.Stats.CurrentHp}/{_target.Stats.MaxHp}");
+                context.Logger.Info($"{_attacker} hit {_target} for {damageResult.Final} damage. HP: {_target.Stats.CurrentHp.Value}/{_target.Stats.MaxHp}");
 
                 AfterHitContext after = new()
                 {
@@ -151,7 +151,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
                     before.IsCancelled,
                     _attackId));
 
-                context.Logger.Info($"{_attacker} projectile hit (deferred): raw={finalDamage} to {_target}. HP: {_target.Stats.CurrentHp}/{_target.Stats.MaxHp}");
+                context.Logger.Info($"{_attacker} projectile hit (deferred): raw={finalDamage} to {_target}. HP: {_target.Stats.CurrentHp.Value}/{_target.Stats.MaxHp}");
             }
         }
 

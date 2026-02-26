@@ -12,11 +12,6 @@ using Object = UnityEngine.Object;
 
 namespace Project.Core.Window
 {
-  public enum EnumWindowPreloadGroup
-  {
-    NONE
-  }
-
   public class WindowsController : MonoBehaviour, IWindowsController
   {
     public event Action<Window> OnCreateWindow;
@@ -38,117 +33,20 @@ namespace Project.Core.Window
     private readonly List<Window> _hidingWindows = new List<Window>();
     private readonly LinkedList<Action> _windowQueue = new LinkedList<Action>();
 
-    //todo make global for all assets
-    private readonly Dictionary<EnumWindowPreloadGroup, HashSet<WindowLoader>> _windowLoaders = new();
-
     public Canvas Canvas => _canvas;
-
-    private class WindowLoader
-    {
-      public Window PreloadedWindow => _window;
-      private readonly string _key;
-      private readonly bool _keepInMemory;
-
-      private bool _loaded = false;
-      private bool _loading = false;
-      private readonly ILogService _logService;
-      private readonly IAssetService _assetService;
-      private Window _window;
-
-      public WindowLoader(IAssetService assetService, string key, bool keepInMemory = false)
-      {
-        _assetService = assetService;
-        _key = key;
-        _keepInMemory = keepInMemory;
-      }
-
-      public async UniTask Preload()
-      {
-        if (_loaded)
-          return;
-
-        if (_loading)
-        {
-          await UniTask.WaitWhile(() => _loading);
-          return;
-        }
-
-        _loading = true;
-
-        /*Assets.Register(_key);
-        if(_keepInMemory)
-          Assets.KeepInMemory(_key);*/
-        _window = await _assetService.LoadAssetAsync<Window>(_key);
-
-        _loading = false;
-        _loaded = true;
-      }
-
-      public void Release()
-      {
-        if (!_loaded)
-          return;
-
-        _assetService.Release(_window);
-        _window = null;
-        /*Assets.Unregister(_key);
-        if(_keepInMemory)
-          Assets.ReleaseKeepInMemory(_key);*/
-
-        _loaded = false;
-      }
-    }
 
     public CanvasGroup CanvasGroup => _canvasGroup;
 
     private Core.Logging.ILogger<WindowsController> _log;
     private IAssetService _assetService;
     private ILogService _logService;
-    
+
     public async UniTask InitAsync(IAssetService assetService, ILogService logService)
     {
       _assetService = assetService;
       _logService = logService;
       _log = _logService.CreateLogger<WindowsController>();
       SetCanvasSettings();
-      MapPreloadedWindows();
-    }
-
-    private void MapPreloadedWindows()
-    {
-      /*var assembly = typeof(Window).Assembly;
-      var windowTypes = assembly.GetTypes().Where(type => typeof(Window).IsAssignableFrom(type) && type.IsClass && !type.IsAbstract);
-
-      foreach (var type in windowTypes)
-      {
-        foreach (PreloadedWindowAttribute preloadAttribute in type.GetCustomAttributes(typeof(PreloadedWindowAttribute), true))
-        {
-          if (_windowLoaders.TryGetValue(preloadAttribute.Group, out var windowsSet))
-            windowsSet.Add(new(type.FullName));
-          else
-            _windowLoaders[preloadAttribute.Group] = new HashSet<WindowLoader>() {new(type.FullName)};
-        }
-      }*/
-    }
-
-    public async UniTask PreloadWindowsAsync(EnumWindowPreloadGroup group)
-    {
-      if (!_windowLoaders.TryGetValue(group, out var loaders))
-        return;
-
-      var windowsPreloadTasks = loaders.Select(w => w.Preload());
-      await UniTask.WhenAll(windowsPreloadTasks);
-    }
-
-    public void ReleasePreloadedWindows(EnumWindowPreloadGroup group)
-    {
-      if (!_windowLoaders.TryGetValue(group, out var loaders))
-        return;
-
-      foreach (var loader in loaders)
-      {
-        loader.Release();
-      }
     }
 
     private void SetCanvasSettings()
@@ -348,22 +246,14 @@ namespace Project.Core.Window
 
     public Window GetOrCreateWindow(Type windowType)
     {
-      Window window;
-
-      if (_windows.ContainsKey(windowType))
-        window = _windows[windowType];
-      else
+      if (_windows.TryGetValue(windowType, out Window? target))
       {
-        window = CreateWindow(windowType);
-        CreateWindowPostprocess(window);
+        return target;
       }
 
-      if (window == null)
-      {
-        throw new Exception($"Failed to create window of type {windowType}");
-      }
-
-      return window;
+      // Sync создание без preload не поддерживается
+      _log.Error($"Sync GetOrCreateWindow not supported for {windowType.Name}. Use async version.");
+      return null;
     }
 
     public async UniTask<T> GetOrCreateWindowAsync<T>() where T : Window
@@ -429,37 +319,8 @@ namespace Project.Core.Window
 
     private Window CreateWindow(Type windowType)
     {
-      try
-      {
-        var window = Instantiate(GetPreloadedWindow(windowType), _windowContainer.transform);
-        var id = windowType;
-        _windows.Add(id, window);
-        window.name = id.Name;
-        window.Init(_assetService, _logService);
-
-        OnCreateWindow?.Invoke(window);
-
-        return window;
-      }
-      catch (Exception e)
-      {
-        _log.Error($"Error happens:\n{e}");
-        throw;
-      }
-    }
-
-    private Window GetPreloadedWindow(Type windowType)
-    {
-      foreach (HashSet<WindowLoader>? loaders in _windowLoaders.Values)
-      {
-        foreach (WindowLoader loader in loaders)
-        {
-          if(loader.PreloadedWindow.GetType() == windowType)
-            return loader.PreloadedWindow;
-        }
-      }
-
-      return null;
+      _log.Error($"Sync CreateWindow is not supported without preload. Use GetOrCreateWindowAsync for {windowType.Name}.");
+      throw new Exception($"Sync window creation not supported for {windowType.Name}");
     }
 
     private async UniTask<Window> CreateWindowAsync(Type windowType)

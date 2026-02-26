@@ -22,7 +22,7 @@ namespace Project.Gameplay.Gameplay.Figures
         void SetDamagePreview(int figureId, float? damage);
         UniTask PlayDeathEffectAsync(int figureId);
         UniTask PlayPushEffectAsync(int figureId, GridPosition from, GridPosition to);
-        void ShowDamageText(int figureId, DamageVisualContext ctx);
+        UniTask ShowDamageText(int figureId, DamageVisualContext ctx);
         void Clear();
     }
 }

@@ -1,11 +1,11 @@
 {
   "content": [
     {
-      "id": "0",
+      "id": "tutorial",
       "stages": [
         "tutorial_1",
         "tutorial_2",
-        "duel_level_1"
+        "tutorial_3"
       ]
     }
   ]

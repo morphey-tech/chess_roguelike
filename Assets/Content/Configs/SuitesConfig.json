@@ -1,10 +1,9 @@
 {
   "content": [
     {
-      "id": "default",
+      "id": "tutorial",
       "figures": [
-        "pawn_white",
-        "pawn_white",
+        "king_white",
         "pawn_white",
         "pawn_white",
         "pawn_white"

@@ -9,7 +9,9 @@ using Project.Gameplay.Gameplay.Extensions;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Input.Messages;
+using Project.Gameplay.Gameplay.Prepare.Messages;
 using Project.Gameplay.Gameplay.Run;
+using Project.Gameplay.Gameplay.Stage.Messages;
 using Project.Gameplay.Gameplay.Turn;
 using VContainer;
 
@@ -30,6 +32,7 @@ namespace Project.Gameplay.Gameplay.Selection
         private GameplayConfig _config = new();
         private int? _hoveredFigureId;
         private int? _selectedFriendlyFigureId;
+        private bool _isPreparePhase = true;
 
         [Inject]
         private HpBarVisibilityService(
@@ -42,6 +45,8 @@ namespace Project.Gameplay.Gameplay.Selection
             ISubscriber<FigureSpawnedMessage> figureSpawnedSubscriber,
             ISubscriber<FigureDeathMessage> figureDeathSubscriber,
             ISubscriber<TurnChangedMessage> turnChangedSubscriber,
+            ISubscriber<PreparePhaseCompletedMessage> prepareCompletedSubscriber,
+            ISubscriber<StageStartedMessage> stageStartedSubscriber,
             ILogService logService)
         {
             _figurePresenter = figurePresenter;
@@ -56,6 +61,8 @@ namespace Project.Gameplay.Gameplay.Selection
             figureSpawnedSubscriber.Subscribe(OnFigureSpawned).AddTo(bag);
             figureDeathSubscriber.Subscribe(OnFigureDeath).AddTo(bag);
             turnChangedSubscriber.Subscribe(OnTurnChanged).AddTo(bag);
+            prepareCompletedSubscriber.Subscribe(OnPrepareCompleted).AddTo(bag);
+            stageStartedSubscriber.Subscribe(OnStageStarted).AddTo(bag);
             _subscriptions = bag.Build();
 
             LoadConfigAsync()
@@ -67,7 +74,18 @@ namespace Project.Gameplay.Gameplay.Selection
         {
             _config = await _configProvider.Get<GameplayConfig>("gameplay_conf", _disposeCts.Token) ?? new GameplayConfig();
             RefreshAll();
-            _logger.Info($"HP bar policy loaded: allies={_config.HpBarVisibilityModeAllies}, enemies={_config.HpBarVisibilityModeEnemies}");
+            _logger.Info($"HP bar policy loaded: allies={_config.HpBarVisibilityModeAllies}, enemies={_config.HpBarVisibilityModeEnemies}, hideDuringPrepare={_config.HideHpBarsDuringPrepare}");
+        }
+
+        private void OnPrepareCompleted(PreparePhaseCompletedMessage message)
+        {
+            _isPreparePhase = false;
+            RefreshAll();
+        }
+
+        private void OnStageStarted(StageStartedMessage message)
+        {
+            _isPreparePhase = true;
         }
 
         private void OnFigureSelected(FigureSelectedMessage message)
@@ -149,6 +167,12 @@ namespace Project.Gameplay.Gameplay.Selection
         private bool ShouldShowBar(Figure? figure)
         {
             if (figure == null || figure.Stats.IsDead)
+            {
+                return false;
+            }
+
+            // Скрываем HP бары на стадии подготовки, если включена опция
+            if (_config.HideHpBarsDuringPrepare && _isPreparePhase)
             {
                 return false;
             }

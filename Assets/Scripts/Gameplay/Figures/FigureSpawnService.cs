@@ -172,7 +172,7 @@ namespace Project.Gameplay.Gameplay.Figures
                 grid.PlaceFigure(figure, position);
                 await _figurePresenter.CreateFigure(figure, figureConfig.AssetKey, position, team);
                 _figureRegistry.Register(figure);
-                _logger.Info($"Spawned {figure} [{description.Id}] HP:{stats.CurrentHp}/{stats.MaxHp} ATK:{stats.Attack}");
+                _logger.Info($"Spawned {figure} [{description.Id}] HP:{stats.CurrentHp.Value}/{stats.MaxHp} ATK:{stats.Attack}");
                 _spawnedPublisher.Publish(new FigureSpawnedMessage(figure, position));
                 return figure;
             }

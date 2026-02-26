@@ -1,5 +1,5 @@
 {
-  "hideEnemiesDuringPrepare": true,
+  "hideEnemiesDuringPrepare": false,
   "figureSpawnDuration": 0.3,
   "prepareSlotSpawnDelay": 0.05,
   "hpBarVisibilityModeAllies": "Always",

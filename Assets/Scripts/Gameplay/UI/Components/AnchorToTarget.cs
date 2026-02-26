@@ -101,7 +101,7 @@ namespace Project.Unity.UI.Components
     private void Construct(IAnchorToTargetTicker ticker)
     {
       _ticker = ticker;
-      
+
       // Регистрируем если объект уже активен
       if (gameObject.activeInHierarchy)
       {
@@ -191,12 +191,16 @@ namespace Project.Unity.UI.Components
     public void Tick()
     {
       if (_rectTransform == null)
+      {
         return;
+      }
 
       UpdatePosition(_forceUpdateCount > 0);
 
       if (_forceUpdateCount > 0)
+      {
         _forceUpdateCount--;
+      }
     }
 
     public void UpdatePosition(bool ignoreLerp = false)
@@ -211,26 +215,36 @@ namespace Project.Unity.UI.Components
         return;
       }
 
-      //Camera main = CameraManager.Main ?? Camera.main;
       Camera main = Camera.main;
-
       Vector3 targetPosition = Vector3.zero;
       if (_targetIsRect)
       {
         if (_targetPosition.HasValue)
+        {
           _rectTransform.anchoredPosition = _targetPosition.Value;
+          return;
+        }
         else
-          _rectTransform.transform.position = _target.transform.position + _worldOffset;
-
-        return;
+        {
+          // Для RectTransform используем TransformPoint для конвертации в мировой, потом в Canvas
+          RectTransform targetRect = _target as RectTransform;
+          if (targetRect != null)
+          {
+            // Берём позицию центра target RectTransform в мировых координатах
+            targetPosition = targetRect.TransformPoint(Vector3.zero);
+          }
+          else
+          {
+            targetPosition = _target.position;
+          }
+        }
       }
       else
       {
         targetPosition = _targetPosition ?? _target.position + _target.rotation * _worldLocalOffset;
-        targetPosition =
-          Gameplay.Gameplay.UI.UIService.Canvas.WorldToCanvasPosition(targetPosition + _worldOffset, main) +
-          _anchorOffset;
       }
+
+      targetPosition = Gameplay.Gameplay.UI.UIService.Canvas.WorldToCanvasPosition(targetPosition + _worldOffset, main) + _anchorOffset;
 
       IsOnScreen = ScreenRect.Contains(targetPosition);
 
@@ -388,9 +402,9 @@ namespace Project.Unity.UI.Components
 
     private void OnEnable()
     {
-      _target = null;
+      // Не сбрасываем _target — он должен сохраняться при включении/выключении
       _targetPosition = null;
-      
+
       // Регистрируем если тикер уже доступен (после Construct)
       if (_ticker != null)
       {

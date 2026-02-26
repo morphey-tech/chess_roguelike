@@ -1,10 +1,10 @@
 {
   "content": [
     {
-      "id": "default_zone",
-      "min_turn": 8,
-      "max_turn": 15,
-      "shrink_interval": 4,
+      "id": "tutorial_storm",
+      "min_turn": 15,
+      "max_turn": 30,
+      "shrink_interval": 5,
       "zone_damage_flat": 1,
       "zone_damage_percent": 0.1,
       "safe_zone_min_size": 4,

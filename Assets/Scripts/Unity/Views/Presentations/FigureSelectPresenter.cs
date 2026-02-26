@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using Project.Gameplay.Components;
 using Project.Gameplay.Presentations;
 using UnityEngine;
@@ -12,9 +13,10 @@ namespace Project.Unity.Unity.Views.Presentations
         private EntityLink _link;
         private Outline[] _outlines = System.Array.Empty<Outline>();
         
-        public void Init(EntityLink link)
+        public UniTask Init(EntityLink link)
         {
-            _link = link; 
+            _link = link;
+            return UniTask.CompletedTask;
         }
 
         private void Update()

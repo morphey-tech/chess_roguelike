@@ -2,11 +2,6 @@ using UnityEngine;
 
 namespace Project.Gameplay.Presentations
 {
-  public interface IPresenter 
-  {
-    void Init(EntityLink link);
-  }
-  
   public class EntityLink : MonoBehaviour
   {
     public int EntityId => _entity.Id;

@@ -26,7 +26,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
 
         public void Apply(CombatEffectContext context)
         {
-            if (_target == null || _target.Stats.CurrentHp <= 0 || _reflectedDamage <= 0)
+            if (_target == null || _target.Stats.CurrentHp.Value <= 0 || _reflectedDamage <= 0)
             {
                 return;
             }
@@ -36,7 +36,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
             (DamageResult result, _) = context.DamageApplier.Apply(context, dmgCtx);
 
             context.AddVisualEvent(new DamageVisualEvent(_target.Id, result.Final, damageType: "thorns"));
-            context.Logger.Info($"{_target} takes {result.Final} thorns damage. HP: {_target.Stats.CurrentHp}/{_target.Stats.MaxHp}");
+            context.Logger.Info($"{_target} takes {result.Final} thorns damage. HP: {_target.Stats.CurrentHp.Value}/{_target.Stats.MaxHp}");
         }
     }
 }
