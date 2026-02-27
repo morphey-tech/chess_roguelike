@@ -5,7 +5,7 @@
       "type": "swarm",
       "name": "Рой",
       "description": "Наносит урон всем врагам рядом в конце хода",
-      "icon": "passives/swarm_icon",
+      "icon": "swarm_passive_icon",
       "params": {
         "damage": 1,
         "duration": 1
@@ -79,7 +79,7 @@
       "type": "retreat_on_no_kill",
       "name": "Отступление",
       "description": "Отступает на 1 клетку при убийстве врага",
-      "icon": "passives/retreat_icon",
+      "icon": "escape_passive_icon",
       "params": {
         "distance": 1
       }
@@ -99,7 +99,7 @@
       "type": "push_on_hit",
       "name": "Толчок",
       "description": "Отталкивает врага при атаке",
-      "icon": "passives/push_icon",
+      "icon": "impact_passive_icon",
       "params": {
         "bonus_damage": 1
       }
@@ -109,7 +109,7 @@
       "type": "momentum",
       "name": "Инерция",
       "description": "+50% урона после перемещения",
-      "icon": "passives/momentum_icon",
+      "icon": "momentum_passive_icon",
       "params": {
         "bonus_damage": 0.5
       }
@@ -119,7 +119,7 @@
       "type": "agile_dodge",
       "name": "Уклонение",
       "description": "50% шанс уклониться от атаки",
-      "icon": "passives/dodge_icon",
+      "icon": "agile_dodge_passive",
       "params": {
         "chance": 0.5
       }
@@ -129,7 +129,7 @@
       "type": "first_shot",
       "name": "Первый выстрел",
       "description": "+2 урона к первой атаке в ходу",
-      "icon": "passives/first_shot_icon",
+      "icon": "first_shot_passive_icon",
       "params": {
         "bonus_damage": 2
       }
@@ -139,7 +139,7 @@
       "type": "fury",
       "name": "Ярость",
       "description": "+50% урона за каждое убийство (макс. 4 стага)",
-      "icon": "passives/fury_icon",
+      "icon": "momentum_passive_icon",
       "params": {
         "damage": 0.5,
         "max_stacks": 4
@@ -163,7 +163,7 @@
       "type": "provocation",
       "name": "Провокация",
       "description": "Враги обязаны атаковать эту фигуру",
-      "icon": "passives/provocation_icon",
+      "icon": "provocation_passive_icon",
       "params": {}
     },
     {
@@ -171,7 +171,7 @@
       "type": "desperation",
       "name": "Отчаяние",
       "description": "+50% урона при здоровье ниже 50%",
-      "icon": "passives/desperation_icon",
+      "icon": "desperation_passive_icon",
       "params": {}
     },
     {
@@ -179,7 +179,7 @@
       "type": "royal_presence",
       "name": "Королевское присутствие",
       "description": "+100% урона союзникам в радиусе 2 клеток",
-      "icon": "passives/royal_presence_icon",
+      "icon": "royal_presence_passive_icon",
       "params": {
         "damage_bonus": 1,
         "aura_radius": 2
@@ -190,7 +190,7 @@
       "type": "escape",
       "name": "Побег",
       "description": "Может уйти с поля боя при низком здоровье",
-      "icon": "passives/escape_icon",
+      "icon": "escape_passive_icon",
       "params": {}
     },
     {
@@ -198,7 +198,7 @@
       "type": "impact",
       "name": "Удар",
       "description": "+2 урона к первой атаке",
-      "icon": "passives/impact_icon",
+      "icon": "impact_passive_icon",
       "params": {
         "bonus_damage": 2
       }
@@ -208,7 +208,7 @@
       "type": "melee_override",
       "name": "Ближний бой",
       "description": "Уменьшает урон в ближнем бою на 50%",
-      "icon": "passives/melee_icon",
+      "icon": "melee_override_passive_icon",
       "params": {
         "melee_damage_multiplier": 0.5
       }
@@ -218,7 +218,7 @@
       "type": "splash",
       "name": "Всплеск",
       "description": "Урон по области вокруг цели",
-      "icon": "passives/splash_icon",
+      "icon": "splash_passive_icon",
       "params": {}
     },
     {
@@ -226,7 +226,7 @@
       "type": "pierce",
       "name": "Пронзающий удар",
       "description": "Атака проходит сквозь цель",
-      "icon": "passives/pierce_icon",
+      "icon": "pierce_passive_icon",
       "params": {}
     }
   ]

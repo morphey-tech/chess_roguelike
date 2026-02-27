@@ -115,7 +115,7 @@ namespace Project.Gameplay.Gameplay.UI
                     }
                 }
 
-                var model = new FigureInfoWindow.Model
+                var model = new FigureInfoWindow.FigureInfoModel
                 {
                     Figure = figure,
                     InfoConfig = infoConfig,

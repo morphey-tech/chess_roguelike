@@ -13,10 +13,9 @@ namespace Project.Gameplay.UI
     /// Окно отображения информации о выбранной фигуре.
     /// Показывает название, описание, статы и пассивки иконками.
     /// </summary>
-    public class FigureInfoWindow : ParameterWindow<FigureInfoWindow.Model>
+    public class FigureInfoWindow : ParameterWindow<FigureInfoWindow.FigureInfoModel>
     {
         [Header("Figure Info")]
-        [SerializeField] private Image _figureIcon;
         [SerializeField] private Text _figureName;
         [SerializeField] private Text _figureDescription;
 
@@ -31,19 +30,14 @@ namespace Project.Gameplay.UI
         [SerializeField] private Transform _passivesContainer;
         [SerializeField] private PassiveIconView _passiveIconPrefab;
 
-        [Header("Team")]
-        [SerializeField] private Image _teamIndicator;
-        [SerializeField] private Color _playerTeamColor = Color.green;
-        [SerializeField] private Color _enemyTeamColor = Color.red;
-
         private readonly List<PassiveIconView> _activePassiveIcons = new();
 
-        protected override void OnShow(Model model)
+        protected override void OnShow(FigureInfoModel figureInfoModel)
         {
-            Figure figure = model.Figure;
-            var stats = figure.Stats;
-            var infoConfig = model.InfoConfig;
-            var passiveConfigs = model.PassiveConfigs;
+            Figure figure = figureInfoModel.Figure;
+            FigureStats stats = figure.Stats;
+            FigureInfoConfig? infoConfig = figureInfoModel.InfoConfig;
+            List<PassiveConfig> passiveConfigs = figureInfoModel.PassiveConfigs;
 
             // Отображаем основную информацию
             if (infoConfig != null)
@@ -57,26 +51,23 @@ namespace Project.Gameplay.UI
                 _figureDescription.text = string.Empty;
             }
 
-            // Отображаем статы
             _hpText.text = $"HP: {stats.CurrentHp.Value}/{stats.MaxHp}";
             _attackText.text = $"Атака: {stats.Attack.Value}";
             _defenceText.text = $"Защита: {stats.Defence.Value}";
             _evasionText.text = $"Уклонение: {stats.Evasion.Value}";
             _attackRangeText.text = $"Дальность: {stats.AttackRange}";
 
-            // Отображаем команду
-            _teamIndicator.color = figure.Team == Team.Player ? _playerTeamColor : _enemyTeamColor;
-
-            // Отображаем пассивки
             RenderPassives(passiveConfigs);
         }
 
         protected override void OnHidden()
         {
-            foreach (var icon in _activePassiveIcons)
+            foreach (PassiveIconView? icon in _activePassiveIcons)
             {
                 if (icon != null)
+                {
                     Destroy(icon.gameObject);
+                }
             }
             _activePassiveIcons.Clear();
         }
@@ -84,25 +75,29 @@ namespace Project.Gameplay.UI
         private void RenderPassives(List<PassiveConfig> passiveConfigs)
         {
             // Очищаем старые иконки
-            foreach (var icon in _activePassiveIcons)
+            foreach (PassiveIconView? icon in _activePassiveIcons)
             {
                 if (icon != null)
+                {
                     Destroy(icon.gameObject);
+                }
             }
             _activePassiveIcons.Clear();
 
             if (passiveConfigs.Count == 0)
-                return;
-
-            foreach (var passiveConfig in passiveConfigs)
             {
-                var iconView = Instantiate(_passiveIconPrefab, _passivesContainer);
+                return;
+            }
+
+            foreach (PassiveConfig? passiveConfig in passiveConfigs)
+            {
+                PassiveIconView? iconView = Instantiate(_passiveIconPrefab, _passivesContainer);
                 iconView.Setup(passiveConfig);
                 _activePassiveIcons.Add(iconView);
             }
         }
 
-        public class Model
+        public class FigureInfoModel
         {
             public Figure Figure { get; set; }
             public FigureInfoConfig? InfoConfig { get; set; }
