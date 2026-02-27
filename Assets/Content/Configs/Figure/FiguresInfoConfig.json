@@ -1,0 +1,46 @@
+{
+  "content": [
+    {
+      "id": "pawn",
+      "name": "Пешка",
+      "description": "Базовая боевая единица. Движется только вперёд, атакует по диагонали.",
+      "icon": "figures/pawn_icon",
+      "icon_prefab": "figures/pawn_icon_prefab"
+    },
+    {
+      "id": "rook",
+      "name": "Ладья",
+      "description": "Тяжёлая фигура. Движется и атакует по прямым линиям.",
+      "icon": "figures/rook_icon",
+      "icon_prefab": "figures/rook_icon_prefab"
+    },
+    {
+      "id": "knight",
+      "name": "Конь",
+      "description": "Быстрая фигура. Движется буквой Г, может перепрыгивать через другие фигуры.",
+      "icon": "figures/knight_icon",
+      "icon_prefab": "figures/knight_icon_prefab"
+    },
+    {
+      "id": "bishop",
+      "name": "Слон",
+      "description": "Дальнобойная фигура. Движется и атакует по диагоналям.",
+      "icon": "figures/bishop_icon",
+      "icon_prefab": "figures/bishop_icon_prefab"
+    },
+    {
+      "id": "queen",
+      "name": "Ферзь",
+      "description": "Самая сильная фигура. Сочетает возможности ладьи и слона.",
+      "icon": "figures/queen_icon",
+      "icon_prefab": "figures/queen_icon_prefab"
+    },
+    {
+      "id": "king",
+      "name": "Король",
+      "description": "Главная фигура. Движется на одну клетку в любом направлении.",
+      "icon": "figures/king_icon",
+      "icon_prefab": "figures/king_icon_prefab"
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Passives
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: Passives
+  m_GUID: 9c6081698112115729462f2e654f4a2c
+  m_SerializeEntries:
+  - m_GUID: 08dafa9d4eced05e598ed0db26a08595
+    m_Address: pierce_passive_icon
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - passives
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0e0451818d31146a2a3de9033cb7e4c6
+    m_Address: royal_presence_passive_icon
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - passives
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2ab0a0899dcef6db88b1ec7d943c1f7f
+    m_Address: first_shot_passive_icon
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - passives
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 459f557adb65dbd57a6e9a85ac548cd3
+    m_Address: swarm_passive_icon
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - passives
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5161ff637c83765a489a2aa805ec7eb9
+    m_Address: escape_passive_icon
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - passives
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5836ba0155ed88b11833d4a0500c44cd
+    m_Address: desperation_passive_icon
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - passives
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 58c975924eb92f32e943fde451d00ee4
+    m_Address: provocation_passive_icon
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - passives
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7ac07eb9dc5a6277f81ebf84b8ca9069
+    m_Address: ramming_passive_icon
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - passives
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a9b151862d74dc424855a331c4008ae0
+    m_Address: agile_dodge_passive_icon
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - passives
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: aabbc14174c80f5d0b8f037d05f4c936
+    m_Address: momentum_passive_icon
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - passives
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b5e334cbacad69e55a16ce11617e8b92
+    m_Address: melee_override_passive_icon
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - passives
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ba30f5cc8b947edb5a0e052b810bf61b
+    m_Address: splash_passive_icon
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - passives
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c582bf6df4cdeb37e8711f08dbcc7162
+    m_Address: impact_passive_icon
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - passives
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 619719904bd153b4fb62260efbf16a67, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 1692bbc8260157ceca91fb147a8a41ad, type: 2}
+    - {fileID: 11400000, guid: 9c0e7ab2d0449b4c48de29de81a773a0, type: 2}

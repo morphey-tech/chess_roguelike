@@ -114,6 +114,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - configs
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cee1c3e4801496c61bebe5f775d79632
+    m_Address: figures_info_conf
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - configs
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d65a552683d47384ba5498395ca5521c
     m_Address: passives_conf
     m_ReadOnly: 0

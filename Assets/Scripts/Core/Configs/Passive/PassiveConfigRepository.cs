@@ -4,6 +4,9 @@ using Newtonsoft.Json;
 
 namespace Project.Core.Core.Configs.Passive
 {
+    /// <summary>
+    /// Репозиторий для хранения и доступа к конфигам пассивок.
+    /// </summary>
     [Serializable]
     public sealed class PassiveConfigRepository : ConfigRepository<PassiveConfig>
     {
@@ -18,5 +21,10 @@ namespace Project.Core.Core.Configs.Passive
         protected override string GetKey(PassiveConfig item) => item.Id;
 
         private PassiveConfig[] _passives = Array.Empty<PassiveConfig>();
+
+        /// <summary>
+        /// Возвращает все конфиги пассивок.
+        /// </summary>
+        public IReadOnlyList<PassiveConfig> GetAll() => _passives;
     }
 }

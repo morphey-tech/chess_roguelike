@@ -9,12 +9,30 @@ namespace Project.Core.Core.Configs.Passive
     {
         [JsonProperty("id")]
         public string Id { get; set; }
-        
+
         [JsonProperty("type")]
         public string Type { get; set; }
-        
+
         [JsonProperty("params")]
         public Dictionary<string, object> Params { get; set; } = new();
+
+        /// <summary>
+        /// Отображаемое название пассивки.
+        /// </summary>
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        /// <summary>
+        /// Краткое описание пассивки.
+        /// </summary>
+        [JsonProperty("description")]
+        public string Description { get; set; }
+
+        /// <summary>
+        /// Ключ спрайта/иконки пассивки для UI.
+        /// </summary>
+        [JsonProperty("icon")]
+        public string Icon { get; set; }
 
         public T Get<T>(string key, T defaultValue = default)
         {

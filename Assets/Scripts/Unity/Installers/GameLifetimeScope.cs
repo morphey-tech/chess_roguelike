@@ -20,6 +20,7 @@ using Project.Gameplay.Gameplay.Visual;
 using Project.Gameplay.Gameplay.Visual.Commands;
 using Project.Gameplay.Gameplay.Installers;
 using Project.Gameplay.Gameplay.Shutdown;
+using Project.Gameplay.Gameplay.UI;
 using Project.Gameplay.UI;
 using Project.Unity.Unity.Debug;
 using Project.Unity.UI;
@@ -185,6 +186,7 @@ namespace Project.Unity.Unity.Installers
             builder.Register<PrepareVisualSyncService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
             builder.Register<HpBarVisibilityService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
             builder.Register<DamagePreviewService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
+            builder.Register<FigureInfoUIService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
         }
 
         private void OnContainerBuilt(IObjectResolver resolver)
@@ -210,6 +212,7 @@ namespace Project.Unity.Unity.Installers
             resolver.Resolve<StormInitService>();
             resolver.Resolve<StormHighlightRenderer>();
             resolver.Resolve<StormDamageService>();
+            resolver.Resolve<FigureInfoUIService>();
 
             // UI must be force-resolved so its constructor runs InitAsync
             // (loads WindowsController prefab). Without this, static UI methods

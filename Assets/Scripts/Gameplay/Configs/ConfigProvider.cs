@@ -23,6 +23,7 @@ namespace Project.Gameplay.Gameplay.Configs
             "suites_conf",
             "figures_conf",
             "figure_descriptions_conf",
+            "figures_info_conf",
             "stats_conf",
             "passives_conf",
             "spawn_patterns_conf",
