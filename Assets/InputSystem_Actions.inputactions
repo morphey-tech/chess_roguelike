@@ -6,7 +6,7 @@
             "id": "df70fa95-8a34-4494-b137-73ab6b9c7d37",
             "actions": [
                 {
-                    "name": "Click",
+                    "name": "Left Click",
                     "type": "Button",
                     "id": "6c2ab1b8-8984-453a-af3d-a3c78ae1679a",
                     "expectedControlType": "Button",
@@ -31,6 +31,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
+                },
+                {
+                    "name": "Right Click",
+                    "type": "Button",
+                    "id": "5ee6f4f7-811c-45b9-88b8-212a639f7cfb",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -41,7 +50,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": ";Gamepad",
-                    "action": "Click",
+                    "action": "Left Click",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -52,7 +61,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
-                    "action": "Click",
+                    "action": "Left Click",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -63,7 +72,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": ";Touch",
-                    "action": "Click",
+                    "action": "Left Click",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -74,7 +83,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Joystick",
-                    "action": "Click",
+                    "action": "Left Click",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -85,7 +94,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "XR",
-                    "action": "Click",
+                    "action": "Left Click",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -96,7 +105,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard&Mouse",
-                    "action": "Click",
+                    "action": "Left Click",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -119,6 +128,17 @@
                     "processors": "",
                     "groups": "Keyboard&Mouse",
                     "action": "Point",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d69b0182-efec-49f3-b699-50783dc03dd8",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Right Click",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

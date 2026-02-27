@@ -11,7 +11,6 @@ using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Input.Messages;
 using Project.Gameplay.Gameplay.Run;
 using Project.Gameplay.UI;
-using UnityEngine;
 using VContainer;
 using VContainer.Unity;
 
@@ -20,13 +19,14 @@ namespace Project.Gameplay.Gameplay.UI
     /// <summary>
     /// Сервис управления окном информации о фигуре.
     /// Открывает окно при клике на фигуру (ЛКМ).
-    /// Закрывает окно при клике вне фигуры.
+    /// Закрывает окно при клике вне фигуры или по ПКМ.
     /// </summary>
     public sealed class FigureInfoUIService : IStartable, IDisposable
     {
         private readonly ISubscriber<FigureHoverChangedMessage> _figureHoverPublisher;
         private readonly ISubscriber<CellClickedMessage> _cellClickedPublisher;
-        private readonly ISubscriber<RawClickMessage> _rawClickPublisher;
+        private readonly ISubscriber<RightClickMessage> _rightClickPublisher;
+        private readonly ISubscriber<CancelRequestedMessage> _cancelPublisher;
         private readonly RunHolder _runHolder;
         private readonly ConfigProvider _configProvider;
         private readonly IAssetService _assetService;
@@ -35,17 +35,18 @@ namespace Project.Gameplay.Gameplay.UI
         private int? _hoveredFigureId;
         private IDisposable? _hoverSubscription;
         private IDisposable? _clickSubscription;
-        private IDisposable? _rawClickSubscription;
+        private IDisposable? _rightClickSubscription;
+        private IDisposable? _cancelSubscription;
         private FigureInfoWindow? _window;
         private FigureInfoConfigRepository? _figureInfoCache;
         private PassiveConfigRepository? _passiveCache;
-        private Dictionary<string, Sprite> _iconCache = new();
 
         [Inject]
         private FigureInfoUIService(
             ISubscriber<FigureHoverChangedMessage> figureHoverPublisher,
             ISubscriber<CellClickedMessage> cellClickedPublisher,
-            ISubscriber<RawClickMessage> rawClickPublisher,
+            ISubscriber<RightClickMessage> rightClickPublisher,
+            ISubscriber<CancelRequestedMessage> cancelPublisher,
             RunHolder runHolder,
             ConfigProvider configProvider,
             IAssetService assetService,
@@ -53,7 +54,8 @@ namespace Project.Gameplay.Gameplay.UI
         {
             _figureHoverPublisher = figureHoverPublisher;
             _cellClickedPublisher = cellClickedPublisher;
-            _rawClickPublisher = rawClickPublisher;
+            _rightClickPublisher = rightClickPublisher;
+            _cancelPublisher = cancelPublisher;
             _runHolder = runHolder;
             _configProvider = configProvider;
             _assetService = assetService;
@@ -64,7 +66,8 @@ namespace Project.Gameplay.Gameplay.UI
         {
             _hoverSubscription = _figureHoverPublisher.Subscribe(OnFigureHoverChanged);
             _clickSubscription = _cellClickedPublisher.Subscribe(OnCellClicked);
-            _rawClickSubscription = _rawClickPublisher.Subscribe(OnRawClick);
+            _rightClickSubscription = _rightClickPublisher.Subscribe(OnRightClick);
+            _cancelSubscription = _cancelPublisher.Subscribe(OnCancelRequested);
 
             // Предзагружаем конфиги и окно
             InitializeAsync().Forget();
@@ -109,13 +112,16 @@ namespace Project.Gameplay.Gameplay.UI
             ShowFigureInfo(figure);
         }
 
-        private void OnRawClick(RawClickMessage message)
+        private void OnRightClick(RightClickMessage message)
         {
-            // Если окно открыто и был клик, но фигура не выбрана - закрываем
-            if (_window != null && _window.IsVisible() && !_hoveredFigureId.HasValue)
-            {
-                CloseWindow();
-            }
+            // ПКМ закрывает окно
+            CloseWindow();
+        }
+
+        private void OnCancelRequested(CancelRequestedMessage message)
+        {
+            // Escape закрывает окно
+            CloseWindow();
         }
 
         private void CloseWindow()
@@ -145,7 +151,7 @@ namespace Project.Gameplay.Gameplay.UI
                 // Загружаем информацию о фигуре
                 FigureInfoConfig? infoConfig = _figureInfoCache?.Get(figure.TypeId);
 
-                // Загружаем конфиги пассивок и иконки
+                // Загружаем конфиги пассивок
                 var passiveConfigs = new List<PassiveConfig>();
                 foreach (var passive in figure.BasePassives)
                 {
@@ -175,7 +181,8 @@ namespace Project.Gameplay.Gameplay.UI
         {
             _hoverSubscription?.Dispose();
             _clickSubscription?.Dispose();
-            _rawClickSubscription?.Dispose();
+            _rightClickSubscription?.Dispose();
+            _cancelSubscription?.Dispose();
         }
     }
 }

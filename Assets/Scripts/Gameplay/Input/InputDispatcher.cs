@@ -29,6 +29,7 @@ namespace Project.Gameplay.Gameplay.Input
         private readonly IPublisher<EndTurnRequestedMessage> _endTurnPublisher;
         private readonly IPublisher<CancelRequestedMessage> _cancelPublisher;
         private readonly IPublisher<FigureHoverChangedMessage> _figureHoverChangedPublisher;
+        private readonly IPublisher<RightClickMessage> _rightClickPublisher;
         private readonly ILogger<InputDispatcher> _logger;
         private readonly RunHolder _runHolder;
 
@@ -37,10 +38,11 @@ namespace Project.Gameplay.Gameplay.Input
         private InputAction _pointAction;
         private InputAction _endTurnAction;
         private InputAction? _cancelAction;
+        private InputAction? _rightClickAction;
 
         private Camera _camera;
         private int? _hoveredFigureId;
-        
+
         // Reusable buffer for RaycastNonAlloc (max 16 figures in ray path)
         private readonly RaycastHit[] _raycastBuffer = new RaycastHit[16];
 
@@ -52,6 +54,7 @@ namespace Project.Gameplay.Gameplay.Input
             IPublisher<EndTurnRequestedMessage> endTurnPublisher,
             IPublisher<CancelRequestedMessage> cancelPublisher,
             IPublisher<FigureHoverChangedMessage> figureHoverChangedPublisher,
+            IPublisher<RightClickMessage> rightClickPublisher,
             RunHolder runHolder,
             ILogService logService)
         {
@@ -61,6 +64,7 @@ namespace Project.Gameplay.Gameplay.Input
             _endTurnPublisher = endTurnPublisher;
             _cancelPublisher = cancelPublisher;
             _figureHoverChangedPublisher = figureHoverChangedPublisher;
+            _rightClickPublisher = rightClickPublisher;
             _runHolder = runHolder;
             _logger = logService.CreateLogger<InputDispatcher>();
         }
@@ -75,10 +79,11 @@ namespace Project.Gameplay.Gameplay.Input
         {
             _gameplayMap = _inputActions.FindActionMap("Gameplay", true);
 
-            _clickAction   = _gameplayMap.FindAction("Click", true);
-            _pointAction   = _gameplayMap.FindAction("Point", true);
+            _clickAction = _gameplayMap.FindAction("Left Click", true);
+            _pointAction = _gameplayMap.FindAction("Point", true);
             _endTurnAction = _gameplayMap.FindAction("EndTurn", true);
-            _cancelAction  = _gameplayMap.FindAction("Cancel", false);
+            _cancelAction = _gameplayMap.FindAction("Cancel", false);
+            _rightClickAction = _gameplayMap.FindAction("Right Click", false);
 
             _clickAction.started += OnClickStarted;
             _pointAction.performed += OnPointPerformed;
@@ -87,9 +92,9 @@ namespace Project.Gameplay.Gameplay.Input
             {
                 _cancelAction.performed += OnCancelPerformed;
             }
+            _rightClickAction.performed += OnRightClickPerformed;
 
             _gameplayMap.Enable();
-
             _logger.Info($"Input bound: {_gameplayMap.name}");
         }
 
@@ -233,6 +238,12 @@ namespace Project.Gameplay.Gameplay.Input
         {
             _logger.Debug("Cancel requested");
             _cancelPublisher.Publish(new CancelRequestedMessage());
+        }
+
+        private void OnRightClickPerformed(InputAction.CallbackContext context)
+        {
+            _logger.Debug("Right click");
+            _rightClickPublisher.Publish(new RightClickMessage());
         }
 
         public void Dispose()
