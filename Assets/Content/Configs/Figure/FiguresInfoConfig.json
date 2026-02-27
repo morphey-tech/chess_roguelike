@@ -3,44 +3,86 @@
     {
       "id": "pawn",
       "name": "Пешка",
-      "description": "Базовая боевая единица. Движется только вперёд, атакует по диагонали.",
+      "description": "Слабая поодиночке, но становится опасной в группе. Идеальна для заполнения поля и создания численного преимущества.\nИспользуй массой для давления и контроля территории.",
       "icon": "figures/pawn_icon",
       "icon_prefab": "figures/pawn_icon_prefab"
     },
     {
       "id": "rook",
       "name": "Ладья",
-      "description": "Тяжёлая фигура. Движется и атакует по прямым линиям.",
+      "description": "Мощный боец, который набирает силу с разбега. Чем длиннее путь до цели, тем сокрушительнее удар.\nТребует открытых линий для максимальной эффективности.",
       "icon": "figures/rook_icon",
       "icon_prefab": "figures/rook_icon_prefab"
     },
     {
       "id": "knight",
       "name": "Конь",
-      "description": "Быстрая фигура. Движется буквой Г, может перепрыгивать через другие фигуры.",
+      "description": "Ловкий боец, способный перепрыгивать через препятствия. После рывка становится трудно поймать.\nИдеален для обхода фронта и атаки уязвимых целей.",
       "icon": "figures/knight_icon",
       "icon_prefab": "figures/knight_icon_prefab"
     },
     {
       "id": "bishop",
       "name": "Слон",
-      "description": "Дальнобойная фигура. Движется и атакует по диагоналям.",
+      "description": "Снайпер, специализирующийся на контроле диагоналей. Первый выстрел всегда самый мощный.\nОтлично справляется с устранением ключевых целей на дистанции.",
       "icon": "figures/bishop_icon",
       "icon_prefab": "figures/bishop_icon_prefab"
     },
     {
       "id": "queen",
       "name": "Ферзь",
-      "description": "Самая сильная фигура. Сочетает возможности ладьи и слона.",
+      "description": "Универсальный боец, который становится сильнее с каждой атакой. Не останавливайся, чтобы поддерживать мощь.\nСамая гибкая фигура, адаптирующаяся под любую ситуацию.",
       "icon": "figures/queen_icon",
       "icon_prefab": "figures/queen_icon_prefab"
     },
     {
       "id": "king",
       "name": "Король",
-      "description": "Главная фигура. Движется на одну клетку в любом направлении.",
+      "description": "Командир, усиливающий союзников вокруг себя. Должен постоянно двигаться, чтобы поддерживать боевой дух войска.\nДержи в центре, но не давай застаиваться на месте.",
       "icon": "figures/king_icon",
       "icon_prefab": "figures/king_icon_prefab"
+    },
+    {
+      "id": "brutal",
+      "name": "Брут",
+      "description": "Тяжёлый боец ближнего боя. Наносит огромный урон вблизи, но уязвим на дистанции.",
+      "icon": "figures/brutal_icon",
+      "icon_prefab": "figures/brutal_icon_prefab"
+    },
+    {
+      "id": "slippery",
+      "name": "Скользкий",
+      "description": "Быстрый и неуловимый. После атаки отступает, затрудняя контратаку.",
+      "icon": "figures/slippery_icon",
+      "icon_prefab": "figures/slippery_icon_prefab"
+    },
+    {
+      "id": "tank",
+      "name": "Танк",
+      "description": "Живучий боец с высокой защитой. Поглощает урон и защищает союзников.",
+      "icon": "figures/tank_icon",
+      "icon_prefab": "figures/tank_icon_prefab"
+    },
+    {
+      "id": "splash",
+      "name": "Плеск",
+      "description": "Атакует по области, нанося урон нескольким целям одновременно.",
+      "icon": "figures/splash_icon",
+      "icon_prefab": "figures/splash_icon_prefab"
+    },
+    {
+      "id": "pierce",
+      "name": "Пронзающий",
+      "description": "Атаки проходят сквозь цели, поражая несколько фигур на линии.",
+      "icon": "figures/pierce_icon",
+      "icon_prefab": "figures/pierce_icon_prefab"
+    },
+    {
+      "id": "ranger",
+      "name": "Рейнджер",
+      "description": "Дальнобойный снайпер. Атакует с большого расстояния, но слаб вблизи.",
+      "icon": "figures/ranger_icon",
+      "icon_prefab": "figures/ranger_icon_prefab"
     }
   ]
 }

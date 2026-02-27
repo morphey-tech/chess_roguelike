@@ -15,5 +15,8 @@ namespace Project.Core.Core.Configs.Figure
         
         [JsonProperty("description_id")]
         public string DescriptionId { get; set; }
+        
+        [JsonProperty("info_id")]
+        public string InfoId { get; set; }
     }
 }

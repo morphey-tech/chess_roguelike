@@ -148,8 +148,12 @@ namespace Project.Gameplay.Gameplay.UI
 
             try
             {
-                // Загружаем информацию о фигуре
-                FigureInfoConfig? infoConfig = _figureInfoCache?.Get(figure.TypeId);
+                // Загружаем информацию о фигуре по InfoId из Figure
+                FigureInfoConfig? infoConfig = null;
+                if (!string.IsNullOrEmpty(figure.InfoId) && _figureInfoCache != null)
+                {
+                    infoConfig = _figureInfoCache.Get(figure.InfoId);
+                }
 
                 // Загружаем конфиги пассивок
                 var passiveConfigs = new List<PassiveConfig>();

@@ -1,52 +1,31 @@
-using System;
 using System.Collections.Generic;
-using Project.Core.Core.Assets;
 using Project.Core.Core.Configs.Figure;
 using Project.Core.Core.Configs.Passive;
 using Project.Core.Window;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.UI;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using VContainer;
-using VContainer.Unity;
 
 namespace Project.Gameplay.UI
 {
-    /// <summary>
-    /// Окно отображения информации о выбранной фигуре.
-    /// Показывает название, описание, статы и пассивки иконками.
-    /// 
-    /// Структура префаба:
-    /// - FigureInfoWindow (корневой, растянут на весь экран через WindowController)
-    ///   └── Root (RectTransform, Vertical Layout Group)
-    ///       ├── Header (RectTransform)
-    ///       │   ├── FigureName (Text)
-    ///       │   └── FigureDescription (Text)
-    ///       ├── StatsContainer (RectTransform)
-    ///       │   ├── HPText (Text)
-    ///       │   ├── AttackText (Text)
-    ///       │   ├── DefenceText (Text)
-    ///       │   ├── EvasionText (Text)
-    ///       │   └── AttackRangeText (Text)
-    ///       └── PassivesContainer (RectTransform, Horizontal Layout)
-    ///           └── PassiveIconPrefab (PassiveIconView) [disabled]
-    /// </summary>
     public class FigureInfoWindow : ParameterWindow<FigureInfoWindow.FigureInfoModel>
     {
         [Header("Root")]
         [SerializeField] private RectTransform _root;
 
         [Header("Figure Info")]
-        [SerializeField] private Text _figureName;
-        [SerializeField] private Text _figureDescription;
+        [SerializeField] private TextMeshProUGUI _figureName;
+        [SerializeField] private TextMeshProUGUI _figureDescription;
 
         [Header("Stats")]
-        [SerializeField] private Text _hpText;
-        [SerializeField] private Text _attackText;
-        [SerializeField] private Text _defenceText;
-        [SerializeField] private Text _evasionText;
-        [SerializeField] private Text _attackRangeText;
+        [SerializeField] private TextMeshProUGUI _hpText;
+        [SerializeField] private TextMeshProUGUI _attackText;
+        [SerializeField] private TextMeshProUGUI _defenceText;
+        [SerializeField] private TextMeshProUGUI _evasionText;
+        [SerializeField] private TextMeshProUGUI _attackRangeText;
 
         [Header("Passives")]
         [SerializeField] private RectTransform _passivesContainer;
@@ -59,54 +38,6 @@ namespace Project.Gameplay.UI
         private void Construct(IUIAssetService iuiAssetService)
         {
             _iuiAssetService = iuiAssetService;
-        }
-
-        private static void AddLayoutComponents(RectTransform rectTransform, float spacing, TextAnchor alignment)
-        {
-            // VerticalLayoutGroup
-            if (rectTransform.GetComponent<VerticalLayoutGroup>() == null)
-            {
-                var layout = rectTransform.gameObject.AddComponent<VerticalLayoutGroup>();
-                layout.spacing = spacing;
-                layout.padding = new RectOffset(10, 10, 10, 10);
-                layout.childAlignment = alignment;
-                layout.childForceExpandWidth = true;
-                layout.childForceExpandHeight = false;
-                layout.childControlWidth = true;
-                layout.childControlHeight = false;
-            }
-
-            // ContentSizeFitter
-            if (rectTransform.GetComponent<ContentSizeFitter>() == null)
-            {
-                var fitter = rectTransform.gameObject.AddComponent<ContentSizeFitter>();
-                fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-                fitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
-            }
-        }
-
-        private static void AddHorizontalLayoutComponents(RectTransform rectTransform, float spacing, TextAnchor alignment)
-        {
-            // HorizontalLayoutGroup
-            if (rectTransform.GetComponent<HorizontalLayoutGroup>() == null)
-            {
-                var layout = rectTransform.gameObject.AddComponent<HorizontalLayoutGroup>();
-                layout.spacing = spacing;
-                layout.padding = new RectOffset(10, 10, 10, 10);
-                layout.childAlignment = alignment;
-                layout.childForceExpandWidth = false;
-                layout.childForceExpandHeight = false;
-                layout.childControlWidth = false;
-                layout.childControlHeight = false;
-            }
-
-            // ContentSizeFitter
-            if (rectTransform.GetComponent<ContentSizeFitter>() == null)
-            {
-                var fitter = rectTransform.gameObject.AddComponent<ContentSizeFitter>();
-                fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-                fitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
-            }
         }
 
         protected override void OnShow(FigureInfoModel figureInfoModel)
@@ -183,7 +114,7 @@ namespace Project.Gameplay.UI
         public class FigureInfoModel
         {
             public Figure Figure { get; set; }
-            public FigureInfoConfig? InfoConfig { get; set; }
+            public FigureInfoConfig? InfoConfig { get; set; }  // Готовый конфиг из FigureConfig.InfoId
             public List<PassiveConfig> PassiveConfigs { get; set; } = new();
         }
     }

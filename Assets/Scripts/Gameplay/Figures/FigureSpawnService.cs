@@ -123,7 +123,8 @@ namespace Project.Gameplay.Gameplay.Figures
                 description.AttackId,
                 description.TurnPatternsId,
                 stats,
-                team);
+                team,
+                figureConfig.InfoId);
 
             if (!string.IsNullOrEmpty(description.LootTableId))
             {

@@ -12,6 +12,7 @@ namespace Project.Gameplay.Gameplay.Figures
         public string MovementId { get; }
         public string AttackId { get; }
         public string TurnPatternsId { get; }
+        public string? InfoId { get; }  // Ссылка на FigureInfoConfig
         public Team Team { get; }
 
         public FigureStats Stats { get; }
@@ -23,12 +24,13 @@ namespace Project.Gameplay.Gameplay.Figures
         public string? LootTableId { get; set; }
 
         public Figure(int id, string typeId, string movementId, string attackId,
-            string turnPatternsId, FigureStats stats, Team team) : base(id)
+            string turnPatternsId, FigureStats stats, Team team, string? infoId = null) : base(id)
         {
             TypeId = typeId;
             MovementId = movementId;
             AttackId = attackId;
             TurnPatternsId = turnPatternsId;
+            InfoId = infoId;
             Stats = stats;
             Team = team;
             Effects = new(this);

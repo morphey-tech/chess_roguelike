@@ -188,6 +188,7 @@ namespace Project.Unity.Unity.Installers
             builder.Register<DamagePreviewService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
             builder.Register<FigureInfoUIService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
             builder.Register<UIAssetService>(Lifetime.Singleton).As<IUIAssetService>();
+            builder.Register<TooltipService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
         }
 
         private void OnContainerBuilt(IObjectResolver resolver)

@@ -1,4 +1,5 @@
 using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,7 +12,7 @@ namespace Project.Unity.UI.Components.Game
         [SerializeField] private Image _damageFill;
         [SerializeField] private Transform _dividerContainer;
         [SerializeField] private Image _dividerTemplate;
-        [SerializeField] private Text _hpText;
+        [SerializeField] private TextMeshProUGUI _hpText;
 
         [Header("Settings")]
         [SerializeField] private float _dividerWidth = 2f;

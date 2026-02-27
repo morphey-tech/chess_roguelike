@@ -27,6 +27,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - ui
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9aded6957e63139a3a4765095a4e433e
+    m_Address: Project.Gameplay.UI.TooltipWindow
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ui
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6
     m_Address: Project.Gameplay.UI.StageOutcomeWindow
     m_ReadOnly: 0

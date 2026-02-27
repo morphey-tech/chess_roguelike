@@ -4,103 +4,120 @@
       "id": "pawn_white",
       "alias": "pw",
       "asset_key": "pawn_white_view",
-      "description_id": "pawn"
+      "description_id": "pawn",
+      "info_id": "pawn"
     },
     {
       "id": "pawn_black",
       "alias": "pb",
       "asset_key": "pawn_black_view",
-      "description_id": "pawn"
+      "description_id": "pawn",
+      "info_id": "pawn"
     },
     {
       "id": "knight_white",
       "alias": "kw",
       "asset_key": "knight_white_view",
-      "description_id": "knight"
+      "description_id": "knight",
+      "info_id": "knight"
     },
     {
       "id": "knight_black",
       "alias": "kb",
       "asset_key": "knight_black_view",
-      "description_id": "knight"
+      "description_id": "knight",
+      "info_id": "knight"
     },
     {
       "id": "bishop_white",
       "alias": "bw",
       "asset_key": "bishop_white_view",
-      "description_id": "bishop"
+      "description_id": "bishop",
+      "info_id": "bishop"
     },
     {
       "id": "bishop_black",
       "alias": "bb",
       "asset_key": "bishop_black_view",
-      "description_id": "bishop"
+      "description_id": "bishop",
+      "info_id": "bishop"
     },
     {
       "id": "rook_white",
       "alias": "rw",
       "asset_key": "rook_white_view",
-      "description_id": "rook"
+      "description_id": "rook",
+      "info_id": "rook"
     },
     {
       "id": "rook_black",
       "alias": "rb",
       "asset_key": "rook_black_view",
-      "description_id": "rook"
+      "description_id": "rook",
+      "info_id": "rook"
     },
     {
       "id": "queen_white",
       "alias": "qw",
       "asset_key": "queen_white_view",
-      "description_id": "queen"
+      "description_id": "queen",
+      "info_id": "queen"
     },
     {
       "id": "queen_black",
       "alias": "qb",
       "asset_key": "queen_black_view",
-      "description_id": "queen"
+      "description_id": "queen",
+      "info_id": "queen"
     },
     {
       "id": "king_white",
       "alias": "kg",
       "asset_key": "king_white_view",
-      "description_id": "king"
+      "description_id": "king",
+      "info_id": "king"
     },
     {
       "id": "brutal",
       "alias": "br",
       "asset_key": "brutal_figure_view",
-      "description_id": "pusher"
+      "description_id": "pusher",
+      "info_id": "brutal"
     },
     {
       "id": "slippery",
       "alias": "sl",
       "asset_key": "slippery_figure_view",
-      "description_id": "slippery"
+      "description_id": "slippery",
+      "info_id": "slippery"
     },
     {
       "id": "tank",
       "alias": "tn",
       "asset_key": "tank_figure_view",
-      "description_id": "tank"
+      "description_id": "tank",
+      "info_id": "tank"
     },
     {
       "id": "splash",
       "alias": "sp",
       "asset_key": "splash_figure_view",
-      "description_id": "splash"
+      "description_id": "splash",
+      "info_id": "splash"
     },
     {
       "id": "pierce",
       "alias": "pr",
       "asset_key": "pierce_figure_view",
-      "description_id": "pierce"
+      "description_id": "pierce",
+      "info_id": "pierce"
     },
     {
       "id": "ranger",
       "alias": "rg",
       "asset_key": "ranger_figure_view",
-      "description_id": "ranger"
+      "description_id": "ranger",
+      "info_id": "ranger"
     }
   ]
 }
