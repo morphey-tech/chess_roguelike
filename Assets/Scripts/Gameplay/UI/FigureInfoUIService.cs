@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using MessagePipe;
+using Project.Core.Core.Assets;
 using Project.Core.Core.Configs.Figure;
 using Project.Core.Core.Configs.Passive;
 using Project.Core.Core.Logging;
@@ -10,6 +11,7 @@ using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Input.Messages;
 using Project.Gameplay.Gameplay.Run;
 using Project.Gameplay.UI;
+using UnityEngine;
 using VContainer;
 using VContainer.Unity;
 
@@ -18,34 +20,43 @@ namespace Project.Gameplay.Gameplay.UI
     /// <summary>
     /// Сервис управления окном информации о фигуре.
     /// Открывает окно при клике на фигуру (ЛКМ).
+    /// Закрывает окно при клике вне фигуры.
     /// </summary>
     public sealed class FigureInfoUIService : IStartable, IDisposable
     {
         private readonly ISubscriber<FigureHoverChangedMessage> _figureHoverPublisher;
         private readonly ISubscriber<CellClickedMessage> _cellClickedPublisher;
+        private readonly ISubscriber<RawClickMessage> _rawClickPublisher;
         private readonly RunHolder _runHolder;
         private readonly ConfigProvider _configProvider;
+        private readonly IAssetService _assetService;
         private readonly ILogger<FigureInfoUIService> _logger;
 
         private int? _hoveredFigureId;
         private IDisposable? _hoverSubscription;
         private IDisposable? _clickSubscription;
+        private IDisposable? _rawClickSubscription;
         private FigureInfoWindow? _window;
         private FigureInfoConfigRepository? _figureInfoCache;
         private PassiveConfigRepository? _passiveCache;
+        private Dictionary<string, Sprite> _iconCache = new();
 
         [Inject]
         private FigureInfoUIService(
             ISubscriber<FigureHoverChangedMessage> figureHoverPublisher,
             ISubscriber<CellClickedMessage> cellClickedPublisher,
+            ISubscriber<RawClickMessage> rawClickPublisher,
             RunHolder runHolder,
             ConfigProvider configProvider,
+            IAssetService assetService,
             ILogService logService)
         {
             _figureHoverPublisher = figureHoverPublisher;
             _cellClickedPublisher = cellClickedPublisher;
+            _rawClickPublisher = rawClickPublisher;
             _runHolder = runHolder;
             _configProvider = configProvider;
+            _assetService = assetService;
             _logger = logService.CreateLogger<FigureInfoUIService>();
         }
 
@@ -53,6 +64,9 @@ namespace Project.Gameplay.Gameplay.UI
         {
             _hoverSubscription = _figureHoverPublisher.Subscribe(OnFigureHoverChanged);
             _clickSubscription = _cellClickedPublisher.Subscribe(OnCellClicked);
+            _rawClickSubscription = _rawClickPublisher.Subscribe(OnRawClick);
+
+            // Предзагружаем конфиги и окно
             InitializeAsync().Forget();
         }
 
@@ -70,19 +84,46 @@ namespace Project.Gameplay.Gameplay.UI
 
         private void OnCellClicked(CellClickedMessage message)
         {
+            // Если кликнули на клетку без фигуры - закрываем окно
             if (!_hoveredFigureId.HasValue)
+            {
+                CloseWindow();
                 return;
+            }
 
             var run = _runHolder.Current;
             if (run?.CurrentStage?.Grid == null)
+            {
+                CloseWindow();
                 return;
+            }
 
             var grid = run.CurrentStage.Grid;
             var figure = grid.GetFigureById(_hoveredFigureId.Value);
             if (figure == null)
+            {
+                CloseWindow();
                 return;
+            }
 
             ShowFigureInfo(figure);
+        }
+
+        private void OnRawClick(RawClickMessage message)
+        {
+            // Если окно открыто и был клик, но фигура не выбрана - закрываем
+            if (_window != null && _window.IsVisible() && !_hoveredFigureId.HasValue)
+            {
+                CloseWindow();
+            }
+        }
+
+        private void CloseWindow()
+        {
+            if (_window != null && _window.IsVisible())
+            {
+                _window.Hide();
+            }
         }
 
         private void ShowFigureInfo(Figure figure)
@@ -104,7 +145,7 @@ namespace Project.Gameplay.Gameplay.UI
                 // Загружаем информацию о фигуре
                 FigureInfoConfig? infoConfig = _figureInfoCache?.Get(figure.TypeId);
 
-                // Загружаем конфиги пассивок
+                // Загружаем конфиги пассивок и иконки
                 var passiveConfigs = new List<PassiveConfig>();
                 foreach (var passive in figure.BasePassives)
                 {
@@ -134,6 +175,7 @@ namespace Project.Gameplay.Gameplay.UI
         {
             _hoverSubscription?.Dispose();
             _clickSubscription?.Dispose();
+            _rawClickSubscription?.Dispose();
         }
     }
 }

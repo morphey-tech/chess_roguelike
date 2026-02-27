@@ -187,6 +187,7 @@ namespace Project.Unity.Unity.Installers
             builder.Register<HpBarVisibilityService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
             builder.Register<DamagePreviewService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
             builder.Register<FigureInfoUIService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
+            builder.Register<UIAssetService>(Lifetime.Singleton).As<IUIAssetService>();
         }
 
         private void OnContainerBuilt(IObjectResolver resolver)
