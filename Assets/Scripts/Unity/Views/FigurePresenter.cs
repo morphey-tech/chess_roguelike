@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using Project.Core.Core.Assets;
+using Project.Core.Core.Configs.Figure;
 using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
 using Project.Core.Core.Physics;
@@ -25,12 +27,14 @@ namespace Project.Unity.Unity.Views
         private const int AttackAnimationDurationMs = 200;
         private const int DeathAnimationDurationMs = 500;
         private const int PushAnimationDurationMs = 200;
-        
+
         private readonly EntityService _entityService;
         private readonly ConfigProvider _configProvider;
         private readonly IWorldRoot _worldRoot;
+        private readonly IAssetService _assetService;
         private readonly ILogger<FigurePresenter> _logger;
         private GameplayConfig? _gameplayConfig;
+        private FigureShatterConfigRepository? _shatterConfigRepo;
 
         private readonly Dictionary<int, GameObject> _figures = new();
         private readonly Dictionary<int, FigureVisualSet> _visuals = new();
@@ -50,17 +54,27 @@ namespace Project.Unity.Unity.Views
             EntityService entityService,
             ConfigProvider configProvider,
             IWorldRoot worldRoot,
+            IAssetService assetService,
             ILogService logService)
         {
             _entityService = entityService;
             _configProvider = configProvider;
             _worldRoot = worldRoot;
+            _assetService = assetService;
             _logger = logService.CreateLogger<FigurePresenter>();
         }
 
         public async UniTask CreateFigure(Figure figure, string viewAssetKey, GridPosition pos, Team team)
         {
             _gameplayConfig ??= await _configProvider.Get<GameplayConfig>("gameplay_conf");
+
+            // Загрузить репозиторий конфигов разрушения если еще не загружен
+            if (_shatterConfigRepo == null && !string.IsNullOrEmpty(_gameplayConfig.FigureShatterConfigId))
+            {
+                _logger.Info($"Loading shatter config repo: {_gameplayConfig.FigureShatterConfigId}");
+                _shatterConfigRepo = await _configProvider.Get<FigureShatterConfigRepository>("figure_shatter_conf");
+                _logger.Info($"Shatter config repo loaded: {_shatterConfigRepo != null}");
+            }
 
             Vector3 worldPos = GetCellTopPosition(pos);
             
@@ -108,6 +122,27 @@ namespace Project.Unity.Unity.Views
                 DamageText = controllerLink.GetComponentInChildren<DamageTextPresenter>(true)
             };
             _visuals[figure.Id] = visuals;
+
+            // Настроить FigureDeathShatterPresenter если есть
+            FigureDeathShatterPresenter? shatterPresenter = controllerLink.GetComponentInChildren<FigureDeathShatterPresenter>(true);
+            if (shatterPresenter != null && _shatterConfigRepo != null && !string.IsNullOrEmpty(_gameplayConfig?.FigureShatterConfigId))
+            {
+                FigureShatterConfig? shatterConfig = _shatterConfigRepo.Get(_gameplayConfig.FigureShatterConfigId);
+                if (shatterConfig != null)
+                {
+                    _logger.Info($"Setting shatter config for figure {figure.Id}: {shatterConfig.Id}");
+                    shatterPresenter.SetConfig(shatterConfig);
+                }
+                else
+                {
+                    _logger.Warning($"Shatter config not found: {_gameplayConfig.FigureShatterConfigId}");
+                }
+            }
+            else
+            {
+                if (shatterPresenter == null)
+                    _logger.Warning("FigureDeathShatterPresenter not found on figure controller");
+            }
 
             // Face enemy figures towards player
             if (team == Team.Enemy)

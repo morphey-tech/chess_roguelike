@@ -186,7 +186,7 @@ namespace Project.Unity.Unity.Installers
             builder.Register<PrepareVisualSyncService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
             builder.Register<HpBarVisibilityService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
             builder.Register<DamagePreviewService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
-            builder.Register<FigureInfoUIService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
+            builder.Register<FigureInfoPreviewService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
             builder.Register<UIAssetService>(Lifetime.Singleton).As<IUIAssetService>();
             builder.Register<TooltipService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
         }
@@ -214,7 +214,7 @@ namespace Project.Unity.Unity.Installers
             resolver.Resolve<StormInitService>();
             resolver.Resolve<StormHighlightRenderer>();
             resolver.Resolve<StormDamageService>();
-            resolver.Resolve<FigureInfoUIService>();
+            resolver.Resolve<FigureInfoPreviewService>();
 
             // UI must be force-resolved so its constructor runs InitAsync
             // (loads WindowsController prefab). Without this, static UI methods

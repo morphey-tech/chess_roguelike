@@ -77,6 +77,15 @@ namespace Project.Gameplay.Gameplay.Figures
         }
 
         /// <summary>
+        /// Remove all modifiers with specific source context.
+        /// </summary>
+        public bool ClearByContext(ModifierSourceContext context)
+        {
+            int removed = _mods.RemoveAll(m => m.SourceContext == context);
+            return removed > 0;
+        }
+
+        /// <summary>
         /// Called once per turn to update all modifiers.
         /// </summary>
         public void Tick()

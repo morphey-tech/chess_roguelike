@@ -3,5 +3,6 @@
   "figureSpawnDuration": 0.3,
   "prepareSlotSpawnDelay": 0.05,
   "hpBarVisibilityModeAllies": "Always",
-  "hpBarVisibilityModeEnemies": "OnHoverOrSelection"
+  "hpBarVisibilityModeEnemies": "OnHoverOrSelection",
+  "figureShatterConfigId": "default"
 }

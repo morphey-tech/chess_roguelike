@@ -24,13 +24,13 @@ namespace Project.Gameplay.Gameplay.Figures.StatusEffects
             switch (_buffType)
             {
                 case BuffType.Attack:
-                    owner.Stats.Attack.AddModifier(new FlatModifier<float>(_modifierId, _value, 0, 1, true));
+                    owner.Stats.Attack.AddModifier(new FlatModifier<float>(_modifierId, _value, 0, 1, true, ModifierSourceContext.CombatEffect));
                     break;
                 case BuffType.Defence:
-                    owner.Stats.Defence.AddModifier(new FlatModifier<float>(_modifierId, _value, 0, 1, true));
+                    owner.Stats.Defence.AddModifier(new FlatModifier<float>(_modifierId, _value, 0, 1, true, ModifierSourceContext.CombatEffect));
                     break;
                 case BuffType.Evasion:
-                    owner.Stats.Evasion.AddModifier(new FlatModifier<float>(_modifierId, _value, 0, 1, true));
+                    owner.Stats.Evasion.AddModifier(new FlatModifier<float>(_modifierId, _value, 0, 1, true, ModifierSourceContext.CombatEffect));
                     break;
             }
         }

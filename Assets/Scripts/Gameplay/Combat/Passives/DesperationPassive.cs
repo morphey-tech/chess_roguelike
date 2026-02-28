@@ -29,12 +29,12 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
                 // No allies nearby: set Attack to 1 via modifier
                 // Remove old modifier first to avoid stacking
                 owner.Stats.Attack.RemoveModifiersById(Id);
-                
+
                 // Calculate the delta needed to bring Attack to 1
                 float currentAttack = owner.Stats.Attack.Value;
                 float delta = 1f - currentAttack;
-                
-                CombatFlatModifier modifier = new CombatFlatModifier(Id, delta, 0, 1, false);
+
+                CombatFlatModifier modifier = new(Id, delta, 0, 1, false, ModifierSourceContext.PreviewCalculation);
                 owner.Stats.Attack.AddModifier(modifier);
             }
         }

@@ -7,8 +7,8 @@ namespace Project.Gameplay.Gameplay.Figures
         private readonly T _value;
         private readonly Func<T, T, T> _addFunc;
 
-        public FlatModifier(string id, T value, int priority = 0, int duration = -1, bool stackable = true)
-            : base(id, priority, duration, stackable)
+        public FlatModifier(string id, T value, int priority = 0, int duration = -1, bool stackable = true, ModifierSourceContext sourceContext = ModifierSourceContext.Passive)
+            : base(id, priority, duration, stackable, sourceContext)
         {
             _value = value;
 

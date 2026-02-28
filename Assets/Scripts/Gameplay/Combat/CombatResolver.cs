@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
+using Project.Gameplay.Gameplay.Combat.Contexts;
 using Project.Gameplay.Gameplay.Combat.Effects;
 using Project.Gameplay.Gameplay.Combat.Effects.Impl;
 using Project.Gameplay.Gameplay.Figures;
+using Project.Gameplay.Gameplay.Grid;
 using VContainer;
 
 namespace Project.Gameplay.Gameplay.Combat
@@ -16,11 +19,15 @@ namespace Project.Gameplay.Gameplay.Combat
     public sealed class CombatResolver
     {
         private readonly ILogger<CombatResolver> _logger;
+        private readonly PassiveTriggerService _passiveTriggerService;
 
         [Inject]
-        private CombatResolver(ILogService logService)
+        private CombatResolver(
+            ILogService logService,
+            PassiveTriggerService passiveTriggerService)
         {
             _logger = logService.CreateLogger<CombatResolver>();
+            _passiveTriggerService = passiveTriggerService;
         }
 
         public CombatResult Resolve(HitContext context)
@@ -45,10 +52,7 @@ namespace Project.Gameplay.Gameplay.Combat
                 context.Delivery,
                 context.ProjectileConfigId));
 
-            // Effects from attack strategy (splash, pierce, etc.)
             effects.AddRange(context.Effects);
-
-            // Sort by Phase, then by OrderInPhase
             List<ICombatEffect> sortedEffects = effects
                 .OrderBy(e => e.Phase)
                 .ThenBy(e => e.OrderInPhase)
@@ -65,6 +69,41 @@ namespace Project.Gameplay.Gameplay.Combat
                 damageDealt: 0,
                 targetDied: false,
                 wasCritical: false);
+        }
+
+        /// <summary>
+        /// Рассчитывает урон для превью с учётом пассивок.
+        /// Возвращает финальный урон после применения всех модификаторов.
+        /// </summary>
+        public float CalculatePreviewDamage(Figure attacker, Figure target, BoardGrid grid)
+        {
+            BeforeHitContext beforeContext = new()
+            {
+                Attacker = attacker,
+                Target = target,
+                Grid = grid,
+                BaseDamage = attacker.Stats.Attack.Value
+            };
+
+            _passiveTriggerService.TriggerBeforeHit(attacker, target, beforeContext);
+
+            float atk = attacker.Stats.Attack.Value;
+            float def = target.Stats.Defence.Value;
+            float finalDamage = Math.Max(1f, atk - def);
+
+            finalDamage = finalDamage * beforeContext.DamageMultiplier + beforeContext.BonusDamage;
+            if (finalDamage < 0)
+            {
+                finalDamage = 0;
+            }
+
+            attacker.Stats.Attack.ClearByContext(ModifierSourceContext.PreviewCalculation);
+            attacker.Stats.Defence.ClearByContext(ModifierSourceContext.PreviewCalculation);
+            attacker.Stats.Evasion.ClearByContext(ModifierSourceContext.PreviewCalculation);
+            target.Stats.Attack.ClearByContext(ModifierSourceContext.PreviewCalculation);
+            target.Stats.Defence.ClearByContext(ModifierSourceContext.PreviewCalculation);
+            target.Stats.Evasion.ClearByContext(ModifierSourceContext.PreviewCalculation);
+            return finalDamage;
         }
     }
 }

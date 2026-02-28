@@ -96,6 +96,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - configs
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8f7a2b3c4d5e6f7a8b9c0d1e2f3a4b5c
+    m_Address: figure_shatter_conf
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - configs
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b50dfd490fa9473588ba8e1f40b936ad
     m_Address: duels_conf
     m_ReadOnly: 0

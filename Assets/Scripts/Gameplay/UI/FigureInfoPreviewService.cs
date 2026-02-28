@@ -6,8 +6,10 @@ using Project.Core.Core.Assets;
 using Project.Core.Core.Configs.Figure;
 using Project.Core.Core.Configs.Passive;
 using Project.Core.Core.Logging;
+using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.Gameplay.Figures;
+using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Input.Messages;
 using Project.Gameplay.Gameplay.Run;
 using Project.Gameplay.UI;
@@ -21,16 +23,16 @@ namespace Project.Gameplay.Gameplay.UI
     /// Открывает окно при клике на фигуру (ЛКМ).
     /// Закрывает окно при клике вне фигуры или по ПКМ.
     /// </summary>
-    public sealed class FigureInfoUIService : IStartable, IDisposable
+    public sealed class FigureInfoPreviewService : IStartable, IDisposable
     {
         private readonly ISubscriber<FigureHoverChangedMessage> _figureHoverPublisher;
         private readonly ISubscriber<CellClickedMessage> _cellClickedPublisher;
         private readonly ISubscriber<RightClickMessage> _rightClickPublisher;
         private readonly ISubscriber<CancelRequestedMessage> _cancelPublisher;
+        private readonly ITooltipService _tooltipService;
         private readonly RunHolder _runHolder;
         private readonly ConfigProvider _configProvider;
-        private readonly IAssetService _assetService;
-        private readonly ILogger<FigureInfoUIService> _logger;
+        private readonly ILogger<FigureInfoPreviewService> _logger;
 
         private int? _hoveredFigureId;
         private IDisposable? _hoverSubscription;
@@ -42,11 +44,12 @@ namespace Project.Gameplay.Gameplay.UI
         private PassiveConfigRepository? _passiveCache;
 
         [Inject]
-        private FigureInfoUIService(
+        private FigureInfoPreviewService(
             ISubscriber<FigureHoverChangedMessage> figureHoverPublisher,
             ISubscriber<CellClickedMessage> cellClickedPublisher,
             ISubscriber<RightClickMessage> rightClickPublisher,
             ISubscriber<CancelRequestedMessage> cancelPublisher,
+            ITooltipService tooltipService,
             RunHolder runHolder,
             ConfigProvider configProvider,
             IAssetService assetService,
@@ -56,10 +59,10 @@ namespace Project.Gameplay.Gameplay.UI
             _cellClickedPublisher = cellClickedPublisher;
             _rightClickPublisher = rightClickPublisher;
             _cancelPublisher = cancelPublisher;
+            _tooltipService = tooltipService;
             _runHolder = runHolder;
             _configProvider = configProvider;
-            _assetService = assetService;
-            _logger = logService.CreateLogger<FigureInfoUIService>();
+            _logger = logService.CreateLogger<FigureInfoPreviewService>();
         }
 
         void IStartable.Start()
@@ -68,8 +71,6 @@ namespace Project.Gameplay.Gameplay.UI
             _clickSubscription = _cellClickedPublisher.Subscribe(OnCellClicked);
             _rightClickSubscription = _rightClickPublisher.Subscribe(OnRightClick);
             _cancelSubscription = _cancelPublisher.Subscribe(OnCancelRequested);
-
-            // Предзагружаем конфиги и окно
             InitializeAsync().Forget();
         }
 
@@ -87,22 +88,21 @@ namespace Project.Gameplay.Gameplay.UI
 
         private void OnCellClicked(CellClickedMessage message)
         {
-            // Если кликнули на клетку без фигуры - закрываем окно
             if (!_hoveredFigureId.HasValue)
             {
                 CloseWindow();
                 return;
             }
 
-            var run = _runHolder.Current;
+            Run.Run? run = _runHolder.Current;
             if (run?.CurrentStage?.Grid == null)
             {
                 CloseWindow();
                 return;
             }
 
-            var grid = run.CurrentStage.Grid;
-            var figure = grid.GetFigureById(_hoveredFigureId.Value);
+            BoardGrid? grid = run.CurrentStage.Grid;
+            Figure? figure = grid.GetFigureById(_hoveredFigureId.Value);
             if (figure == null)
             {
                 CloseWindow();
@@ -114,13 +114,11 @@ namespace Project.Gameplay.Gameplay.UI
 
         private void OnRightClick(RightClickMessage message)
         {
-            // ПКМ закрывает окно
             CloseWindow();
         }
 
         private void OnCancelRequested(CancelRequestedMessage message)
         {
-            // Escape закрывает окно
             CloseWindow();
         }
 
@@ -130,6 +128,7 @@ namespace Project.Gameplay.Gameplay.UI
             {
                 _window.Hide();
             }
+            _tooltipService.HideTooltip();
         }
 
         private void ShowFigureInfo(Figure figure)
@@ -148,25 +147,23 @@ namespace Project.Gameplay.Gameplay.UI
 
             try
             {
-                // Загружаем информацию о фигуре по InfoId из Figure
                 FigureInfoConfig? infoConfig = null;
                 if (!string.IsNullOrEmpty(figure.InfoId) && _figureInfoCache != null)
                 {
                     infoConfig = _figureInfoCache.Get(figure.InfoId);
                 }
 
-                // Загружаем конфиги пассивок
-                var passiveConfigs = new List<PassiveConfig>();
-                foreach (var passive in figure.BasePassives)
+                List<PassiveConfig> passiveConfigs = new();
+                foreach (IPassive? passive in figure.BasePassives)
                 {
-                    var passiveConfig = _passiveCache.Get(passive.Id);
+                    PassiveConfig? passiveConfig = _passiveCache.Get(passive.Id);
                     if (passiveConfig != null)
                     {
                         passiveConfigs.Add(passiveConfig);
                     }
                 }
 
-                var model = new FigureInfoWindow.FigureInfoModel
+                FigureInfoWindow.FigureInfoModel model = new()
                 {
                     Figure = figure,
                     InfoConfig = infoConfig,
@@ -181,7 +178,7 @@ namespace Project.Gameplay.Gameplay.UI
             }
         }
 
-        public void Dispose()
+        void IDisposable.Dispose()
         {
             _hoverSubscription?.Dispose();
             _clickSubscription?.Dispose();

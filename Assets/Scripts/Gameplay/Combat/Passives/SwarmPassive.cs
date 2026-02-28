@@ -29,7 +29,7 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
             int allies = context.Grid.CountAlliesAround(owner);
             int totalBonus = allies * _damagePerAlly;
             owner.Stats.Attack.RemoveModifiersById(Id);
-            CombatFlatModifier modifier = new(Id, totalBonus, 0, _duration, false);
+            CombatFlatModifier modifier = new(Id, totalBonus, 0, _duration, false, ModifierSourceContext.PreviewCalculation);
             owner.Stats.Attack.AddModifier(modifier);
         }
     }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using Project.Core.Core.Configs.Figure;
 using Project.Core.Core.Configs.Passive;
 using Project.Core.Window;
@@ -6,7 +7,6 @@ using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.UI;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 using VContainer;
 
 namespace Project.Gameplay.UI
@@ -47,7 +47,6 @@ namespace Project.Gameplay.UI
             FigureInfoConfig? infoConfig = figureInfoModel.InfoConfig;
             List<PassiveConfig> passiveConfigs = figureInfoModel.PassiveConfigs;
 
-            // Отображаем основную информацию
             if (infoConfig != null)
             {
                 _figureName.text = infoConfig.Name;
@@ -64,16 +63,11 @@ namespace Project.Gameplay.UI
             _defenceText.text = $"Защита: {stats.Defence.Value}";
             _evasionText.text = $"Уклонение: {stats.Evasion.Value}";
             _attackRangeText.text = $"Дальность: {stats.AttackRange}";
-
-            RenderPassives(passiveConfigs);
-
-            // Принудительное обновление layout
-            if (_root != null)
-            {
-                LayoutRebuilder.ForceRebuildLayoutImmediate(_root);
-            }
+            
+            RenderPassives(passiveConfigs).Forget();
         }
 
+        //Надо бы это всё дело на пулы перетащить либо еще куда, дестрой просто так - фе
         protected override void OnHidden()
         {
             foreach (PassiveIconView? icon in _activePassiveIcons)
@@ -86,9 +80,8 @@ namespace Project.Gameplay.UI
             _activePassiveIcons.Clear();
         }
 
-        private void RenderPassives(List<PassiveConfig> passiveConfigs)
+        private async UniTask RenderPassives(List<PassiveConfig> passiveConfigs)
         {
-            // Очищаем старые иконки
             foreach (PassiveIconView? icon in _activePassiveIcons)
             {
                 if (icon != null)
@@ -103,12 +96,16 @@ namespace Project.Gameplay.UI
                 return;
             }
 
+            List<UniTask> setupTasks = new(passiveConfigs.Count);
             foreach (PassiveConfig? passiveConfig in passiveConfigs)
             {
-                PassiveIconView? iconView = _iuiAssetService.Instantiate(_passiveIconPrefab, _passivesContainer);
-                iconView.Setup(passiveConfig);
+                PassiveIconView? iconView = _iuiAssetService.Instantiate(_passiveIconPrefab,
+                    _passivesContainer);
+                setupTasks.Add(iconView.Setup(passiveConfig));
                 _activePassiveIcons.Add(iconView);
             }
+            await UniTask.WhenAll(setupTasks)
+                .AttachExternalCancellation(gameObject.GetCancellationTokenOnDestroy());
         }
 
         public class FigureInfoModel

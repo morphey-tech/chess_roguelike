@@ -1,0 +1,21 @@
+{
+  "id": "figure_shatter_conf",
+  "content": [
+    {
+      "id": "default",
+      "minShards": 8,
+      "maxShards": 15,
+      "scatterForceMin": 0.5,
+      "scatterForceMax": 1.5,
+      "forceMultiplier": 1.0,
+      "drag": 0.5,
+      "angularDrag": 0.5,
+      "lifetime": -1,
+      "proxyScale": 0.5,
+      "useOriginalMaterials": true,
+      "doubleSided": true,
+      "fallbackMaterialKey": "",
+      "asyncFracture": false
+    }
+  ]
+}

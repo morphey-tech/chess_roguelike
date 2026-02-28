@@ -7,7 +7,8 @@ namespace Project.Gameplay.Gameplay.Figures
         int Duration { get; }
         bool Stackable { get; }
         bool IsExpired { get; }
-        
+        ModifierSourceContext SourceContext { get; }
+
         T Apply(T value);
         void Tick();
     }

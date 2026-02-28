@@ -1,5 +1,6 @@
 using System;
 using Newtonsoft.Json;
+using Project.Core.Core.Configs.Figure;
 
 namespace Project.Core.Core.Configs.Gameplay
 {
@@ -41,5 +42,11 @@ namespace Project.Core.Core.Configs.Gameplay
         /// </summary>
         [JsonProperty("hpBarVisibilityModeEnemies")]
         public HpBarVisibilityMode HpBarVisibilityModeEnemies { get; set; } = HpBarVisibilityMode.OnHoverOrSelection;
+
+        /// <summary>
+        /// ID конфига разрушения фигур при смерти (ссылка на FigureShatterConfigRepository).
+        /// </summary>
+        [JsonProperty("figureShatterConfigId")]
+        public string? FigureShatterConfigId { get; set; }
     }
 }

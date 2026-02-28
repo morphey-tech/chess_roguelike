@@ -3,6 +3,7 @@ using System.Linq;
 using MessagePipe;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Attack.Rules;
+using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Combat.Damage;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
@@ -22,8 +23,8 @@ namespace Project.Gameplay.Gameplay.Selection
     {
         private readonly IFigurePresenter _figurePresenter;
         private readonly RunHolder _runHolder;
+        private readonly CombatResolver _combatResolver;
         private readonly AttackRuleService _attackRuleService;
-        private readonly IDamagePipeline _damagePipeline;
         private readonly IDisposable _subscriptions;
         private readonly ILogger<DamagePreviewService> _logger;
 
@@ -35,8 +36,8 @@ namespace Project.Gameplay.Gameplay.Selection
         private DamagePreviewService(
             IFigurePresenter figurePresenter,
             RunHolder runHolder,
+            CombatResolver combatResolver,
             AttackRuleService attackRuleService,
-            IDamagePipeline damagePipeline,
             ISubscriber<FigureSelectedMessage> selectedSubscriber,
             ISubscriber<FigureDeselectedMessage> deselectedSubscriber,
             ISubscriber<FigureHoverChangedMessage> hoverChangedSubscriber,
@@ -47,11 +48,9 @@ namespace Project.Gameplay.Gameplay.Selection
         {
             _figurePresenter = figurePresenter;
             _runHolder = runHolder;
+            _combatResolver = combatResolver;
             _attackRuleService = attackRuleService;
-            _damagePipeline = damagePipeline;
             _logger = logService.CreateLogger<DamagePreviewService>();
-
-            _logger.Debug("[DamagePreviewService] Initialized");
 
             DisposableBagBuilder bag = DisposableBag.CreateBuilder();
             selectedSubscriber.Subscribe(OnFigureSelected).AddTo(bag);
@@ -225,24 +224,19 @@ namespace Project.Gameplay.Gameplay.Selection
                 return false;
             }
 
-            float rawDamage = Mathf.Max(1f, attacker.Stats.Attack.Value - target.Stats.Defence.Value);
-            
-            DamageContext dmgCtx = new(
+            // Используем CombatResolver для расчёта урона с учётом пассивок
+            damage = _combatResolver.CalculatePreviewDamage(
                 attacker,
                 target,
-                rawDamage,
-                isPreview: true);
+                (BoardGrid)grid);
 
-            DamageResult result = _damagePipeline.Calculate(dmgCtx);
+            _logger.Debug($"[DamagePreview] CombatResolver: Final={damage}");
 
-            _logger.Debug($"[DamagePreview] PIPELINE: Raw={rawDamage}, Final={result.Final}, Cancelled={result.Cancelled}");
-
-            if (result.Cancelled)
+            if (damage <= 0)
             {
                 return false;
             }
 
-            damage = result.Final;
             return true;
         }
 

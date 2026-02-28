@@ -152,6 +152,26 @@ PrefabInstance:
       propertyPath: m_Name
       value: InitSceneCanvas
       objectReference: {fileID: 0}
+    - target: {fileID: 5030503747846981941, guid: 691c4cc08e22f2240a5ec652abe57c35, type: 3}
+      propertyPath: m_Type
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5030503747846981941, guid: 691c4cc08e22f2240a5ec652abe57c35, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 98e8e1cf8dc7dbf469617c2e40c8a944, type: 3}
+    - target: {fileID: 5030503747846981941, guid: 691c4cc08e22f2240a5ec652abe57c35, type: 3}
+      propertyPath: m_Color.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5030503747846981941, guid: 691c4cc08e22f2240a5ec652abe57c35, type: 3}
+      propertyPath: m_Color.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5030503747846981941, guid: 691c4cc08e22f2240a5ec652abe57c35, type: 3}
+      propertyPath: m_Color.r
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6616011449845914439, guid: 691c4cc08e22f2240a5ec652abe57c35, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -382,7 +402,7 @@ PrefabInstance:
     - target: {fileID: 3291307827946376951, guid: 13c1b49081659584e9b55b959706358f, type: 3}
       propertyPath: _logos.Array.data[0].Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: 44a054df1702e39458b7072b08d0f212, type: 3}
+      objectReference: {fileID: 21300000, guid: f37d2fb982bacb18a83d6e4b2e5ded4a, type: 3}
     - target: {fileID: 3291307827946376951, guid: 13c1b49081659584e9b55b959706358f, type: 3}
       propertyPath: _logos.Array.data[0].Color.a
       value: 1

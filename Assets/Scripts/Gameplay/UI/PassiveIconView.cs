@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using MessagePipe;
 using Project.Core.Core.Assets;
 using Project.Core.Core.Configs.Passive;
@@ -21,6 +22,7 @@ namespace Project.Gameplay.UI
         private IAssetService _assetService;
         private IPublisher<TooltipShowRequestMessage> _tooltipShowPublisher;
         private IPublisher<TooltipHideRequestMessage> _tooltipHidePublisher;
+        
         private PassiveConfig? _currentConfig;
 
         [Inject]
@@ -34,14 +36,13 @@ namespace Project.Gameplay.UI
             _tooltipHidePublisher = tooltipHidePublisher;
         }
 
-        public async void Setup(PassiveConfig config)
+        public async UniTask Setup(PassiveConfig config)
         {
             _currentConfig = config;
             
-            // Загрузка иконки пассивки
             if (_iconImage != null && !string.IsNullOrEmpty(config.Icon))
             {
-                var sprite = await _assetService.LoadAssetAsync<Sprite>(config.Icon);
+                Sprite? sprite = await _assetService.LoadAssetAsync<Sprite>(config.Icon);
                 if (sprite != null)
                 {
                     _iconImage.sprite = sprite;
@@ -49,7 +50,6 @@ namespace Project.Gameplay.UI
                 }
             }
 
-            // Установка тултипа
             if (_tooltipText != null)
             {
                 _tooltipText.text = $"{config.Name}\n{config.Description}";
@@ -59,10 +59,11 @@ namespace Project.Gameplay.UI
         public void OnPointerEnter(PointerEventData eventData)
         {
             if (_currentConfig == null)
+            {
                 return;
+            }
 
-            // Показываем tooltip у позиции курсора
-            var content = $"{_currentConfig.Name}\n{_currentConfig.Description}";
+            string content = $"{_currentConfig.Name}\n{_currentConfig.Description}";
             _tooltipShowPublisher.Publish(new TooltipShowRequestMessage(content, eventData.position));
         }
 

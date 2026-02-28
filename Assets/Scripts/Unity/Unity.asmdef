@@ -14,8 +14,8 @@
         "DOTween.Modules",
         "ShapesRuntime",
         "IngameDebugConsole.Runtime",
-        "GameUI",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "RuntimeAssembly"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

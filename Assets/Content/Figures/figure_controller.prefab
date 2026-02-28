@@ -19,6 +19,7 @@ GameObject:
   - component: {fileID: 4735786356695318062}
   - component: {fileID: 3955189433567374003}
   - component: {fileID: 1440325630196260790}
+  - component: {fileID: 8901234567890123456}
   m_Layer: 7
   m_Name: figure_controller
   m_TagString: Untagged
@@ -162,7 +163,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 203619cd371447d4ca888f80778a7924, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity::Project.Unity.Presentations.FigureDeathPresenter
+  _useShatter: 1
   _deathDuration: 0.3
+  _shatterPresenter: {fileID: 8901234567890123456}
 --- !u!114 &3955189433567374003
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -193,6 +196,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity::Project.Unity.Presentations.DamageTextPresenter
   _template: {fileID: 6506167841075895821, guid: aa4438b49e9926b45b87b72bf5ace737, type: 3}
   _pivot: {fileID: 433424717367189028}
+--- !u!114 &8901234567890123456
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 740290869039254118}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8d9f8e7a6b5c4d3e2f1a0b9c8d7e6f5, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Unity::Project.Unity.Presentations.FigureDeathShatterPresenter
+  _minFragments: 6
+  _maxFragments: 12
+  _forceMultiplier: 2
+  _lifetime: 30
+  _useOriginalMaterials: 1
+  _insideMaterial: {fileID: 0}
 --- !u!1 &914641366813327434
 GameObject:
   m_ObjectHideFlags: 0
