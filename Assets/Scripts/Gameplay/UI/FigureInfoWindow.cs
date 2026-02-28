@@ -58,11 +58,11 @@ namespace Project.Gameplay.UI
                 _figureDescription.text = string.Empty;
             }
 
-            _hpText.text = $"HP: {stats.CurrentHp.Value}/{stats.MaxHp}";
-            _attackText.text = $"Атака: {stats.Attack.Value}";
-            _defenceText.text = $"Защита: {stats.Defence.Value}";
-            _evasionText.text = $"Уклонение: {stats.Evasion.Value}";
-            _attackRangeText.text = $"Дальность: {stats.AttackRange}";
+            _hpText.text = $"{stats.CurrentHp.Value}/{stats.MaxHp}";
+            _attackText.text = $"{stats.Attack.Value}";
+            _defenceText.text = $"{stats.Defence.Value}";
+            _evasionText.text = $"{stats.Evasion.Value}";
+            _attackRangeText.text = $"{stats.AttackRange}";
             
             RenderPassives(passiveConfigs).Forget();
         }
