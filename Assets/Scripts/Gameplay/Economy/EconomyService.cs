@@ -16,15 +16,9 @@ namespace Project.Gameplay.Gameplay.Economy
     /// </summary>
     public sealed class EconomyService
     {
-        /// <summary>Per-run resources (gold, keys, tokens). Cleared on new run.</summary>
         public ResourceStorage RunResources { get; } = new();
-
-        /// <summary>Persistent resources (crystals, premium currency). Survives across runs.</summary>
         public ResourceStorage MetaResources { get; } = new();
-
-        /// <summary>Per-run item inventory (artifacts, consumables). Cleared on new run.</summary>
         public Inventory RunInventory { get; } = new();
-
         public ItemFactory ItemFactory { get; }
 
         private readonly ILogger _logger;

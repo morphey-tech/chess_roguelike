@@ -22,25 +22,28 @@ namespace Project.Gameplay.UI
         [SerializeField] private Image _scrollsIcon;
         [SerializeField] private TextMeshProUGUI _scrollsText;
 
-        [Inject] private EconomyService _economyService;
-
-        private CompositeDisposable _disposables;
-
         protected override bool HideOtherWindows => false;
         protected override bool IgnoreHideOthersWindows => true;
         public override bool NeedShowBackground => false;
         public override int ZOrder => 100;
+        
+        private EconomyService _economyService;
+        private CompositeDisposable _disposables;
 
+        [Inject]
+        private void Construct(EconomyService economyService)
+        {
+            _economyService = economyService;
+        }
+        
         protected override void OnInit()
         {
             _disposables = new CompositeDisposable();
 
-            // Subscribe to crowns changes (run resource)
             _economyService.GetCrownsProperty()
                 .Subscribe(value => _crownsText.text = value.ToString())
                 .AddTo(_disposables);
 
-            // Subscribe to scrolls changes (meta resource)
             _economyService.GetScrollsProperty()
                 .Subscribe(value => _scrollsText.text = value.ToString())
                 .AddTo(_disposables);
