@@ -37,7 +37,19 @@ namespace Project.Core.Core.Configs.Figure
         /// Максимальная сила подброса осколков вверх.
         /// </summary>
         [JsonProperty("scatterForceMax")]
-        public float ScatterForceMax { get; set; } = 1.5f;
+        public float ScatterForceMax { get; set; } = 1.0f;
+
+        /// <summary>
+        /// Минимальная сила подброса осколков вверх.
+        /// </summary>
+        [JsonProperty("upwardForceMin")]
+        public float UpwardForceMin { get; set; } = 0.5f;
+
+        /// <summary>
+        /// Максимальная сила подброса осколков вверх.
+        /// </summary>
+        [JsonProperty("upwardForceMax")]
+        public float UpwardForceMax { get; set; } = 1.0f;
 
         /// <summary>
         /// Множитель силы разброса.
@@ -68,6 +80,12 @@ namespace Project.Core.Core.Configs.Figure
         /// </summary>
         [JsonProperty("proxyScale")]
         public float ProxyScale { get; set; } = 0.5f;
+
+        /// <summary>
+        /// Масштаб каждого осколка (множитель).
+        /// </summary>
+        [JsonProperty("fragmentScale")]
+        public float FragmentScale { get; set; } = 1.0f;
 
         /// <summary>
         /// Использовать материалы оригинального меша.

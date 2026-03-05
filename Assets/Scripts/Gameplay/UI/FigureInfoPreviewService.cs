@@ -7,6 +7,7 @@ using Project.Core.Core.Configs.Figure;
 using Project.Core.Core.Configs.Passive;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Combat;
+using Project.Gameplay.Gameplay.Combat.Contexts;
 using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
@@ -32,6 +33,7 @@ namespace Project.Gameplay.Gameplay.UI
         private readonly ITooltipService _tooltipService;
         private readonly RunHolder _runHolder;
         private readonly ConfigProvider _configProvider;
+        private readonly CombatResolver _combatResolver;
         private readonly ILogger<FigureInfoPreviewService> _logger;
 
         private int? _hoveredFigureId;
@@ -52,6 +54,7 @@ namespace Project.Gameplay.Gameplay.UI
             ITooltipService tooltipService,
             RunHolder runHolder,
             ConfigProvider configProvider,
+            CombatResolver combatResolver,
             IAssetService assetService,
             ILogService logService)
         {
@@ -62,6 +65,7 @@ namespace Project.Gameplay.Gameplay.UI
             _tooltipService = tooltipService;
             _runHolder = runHolder;
             _configProvider = configProvider;
+            _combatResolver = combatResolver;
             _logger = logService.CreateLogger<FigureInfoPreviewService>();
         }
 
@@ -147,6 +151,16 @@ namespace Project.Gameplay.Gameplay.UI
 
             try
             {
+                BeforeHitContext previewContext = new()
+                {
+                    Attacker = figure,
+                    Target = figure,
+                    Grid = _runHolder.Current?.CurrentStage?.Grid ?? throw new InvalidOperationException("Grid is null"),
+                    BaseDamage = figure.Stats.Attack.Value
+                };
+
+                _combatResolver.ApplyPassivesForPreview(figure, figure, previewContext);
+
                 FigureInfoConfig? infoConfig = null;
                 if (!string.IsNullOrEmpty(figure.InfoId) && _figureInfoCache != null)
                 {
@@ -171,6 +185,11 @@ namespace Project.Gameplay.Gameplay.UI
                 };
 
                 _window.Show(model);
+
+                // Очищаем модификаторы превью
+                figure.Stats.Attack.ClearByContext(ModifierSourceContext.PreviewCalculation);
+                figure.Stats.Defence.ClearByContext(ModifierSourceContext.PreviewCalculation);
+                figure.Stats.Evasion.ClearByContext(ModifierSourceContext.PreviewCalculation);
             }
             catch (Exception ex)
             {

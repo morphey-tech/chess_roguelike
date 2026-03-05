@@ -4,6 +4,8 @@ using Cysharp.Threading.Tasks;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Loot;
+using UniRx;
+using VContainer;
 
 namespace Project.Gameplay.Gameplay.Economy
 {
@@ -27,7 +29,8 @@ namespace Project.Gameplay.Gameplay.Economy
 
         private readonly ILogger _logger;
 
-        public EconomyService(ItemFactory itemFactory, ILogService logService)
+        [Inject]
+        private EconomyService(ItemFactory itemFactory, ILogService logService)
         {
             ItemFactory = itemFactory;
             _logger = logService.CreateLogger<EconomyService>();
@@ -114,5 +117,77 @@ namespace Project.Gameplay.Gameplay.Economy
                 .SelectMany(item => item.Passives)
                 .ToList();
         }
+
+        /// <summary>
+        /// Adds crowns to run resources.
+        /// </summary>
+        public void AddCrowns(int amount)
+        {
+            if (amount > 0)
+            {
+                RunResources.Add(ResourceIds.Crowns, amount);
+                _logger.Debug($"Crowns added: +{amount}");
+            }
+        }
+
+        /// <summary>
+        /// Spends crowns from run resources. Returns true if successful.
+        /// </summary>
+        public bool TrySpendCrowns(int amount)
+        {
+            bool result = RunResources.TrySpend(ResourceIds.Crowns, amount);
+            if (result)
+            {
+                _logger.Debug($"Crowns spent: -{amount}");
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Gets current crowns amount.
+        /// </summary>
+        public int GetCrowns() => RunResources.Get(ResourceIds.Crowns);
+
+        /// <summary>
+        /// Gets reactive property for crowns (for UI binding).
+        /// </summary>
+        public IReadOnlyReactiveProperty<int> GetCrownsProperty() => 
+            RunResources.GetProperty(ResourceIds.Crowns);
+
+        /// <summary>
+        /// Adds scrolls to meta resources (persistent).
+        /// </summary>
+        public void AddScrolls(int amount)
+        {
+            if (amount > 0)
+            {
+                MetaResources.Add(ResourceIds.Scrolls, amount);
+                _logger.Debug($"Scrolls added: +{amount}");
+            }
+        }
+
+        /// <summary>
+        /// Spends scrolls from meta resources. Returns true if successful.
+        /// </summary>
+        public bool TrySpendScrolls(int amount)
+        {
+            bool result = MetaResources.TrySpend(ResourceIds.Scrolls, amount);
+            if (result)
+            {
+                _logger.Debug($"Scrolls spent: -{amount}");
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Gets current scrolls amount.
+        /// </summary>
+        public int GetScrolls() => MetaResources.Get(ResourceIds.Scrolls);
+
+        /// <summary>
+        /// Gets reactive property for scrolls (for UI binding).
+        /// </summary>
+        public IReadOnlyReactiveProperty<int> GetScrollsProperty() => 
+            MetaResources.GetProperty(ResourceIds.Scrolls);
     }
 }

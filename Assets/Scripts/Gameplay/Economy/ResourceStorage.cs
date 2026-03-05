@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Project.Core.Core.Configs.Economy;
+using UniRx;
 
 namespace Project.Gameplay.Gameplay.Economy
 {
@@ -9,11 +10,20 @@ namespace Project.Gameplay.Gameplay.Economy
     /// </summary>
     public sealed class ResourceStorage
     {
-        private readonly Dictionary<string, int> _data = new();
+        private readonly Dictionary<string, ReactiveProperty<int>> _data = new();
 
         public int Get(string id)
         {
-            return _data.GetValueOrDefault(id);
+            return _data.TryGetValue(id, out var prop) ? prop.Value : 0;
+        }
+
+        public IReadOnlyReactiveProperty<int> GetProperty(string id)
+        {
+            if (!_data.ContainsKey(id))
+            {
+                _data[id] = new ReactiveProperty<int>(0);
+            }
+            return _data[id];
         }
 
         public void Add(string id, int value)
@@ -22,7 +32,13 @@ namespace Project.Gameplay.Gameplay.Economy
             {
                 return;
             }
-            _data[id] = Get(id) + value;
+
+            if (!_data.ContainsKey(id))
+            {
+                _data[id] = new ReactiveProperty<int>(0);
+            }
+
+            _data[id].Value += value;
         }
 
         public bool TrySpend(string id, int value)
@@ -31,12 +47,19 @@ namespace Project.Gameplay.Gameplay.Economy
             {
                 return true;
             }
-            int current = Get(id);
+
+            if (!_data.ContainsKey(id))
+            {
+                return false;
+            }
+
+            int current = _data[id].Value;
             if (current < value)
             {
                 return false;
             }
-            _data[id] = current - value;
+
+            _data[id].Value -= value;
             return true;
         }
 
@@ -80,7 +103,11 @@ namespace Project.Gameplay.Gameplay.Economy
 
         public void Set(string id, int value)
         {
-            _data[id] = value;
+            if (!_data.ContainsKey(id))
+            {
+                _data[id] = new ReactiveProperty<int>(0);
+            }
+            _data[id].Value = value;
         }
 
         public bool Has(string id, int amount = 1)
@@ -106,7 +133,12 @@ namespace Project.Gameplay.Gameplay.Economy
 
         public Dictionary<string, int> GetAll()
         {
-            return new Dictionary<string, int>(_data);
+            var result = new Dictionary<string, int>();
+            foreach (var kvp in _data)
+            {
+                result[kvp.Key] = kvp.Value.Value;
+            }
+            return result;
         }
 
         public void Load(Dictionary<string, int>? data)
@@ -119,7 +151,7 @@ namespace Project.Gameplay.Gameplay.Economy
 
             foreach (KeyValuePair<string, int> kvp in data)
             {
-                _data[kvp.Key] = kvp.Value;
+                _data[kvp.Key] = new ReactiveProperty<int>(kvp.Value);
             }
         }
 

@@ -36,6 +36,16 @@ namespace Project.Unity.Unity.Debug
                 "Add meta resource: add_meta_resource <id> <amount>",
                 AddMetaResource);
 
+            DebugLogConsole.AddCommand<int>(
+                "add_crowns",
+                "Add crowns (run currency): add_crowns <amount>",
+                AddCrowns);
+
+            DebugLogConsole.AddCommand<int>(
+                "add_scrolls",
+                "Add scrolls (meta currency): add_scrolls <amount>",
+                AddScrolls);
+
             DebugLogConsole.AddCommand<string>(
                 "add_item",
                 "Add item to run inventory: add_item <configId>",
@@ -65,6 +75,18 @@ namespace Project.Unity.Unity.Debug
         {
             _economyService.MetaResources.Add(id, amount);
             _logger.Info($"Added meta resource: {id} +{amount} (total: {_economyService.MetaResources.Get(id)})");
+        }
+
+        private void AddCrowns(int amount)
+        {
+            _economyService.AddCrowns(amount);
+            _logger.Info($"Added crowns: +{amount} (total: {_economyService.GetCrowns()})");
+        }
+
+        private void AddScrolls(int amount)
+        {
+            _economyService.AddScrolls(amount);
+            _logger.Info($"Added scrolls: +{amount} (total: {_economyService.GetScrolls()})");
         }
 
         private void AddItem(string configId)
@@ -117,6 +139,8 @@ namespace Project.Unity.Unity.Debug
 
             DebugLogConsole.RemoveCommand("add_resource");
             DebugLogConsole.RemoveCommand("add_meta_resource");
+            DebugLogConsole.RemoveCommand("add_crowns");
+            DebugLogConsole.RemoveCommand("add_scrolls");
             DebugLogConsole.RemoveCommand("add_item");
             DebugLogConsole.RemoveCommand("list_items");
             DebugLogConsole.RemoveCommand("list_resources");

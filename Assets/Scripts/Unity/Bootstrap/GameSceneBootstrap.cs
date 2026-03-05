@@ -4,8 +4,12 @@ using Project.Core.Core.Configs.Run;
 using Project.Core.Core.Configs.Suites;
 using Project.Core.Core.Random;
 using Project.Gameplay.Gameplay.Configs;
+using Project.Gameplay.Gameplay.Economy;
 using Project.Gameplay.Gameplay.Run;
 using Project.Gameplay.Gameplay.Save.Service;
+using Project.Gameplay.Gameplay.UI;
+using Project.Core.Window;
+using Project.Gameplay.UI;
 
 namespace Project.Unity.Unity.Bootstrap
 {
@@ -21,6 +25,7 @@ namespace Project.Unity.Unity.Bootstrap
         private PlayerRunStateService _runStateService;
         private PlayerLoadoutService _loadoutService;
         private RandomService _randomService;
+        private EconomyService _economyService;
 
         private const string DefaultRunId = "tutorial";
 
@@ -32,6 +37,7 @@ namespace Project.Unity.Unity.Bootstrap
             _runStateService = Resolve<PlayerRunStateService>();
             _loadoutService = Resolve<PlayerLoadoutService>();
             _randomService = Resolve<RandomService>();
+            _economyService = Resolve<EconomyService>();
         }
 
         protected override async UniTask OnBootstrapAsync()
@@ -42,15 +48,25 @@ namespace Project.Unity.Unity.Bootstrap
             RunConfig runConfig = await LoadRunConfigAsync(DefaultRunId);
             await InitializeRunStateAsync(runConfig);
 
+            // Start new run: reset economy and show resources window
+            _economyService.StartNewRun();
+            ShowResourcesWindow();
+
             Run run = _runFactory.Create(runConfig);
-            
+
             // Сохраняем в holder чтобы другие сервисы могли получить доступ
             _runHolder.Set(run);
-            
+
             Log.Info($"Starting run: {runConfig.Id}");
             // Fire-and-forget: game loop runs indefinitely (phases wait for player input).
             // Awaiting here would block the bootstrap and prevent the previous scene from unloading.
             run.Begin().Forget();
+        }
+
+        private void ShowResourcesWindow()
+        {
+            UIService.ShowAsync<ResourcesWindow>().Forget();
+            Log.Info("Resources window shown");
         }
 
         private async UniTask InitializeRunStateAsync(RunConfig runConfig)

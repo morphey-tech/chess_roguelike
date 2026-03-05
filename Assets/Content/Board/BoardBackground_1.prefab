@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 1139364159456612141}
   - component: {fileID: 6545713908564362487}
   - component: {fileID: 8089577579118447280}
+  - component: {fileID: 2140590632688270523}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (34)
   m_TagString: Untagged
@@ -89,6 +90,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &2140590632688270523
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 565464306240925564}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &749696640973298009
 GameObject:
   m_ObjectHideFlags: 0
@@ -100,6 +122,7 @@ GameObject:
   - component: {fileID: 1688722173117572448}
   - component: {fileID: 3855634805166910997}
   - component: {fileID: 738986729807808526}
+  - component: {fileID: 4418678112613790682}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (37)
   m_TagString: Untagged
@@ -178,6 +201,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &4418678112613790682
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 749696640973298009}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &877024337985187009
 GameObject:
   m_ObjectHideFlags: 0
@@ -189,6 +233,7 @@ GameObject:
   - component: {fileID: 1517787839362662973}
   - component: {fileID: 4854885668401521858}
   - component: {fileID: 2138525656056031010}
+  - component: {fileID: 1517118389495600252}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (24)
   m_TagString: Untagged
@@ -267,6 +312,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &1517118389495600252
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 877024337985187009}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &1060243135561998419
 GameObject:
   m_ObjectHideFlags: 0
@@ -278,6 +344,7 @@ GameObject:
   - component: {fileID: 1504221227571569036}
   - component: {fileID: 2801394043541883709}
   - component: {fileID: 6721651953695399410}
+  - component: {fileID: 5543809344606865221}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (31)
   m_TagString: Untagged
@@ -356,6 +423,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &5543809344606865221
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1060243135561998419}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &1233552667457754067
 GameObject:
   m_ObjectHideFlags: 0
@@ -367,6 +455,7 @@ GameObject:
   - component: {fileID: 4185363904592388007}
   - component: {fileID: 3938585035074123701}
   - component: {fileID: 6662292147009523430}
+  - component: {fileID: 647321531650308095}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (8)
   m_TagString: Untagged
@@ -445,6 +534,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &647321531650308095
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1233552667457754067}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &1759398936134654730
 GameObject:
   m_ObjectHideFlags: 0
@@ -456,6 +566,7 @@ GameObject:
   - component: {fileID: 1760976519085889088}
   - component: {fileID: 2912954070220628871}
   - component: {fileID: 223025734195353484}
+  - component: {fileID: 7092455830853047058}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (1)
   m_TagString: Untagged
@@ -534,6 +645,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &7092455830853047058
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1759398936134654730}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &1849223491192661961
 GameObject:
   m_ObjectHideFlags: 0
@@ -545,6 +677,7 @@ GameObject:
   - component: {fileID: 6549995644423945296}
   - component: {fileID: 420913507878468358}
   - component: {fileID: 2224350994335369414}
+  - component: {fileID: 2094872856509329561}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (11)
   m_TagString: Untagged
@@ -623,6 +756,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &2094872856509329561
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1849223491192661961}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &1961753239102620954
 GameObject:
   m_ObjectHideFlags: 0
@@ -634,6 +788,7 @@ GameObject:
   - component: {fileID: 6121336494014666966}
   - component: {fileID: 4318593134147202081}
   - component: {fileID: 6065583372215665163}
+  - component: {fileID: 68886246315013805}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (14)
   m_TagString: Untagged
@@ -712,6 +867,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &68886246315013805
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1961753239102620954}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &2013470212102827598
 GameObject:
   m_ObjectHideFlags: 0
@@ -723,6 +899,7 @@ GameObject:
   - component: {fileID: 6752522336732563120}
   - component: {fileID: 7167138195997180489}
   - component: {fileID: 2879990522117323286}
+  - component: {fileID: 4596404911303396190}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (36)
   m_TagString: Untagged
@@ -801,6 +978,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &4596404911303396190
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2013470212102827598}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &2158250696966063619
 GameObject:
   m_ObjectHideFlags: 0
@@ -812,6 +1010,7 @@ GameObject:
   - component: {fileID: 4716962839583544379}
   - component: {fileID: 632684965759792730}
   - component: {fileID: 4572640723958397659}
+  - component: {fileID: 7539977284759978883}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (7)
   m_TagString: Untagged
@@ -890,6 +1089,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &7539977284759978883
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2158250696966063619}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &2766151313829571746
 GameObject:
   m_ObjectHideFlags: 0
@@ -901,6 +1121,7 @@ GameObject:
   - component: {fileID: 8841329558607281575}
   - component: {fileID: 6778650711916778036}
   - component: {fileID: 3697796684986296886}
+  - component: {fileID: 6955794446106146935}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (38)
   m_TagString: Untagged
@@ -979,6 +1200,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &6955794446106146935
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2766151313829571746}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &2849750443093707134
 GameObject:
   m_ObjectHideFlags: 0
@@ -990,6 +1232,7 @@ GameObject:
   - component: {fileID: 241409813113746229}
   - component: {fileID: 7997915296568716814}
   - component: {fileID: 3311276782253503392}
+  - component: {fileID: 3250939787593691993}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (28)
   m_TagString: Untagged
@@ -1068,6 +1311,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &3250939787593691993
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2849750443093707134}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &3330746427846047294
 GameObject:
   m_ObjectHideFlags: 0
@@ -1079,6 +1343,7 @@ GameObject:
   - component: {fileID: 4396829957813169137}
   - component: {fileID: 8854270985152389672}
   - component: {fileID: 1729063956707598316}
+  - component: {fileID: 7278436784416415401}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (27)
   m_TagString: Untagged
@@ -1157,6 +1422,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &7278436784416415401
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3330746427846047294}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &3745579591224765914
 GameObject:
   m_ObjectHideFlags: 0
@@ -1168,6 +1454,7 @@ GameObject:
   - component: {fileID: 7530120225290150214}
   - component: {fileID: 4377470392590079249}
   - component: {fileID: 9157709256610843641}
+  - component: {fileID: 3643406206669718570}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (35)
   m_TagString: Untagged
@@ -1246,6 +1533,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &3643406206669718570
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3745579591224765914}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &3760632145112837678
 GameObject:
   m_ObjectHideFlags: 0
@@ -1257,6 +1565,7 @@ GameObject:
   - component: {fileID: 8317350440875294847}
   - component: {fileID: 1427746115753979661}
   - component: {fileID: 23637375469444636}
+  - component: {fileID: 5975592297025230173}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (25)
   m_TagString: Untagged
@@ -1335,6 +1644,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &5975592297025230173
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3760632145112837678}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &4044386951503040413
 GameObject:
   m_ObjectHideFlags: 0
@@ -1346,6 +1676,7 @@ GameObject:
   - component: {fileID: 4455007137787925391}
   - component: {fileID: 7193682917755805503}
   - component: {fileID: 6682846439413824734}
+  - component: {fileID: 2719447214895909882}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (15)
   m_TagString: Untagged
@@ -1424,6 +1755,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &2719447214895909882
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4044386951503040413}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &4306112760165581363
 GameObject:
   m_ObjectHideFlags: 0
@@ -1435,6 +1787,7 @@ GameObject:
   - component: {fileID: 7611333426106197773}
   - component: {fileID: 207921469329180364}
   - component: {fileID: 7376385134213110139}
+  - component: {fileID: 2580614796785449792}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (12)
   m_TagString: Untagged
@@ -1513,6 +1866,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &2580614796785449792
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4306112760165581363}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &4605498209312207599
 GameObject:
   m_ObjectHideFlags: 0
@@ -1524,6 +1898,7 @@ GameObject:
   - component: {fileID: 2196567534292200479}
   - component: {fileID: 4143444935682499554}
   - component: {fileID: 1238737130407174774}
+  - component: {fileID: 7068955375081769640}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (17)
   m_TagString: Untagged
@@ -1602,6 +1977,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &7068955375081769640
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4605498209312207599}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &4613964909604897694
 GameObject:
   m_ObjectHideFlags: 0
@@ -1613,6 +2009,7 @@ GameObject:
   - component: {fileID: 2790679429824383625}
   - component: {fileID: 6981101961628100174}
   - component: {fileID: 6200961190847749459}
+  - component: {fileID: 7452707053961120060}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (30)
   m_TagString: Untagged
@@ -1691,6 +2088,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &7452707053961120060
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4613964909604897694}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &4649004648918828611
 GameObject:
   m_ObjectHideFlags: 0
@@ -1702,6 +2120,7 @@ GameObject:
   - component: {fileID: 3369222400027241166}
   - component: {fileID: 7359396219584663815}
   - component: {fileID: 1467338798264057667}
+  - component: {fileID: 4659830085111457330}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (23)
   m_TagString: Untagged
@@ -1780,6 +2199,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &4659830085111457330
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4649004648918828611}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &4936012580439784106
 GameObject:
   m_ObjectHideFlags: 0
@@ -1791,6 +2231,7 @@ GameObject:
   - component: {fileID: 3310119208371726385}
   - component: {fileID: 2170370465562566835}
   - component: {fileID: 2619143789997934076}
+  - component: {fileID: 7399073674818403853}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (22)
   m_TagString: Untagged
@@ -1869,6 +2310,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &7399073674818403853
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4936012580439784106}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &5182656805670818390
 GameObject:
   m_ObjectHideFlags: 0
@@ -1880,6 +2342,7 @@ GameObject:
   - component: {fileID: 2367444528369270054}
   - component: {fileID: 9104919292075491812}
   - component: {fileID: 5060952447045354947}
+  - component: {fileID: 4360769862969693994}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (33)
   m_TagString: Untagged
@@ -1958,6 +2421,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &4360769862969693994
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5182656805670818390}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &5240766559287292964
 GameObject:
   m_ObjectHideFlags: 0
@@ -1969,6 +2453,7 @@ GameObject:
   - component: {fileID: 2863082412021858370}
   - component: {fileID: 5518531219909570245}
   - component: {fileID: 1076096327351236391}
+  - component: {fileID: 5085480916434345526}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (9)
   m_TagString: Untagged
@@ -2047,6 +2532,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &5085480916434345526
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5240766559287292964}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &5244984744678066483
 GameObject:
   m_ObjectHideFlags: 0
@@ -2058,6 +2564,7 @@ GameObject:
   - component: {fileID: 6547398303883594839}
   - component: {fileID: 6835054539519090586}
   - component: {fileID: 7699986605092300989}
+  - component: {fileID: 5692202627074820334}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (21)
   m_TagString: Untagged
@@ -2136,6 +2643,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &5692202627074820334
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5244984744678066483}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &5326829827813001007
 GameObject:
   m_ObjectHideFlags: 0
@@ -2147,6 +2675,7 @@ GameObject:
   - component: {fileID: 8087265275038430874}
   - component: {fileID: 5753543963245121963}
   - component: {fileID: 7863462787573398054}
+  - component: {fileID: 8883445048516176994}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (3)
   m_TagString: Untagged
@@ -2225,6 +2754,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &8883445048516176994
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5326829827813001007}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &5330607144393788673
 GameObject:
   m_ObjectHideFlags: 0
@@ -2236,6 +2786,7 @@ GameObject:
   - component: {fileID: 7015679931041035827}
   - component: {fileID: 1917694549963696927}
   - component: {fileID: 7065097849057988435}
+  - component: {fileID: 1780794016906643348}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (6)
   m_TagString: Untagged
@@ -2314,6 +2865,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &1780794016906643348
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5330607144393788673}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &5967884886961616623
 GameObject:
   m_ObjectHideFlags: 0
@@ -2325,6 +2897,7 @@ GameObject:
   - component: {fileID: 6036731460568349230}
   - component: {fileID: 4968897714413299674}
   - component: {fileID: 9062341385126099557}
+  - component: {fileID: 1065249174963582461}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0
   m_TagString: Untagged
@@ -2403,6 +2976,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &1065249174963582461
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5967884886961616623}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &6434362672701024774
 GameObject:
   m_ObjectHideFlags: 0
@@ -2414,6 +3008,7 @@ GameObject:
   - component: {fileID: 8393143575000802148}
   - component: {fileID: 6492440086774969859}
   - component: {fileID: 7934205815994283459}
+  - component: {fileID: 2455493054036579052}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (16)
   m_TagString: Untagged
@@ -2492,6 +3087,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &2455493054036579052
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6434362672701024774}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &6480886127904375621
 GameObject:
   m_ObjectHideFlags: 0
@@ -2503,6 +3119,7 @@ GameObject:
   - component: {fileID: 4991044158543440316}
   - component: {fileID: 3221587036535352303}
   - component: {fileID: 1596622920757119910}
+  - component: {fileID: 8580948785954309831}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (10)
   m_TagString: Untagged
@@ -2581,6 +3198,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &8580948785954309831
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6480886127904375621}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &6783125667349934230
 GameObject:
   m_ObjectHideFlags: 0
@@ -2592,6 +3230,7 @@ GameObject:
   - component: {fileID: 7106198683484792824}
   - component: {fileID: 2493822618540047408}
   - component: {fileID: 9094770694708281243}
+  - component: {fileID: 188205571409917171}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (19)
   m_TagString: Untagged
@@ -2670,6 +3309,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &188205571409917171
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6783125667349934230}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &6790771354888414042
 GameObject:
   m_ObjectHideFlags: 0
@@ -2681,6 +3341,7 @@ GameObject:
   - component: {fileID: 8620369660285517304}
   - component: {fileID: 4180791192688020505}
   - component: {fileID: 1927454251156320127}
+  - component: {fileID: 1550138455383742566}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (26)
   m_TagString: Untagged
@@ -2759,6 +3420,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &1550138455383742566
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6790771354888414042}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &6805543772487335455
 GameObject:
   m_ObjectHideFlags: 0
@@ -2770,6 +3452,7 @@ GameObject:
   - component: {fileID: 6943053311912292956}
   - component: {fileID: 5092664486884869074}
   - component: {fileID: 5772227653275548026}
+  - component: {fileID: 2667516970379747933}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (4)
   m_TagString: Untagged
@@ -2848,6 +3531,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &2667516970379747933
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6805543772487335455}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &6905698994191587795
 GameObject:
   m_ObjectHideFlags: 0
@@ -2859,6 +3563,7 @@ GameObject:
   - component: {fileID: 8688500681776843518}
   - component: {fileID: 5831192341370737669}
   - component: {fileID: 8799611110317064617}
+  - component: {fileID: 3018896051720058958}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (2)
   m_TagString: Untagged
@@ -2937,6 +3642,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &3018896051720058958
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6905698994191587795}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &7331613634155921269
 GameObject:
   m_ObjectHideFlags: 0
@@ -2948,6 +3674,7 @@ GameObject:
   - component: {fileID: 9268998923016054}
   - component: {fileID: 7054499757302790393}
   - component: {fileID: 2435271052153069622}
+  - component: {fileID: 1697830745845591305}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (32)
   m_TagString: Untagged
@@ -3026,6 +3753,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &1697830745845591305
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7331613634155921269}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &7600195314845238062
 GameObject:
   m_ObjectHideFlags: 0
@@ -3037,6 +3785,7 @@ GameObject:
   - component: {fileID: 1257479340621088157}
   - component: {fileID: 7047173719003447564}
   - component: {fileID: 7342150676252761647}
+  - component: {fileID: 2342413783724454283}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (39)
   m_TagString: Untagged
@@ -3115,6 +3864,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &2342413783724454283
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7600195314845238062}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &7707405820455075337
 GameObject:
   m_ObjectHideFlags: 0
@@ -3126,6 +3896,7 @@ GameObject:
   - component: {fileID: 2316924424615155140}
   - component: {fileID: 5699203837805903020}
   - component: {fileID: 4915896392556747279}
+  - component: {fileID: 2459861051278738026}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (5)
   m_TagString: Untagged
@@ -3204,6 +3975,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &2459861051278738026
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7707405820455075337}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &8213970561609972823
 GameObject:
   m_ObjectHideFlags: 0
@@ -3215,6 +4007,7 @@ GameObject:
   - component: {fileID: 1250711479553220262}
   - component: {fileID: 5887169775901038173}
   - component: {fileID: 8229636653516638945}
+  - component: {fileID: 4012984078608964314}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (20)
   m_TagString: Untagged
@@ -3293,6 +4086,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &4012984078608964314
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8213970561609972823}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &8402101269942817860
 GameObject:
   m_ObjectHideFlags: 0
@@ -3304,6 +4118,7 @@ GameObject:
   - component: {fileID: 3588491082609469898}
   - component: {fileID: 2607661139248663499}
   - component: {fileID: 3249035945441447659}
+  - component: {fileID: 445895946684968292}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (18)
   m_TagString: Untagged
@@ -3382,6 +4197,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &445895946684968292
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8402101269942817860}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &8625769415072832758
 GameObject:
   m_ObjectHideFlags: 0
@@ -3464,6 +4300,7 @@ GameObject:
   - component: {fileID: 9133844126457307302}
   - component: {fileID: 123041856021639452}
   - component: {fileID: 8784914844548830602}
+  - component: {fileID: 9006354328169162663}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (13)
   m_TagString: Untagged
@@ -3542,6 +4379,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &9006354328169162663
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8921819666864803920}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}
 --- !u!1 &9079916232080524721
 GameObject:
   m_ObjectHideFlags: 0
@@ -3553,6 +4411,7 @@ GameObject:
   - component: {fileID: 2115078739835892562}
   - component: {fileID: 3726008432696307751}
   - component: {fileID: 7767404599934820316}
+  - component: {fileID: 5845071632094171823}
   m_Layer: 0
   m_Name: SM_dungeon_floor_ceiling22_M_crypt_floor_ornament_0 (29)
   m_TagString: Untagged
@@ -3631,3 +4490,24 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &5845071632094171823
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9079916232080524721}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.05119997, y: 0.05119996, z: 0.00120002}
+  m_Center: {x: 0.00000031292439, y: -0.00000031292436, z: 0.00059999916}

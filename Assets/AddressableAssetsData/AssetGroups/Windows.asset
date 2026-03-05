@@ -21,6 +21,11 @@ MonoBehaviour:
     m_SerializedLabels:
     - ui
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 78a2a125c2a4e488993789766b39273c
+    m_Address: Project.Gameplay.UI.ResourcesWindow
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 96453e84471ff24e0bf2c5ca7475698c
     m_Address: Project.Gameplay.UI.FigureInfoWindow
     m_ReadOnly: 0

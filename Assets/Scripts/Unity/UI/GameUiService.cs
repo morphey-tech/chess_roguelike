@@ -26,7 +26,8 @@ namespace Project.Unity.UI
         {
             TurnWindow? wnd = await UIService.ShowAsync<TurnWindow>();
             wnd?.SetPreparePhase();
-            await UIService.ShowAsync<BoardCapacityWindow>();
+            // Board capacity window disabled temporarily
+            // await UIService.ShowAsync<BoardCapacityWindow>();
         }
 
         public async UniTask SetGamePhase()
@@ -45,7 +46,7 @@ namespace Project.Unity.UI
             if (UIService.IsValid)
             {
                 UIService.Hide<TurnWindow>();
-                UIService.Hide<BoardCapacityWindow>();
+                // UIService.Hide<BoardCapacityWindow>();
             }
             return UniTask.CompletedTask;
         }

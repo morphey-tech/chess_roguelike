@@ -72,6 +72,14 @@ namespace Project.Gameplay.Gameplay.Combat
         }
 
         /// <summary>
+        /// Применяет пассивки для превью-расчёта (без очистки).
+        /// </summary>
+        public void ApplyPassivesForPreview(Figure attacker, Figure target, BeforeHitContext context)
+        {
+            _passiveTriggerService.TriggerBeforeHit(attacker, target, context);
+        }
+
+        /// <summary>
         /// Рассчитывает урон для превью с учётом пассивок.
         /// Возвращает финальный урон после применения всех модификаторов.
         /// </summary>

@@ -46,6 +46,7 @@ namespace Project.Unity.Unity.Views.Presentations
         public void SetConfig(FigureShatterConfig config)
         {
             _config = config;
+            _logger.Info($"[SetConfig] proxyScale={config.ProxyScale}, fragmentScale={config.FragmentScale}, shards={config.MinShards}-{config.MaxShards}");
         }
 
         public async UniTask PlayDeathAsync()
@@ -107,7 +108,7 @@ namespace Project.Unity.Unity.Views.Presentations
             fragmentRoot.transform.rotation = transform.rotation;
             fragmentRoot.transform.SetParent(transform.parent);
 
-            int totalFragmentCount = Mathf.Max(3, _random.Range(_config.MinShards, _config.MaxShards) / 2);
+            int totalFragmentCount = Mathf.Max(3, _random.Range(_config.MinShards, _config.MaxShards));
             int fragmentsPerMesh = Mathf.Max(2, totalFragmentCount / _validMeshesCache.Count);
 
             if (_enableLogging)
@@ -146,6 +147,13 @@ namespace Project.Unity.Unity.Views.Presentations
                 };
 
                 Fragmenter.Fracture(proxyMesh, options, fragmentTemplate, fragmentRoot.transform, saveToDisk: false);
+
+                // Применяем масштаб к фрагментам (не умножаем, а устанавливаем)
+                foreach (Transform child in fragmentRoot.transform)
+                {
+                    child.localScale = Vector3.one * _config.FragmentScale;
+                }
+
                 Destroy(fragmentTemplate);
                 Destroy(proxyMesh);
             }
@@ -158,7 +166,7 @@ namespace Project.Unity.Unity.Views.Presentations
             GameObject proxy = new($"{originalMf.gameObject.name}_proxy");
             proxy.transform.position = originalMf.transform.position;
             proxy.transform.rotation = originalMf.transform.rotation;
-            proxy.transform.localScale = originalMf.transform.lossyScale * scaleMultiplier;
+            proxy.transform.localScale = Vector3.one * scaleMultiplier;
             proxy.transform.SetParent(originalMf.transform.parent);
 
             MeshFilter proxyMf = proxy.AddComponent<MeshFilter>();
@@ -183,7 +191,9 @@ namespace Project.Unity.Unity.Views.Presentations
                     if (_config.DoubleSided)
                     {
                         Material doubleSidedMat = new(activeMaterial);
-                        doubleSidedMat.SetInt(Cull, 0);
+                        doubleSidedMat.SetInt("_Cull", 0);
+                        doubleSidedMat.EnableKeyword("_DOUBLESIDED_ON");
+                        doubleSidedMat.DisableKeyword("_CULL_ON");
                         _createdMaterials.Add(doubleSidedMat);
                         proxyMr.materials = new[] { doubleSidedMat };
                     }
@@ -219,10 +229,43 @@ namespace Project.Unity.Unity.Views.Presentations
             Mesh boxMesh = new();
             boxMesh.name = "ProxyBox";
 
+            // 24 вершины (4 на каждую из 6 граней)
             Vector3[] vertices = new Vector3[24];
             Vector2[] uv = new Vector2[24];
-            int[] triangles = new int[36];
 
+            // Вершины для каждой грани
+            // Front (z = min)
+            vertices[0] = new Vector3(-1, -1, -1);
+            vertices[1] = new Vector3(1, -1, -1);
+            vertices[2] = new Vector3(1, 1, -1);
+            vertices[3] = new Vector3(-1, 1, -1);
+            // Back (z = max)
+            vertices[4] = new Vector3(-1, -1, 1);
+            vertices[5] = new Vector3(1, -1, 1);
+            vertices[6] = new Vector3(1, 1, 1);
+            vertices[7] = new Vector3(-1, 1, 1);
+            // Left (x = min)
+            vertices[8] = new Vector3(-1, -1, -1);
+            vertices[9] = new Vector3(-1, -1, 1);
+            vertices[10] = new Vector3(-1, 1, 1);
+            vertices[11] = new Vector3(-1, 1, -1);
+            // Right (x = max)
+            vertices[12] = new Vector3(1, -1, -1);
+            vertices[13] = new Vector3(1, -1, 1);
+            vertices[14] = new Vector3(1, 1, 1);
+            vertices[15] = new Vector3(1, 1, -1);
+            // Top (y = max)
+            vertices[16] = new Vector3(-1, 1, -1);
+            vertices[17] = new Vector3(1, 1, -1);
+            vertices[18] = new Vector3(1, 1, 1);
+            vertices[19] = new Vector3(-1, 1, 1);
+            // Bottom (y = min)
+            vertices[20] = new Vector3(-1, -1, -1);
+            vertices[21] = new Vector3(1, -1, -1);
+            vertices[22] = new Vector3(1, -1, 1);
+            vertices[23] = new Vector3(-1, -1, 1);
+
+            // UV для каждой грани
             for (int i = 0; i < 24; i += 4)
             {
                 uv[i] = new Vector2(0, 0);
@@ -231,15 +274,22 @@ namespace Project.Unity.Unity.Views.Presentations
                 uv[i + 3] = new Vector2(0, 1);
             }
 
-            for (int i = 0; i < 36; i += 6)
+            // 36 треугольников (6 граней * 2 треугольника * 3 индекса)
+            int[] triangles = new int[36]
             {
-                triangles[i] = i;
-                triangles[i + 1] = i + 2;
-                triangles[i + 2] = i + 1;
-                triangles[i + 3] = i;
-                triangles[i + 4] = i + 3;
-                triangles[i + 5] = i + 2;
-            }
+                // Front
+                0, 2, 1, 0, 3, 2,
+                // Back
+                4, 5, 6, 4, 6, 7,
+                // Left
+                8, 10, 9, 8, 11, 10,
+                // Right
+                12, 14, 13, 12, 15, 14,
+                // Top
+                16, 18, 17, 16, 19, 18,
+                // Bottom
+                20, 22, 21, 20, 23, 22
+            };
 
             boxMesh.vertices = vertices;
             boxMesh.uv = uv;
@@ -253,7 +303,7 @@ namespace Project.Unity.Unity.Views.Presentations
         {
             GameObject template = new("FragmentTemplate");
             template.AddComponent<MeshFilter>();
-            
+
             MeshRenderer mr = template.AddComponent<MeshRenderer>();
             if (_config!.UseOriginalMaterials && materials.Length > 0)
             {
@@ -263,6 +313,9 @@ namespace Project.Unity.Unity.Views.Presentations
             {
                 mr.material = fallbackMaterial;
             }
+
+            // Масштаб осколка
+            template.transform.localScale = Vector3.one * _config.FragmentScale;
 
             Rigidbody rb = template.AddComponent<Rigidbody>();
             rb.mass = 0.1f;
@@ -287,13 +340,15 @@ namespace Project.Unity.Unity.Views.Presentations
             Rigidbody[] rigidbodies = fragmentRoot.GetComponentsInChildren<Rigidbody>();
             float scatterMin = _config!.ScatterForceMin;
             float scatterMax = _config!.ScatterForceMax;
+            float upwardMin = _config!.UpwardForceMin;
+            float upwardMax = _config!.UpwardForceMax;
             float forceMult = _config!.ForceMultiplier;
 
             foreach (Rigidbody rb in rigidbodies)
             {
                 Vector3 scatterForce = new Vector3(
                     _random!.Range(-1f, 1f),
-                    _random!.Range(0.5f, 1.5f),
+                    _random!.Range(upwardMin, upwardMax),
                     _random!.Range(-1f, 1f)
                 ).normalized * _random!.Range(scatterMin, scatterMax) * forceMult;
 

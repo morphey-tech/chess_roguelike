@@ -6,10 +6,10 @@
       "entries": [
         {
           "type": "resource",
-          "id": "gold",
-          "min": 3,
-          "max": 7,
-          "weight": 60
+          "id": "crowns",
+          "min": 1,
+          "max": 3,
+          "weight": 70
         },
         {
           "type": "item",
@@ -33,10 +33,10 @@
       "entries": [
         {
           "type": "resource",
-          "id": "gold",
-          "min": 20,
-          "max": 50,
-          "weight": 40
+          "id": "crowns",
+          "min": 5,
+          "max": 10,
+          "weight": 50
         },
         {
           "type": "item",
