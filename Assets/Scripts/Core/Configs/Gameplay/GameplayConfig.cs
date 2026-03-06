@@ -1,6 +1,7 @@
 using System;
 using Newtonsoft.Json;
 using Project.Core.Core.Configs.Figure;
+using Project.Core.Core.Configs.Gameplay;
 
 namespace Project.Core.Core.Configs.Gameplay
 {
@@ -48,5 +49,16 @@ namespace Project.Core.Core.Configs.Gameplay
         /// </summary>
         [JsonProperty("figureShatterConfigId")]
         public string? FigureShatterConfigId { get; set; }
+
+        /// <summary>
+        /// Artifact system configuration.
+        /// </summary>
+        [JsonProperty("artifacts")]
+        public ArtifactGameplayConfig? Artifacts { get; set; }
+
+        /// <summary>
+        /// Get max artifacts limit with fallback to default.
+        /// </summary>
+        public int GetMaxArtifacts() => Artifacts?.MaxArtifacts ?? 8;
     }
 }

@@ -64,6 +64,20 @@ namespace Project.Core.Core.Configs.Artifacts
         [JsonProperty("effect")]
         public ArtifactEffectConfig Effect { get; set; } = new();
 
+        /// <summary>
+        /// Maximum stack count for this artifact.
+        /// -1 = unlimited, 1 = not stackable, N = max N stacks
+        /// Default: 1 (not stackable)
+        /// </summary>
+        [JsonProperty("max_stack")]
+        public int MaxStack { get; set; } = 1;
+
+        /// <summary>
+        /// Comma-separated tags (e.g. "attack,utility").
+        /// </summary>
+        [JsonProperty("tags")]
+        public string Tags { get; set; } = string.Empty;
+
         public ArtifactRarity ParseRarity()
         {
             return Rarity?.ToLowerInvariant() switch
@@ -88,5 +102,38 @@ namespace Project.Core.Core.Configs.Artifacts
                 _ => ArtifactTrigger.Passive
             };
         }
+
+        /// <summary>
+        /// Parse tags from comma-separated string.
+        /// </summary>
+        public ArtifactTag ParseTags()
+        {
+            if (string.IsNullOrEmpty(Tags))
+                return ArtifactTag.None;
+
+            ArtifactTag result = ArtifactTag.None;
+            var tagList = Tags.Split(',');
+
+            foreach (var tagStr in tagList)
+            {
+                var trimmed = tagStr.Trim().ToLowerInvariant();
+                if (Enum.TryParse<ArtifactTag>(trimmed, true, out var tag))
+                {
+                    result |= tag;
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Check if artifact can be stacked.
+        /// </summary>
+        public bool IsStackable() => MaxStack > 1 || MaxStack == -1;
+
+        /// <summary>
+        /// Get maximum stack count (-1 = unlimited).
+        /// </summary>
+        public int GetMaxStack() => MaxStack;
     }
 }

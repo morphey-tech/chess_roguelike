@@ -55,13 +55,13 @@ namespace Project.Gameplay.Gameplay.Artifacts
         {
             return config.Id switch
             {
-                "old_crown" => new OldCrownArtifact(config),
-                "beginner_shield" => new BeginnerShieldArtifact(config),
-                "mercenary_pouch" => new MercenaryPouchArtifact(config),
-                "dice" => new DiceArtifact(config, _randomService),
-                "trap_mine" => new TrapMineArtifact(config),
-                "grandmaster_sword" => new GrandmasterSwordArtifact(config),
-                "wind_boots" => new WindBootsArtifact(config),
+                "worn_crown" => new WornCrownArtifact(config),
+                "pawns_guard" => new PawnsGuardArtifact(config),
+                "mercenaries_pouch" => new MercenariesPouchArtifact(config),
+                "gamblers_die" => new GamblersDieArtifact(config, _randomService),
+                "ambush_charge" => new AmbushChargeArtifact(config),
+                "grandmaster_blade" => new GrandmasterBladeArtifact(config),
+                "swift_strider" => new SwiftStriderArtifact(config),
                 _ => new GenericArtifact(config)
             };
         }

@@ -7,6 +7,9 @@ using VContainer;
 
 namespace Project.Gameplay.Gameplay.Artifacts
 {
+    /// <summary>
+    /// Subscribes to game events and triggers artifact effects.
+    /// </summary>
     public sealed class ArtifactEventSubscriber : IDisposable
     {
         private readonly ArtifactTriggerService _triggerService;
@@ -23,7 +26,7 @@ namespace Project.Gameplay.Gameplay.Artifacts
             _triggerService = triggerService;
             _logger = logService.CreateLogger<ArtifactEventSubscriber>();
             DisposableBagBuilder bag = DisposableBag.CreateBuilder();
-            battleStartedSubscriber.Subscribe(_ =>
+            battleStartedSubscriber.Subscribe(_ => 
             {
                 _triggerService.TriggerBattleStart();
             }).AddTo(bag);
@@ -34,13 +37,17 @@ namespace Project.Gameplay.Gameplay.Artifacts
         private void OnFigureDeath(FigureDeathMessage message)
         {
             // Trigger OnUnitDeath for all artifacts
-            _triggerService.TriggerUnitDeath(message.FigureId);
+            // Note: FigureDeathMessage needs to be extended with KillerId for full functionality
+            _triggerService.TriggerUnitDeath(
+                victim: GetFigureById(message.FigureId),
+                killer: null // TODO: Get killer from message
+            );
+        }
 
-            // Note: OnUnitKill would need to know who killed
-            // This requires extending FigureDeathMessage with KillerId
-            
-            // OnAllyDeath would need team information
-            // For now, just trigger generic death
+        private static Figure? GetFigureById(int figureId)
+        {
+            // TODO: Resolve from FigureRegistry or EntityService
+            return null;
         }
 
         void IDisposable.Dispose()

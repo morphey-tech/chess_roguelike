@@ -4,5 +4,8 @@
   "prepareSlotSpawnDelay": 0.05,
   "hpBarVisibilityModeAllies": "Always",
   "hpBarVisibilityModeEnemies": "OnHoverOrSelection",
-  "figureShatterConfigId": "default"
+  "figureShatterConfigId": "default",
+  "artifacts": {
+    "maxArtifacts": 8
+  }
 }

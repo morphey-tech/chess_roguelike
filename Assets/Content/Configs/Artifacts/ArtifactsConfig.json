@@ -7,6 +7,8 @@
       "rarity": "common",
       "trigger": "on_battle_start",
       "icon": "worn_crown_artifact_icon",
+      "max_stack": 1,
+      "tags": "defense,battle",
       "effect": {
         "type": "king_shield",
         "value": 5
@@ -19,6 +21,8 @@
       "rarity": "common",
       "trigger": "on_battle_start",
       "icon": "pawns_guard_artifact_icon",
+      "max_stack": 1,
+      "tags": "defense,battle",
       "effect": {
         "type": "team_shield",
         "value": 2
@@ -31,6 +35,8 @@
       "rarity": "common",
       "trigger": "on_battle_end",
       "icon": "mercenaries_pouch_artifact_icon",
+      "max_stack": 1,
+      "tags": "economy,battle",
       "effect": {
         "type": "crowns_reward",
         "value": 1
@@ -43,6 +49,8 @@
       "rarity": "common",
       "trigger": "passive",
       "icon": "gamblers_die_artifact_icon",
+      "max_stack": 1,
+      "tags": "utility,defense",
       "effect": {
         "type": "dodge_chance",
         "value": 0.1
@@ -55,6 +63,8 @@
       "rarity": "rare",
       "trigger": "on_unit_death",
       "icon": "ambush_charge_artifact_icon",
+      "max_stack": 3,
+      "tags": "death,control",
       "effect": {
         "type": "death_damage",
         "value": 3,
@@ -68,6 +78,8 @@
       "rarity": "rare",
       "trigger": "passive",
       "icon": "grandmaster_blade_artifact_icon",
+      "max_stack": 2,
+      "tags": "attack,utility",
       "effect": {
         "type": "armor_penetration",
         "value": 1
@@ -80,6 +92,8 @@
       "rarity": "rare",
       "trigger": "passive",
       "icon": "swift_strider_artifact_icon",
+      "max_stack": 1,
+      "tags": "movement,utility",
       "effect": {
         "type": "movement_range",
         "value": 1

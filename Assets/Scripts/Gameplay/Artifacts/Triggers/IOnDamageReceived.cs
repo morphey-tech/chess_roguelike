@@ -5,6 +5,6 @@ namespace Project.Gameplay.Gameplay.Artifacts.Triggers
     /// </summary>
     public interface IOnDamageReceived
     {
-        void OnDamageReceived(DamageContext context);
+        void OnDamageReceived(ArtifactTriggerContext context);
     }
 }

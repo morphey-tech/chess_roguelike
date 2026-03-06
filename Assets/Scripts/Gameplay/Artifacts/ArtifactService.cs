@@ -2,69 +2,170 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Project.Core.Core.Configs.Artifacts;
+using Project.Core.Core.Configs.Gameplay;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Artifacts.Effects;
+using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.Gameplay.UI;
 using Project.Gameplay.UI;
 using VContainer;
 
 namespace Project.Gameplay.Gameplay.Artifacts
 {
+    /// <summary>
+    /// Service for managing player's artifacts during a run.
+    /// </summary>
     public sealed class ArtifactService
     {
-        private readonly List<ArtifactInstance> _artifacts = new();
-        private readonly ArtifactFactory _factory;
-        private readonly ILogger<ArtifactService> _logger;
-
+        public int ArtifactCount => _artifacts.Count;
+        public int TotalStackCount => _artifacts.Sum(a => a.Stack);
         public IReadOnlyList<ArtifactInstance> Artifacts => _artifacts;
         public int Count => _artifacts.Count;
 
+        private readonly List<ArtifactInstance> _artifacts = new();
+        private readonly ArtifactFactory _factory;
+        private readonly ArtifactTriggerService _triggerService;
+        private readonly ConfigProvider _configProvider;
+        private readonly ILogger<ArtifactService> _logger;
+        
+        private int _maxArtifacts = 8;  // Default
+
         [Inject]
-        private ArtifactService(ArtifactFactory factory, ILogService logService)
+        private ArtifactService(
+            ArtifactFactory factory,
+            ArtifactTriggerService triggerService,
+            ConfigProvider configProvider,
+            ILogService logService)
         {
             _factory = factory;
+            _triggerService = triggerService;
+            _configProvider = configProvider;
             _logger = logService.CreateLogger<ArtifactService>();
+            
+            // Load max artifacts from config
+            LoadMaxArtifacts().Forget();
         }
 
-        public async UniTask<ArtifactInstance> Add(string configId)
-        {
-            IArtifact artifact = await _factory.Create(configId);
-            ArtifactInstance instance = new(artifact, Guid.NewGuid().ToString());
-            _artifacts.Add(instance);
-            artifact.OnAcquired(new ArtifactContext { OwnerId = 0, ArtifactId = instance.Id });
-            _logger.Info($"Artifact acquired: {artifact.ConfigId} ({artifact.GetType().Name})");
-            // Try to open artifacts window, need remove from that class
-            TryOpenArtifactsWindow();
-            return instance;
-        }
-
-        private static void TryOpenArtifactsWindow()
+        private async UniTask LoadMaxArtifacts()
         {
             try
             {
-                if (UIService.IsValid && !UIService.IsVisible<ArtifactsWindow>())
+                var gameplayConfig = await _configProvider.Get<GameplayConfig>("gameplay_conf");
+                _maxArtifacts = gameplayConfig.GetMaxArtifacts();
+                _logger.Debug($"Max artifacts limit: {_maxArtifacts}");
+            }
+            catch (Exception ex)
+            {
+                _logger.Warning($"Failed to load artifact limit from config, using default: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Try to add an artifact. Returns null if limit reached.
+        /// </summary>
+        public async UniTask<ArtifactInstance?> TryAdd(string configId, int stackCount = 1)
+        {
+            if (_artifacts.Count >= _maxArtifacts)
+            {
+                _logger.Warning($"Cannot add artifact {configId}: limit reached ({_artifacts.Count}/{_maxArtifacts})");
+                return null;
+            }
+
+            return await Add(configId, stackCount);
+        }
+
+        /// <summary>
+        /// Add an artifact. Stacks if same artifact exists.
+        /// </summary>
+        public async UniTask<ArtifactInstance> Add(string configId, int stackCount = 1)
+        {
+            IArtifact artifact = await _factory.Create(configId);
+            ArtifactConfig? config = await GetConfig(configId);
+            int maxStack = config?.GetMaxStack() ?? 1;  // Default max stack: 1
+
+            // Check if we can stack with existing artifact
+            ArtifactInstance? existing = _artifacts.FirstOrDefault(a => a.ConfigId == configId);
+            if (existing != null)
+            {
+                if (maxStack != -1 && existing.Stack + stackCount > maxStack)
+                {
+                    _logger.Warning($"Cannot stack {configId}: would exceed max stack ({existing.Stack}+{stackCount}>{maxStack})");
+                    return existing;
+                }
+
+                existing.Stack += stackCount;
+                _logger.Info($"Artifact stacked: {configId} x{existing.Stack}");
+
+                _triggerService.InvalidateCache();
+                TryOpenOrRefreshArtifactsWindow();
+
+                return existing;
+            }
+
+            // Create new instance
+            ArtifactInstance instance = new(artifact, Guid.NewGuid().ToString())
+            {
+                Stack = stackCount
+            };
+
+            _artifacts.Add(instance);
+            artifact.OnAcquired(new ArtifactContext { OwnerId = 0, ArtifactId = instance.Id });
+            _logger.Info($"Artifact acquired: {artifact.ConfigId} x{stackCount} ({artifact.GetType().Name})");
+
+            _triggerService.InvalidateCache();
+            TryOpenOrRefreshArtifactsWindow();
+
+            return instance;
+        }
+
+        private async UniTask<ArtifactConfig?> GetConfig(string configId)
+        {
+            try
+            {
+                var repository = await _configProvider.Get<ArtifactConfigRepository>("artifacts_conf");
+                return repository.Get(configId);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Failed to load artifact config {configId}: {ex.Message}");
+                return null;
+            }
+        }
+
+        private static void TryOpenOrRefreshArtifactsWindow()
+        {
+            try
+            {
+                if (!UIService.IsValid) return;
+
+                if (UIService.IsVisible<ArtifactsWindow>())
+                {
+                    var window = UIService.FindWindow<ArtifactsWindow>();
+                    window?.Refresh();
+                }
+                else
                 {
                     UIService.ShowAsync<ArtifactsWindow>().Forget();
                 }
             }
             catch (Exception ex)
             {
-                //To logger
-                // UI service may not be available in all contexts
-                UnityEngine.Debug.LogWarning($"Failed to open artifacts window: {ex.Message}");
+                UnityEngine.Debug.LogWarning($"Failed to open/refresh artifacts window: {ex.Message}");
             }
         }
 
         public bool Remove(string instanceId)
         {
             ArtifactInstance? instance = Find(instanceId);
-            if (instance == null)
-            {
-                return false;
-            }
+            if (instance == null) return false;
+
             instance.Artifact.OnRemoved(new ArtifactContext { OwnerId = 0, ArtifactId = instance.Id });
             _artifacts.Remove(instance);
             _logger.Info($"Artifact removed: {instance.ConfigId}");
+
+            _triggerService.InvalidateCache();
+
             return true;
         }
 
@@ -84,6 +185,40 @@ namespace Project.Gameplay.Gameplay.Artifacts
             return _artifacts.Any(a => a.ConfigId == configId);
         }
 
+        /// <summary>
+        /// Count artifacts with a specific tag.
+        /// </summary>
+        public int CountByTag(ArtifactTag tag)
+        {
+            int count = 0;
+            foreach (var instance in _artifacts)
+            {
+                if (instance.Artifact.Tags.HasTag(tag))
+                {
+                    count += instance.Stack;
+                }
+            }
+            return count;
+        }
+
+        /// <summary>
+        /// Get total stack count for all artifacts with a tag.
+        /// </summary>
+        public int GetTagStackCount(ArtifactTag tag)
+        {
+            return _artifacts
+                .Where(a => a.Artifact.Tags.HasTag(tag))
+                .Sum(a => a.Stack);
+        }
+
+        /// <summary>
+        /// Check if player has any artifact with a specific tag.
+        /// </summary>
+        public bool HasTag(ArtifactTag tag)
+        {
+            return _artifacts.Any(a => a.Artifact.Tags.HasTag(tag));
+        }
+
         public void Clear()
         {
             foreach (ArtifactInstance? instance in _artifacts)
@@ -91,6 +226,10 @@ namespace Project.Gameplay.Gameplay.Artifacts
                 instance.Artifact.OnRemoved(new ArtifactContext { OwnerId = 0, ArtifactId = instance.Id });
             }
             _artifacts.Clear();
+
+            _triggerService.InvalidateCache();
+
+            _logger.Info("All artifacts cleared");
         }
     }
 }

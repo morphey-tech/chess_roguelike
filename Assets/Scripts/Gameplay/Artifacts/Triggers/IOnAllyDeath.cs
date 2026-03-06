@@ -1,7 +1,10 @@
 namespace Project.Gameplay.Gameplay.Artifacts.Triggers
 {
+    /// <summary>
+    /// Called when an ally dies.
+    /// </summary>
     public interface IOnAllyDeath
     {
-        void OnAllyDeath(DeathContext context);
+        void OnAllyDeath(ArtifactTriggerContext context);
     }
 }
