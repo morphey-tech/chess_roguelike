@@ -77,6 +77,17 @@ namespace Project.Unity.UI
             _logger.Warning($"[UI Warning] {message}");
         }
 
+        /// <summary>
+        /// Show artifacts window (player's owned artifacts).
+        /// </summary>
+        public void ShowArtifacts()
+        {
+            if (UIService.IsValid)
+            {
+                UIService.Show<ArtifactsWindow>();
+            }
+        }
+
         private async UniTask<StageFlowAction> ShowOutcomeScreenAsync(
             string title,
             string body,

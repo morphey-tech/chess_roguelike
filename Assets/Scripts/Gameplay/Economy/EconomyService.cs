@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Project.Core.Core.Logging;
+using Project.Gameplay.Gameplay.Artifacts;
 using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Loot;
 using UniRx;
@@ -20,13 +21,15 @@ namespace Project.Gameplay.Gameplay.Economy
         public ResourceStorage MetaResources { get; } = new();
         public Inventory RunInventory { get; } = new();
         public ItemFactory ItemFactory { get; }
+        public ArtifactService Artifacts { get; }
 
         private readonly ILogger _logger;
 
         [Inject]
-        private EconomyService(ItemFactory itemFactory, ILogService logService)
+        private EconomyService(ItemFactory itemFactory, ArtifactService artifacts, ILogService logService)
         {
             ItemFactory = itemFactory;
+            Artifacts = artifacts;
             _logger = logService.CreateLogger<EconomyService>();
         }
 
@@ -37,8 +40,9 @@ namespace Project.Gameplay.Gameplay.Economy
         {
             RunResources.Clear();
             RunInventory.Clear();
+            Artifacts.Clear();
             ItemFactory.ClearCache();
-            _logger.Info("Economy: new run started, run resources and inventory cleared");
+            _logger.Info("Economy: new run started, run resources, inventory and artifacts cleared");
         }
 
         /// <summary>

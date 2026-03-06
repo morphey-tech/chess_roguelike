@@ -39,7 +39,8 @@ namespace Project.Gameplay.Gameplay.Configs
             "duels_conf",
             "items_conf",
             "resources_conf",
-            "loot_tables_conf"
+            "loot_tables_conf",
+            "artifacts_conf"
         };
 
         private readonly Dictionary<string, object> _configsCache = new();

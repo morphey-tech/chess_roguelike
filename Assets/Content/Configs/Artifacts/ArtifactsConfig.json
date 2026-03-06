@@ -1,0 +1,135 @@
+{
+  "content": [
+    {
+      "id": "warrior_banner",
+      "name": "Warrior Banner",
+      "description": "Increase attack by 2 for all allies at battle start",
+      "rarity": "common",
+      "trigger": "on_battle_start",
+      "icon": "warrior_banner_icon",
+      "effect": {
+        "type": "stat_buff",
+        "stat": "attack",
+        "value": 2,
+        "duration": "battle"
+      }
+    },
+    {
+      "id": "healing_crystal",
+      "name": "Healing Crystal",
+      "description": "Heal king for 5 HP at battle start",
+      "rarity": "common",
+      "trigger": "on_battle_start",
+      "icon": "healing_crystal_icon",
+      "effect": {
+        "type": "heal",
+        "target": "king",
+        "value": 5
+      }
+    },
+    {
+      "id": "vampire_fang",
+      "name": "Vampire Fang",
+      "description": "Heal for 3 HP when killing an enemy",
+      "rarity": "rare",
+      "trigger": "on_unit_kill",
+      "icon": "vampire_fang_icon",
+      "effect": {
+        "type": "heal",
+        "target": "killer",
+        "value": 3
+      }
+    },
+    {
+      "id": "thorn_armor",
+      "name": "Thorn Armor",
+      "description": "Deal 2 damage back when hit",
+      "rarity": "rare",
+      "trigger": "on_damage_received",
+      "icon": "thorn_armor_icon",
+      "effect": {
+        "type": "reflect_damage",
+        "value": 2
+      }
+    },
+    {
+      "id": "phoenix_feather",
+      "name": "Phoenix Feather",
+      "description": "Revive a fallen ally with 50% HP once per battle",
+      "rarity": "legendary",
+      "trigger": "on_ally_death",
+      "icon": "phoenix_feather_icon",
+      "effect": {
+        "type": "revive",
+        "value": 0.5,
+        "maxTriggers": 1
+      }
+    },
+    {
+      "id": "swift_boots",
+      "name": "Swift Boots",
+      "description": "Passive: +1 movement range",
+      "rarity": "common",
+      "trigger": "passive",
+      "icon": "swift_boots_icon",
+      "effect": {
+        "type": "stat_buff",
+        "stat": "movement",
+        "value": 1,
+        "duration": "permanent"
+      }
+    },
+    {
+      "id": "crown_of_power",
+      "name": "Crown of Power",
+      "description": "Increase all stats by 1",
+      "rarity": "legendary",
+      "trigger": "passive",
+      "icon": "crown_of_power_icon",
+      "effect": {
+        "type": "all_stats_buff",
+        "value": 1,
+        "duration": "permanent"
+      }
+    },
+    {
+      "id": "shield_of_valor",
+      "name": "Shield of Valor",
+      "description": "Gain 3 shield at battle start",
+      "rarity": "common",
+      "trigger": "on_battle_start",
+      "icon": "shield_of_valor_icon",
+      "effect": {
+        "type": "shield",
+        "value": 3
+      }
+    },
+    {
+      "id": "berserker_rage",
+      "name": "Berserker Rage",
+      "description": "Gain +3 attack when an ally dies",
+      "rarity": "rare",
+      "trigger": "on_ally_death",
+      "icon": "berserker_rage_icon",
+      "effect": {
+        "type": "stat_buff",
+        "stat": "attack",
+        "value": 3,
+        "duration": "battle",
+        "stackable": true
+      }
+    },
+    {
+      "id": "ancient_scroll",
+      "name": "Ancient Scroll",
+      "description": "Draw 1 extra item choice at reward selection",
+      "rarity": "rare",
+      "trigger": "on_reward",
+      "icon": "ancient_scroll_icon",
+      "effect": {
+        "type": "extra_choice",
+        "value": 1
+      }
+    }
+  ]
+}

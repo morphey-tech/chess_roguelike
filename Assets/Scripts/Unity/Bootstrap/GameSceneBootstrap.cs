@@ -1,5 +1,6 @@
 using System;
 using Cysharp.Threading.Tasks;
+using Project.Core.Core.Configs.Artifacts;
 using Project.Core.Core.Configs.Run;
 using Project.Core.Core.Configs.Suites;
 using Project.Core.Core.Random;
@@ -48,19 +49,17 @@ namespace Project.Unity.Unity.Bootstrap
             RunConfig runConfig = await LoadRunConfigAsync(DefaultRunId);
             await InitializeRunStateAsync(runConfig);
 
-            // Start new run: reset economy and show resources window
+            // Start new run: reset economy (includes artifacts)
             _economyService.StartNewRun();
             ShowResourcesWindow();
 
             Run run = _runFactory.Create(runConfig);
-
-            // Сохраняем в holder чтобы другие сервисы могли получить доступ
             _runHolder.Set(run);
 
-            Log.Info($"Starting run: {runConfig.Id}");
             // Fire-and-forget: game loop runs indefinitely (phases wait for player input).
             // Awaiting here would block the bootstrap and prevent the previous scene from unloading.
             run.Begin().Forget();
+            Log.Info($"Starting run: {runConfig.Id}");
         }
 
         private void ShowResourcesWindow()

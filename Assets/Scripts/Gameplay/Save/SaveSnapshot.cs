@@ -20,5 +20,8 @@ namespace Project.Gameplay.Gameplay.Save
         public Dictionary<string, int>? RunResources { get; set; }
         public List<ItemState>? RunItems { get; set; }
         public Dictionary<string, int>? MetaResources { get; set; }
+
+        // Artifacts
+        public List<string>? Artifacts { get; set; }
     }
 }

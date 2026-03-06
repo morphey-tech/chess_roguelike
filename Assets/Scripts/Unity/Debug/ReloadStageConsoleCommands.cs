@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using IngameDebugConsole;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Stage;
+using VContainer;
 using VContainer.Unity;
 
 namespace Project.Unity.Unity.Debug
@@ -13,7 +14,8 @@ namespace Project.Unity.Unity.Debug
         private readonly ILogger _logger;
         private bool _registered;
 
-        public ReloadStageConsoleCommands(
+        [Inject]
+        private ReloadStageConsoleCommands(
             StageReloadService stageReloadService,
             ILogService logService)
         {

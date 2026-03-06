@@ -2,11 +2,15 @@ using System;
 using System.Collections.Generic;
 using LiteUI.UI.Service;
 using MessagePipe;
+using Project.Core.Core.Configs.Artifacts;
 using Project.Core.Core.Logging;
+using Project.Core.Core.Storm.Messages;
 using Project.Core.Core.World;
-using Project.Gameplay.Gameplay.Board;
+using Project.Gameplay.Gameplay.Artifacts;
+using Project.Gameplay.Gameplay.Board.Messages;
 using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Figures;
+using Project.Gameplay.Gameplay.Input.Messages;
 using Project.Gameplay.Gameplay.Interaction;
 using Project.Gameplay.Gameplay.Prepare;
 using Project.Gameplay.Gameplay.Selection;
@@ -19,13 +23,17 @@ using Project.Gameplay.Gameplay.Turn.BonusMove;
 using Project.Gameplay.Gameplay.Visual;
 using Project.Gameplay.Gameplay.Visual.Commands;
 using Project.Gameplay.Gameplay.Installers;
+using Project.Gameplay.Gameplay.Prepare.Messages;
+using Project.Gameplay.Gameplay.Save.Adapter;
 using Project.Gameplay.Gameplay.Shutdown;
+using Project.Gameplay.Gameplay.Stage.Messages;
 using Project.Gameplay.Gameplay.UI;
 using Project.Gameplay.UI;
 using Project.Unity.Unity.Debug;
 using Project.Unity.UI;
 using Project.Gameplay.Presentations;
 using Project.Gameplay.ShrinkingZone;
+using Project.Gameplay.ShrinkingZone.Messages;
 using Project.Unity.Unity.Bootstrap;
 using Project.Unity.Unity.Prepare;
 using Project.Unity.Unity.Views;
@@ -76,6 +84,59 @@ namespace Project.Unity.Unity.Installers
             MessagePipeOptions options = builder.RegisterMessagePipe();
             options.HandlingSubscribeDisposedPolicy = HandlingSubscribeDisposedPolicy.Throw;
             options.EnableCaptureStackTrace = true;
+
+            // Explicit registration of all message types for cross-scope usage
+            // Input messages
+            builder.RegisterMessageBroker<RawClickMessage>(options);
+            builder.RegisterMessageBroker<CellClickedMessage>(options);
+            builder.RegisterMessageBroker<EndTurnRequestedMessage>(options);
+            builder.RegisterMessageBroker<CancelRequestedMessage>(options);
+            builder.RegisterMessageBroker<FigureHoverChangedMessage>(options);
+            builder.RegisterMessageBroker<RightClickMessage>(options);
+            builder.RegisterMessageBroker<HandFigureClickedMessage>(options);
+
+            // Turn messages
+            builder.RegisterMessageBroker<TurnChangedMessage>(options);
+
+            // Prepare messages
+            builder.RegisterMessageBroker<PreparePhaseCompletedMessage>(options);
+            builder.RegisterMessageBroker<PrepareSelectionChangedMessage>(options);
+            builder.RegisterMessageBroker<PrepareVisualResetMessage>(options);
+            builder.RegisterMessageBroker<PrepareCompleteRequestedMessage>(options);
+
+            // Figure messages
+            builder.RegisterMessageBroker<FigureSpawnedMessage>(options);
+            builder.RegisterMessageBroker<FigureSelectedMessage>(options);
+            builder.RegisterMessageBroker<FigureDeselectedMessage>(options);
+            builder.RegisterMessageBroker<FigureDeathMessage>(options);
+            builder.RegisterMessageBroker<FigureBoardRemovedMessage>(options);
+            builder.RegisterMessageBroker<FigureAttackStartedMessage>(options);
+
+            // Board messages
+            builder.RegisterMessageBroker<BoardCapacityChangedMessage>(options);
+
+            // Stage/Flow messages
+            builder.RegisterMessageBroker<StageCompletedMessage>(options);
+            builder.RegisterMessageBroker<PhaseStartedMessage>(options);
+            builder.RegisterMessageBroker<PhaseCompletedMessage>(options);
+            builder.RegisterMessageBroker<StageStartedMessage>(options);
+
+            // Bonus move messages
+            builder.RegisterMessageBroker<BonusMoveStartedMessage>(options);
+            builder.RegisterMessageBroker<BonusMoveCompletedMessage>(options);
+
+            // Storm messages
+            builder.RegisterMessageBroker<StormBattleStartedMessage>(options);
+            builder.RegisterMessageBroker<StormTurnStartedMessage>(options);
+            builder.RegisterMessageBroker<StormStateChangedMessage>(options);
+            builder.RegisterMessageBroker<StormCellsUpdatedMessage>(options);
+            builder.RegisterMessageBroker<StormDamageDealtMessage>(options);
+            builder.RegisterMessageBroker<StormFigureTurnEndedMessage>(options);
+            builder.RegisterMessageBroker<FigureTakeStormDamageMessage>(options);
+
+            // UI messages
+            builder.RegisterMessageBroker<TooltipShowRequestMessage>(options);
+            builder.RegisterMessageBroker<TooltipHideRequestMessage>(options);
         }
 
         private void ConfigureInput(IContainerBuilder builder)
@@ -157,6 +218,11 @@ namespace Project.Unity.Unity.Installers
             builder.Register<FigureLifeService>(Lifetime.Singleton).As<IFigureLifeService>();
             builder.Register<DamageApplier>(Lifetime.Singleton);
             builder.Register<ProjectileHitApplyService>(Lifetime.Singleton).As<IProjectileHitApplyService>();
+
+            // ArtifactEventSubscriber — слушает события и вызывает триггеры артефактов
+            builder.Register<ArtifactEventSubscriber>(Lifetime.Singleton)
+                .AsImplementedInterfaces()
+                .AsSelf();
             
             // ActionBuilderContext (needs VisualPipeline, ActionContextAccessor, etc. registered above)
             builder.Register<ActionBuilderContext>(Lifetime.Singleton).As<IActionBuilderContext>();
@@ -196,7 +262,7 @@ namespace Project.Unity.Unity.Installers
             _resolver = resolver;
             _logger = resolver.Resolve<ILogService>()
                 .CreateLogger<GameLifetimeScope>();
-            
+
             // Force-create services with subscriptions
             resolver.Resolve<TurnService>();
             resolver.Resolve<InteractionController>();
@@ -215,6 +281,7 @@ namespace Project.Unity.Unity.Installers
             resolver.Resolve<StormHighlightRenderer>();
             resolver.Resolve<StormDamageService>();
             resolver.Resolve<FigureInfoPreviewService>();
+            resolver.Resolve<ArtifactEventSubscriber>();
 
             // UI must be force-resolved so its constructor runs InitAsync
             // (loads WindowsController prefab). Without this, static UI methods

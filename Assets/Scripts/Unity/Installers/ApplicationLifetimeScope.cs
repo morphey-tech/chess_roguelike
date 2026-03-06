@@ -1,3 +1,4 @@
+using System;
 using Project.Core.Core.Logging;
 using Project.Core.Window;
 using Project.Gameplay.Gameplay.Assets;
@@ -16,6 +17,8 @@ using VContainer;
 using VContainer.Unity;
 using IRandomService = Project.Core.Core.Random.IRandomService;
 using RandomService = Project.Core.Core.Random.RandomService;
+using Project.Core.Core.Configs.Artifacts;
+using Project.Gameplay.Gameplay.Artifacts;
 
 namespace Project.Unity.Unity.Installers
 {
@@ -70,7 +73,20 @@ namespace Project.Unity.Unity.Installers
                 .AsSelf();
             builder.Register<EconomySaveAdapter>(Lifetime.Singleton)
                 .AsImplementedInterfaces();
-            
+
+            // Artifacts system (base services - accessible everywhere)
+            builder.Register<ArtifactConfigRepository>(Lifetime.Singleton)
+                .AsSelf();
+            builder.Register<ArtifactFactory>(Lifetime.Singleton)
+                .AsSelf();
+            builder.Register<ArtifactService>(Lifetime.Singleton)
+                .AsSelf();
+            builder.Register<ArtifactSaveAdapter>(Lifetime.Singleton)
+                .AsImplementedInterfaces();
+            builder.Register<ArtifactTriggerService>(Lifetime.Singleton)
+                .AsImplementedInterfaces()
+                .AsSelf();
+
             builder.Register<MemoryCleanService>(Lifetime.Singleton)
                 .AsImplementedInterfaces()
                 .AsSelf();
@@ -78,7 +94,15 @@ namespace Project.Unity.Unity.Installers
             builder.Register<SceneTransitionService>(Lifetime.Singleton);
             builder.Register<SceneService>(Lifetime.Singleton)
                 .AsImplementedInterfaces();
-            
+
+            // Debug commands
+            builder.Register<EconomyConsoleCommands>(Lifetime.Singleton)
+                .AsImplementedInterfaces()
+                .AsSelf();
+            builder.Register<ArtifactConsoleCommands>(Lifetime.Singleton)
+                .AsImplementedInterfaces()
+                .AsSelf();
+
             builder.RegisterInstance(saveEnvironment)
                 .As<Project.Core.Core.Save.ISaveEnvironment>();
             builder.RegisterInstance(new FileSaveStorage(saveEnvironment.SavePath));

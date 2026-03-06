@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity::Project.Unity.Installers.GameLifetimeScope
   parentReference:
-    TypeName: Project.Unity.Installers.ApplicationLifetimeScope
+    TypeName: Project.Unity.Unity.Installers.ApplicationLifetimeScope
   autoRun: 1
   autoInjectGameObjects: []
   _inputActions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

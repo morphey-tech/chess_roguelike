@@ -4,6 +4,7 @@ using IngameDebugConsole;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Stage;
 using Project.Gameplay.Gameplay.Stage.Flow;
+using VContainer;
 using VContainer.Unity;
 
 namespace Project.Unity.Unity.Debug
@@ -14,7 +15,8 @@ namespace Project.Unity.Unity.Debug
         private readonly ILogger _logger;
         private bool _registered;
 
-        public StageOutcomeConsoleCommands(
+        [Inject]
+        private StageOutcomeConsoleCommands(
             RunFlowService runFlowService,
             ILogService logService)
         {
