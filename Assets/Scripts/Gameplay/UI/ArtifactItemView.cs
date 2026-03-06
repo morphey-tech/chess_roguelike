@@ -2,6 +2,8 @@ using System;
 using Cysharp.Threading.Tasks;
 using Project.Core.Core.Assets;
 using Project.Core.Core.Configs.Artifacts;
+using Project.Gameplay.Gameplay.UI;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using VContainer;
@@ -22,14 +24,14 @@ namespace Project.Gameplay.Gameplay.UI
         [SerializeField] private Color _rareColor = new(0.2f, 0.6f, 1f, 0.3f);
         [SerializeField] private Color _legendaryColor = new(1f, 0.8f, 0.2f, 0.3f);
 
-        private IAssetService _assetService = null!;
+        private IAssetService _assetService;
 
         [Inject]
-        private void Construct(IAssetService uiAssetService)
+        private void Construct(IAssetService assetService)
         {
-            _assetService = uiAssetService;
+            _assetService = assetService;
         }
-        
+
         public async UniTask Initialize(ArtifactConfig config)
         {
             Color rarityColor = config.ParseRarity() switch
@@ -38,7 +40,8 @@ namespace Project.Gameplay.Gameplay.UI
                 ArtifactRarity.Legendary => _legendaryColor,
                 _ => _commonColor
             };
-            //Message for exception
+
+            //Message to exception
             _rarityBG.color = rarityColor;
             _icon.sprite = await _assetService.LoadAssetAsync<Sprite>(config.Icon) 
                            ?? throw new InvalidOperationException();

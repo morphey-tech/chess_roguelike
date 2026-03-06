@@ -21,19 +21,29 @@ namespace Project.Gameplay.UI
         [Header("Empty State")]
         [SerializeField] private GameObject _emptyState;
 
-        [Inject] private ArtifactService _artifactService;
-        [Inject] private ConfigProvider _configProvider;
-        [Inject] private IUIAssetService _uiAssetService;
+        private ArtifactService _artifactService = null!;
+        private ConfigProvider _configProvider = null!;
+        private IUIAssetService _uiAssetService = null!;
 
         private readonly List<ArtifactItemView> _itemViews = new();
-        private CompositeDisposable _disposables;
         private ArtifactConfigRepository? _repository;
+        private CompositeDisposable _disposables = null!;
 
         protected override bool HideOtherWindows => false;
         protected override bool IgnoreHideOthersWindows => true;
         public override bool NeedShowBackground => false;
         public override int ZOrder => 90;
 
+        [Inject]
+        private void Construct(ArtifactService artifactService,
+            ConfigProvider configProvider,
+            IUIAssetService uiAssetService)
+        {
+            _artifactService = artifactService;
+            _configProvider = configProvider;
+            _uiAssetService = uiAssetService;
+        }
+        
         //Remove async void
         protected override async void OnInit()
         {
