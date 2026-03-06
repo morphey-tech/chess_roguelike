@@ -2,8 +2,6 @@ using System;
 using Cysharp.Threading.Tasks;
 using Project.Core.Core.Assets;
 using Project.Core.Core.Configs.Artifacts;
-using Project.Gameplay.Gameplay.UI;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using VContainer;
@@ -17,9 +15,6 @@ namespace Project.Gameplay.Gameplay.UI
     {
         [Header("References")]
         [SerializeField] private Image _icon;
-        [SerializeField] private TextMeshProUGUI _nameText;
-        [SerializeField] private TextMeshProUGUI _descriptionText;
-        [SerializeField] private TextMeshProUGUI _triggerText;
         [SerializeField] private Image _rarityBG;
 
         [Header("Rarity Colors")]
@@ -37,10 +32,6 @@ namespace Project.Gameplay.Gameplay.UI
         
         public async UniTask Initialize(ArtifactConfig config)
         {
-            _nameText.text = config.Name;
-            _descriptionText.text = config.Description;
-            _triggerText.text = GetTriggerDisplayName(config.ParseTrigger());
-
             Color rarityColor = config.ParseRarity() switch
             {
                 ArtifactRarity.Rare => _rareColor,
@@ -51,22 +42,6 @@ namespace Project.Gameplay.Gameplay.UI
             _rarityBG.color = rarityColor;
             _icon.sprite = await _assetService.LoadAssetAsync<Sprite>(config.Icon) 
                            ?? throw new InvalidOperationException();
-        }
-
-        private static string GetTriggerDisplayName(ArtifactTrigger trigger)
-        {
-            return trigger switch
-            {
-                ArtifactTrigger.Passive => "⚡ Passive",
-                ArtifactTrigger.OnBattleStart => "⚔️ Battle Start",
-                ArtifactTrigger.OnBattleEnd => "🏆 Battle End",
-                ArtifactTrigger.OnUnitDeath => "💀 Unit Death",
-                ArtifactTrigger.OnUnitKill => "⚔️ On Kill",
-                ArtifactTrigger.OnAllyDeath => "💔 Ally Death",
-                ArtifactTrigger.OnDamageReceived => "🛡️ When Hit",
-                ArtifactTrigger.OnReward => "🎁 On Reward",
-                _ => trigger.ToString()
-            };
         }
     }
 }

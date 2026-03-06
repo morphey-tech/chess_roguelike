@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UniRx;
 using VContainer;
@@ -45,16 +46,18 @@ namespace Project.Gameplay.UI
             }
             catch (Exception ex)
             {
+                //Logger
                 Debug.LogError($"Failed to load artifacts config: {ex.Message}");
             }
         }
 
         public void Refresh()
         {
-            CreateItemViews();
+            CreateItemViews().Forget();
         }
 
-        private void CreateItemViews()
+        //Calcellation token
+        private async UniTask CreateItemViews()
         {
             // Clear existing
             foreach (ArtifactItemView? view in _itemViews)
@@ -80,14 +83,14 @@ namespace Project.Gameplay.UI
                 
                 // Instantiate with DI using UIAssetService
                 ArtifactItemView? view = _uiAssetService.Instantiate(_itemPrefab, _contentParent);
-                view.Initialize(config);
+                await view.Initialize(config);
                 _itemViews.Add(view);
             }
         }
 
         protected override void OnShowed()
         {
-            CreateItemViews();
+            CreateItemViews().Forget();
         }
 
         private void OnDestroy()
