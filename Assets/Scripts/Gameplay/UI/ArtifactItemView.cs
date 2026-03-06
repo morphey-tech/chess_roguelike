@@ -1,7 +1,12 @@
+using System;
+using Cysharp.Threading.Tasks;
+using Project.Core.Core.Assets;
 using Project.Core.Core.Configs.Artifacts;
+using Project.Gameplay.Gameplay.UI;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using VContainer;
 
 namespace Project.Gameplay.Gameplay.UI
 {
@@ -22,27 +27,30 @@ namespace Project.Gameplay.Gameplay.UI
         [SerializeField] private Color _rareColor = new(0.2f, 0.6f, 1f, 0.3f);
         [SerializeField] private Color _legendaryColor = new(1f, 0.8f, 0.2f, 0.3f);
 
-        public void Initialize(ArtifactConfig config)
+        private IAssetService _assetService = null!;
+
+        [Inject]
+        private void Construct(IAssetService uiAssetService)
+        {
+            _assetService = uiAssetService;
+        }
+        
+        public async UniTask Initialize(ArtifactConfig config)
         {
             _nameText.text = config.Name;
             _descriptionText.text = config.Description;
             _triggerText.text = GetTriggerDisplayName(config.ParseTrigger());
 
-            // Set rarity color
             Color rarityColor = config.ParseRarity() switch
             {
                 ArtifactRarity.Rare => _rareColor,
                 ArtifactRarity.Legendary => _legendaryColor,
                 _ => _commonColor
             };
-
-            if (_rarityBG != null)
-            {
-                _rarityBG.color = rarityColor;
-            }
-
-            // Load icon (placeholder - would need sprite atlas or addressables)
-            // _icon.sprite = Resources.Load<Sprite>($"Icons/Artifacts/{config.Icon}");
+            //Message for exception
+            _rarityBG.color = rarityColor;
+            _icon.sprite = await _assetService.LoadAssetAsync<Sprite>(config.Icon) 
+                           ?? throw new InvalidOperationException();
         }
 
         private static string GetTriggerDisplayName(ArtifactTrigger trigger)

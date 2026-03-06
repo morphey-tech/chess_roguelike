@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Project.Core.Core.Configs.Artifacts;
 using Project.Core.Core.Logging;
+using Project.Core.Core.Random;
 using Project.Gameplay.Gameplay.Artifacts.Effects;
 using Project.Gameplay.Gameplay.Configs;
 using VContainer;
@@ -14,15 +15,17 @@ namespace Project.Gameplay.Gameplay.Artifacts
     {
         private readonly ConfigProvider _configProvider;
         private readonly ILogger<ArtifactFactory> _logger;
-        
+        private readonly IRandomService _randomService;
+
         private readonly Dictionary<string, IArtifact> _cache = new();
         private ArtifactConfigRepository? _repository;
-        
+
         [Inject]
-        private ArtifactFactory(ConfigProvider configProvider, ILogService logService)
+        private ArtifactFactory(ConfigProvider configProvider, ILogService logService, IRandomService randomService)
         {
             _configProvider = configProvider;
             _logger = logService.CreateLogger<ArtifactFactory>();
+            _randomService = randomService;
         }
         
         public async UniTask<IArtifact> Create(string configId)
@@ -48,18 +51,17 @@ namespace Project.Gameplay.Gameplay.Artifacts
             return artifact;
         }
 
-        private static IArtifact CreateFromConfig(ArtifactConfig config)
+        private IArtifact CreateFromConfig(ArtifactConfig config)
         {
-            ArtifactEffectType effectType = config.Effect.ParseType();
-            return effectType switch
+            return config.Id switch
             {
-                ArtifactEffectType.StatBuff => new StatBuffArtifact(config),
-                ArtifactEffectType.Heal => new HealArtifact(config),
-                ArtifactEffectType.Shield => new ShieldArtifact(config),
-                ArtifactEffectType.ReflectDamage => new ReflectDamageArtifact(config),
-                ArtifactEffectType.Revive => new ReviveArtifact(config),
-                ArtifactEffectType.ExtraChoice => new ExtraChoiceArtifact(config),
-                ArtifactEffectType.AllStatsBuff => new AllStatsBuffArtifact(config),
+                "old_crown" => new OldCrownArtifact(config),
+                "beginner_shield" => new BeginnerShieldArtifact(config),
+                "mercenary_pouch" => new MercenaryPouchArtifact(config),
+                "dice" => new DiceArtifact(config, _randomService),
+                "trap_mine" => new TrapMineArtifact(config),
+                "grandmaster_sword" => new GrandmasterSwordArtifact(config),
+                "wind_boots" => new WindBootsArtifact(config),
                 _ => new GenericArtifact(config)
             };
         }

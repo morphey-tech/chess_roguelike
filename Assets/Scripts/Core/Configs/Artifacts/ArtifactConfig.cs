@@ -30,30 +30,11 @@ namespace Project.Core.Core.Configs.Artifacts
         [JsonProperty("maxTriggers")]
         public int MaxTriggers { get; set; } = -1;
 
-        public ArtifactEffectType ParseType()
-        {
-            return Type?.ToLowerInvariant() switch
-            {
-                "stat_buff" => ArtifactEffectType.StatBuff,
-                "all_stats_buff" => ArtifactEffectType.AllStatsBuff,
-                "heal" => ArtifactEffectType.Heal,
-                "shield" => ArtifactEffectType.Shield,
-                "reflect_damage" => ArtifactEffectType.ReflectDamage,
-                "revive" => ArtifactEffectType.Revive,
-                "extra_choice" => ArtifactEffectType.ExtraChoice,
-                _ => ArtifactEffectType.None
-            };
-        }
+        [JsonProperty("radius")]
+        public float Radius { get; set; } = 1f;
 
-        public ArtifactBuffDuration ParseDuration()
-        {
-            return Duration?.ToLowerInvariant() switch
-            {
-                "battle" => ArtifactBuffDuration.Battle,
-                "permanent" => ArtifactBuffDuration.Permanent,
-                _ => ArtifactBuffDuration.Instant
-            };
-        }
+        [JsonProperty("params")]
+        public System.Collections.Generic.Dictionary<string, float> Params { get; set; } = new();
     }
 
     /// <summary>

@@ -14,7 +14,42 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
   m_GroupName: Artifacts
   m_GUID: 6ebccad90a3dd112f8f30eb35cfff2b1
-  m_SerializeEntries: []
+  m_SerializeEntries:
+  - m_GUID: 000670f5f3b68ba90b6b71742c9d9907
+    m_Address: pawns_guard_artifact_icon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 03a7cc25653829d3a8ce11250bf025c0
+    m_Address: gamblers_die_artifact_icon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 24c80781b0fe6a1e68998e0b69af9369
+    m_Address: mercenaries_pouch_artifact_icon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b327d925d0e7c9f23bffc53bb2c475c2
+    m_Address: grandmasters_blade_artifact_icon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c0f5323c1d9230a9daf8bc7db8f3cdf9
+    m_Address: ambush_charge_artifact_icon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cf1066f1545034fa89e846d9623fe4fc
+    m_Address: worn_crown_artifact_icon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f110878f8fbcf3a2886d6033d50494ee
+    m_Address: swift_strider_artifact_icon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 619719904bd153b4fb62260efbf16a67, type: 2}
   m_SchemaSet:

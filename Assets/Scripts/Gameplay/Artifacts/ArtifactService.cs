@@ -84,19 +84,6 @@ namespace Project.Gameplay.Gameplay.Artifacts
             return _artifacts.Any(a => a.ConfigId == configId);
         }
 
-        public int GetExtraChoices()
-        {
-            int count = 0;
-            foreach (ArtifactInstance? instance in _artifacts)
-            {
-                if (instance.Artifact is ExtraChoiceArtifact)
-                {
-                    count++;
-                }
-            }
-            return count;
-        }
-
         public void Clear()
         {
             foreach (ArtifactInstance? instance in _artifacts)

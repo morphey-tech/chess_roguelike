@@ -1,133 +1,87 @@
 {
   "content": [
     {
-      "id": "warrior_banner",
-      "name": "Warrior Banner",
-      "description": "Increase attack by 2 for all allies at battle start",
+      "id": "worn_crown",
+      "name": "Старая Корона 👑",
+      "description": "Король начинает бой с щитом 5 HP",
       "rarity": "common",
       "trigger": "on_battle_start",
-      "icon": "warrior_banner_icon",
+      "icon": "worn_crown_artifact_icon",
       "effect": {
-        "type": "stat_buff",
-        "stat": "attack",
-        "value": 2,
-        "duration": "battle"
-      }
-    },
-    {
-      "id": "healing_crystal",
-      "name": "Healing Crystal",
-      "description": "Heal king for 5 HP at battle start",
-      "rarity": "common",
-      "trigger": "on_battle_start",
-      "icon": "healing_crystal_icon",
-      "effect": {
-        "type": "heal",
-        "target": "king",
+        "type": "king_shield",
         "value": 5
       }
     },
     {
-      "id": "vampire_fang",
-      "name": "Vampire Fang",
-      "description": "Heal for 3 HP when killing an enemy",
-      "rarity": "rare",
-      "trigger": "on_unit_kill",
-      "icon": "vampire_fang_icon",
+      "id": "pawns_guard",
+      "name": "Щит Новичка 🛡️",
+      "description": "Все фигуры: +2 щит в начале боя",
+      "rarity": "common",
+      "trigger": "on_battle_start",
+      "icon": "pawns_guard_artifact_icon",
       "effect": {
-        "type": "heal",
-        "target": "killer",
-        "value": 3
-      }
-    },
-    {
-      "id": "thorn_armor",
-      "name": "Thorn Armor",
-      "description": "Deal 2 damage back when hit",
-      "rarity": "rare",
-      "trigger": "on_damage_received",
-      "icon": "thorn_armor_icon",
-      "effect": {
-        "type": "reflect_damage",
+        "type": "team_shield",
         "value": 2
       }
     },
     {
-      "id": "phoenix_feather",
-      "name": "Phoenix Feather",
-      "description": "Revive a fallen ally with 50% HP once per battle",
-      "rarity": "legendary",
-      "trigger": "on_ally_death",
-      "icon": "phoenix_feather_icon",
+      "id": "mercenaries_pouch",
+      "name": "Кошелёк Наёмника 💰",
+      "description": "+1 крона за победу",
+      "rarity": "common",
+      "trigger": "on_battle_end",
+      "icon": "mercenaries_pouch_artifact_icon",
       "effect": {
-        "type": "revive",
-        "value": 0.5,
-        "maxTriggers": 1
+        "type": "crowns_reward",
+        "value": 1
       }
     },
     {
-      "id": "swift_boots",
-      "name": "Swift Boots",
-      "description": "Passive: +1 movement range",
+      "id": "gamblers_die",
+      "name": "Игральная Кость 🎲",
+      "description": "10% шанс уклониться от атаки",
       "rarity": "common",
       "trigger": "passive",
-      "icon": "swift_boots_icon",
+      "icon": "gamblers_die_artifact_icon",
       "effect": {
-        "type": "stat_buff",
-        "stat": "movement",
-        "value": 1,
-        "duration": "permanent"
+        "type": "dodge_chance",
+        "value": 0.1
       }
     },
     {
-      "id": "crown_of_power",
-      "name": "Crown of Power",
-      "description": "Increase all stats by 1",
-      "rarity": "legendary",
-      "trigger": "passive",
-      "icon": "crown_of_power_icon",
-      "effect": {
-        "type": "all_stats_buff",
-        "value": 1,
-        "duration": "permanent"
-      }
-    },
-    {
-      "id": "shield_of_valor",
-      "name": "Shield of Valor",
-      "description": "Gain 3 shield at battle start",
-      "rarity": "common",
-      "trigger": "on_battle_start",
-      "icon": "shield_of_valor_icon",
-      "effect": {
-        "type": "shield",
-        "value": 3
-      }
-    },
-    {
-      "id": "berserker_rage",
-      "name": "Berserker Rage",
-      "description": "Gain +3 attack when an ally dies",
+      "id": "ambush_charge",
+      "name": "Мина-Ловушка 💣",
+      "description": "Смерть фигуры: 3 урона соседям",
       "rarity": "rare",
-      "trigger": "on_ally_death",
-      "icon": "berserker_rage_icon",
+      "trigger": "on_unit_death",
+      "icon": "ambush_charge_artifact_icon",
       "effect": {
-        "type": "stat_buff",
-        "stat": "attack",
+        "type": "death_damage",
         "value": 3,
-        "duration": "battle",
-        "stackable": true
+        "radius": 1
       }
     },
     {
-      "id": "ancient_scroll",
-      "name": "Ancient Scroll",
-      "description": "Draw 1 extra item choice at reward selection",
+      "id": "grandmaster_blade",
+      "name": "Меч Гроссмейстера ⚔️",
+      "description": "Игнорировать 1 броню врага",
       "rarity": "rare",
-      "trigger": "on_reward",
-      "icon": "ancient_scroll_icon",
+      "trigger": "passive",
+      "icon": "grandmaster_blade_artifact_icon",
       "effect": {
-        "type": "extra_choice",
+        "type": "armor_penetration",
+        "value": 1
+      }
+    },
+    {
+      "id": "swift_strider",
+      "name": "Ветреные Сапоги 🌪️",
+      "description": "+1 к дальности хода всем фигурам",
+      "rarity": "rare",
+      "trigger": "passive",
+      "icon": "swift_strider_artifact_icon",
+      "effect": {
+        "type": "movement_range",
         "value": 1
       }
     }

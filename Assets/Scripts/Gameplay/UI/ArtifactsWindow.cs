@@ -22,10 +22,11 @@ namespace Project.Gameplay.UI
 
         [Inject] private ArtifactService _artifactService;
         [Inject] private ConfigProvider _configProvider;
+        [Inject] private IUIAssetService _uiAssetService;
 
         private readonly List<ArtifactItemView> _itemViews = new();
         private CompositeDisposable _disposables;
-        private ArtifactConfigRepository _repository;
+        private ArtifactConfigRepository? _repository;
 
         protected override bool HideOtherWindows => false;
         protected override bool IgnoreHideOthersWindows => true;
@@ -71,12 +72,14 @@ namespace Project.Gameplay.UI
 
             foreach (ArtifactInstance? instance in artifacts)
             {
-                ArtifactConfig? config = _repository.Get(instance.ConfigId);
+                ArtifactConfig? config = _repository?.Get(instance.ConfigId);
                 if (config == null)
                 {
                     continue;
                 }
-                ArtifactItemView? view = Instantiate(_itemPrefab, _contentParent);
+                
+                // Instantiate with DI using UIAssetService
+                ArtifactItemView? view = _uiAssetService.Instantiate(_itemPrefab, _contentParent);
                 view.Initialize(config);
                 _itemViews.Add(view);
             }

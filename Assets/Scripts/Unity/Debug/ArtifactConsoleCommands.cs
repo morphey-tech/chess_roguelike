@@ -75,11 +75,15 @@ namespace Project.Unity.Unity.Debug
                 var repository = _configProvider.GetSync<ArtifactConfigRepository>("artifacts_conf");
                 var sb = new StringBuilder();
                 sb.AppendLine($"Available artifacts ({repository.Content.Length}):");
+                sb.AppendLine();
 
                 foreach (var config in repository.Content)
                 {
-                    sb.AppendLine($"  [{config.ParseRarity()}] {config.Id} - {config.Name}");
-                    sb.AppendLine($"      Trigger: {config.ParseTrigger()} | {config.Description}");
+                    sb.AppendLine($"  [{config.ParseRarity()}] {config.Id}");
+                    sb.AppendLine($"      {config.Name}");
+                    sb.AppendLine($"      Trigger: {config.ParseTrigger()}");
+                    sb.AppendLine($"      {config.Description}");
+                    sb.AppendLine();
                 }
 
                 _logger.Info(sb.ToString());
