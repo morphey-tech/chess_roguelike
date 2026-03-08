@@ -14,6 +14,11 @@ namespace Project.Gameplay.Gameplay.Figures.StatusEffects
         string Id { get; }
 
         /// <summary>
+        /// Category for filtering and interactions.
+        /// </summary>
+        EffectCategory Category { get; }
+
+        /// <summary>
         /// Is this effect expired and should be removed?
         /// </summary>
         bool IsExpired { get; }

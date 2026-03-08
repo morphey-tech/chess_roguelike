@@ -59,7 +59,7 @@ namespace Project.Gameplay.Gameplay.Logging
         {
             return new ZLoggerWrapper<T>(_loggerFactory.CreateLogger<T>());
         }
-        
+
         private static MsLogLevel ToMsLogLevel(LogLevel level)
         {
             return level switch

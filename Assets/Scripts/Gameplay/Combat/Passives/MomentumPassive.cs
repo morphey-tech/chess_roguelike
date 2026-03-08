@@ -40,6 +40,15 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
 
         public TriggerResult Execute(TriggerContext context)
         {
+            if (context is not IMoveContext moveContext)
+            {
+                return TriggerResult.Continue;
+            }
+            return HandleMove(moveContext);
+        }
+
+        public TriggerResult HandleMove(IMoveContext context)
+        {
             if (!context.TryGetData<MoveContext>(out MoveContext move))
             {
                 return TriggerResult.Continue;

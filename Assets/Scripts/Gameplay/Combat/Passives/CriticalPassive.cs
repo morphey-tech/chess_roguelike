@@ -32,11 +32,7 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
             {
                 return false;
             }
-            if (!context.TryGetData<BeforeHitContext>(out BeforeHitContext beforeHit))
-            {
-                return false;
-            }
-            if (context.Actor != beforeHit.Attacker)
+            if (context.Actor == null)
             {
                 return false;
             }
@@ -45,13 +41,17 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
 
         public TriggerResult Execute(TriggerContext context)
         {
-            if (!context.TryGetData<BeforeHitContext>(out BeforeHitContext beforeHit))
+            if (context is not IDamageContext damageContext)
             {
                 return TriggerResult.Continue;
             }
-
-            beforeHit.DamageMultiplier *= _critMultiplier;
-            beforeHit.IsCritical = true;
+            return HandleBeforeHit(damageContext);
+        }
+        
+        public TriggerResult HandleBeforeHit(IDamageContext context)
+        {
+            context.DamageMultiplier *= _critMultiplier;
+            context.IsCritical = true;
 
             return TriggerResult.Continue;
         }

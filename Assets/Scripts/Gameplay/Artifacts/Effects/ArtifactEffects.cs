@@ -25,7 +25,12 @@ namespace Project.Gameplay.Gameplay.Artifacts.Effects
             return context.Type == TriggerType.OnBattleStart;
         }
 
-        public override TriggerResult Execute(TriggerContext context)
+        public TriggerResult Execute(IBattleContext context)
+        {
+            return HandleBattleStart(context);
+        }
+
+        public TriggerResult HandleBattleStart(IBattleContext context)
         {
             // TODO: Apply shield to king figure
             // context.Actor is the king figure
@@ -52,7 +57,12 @@ namespace Project.Gameplay.Gameplay.Artifacts.Effects
             return context.Type == TriggerType.OnBattleStart;
         }
 
-        public override TriggerResult Execute(TriggerContext context)
+        public TriggerResult Execute(IBattleContext context)
+        {
+            return HandleBattleStart(context);
+        }
+
+        public TriggerResult HandleBattleStart(IBattleContext context)
         {
             // TODO: Apply shield to all team figures
             return TriggerResult.Continue;
@@ -82,7 +92,12 @@ namespace Project.Gameplay.Gameplay.Artifacts.Effects
             return context.Type == TriggerType.OnBattleEnd;
         }
 
-        public override TriggerResult Execute(TriggerContext context)
+        public TriggerResult Execute(IBattleContext context)
+        {
+            return HandleBattleEnd(context);
+        }
+
+        public TriggerResult HandleBattleEnd(IBattleContext context)
         {
             // TODO: Add crowns to run resources
             return TriggerResult.Continue;
@@ -114,7 +129,12 @@ namespace Project.Gameplay.Gameplay.Artifacts.Effects
             return context.Type == TriggerType.OnDamageReceived;
         }
 
-        public override TriggerResult Execute(TriggerContext context)
+        public TriggerResult Execute(IDamageContext context)
+        {
+            return HandleDamageReceived(context);
+        }
+
+        public TriggerResult HandleDamageReceived(IDamageContext context)
         {
             if (_randomService.Chance(_dodgeChance))
             {
@@ -152,7 +172,12 @@ namespace Project.Gameplay.Gameplay.Artifacts.Effects
             return context.Type == TriggerType.OnUnitDeath;
         }
 
-        public override TriggerResult Execute(TriggerContext context)
+        public TriggerResult Execute(IKillContext context)
+        {
+            return HandleUnitDeath(context);
+        }
+
+        public TriggerResult HandleUnitDeath(IKillContext context)
         {
             // TODO: Deal damage to all figures within radius
             // context.Target = died figure

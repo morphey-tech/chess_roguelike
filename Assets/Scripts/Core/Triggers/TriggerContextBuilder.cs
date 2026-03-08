@@ -1,3 +1,6 @@
+using Project.Core.Core.Combat;
+using Project.Core.Core.Grid;
+
 namespace Project.Core.Core.Triggers
 {
     /// <summary>
@@ -66,6 +69,83 @@ namespace Project.Core.Core.Triggers
             _context.SetCustomData(value);
             return this;
         }
+
+        #region Damage Context
+
+        public TriggerContextBuilder WithDamageMultiplier(float multiplier)
+        {
+            _context.DamageMultiplier = multiplier;
+            return this;
+        }
+
+        public TriggerContextBuilder WithBonusDamage(float bonus)
+        {
+            _context.BonusDamage = bonus;
+            return this;
+        }
+
+        public TriggerContextBuilder WithCritical(bool isCritical)
+        {
+            _context.IsCritical = isCritical;
+            return this;
+        }
+
+        public TriggerContextBuilder WithDodged(bool isDodged)
+        {
+            _context.IsDodged = isDodged;
+            return this;
+        }
+
+        public TriggerContextBuilder WithCancelled(bool isCancelled)
+        {
+            _context.IsCancelled = isCancelled;
+            return this;
+        }
+
+        #endregion
+
+        #region Move Context
+
+        public TriggerContextBuilder WithMove(GridPosition from, GridPosition to, bool didMove = true)
+        {
+            _context.From = from;
+            _context.To = to;
+            _context.DidMove = didMove;
+            return this;
+        }
+
+        #endregion
+
+        #region Turn Context
+
+        public TriggerContextBuilder WithTurn(int turnNumber, Team team)
+        {
+            _context.TurnNumber = turnNumber;
+            _context.Team = team;
+            return this;
+        }
+
+        #endregion
+
+        #region Reward Context
+
+        public TriggerContextBuilder WithReward(string? rewardId)
+        {
+            _context.RewardId = rewardId;
+            return this;
+        }
+
+        #endregion
+
+        #region Run Context
+
+        public TriggerContextBuilder WithStage(string? stageId)
+        {
+            _context.StageId = stageId;
+            return this;
+        }
+
+        #endregion
 
         public TriggerContext Build()
         {

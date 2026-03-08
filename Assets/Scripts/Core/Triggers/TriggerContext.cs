@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Project.Core.Core.Combat;
+using Project.Core.Core.Grid;
 using UnityEngine;
 
 namespace Project.Core.Core.Triggers
@@ -8,8 +10,9 @@ namespace Project.Core.Core.Triggers
     /// <summary>
     /// Universal context for all triggers.
     /// Core fields are immutable. Mutable data is separated.
+    /// Implements all context interfaces for flexibility.
     /// </summary>
-    public sealed class TriggerContext
+    public sealed class TriggerContext : ITriggerContext, IDamageContext, IMoveContext, ITurnContext, IKillContext, IBattleContext, IRewardContext, IRunContext
     {
         /// <summary>
         /// Type of trigger event. Immutable after creation.
@@ -68,6 +71,32 @@ namespace Project.Core.Core.Triggers
         /// Stack count for stacking triggers.
         /// </summary>
         public int StackCount { get; set; }
+
+        // IDamageContext properties
+        public float DamageMultiplier { get; set; } = 1f;
+        public float BonusDamage { get; set; }
+        public bool IsCritical { get; set; }
+        public bool IsDodged { get; set; }
+        public bool IsCancelled { get; set; }
+
+        // IMoveContext properties
+        public GridPosition From { get; internal set; }
+        public GridPosition To { get; internal set; }
+        public bool DidMove { get; internal set; }
+
+        // ITurnContext properties
+        public int TurnNumber { get; internal set; }
+        public Team Team { get; internal set; }
+
+        // IKillContext properties
+        ITriggerEntity? IKillContext.Victim => Target;
+        ITriggerEntity? IKillContext.Killer => Actor;
+
+        // IRewardContext properties
+        public string? RewardId { get; internal set; }
+
+        // IRunContext properties
+        public string? StageId { get; internal set; }
 
         /// <summary>
         /// Type-safe custom data storage.

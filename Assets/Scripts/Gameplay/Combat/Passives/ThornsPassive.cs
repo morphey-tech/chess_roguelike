@@ -37,6 +37,15 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
 
         public TriggerResult Execute(TriggerContext context)
         {
+            if (context is not IDamageContext damageContext)
+            {
+                return TriggerResult.Continue;
+            }
+            return HandleAfterHit(damageContext);
+        }
+
+        public TriggerResult HandleAfterHit(IDamageContext context)
+        {
             if (!context.TryGetData<AfterHitContext>(out AfterHitContext afterHit))
             {
                 return TriggerResult.Continue;

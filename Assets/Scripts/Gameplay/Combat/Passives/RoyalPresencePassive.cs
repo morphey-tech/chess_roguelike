@@ -36,34 +36,33 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
 
         public TriggerResult Execute(TriggerContext context)
         {
-            if (context.Type == TriggerType.OnMove)
+            if (context is not IMoveContext moveContext)
             {
-                ExecuteMove(context);
+                return TriggerResult.Continue;
             }
-
-            return TriggerResult.Continue;
+            return HandleMove(moveContext);
         }
 
-        private void ExecuteMove(TriggerContext context)
+        public TriggerResult HandleMove(IMoveContext context)
         {
             if (!(context.Actor is Figure actor))
             {
-                return;
+                return TriggerResult.Continue;
             }
             if (!actor.MovedThisTurn)
             {
-                return;
+                return TriggerResult.Continue;
             }
-            if (!(context.Data is MoveContext move))
+            if (!context.TryGetData<MoveContext>(out MoveContext move))
             {
-                return;
+                return TriggerResult.Continue;
             }
 
             BoardGrid grid = move.Grid;
             BoardCell? kingCell = grid.FindFigure(actor);
             if (kingCell == null)
             {
-                return;
+                return TriggerResult.Continue;
             }
 
             List<Figure> alliesInRange = grid.GetFiguresInRadius(kingCell.Position, _auraRadius)
@@ -76,6 +75,8 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
                 RoyalPresenceBuffEffect buff = new(actor.Id.ToString(), _damageBonus, turns: 1);
                 ally.Effects.AddOrStack(buff);
             }
+
+            return TriggerResult.Continue;
         }
     }
 }

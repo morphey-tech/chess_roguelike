@@ -93,7 +93,8 @@ namespace Project.Core.Core.Triggers
                             _executingTriggers ??= new HashSet<string>();
                             _executingTriggers.Add(triggerId);
 
-                            TriggerResult result = entry.Trigger.Execute(context);
+                            // Call typed Execute method based on trigger type
+                            TriggerResult result = ExecuteTyped(entry.Trigger, context);
 
                             // Remove from executing
                             _executingTriggers.Remove(triggerId);
@@ -218,6 +219,31 @@ namespace Project.Core.Core.Triggers
                 IOnStageEnter => TriggerType.OnStageEnter,
                 IOnStageLeave => TriggerType.OnStageLeave,
                 _ => TriggerType.None
+            };
+        }
+
+        private static TriggerResult ExecuteTyped(ITrigger trigger, TriggerContext context)
+        {
+            return trigger switch
+            {
+                IOnBeforeHit t => t.HandleBeforeHit(context),
+                IOnAfterHit t => t.HandleAfterHit(context),
+                IOnBattleStart t => t.HandleBattleStart(context),
+                IOnBattleEnd t => t.HandleBattleEnd(context),
+                IOnUnitKill t => t.HandleUnitKill(context),
+                IOnUnitDeath t => t.HandleUnitDeath(context),
+                IOnAllyDeath t => t.HandleAllyDeath(context),
+                IOnDamageReceived t => t.HandleDamageReceived(context),
+                IOnDamageDealt t => t.HandleDamageDealt(context),
+                IOnAttack t => t.HandleAttack(context),
+                IOnTurnStart t => t.HandleTurnStart(context),
+                IOnTurnEnd t => t.HandleTurnEnd(context),
+                IOnMove t => t.HandleMove(context),
+                IOnReward t => t.HandleReward(context),
+                IOnRunStart t => t.HandleRunStart(context),
+                IOnStageEnter t => t.HandleStageEnter(context),
+                IOnStageLeave t => t.HandleStageLeave(context),
+                _ => trigger.Execute(context)
             };
         }
 

@@ -1,6 +1,7 @@
 using Project.Core.Core.Random;
 using Project.Core.Core.Triggers;
 using Project.Gameplay.Gameplay.Combat.Contexts;
+using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Figures.StatusEffects;
 
 namespace Project.Gameplay.Gameplay.Combat.Passives
@@ -28,18 +29,25 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
             {
                 return false;
             }
-            return context.TryGetData<MoveContext>(out MoveContext _);
+            return context.Actor != null;
         }
 
         public TriggerResult Execute(TriggerContext context)
         {
-            if (!context.TryGetData<MoveContext>(out MoveContext move))
+            if (context is not IMoveContext moveContext)
             {
                 return TriggerResult.Continue;
             }
+            return HandleMove(moveContext);
+        }
 
-            move.Actor.Effects.AddOrStack(new DodgeEffect(_chance, random: _random, turns: 1, uses: 1));
-
+        public TriggerResult HandleMove(IMoveContext context)
+        {
+            if (context.Actor is not Figure actor)
+            {
+                return TriggerResult.Continue;
+            }
+            actor.Effects.AddOrStack(new DodgeEffect(_chance, random: _random, turns: 1, uses: 1));
             return TriggerResult.Continue;
         }
     }

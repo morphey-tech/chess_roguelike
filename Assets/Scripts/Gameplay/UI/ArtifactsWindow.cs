@@ -4,6 +4,7 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UniRx;
 using VContainer;
+using MessagePipe;
 using Project.Core.Window;
 using Project.Gameplay.Gameplay.Artifacts;
 using Project.Core.Core.Configs.Artifacts;
@@ -24,10 +25,12 @@ namespace Project.Gameplay.UI
         private ArtifactService _artifactService = null!;
         private ConfigProvider _configProvider = null!;
         private IUIAssetService _uiAssetService = null!;
+        private ISubscriber<ArtifactChangedMessage> _artifactChangedSubscriber = null!;
 
         private readonly List<ArtifactItemView> _itemViews = new();
         private ArtifactConfigRepository? _repository;
         private CompositeDisposable _disposables = null!;
+        private IDisposable? _subscription;
 
         protected override bool HideOtherWindows => false;
         protected override bool IgnoreHideOthersWindows => true;
@@ -37,18 +40,20 @@ namespace Project.Gameplay.UI
         [Inject]
         private void Construct(ArtifactService artifactService,
             ConfigProvider configProvider,
-            IUIAssetService uiAssetService)
+            IUIAssetService uiAssetService,
+            ISubscriber<ArtifactChangedMessage> artifactChangedSubscriber)
         {
             _artifactService = artifactService;
             _configProvider = configProvider;
             _uiAssetService = uiAssetService;
+            _artifactChangedSubscriber = artifactChangedSubscriber;
         }
-        
+
         //Remove async void
         protected override async void OnInit()
         {
             _disposables = new CompositeDisposable();
-            
+
             // Load artifacts config
             try
             {
@@ -59,6 +64,14 @@ namespace Project.Gameplay.UI
                 //Logger
                 Debug.LogError($"Failed to load artifacts config: {ex.Message}");
             }
+            
+            // Subscribe to artifact changes
+            _subscription = _artifactChangedSubscriber.Subscribe(OnArtifactChanged);
+        }
+
+        private void OnArtifactChanged(ArtifactChangedMessage message)
+        {
+            Refresh();
         }
 
         public void Refresh()
@@ -106,6 +119,7 @@ namespace Project.Gameplay.UI
         private void OnDestroy()
         {
             _disposables?.Dispose();
+            _subscription?.Dispose();
         }
     }
 }

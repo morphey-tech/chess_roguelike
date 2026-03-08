@@ -120,42 +120,55 @@ namespace Project.Tests.Combat.Passives
         protected void ExecuteBeforeHit(BeforeHitContext context)
         {
             // Execute in BeforeHit phase where crit/execute passives run
-            TriggerService.Execute(TriggerType.OnBeforeHit, TriggerPhase.BeforeHit,
-                new TriggerContextBuilder()
-                    .WithType(TriggerType.OnBeforeHit)
-                    .WithPhase(TriggerPhase.BeforeHit)
-                    .WithActor(context.Attacker)
-                    .WithTarget(context.Target)
-                    .WithValue(context.BaseDamage)
-                    .WithData(context)
-                    .Build());
+            var triggerContext = new TriggerContextBuilder()
+                .WithType(TriggerType.OnBeforeHit)
+                .WithPhase(TriggerPhase.BeforeHit)
+                .WithActor(context.Attacker)
+                .WithTarget(context.Target)
+                .WithValue(context.BaseDamage)
+                .WithData(context)
+                .Build();
+                
+            TriggerService.Execute(TriggerType.OnBeforeHit, TriggerPhase.BeforeHit, triggerContext);
+            
+            // Copy values back to BeforeHitContext for test assertions
+            context.DamageMultiplier = triggerContext.DamageMultiplier;
+            context.IsCritical = triggerContext.IsCritical;
+            context.BonusDamage = triggerContext.BonusDamage;
         }
         
         protected void ExecuteBeforeCalculation(BeforeHitContext context)
         {
             // Execute in BeforeCalculation phase where damage calculation passives run
-            TriggerService.Execute(TriggerType.OnBeforeHit, TriggerPhase.BeforeCalculation,
-                new TriggerContextBuilder()
-                    .WithType(TriggerType.OnBeforeHit)
-                    .WithPhase(TriggerPhase.BeforeCalculation)
-                    .WithActor(context.Attacker)
-                    .WithTarget(context.Target)
-                    .WithValue(context.BaseDamage)
-                    .WithData(context)
-                    .Build());
+            var triggerContext = new TriggerContextBuilder()
+                .WithType(TriggerType.OnBeforeHit)
+                .WithPhase(TriggerPhase.BeforeCalculation)
+                .WithActor(context.Attacker)
+                .WithTarget(context.Target)
+                .WithValue(context.BaseDamage)
+                .WithData(context)
+                .Build();
+                
+            TriggerService.Execute(TriggerType.OnBeforeHit, TriggerPhase.BeforeCalculation, triggerContext);
+            
+            // Copy values back to BeforeHitContext for test assertions
+            context.DamageMultiplier = triggerContext.DamageMultiplier;
+            context.IsCritical = triggerContext.IsCritical;
+            context.BonusDamage = triggerContext.BonusDamage;
         }
 
         protected void ExecuteAfterHit(AfterHitContext context)
         {
-            TriggerService.Execute(TriggerType.OnAfterHit, TriggerPhase.AfterHit,
-                new TriggerContextBuilder()
-                    .WithType(TriggerType.OnAfterHit)
-                    .WithPhase(TriggerPhase.AfterHit)
-                    .WithActor(context.Attacker)
-                    .WithTarget(context.Target)
-                    .WithValue(context.DamageDealt)
-                    .WithData(context)
-                    .Build());
+            var triggerContext = new TriggerContextBuilder()
+                .WithType(TriggerType.OnAfterHit)
+                .WithPhase(TriggerPhase.AfterHit)
+                .WithActor(context.Attacker)
+                .WithTarget(context.Target)
+                .WithValue(context.DamageDealt)
+                .WithData(context)
+                .Build();
+                
+            TriggerService.Execute(TriggerType.OnAfterHit, TriggerPhase.AfterHit, triggerContext);
         }
     }
     

@@ -33,6 +33,8 @@ namespace Project.Gameplay.Gameplay.Artifacts
         private readonly IPublisher<ArtifactAddedMessage> _addedPublisher;
         private readonly IPublisher<ArtifactRemovedMessage> _removedPublisher;
         private readonly IPublisher<ArtifactsClearedMessage> _clearedPublisher;
+        private readonly IPublisher<ArtifactChangedMessage> _changedPublisher;
+        private readonly ArtifactSynergyRegistry _synergyRegistry;
         private readonly ConfigProvider _configProvider;
         private readonly ILogger<ArtifactService> _logger;
 
@@ -45,6 +47,8 @@ namespace Project.Gameplay.Gameplay.Artifacts
             IPublisher<ArtifactAddedMessage> addedPublisher,
             IPublisher<ArtifactRemovedMessage> removedPublisher,
             IPublisher<ArtifactsClearedMessage> clearedPublisher,
+            IPublisher<ArtifactChangedMessage> changedPublisher,
+            ArtifactSynergyRegistry synergyRegistry,
             ConfigProvider configProvider,
             ILogService logService)
         {
@@ -53,6 +57,8 @@ namespace Project.Gameplay.Gameplay.Artifacts
             _addedPublisher = addedPublisher;
             _removedPublisher = removedPublisher;
             _clearedPublisher = clearedPublisher;
+            _changedPublisher = changedPublisher;
+            _synergyRegistry = synergyRegistry;
             _configProvider = configProvider;
             _logger = logService.CreateLogger<ArtifactService>();
 
@@ -121,14 +127,19 @@ namespace Project.Gameplay.Gameplay.Artifacts
             };
 
             _artifacts.Add(instance);
-            
+
             // Register trigger
             _triggerService.Register(artifact);
-            
+
             artifact.OnAcquired(new ArtifactContext { OwnerId = 0, ArtifactId = instance.Id });
             _logger.Info($"Artifact acquired: {artifact.ConfigId} x{stackCount} ({artifact.GetType().Name})");
 
             _addedPublisher.Publish(new ArtifactAddedMessage(instance));
+            _changedPublisher.Publish(new ArtifactChangedMessage(0, instance.Id, ArtifactChangeType.Acquired));
+            
+            // Check synergies
+            CheckSynergies();
+            
             return instance;
         }
 
@@ -156,12 +167,16 @@ namespace Project.Gameplay.Gameplay.Artifacts
 
             // Unregister trigger
             _triggerService.Unregister(instance.Artifact);
-            
+
             instance.Artifact.OnRemoved(new ArtifactContext { OwnerId = 0, ArtifactId = instance.Id });
             _artifacts.Remove(instance);
             _logger.Info($"Artifact removed: {instance.ConfigId}");
 
             _removedPublisher.Publish(new ArtifactRemovedMessage(instance.ConfigId));
+            _changedPublisher.Publish(new ArtifactChangedMessage(0, instanceId, ArtifactChangeType.Removed));
+            
+            // Check synergies
+            CheckSynergies();
 
             return true;
         }
@@ -180,6 +195,25 @@ namespace Project.Gameplay.Gameplay.Artifacts
         public bool Has(string configId)
         {
             return _artifacts.Any(a => a.ConfigId == configId);
+        }
+
+        public IEnumerable<ArtifactInstance> GetEquipped() => _artifacts;
+
+        private void CheckSynergies()
+        {
+            var activeSynergies = _synergyRegistry.GetActiveSynergies(this);
+            foreach (var synergyId in activeSynergies)
+            {
+                _logger.Info($"Synergy activated: {synergyId}");
+                // Apply synergy effect (e.g., register passive, apply buff, etc.)
+                ApplySynergyEffect(synergyId);
+            }
+        }
+
+        private void ApplySynergyEffect(string synergyId)
+        {
+            // TODO: Implement synergy effect application
+            // This could register a passive, apply a buff, etc.
         }
 
         /// <summary>

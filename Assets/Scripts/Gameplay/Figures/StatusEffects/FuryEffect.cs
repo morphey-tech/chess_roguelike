@@ -9,6 +9,7 @@ namespace Project.Gameplay.Gameplay.Figures.StatusEffects
     public class FuryEffect : StackableStatusEffect, IOnBeforeHit, IOnAfterHit
     {
         public override string Id => "fury";
+        public override EffectCategory Category => EffectCategory.Buff;
 
         private readonly float _damagePerStack;
 
@@ -48,47 +49,32 @@ namespace Project.Gameplay.Gameplay.Figures.StatusEffects
 
         public TriggerResult Execute(TriggerContext context)
         {
+            if (context is not IDamageContext dc) return TriggerResult.Continue;
+
             switch (context.Type)
             {
                 case TriggerType.OnBeforeHit:
-                    ExecuteBeforeHit(context);
-                    break;
+                    return HandleBeforeHit(dc);
                 case TriggerType.OnAfterHit:
-                    ExecuteAfterHit(context);
-                    break;
+                    return HandleAfterHit(dc);
+                default:
+                    return TriggerResult.Continue;
             }
+        }
+
+        public TriggerResult HandleBeforeHit(IDamageContext context)
+        {
+            // Add bonus damage directly to the hit context
+            float totalBonus = _damagePerStack * Stacks;
+            context.BonusDamage += totalBonus;
             return TriggerResult.Continue;
         }
 
-        private void ExecuteBeforeHit(TriggerContext context)
+        public TriggerResult HandleAfterHit(IDamageContext context)
         {
-            if (!context.TryGetData<BeforeHitContext>(out BeforeHitContext beforeHit))
-            {
-                return;
-            }
-            if (context.Actor != beforeHit.Attacker)
-            {
-                return;
-            }
-
-            // Add bonus damage directly to the hit context
-            float totalBonus = _damagePerStack * Stacks;
-            beforeHit.BonusDamage += totalBonus;
-        }
-
-        private void ExecuteAfterHit(TriggerContext context)
-        {
-            if (!context.TryGetData<AfterHitContext>(out AfterHitContext afterHit))
-            {
-                return;
-            }
-            if (context.Actor != afterHit.Attacker)
-            {
-                return;
-            }
-
             // Add stack after successful hit
             AddStack();
+            return TriggerResult.Continue;
         }
     }
 }

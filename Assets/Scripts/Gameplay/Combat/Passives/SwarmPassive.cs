@@ -37,6 +37,15 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
 
         public TriggerResult Execute(TriggerContext context)
         {
+            if (context is not IDamageContext damageContext)
+            {
+                return TriggerResult.Continue;
+            }
+            return HandleBeforeHit(damageContext);
+        }
+
+        public TriggerResult HandleBeforeHit(IDamageContext context)
+        {
             if (!context.TryGetData(out BeforeHitContext? beforeHit))
             {
                 return TriggerResult.Continue;

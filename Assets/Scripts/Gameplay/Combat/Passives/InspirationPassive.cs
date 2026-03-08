@@ -59,15 +59,20 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
 
         public TriggerResult Execute(TriggerContext context)
         {
-            if (context.Type != TriggerType.OnTurnStart)
+            if (context is not ITurnContext turnContext)
             {
                 return TriggerResult.Continue;
             }
-            if (!(context.Data is TurnContext turn))
-            {
-                return TriggerResult.Continue;
-            }
+            return HandleTurnStart(turnContext);
+        }
+
+        public TriggerResult HandleTurnStart(ITurnContext context)
+        {
             if (!(context.Actor is Figure figure))
+            {
+                return TriggerResult.Continue;
+            }
+            if (!context.TryGetData<TurnContext>(out TurnContext turn))
             {
                 return TriggerResult.Continue;
             }

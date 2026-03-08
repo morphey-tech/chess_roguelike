@@ -9,6 +9,7 @@ namespace Project.Gameplay.Gameplay.Figures.StatusEffects
     public class RoyalPresenceBuffEffect : StatusEffectBase
     {
         public override string Id => "royal_presence";
+        public override EffectCategory Category => EffectCategory.Buff;
 
         private readonly string _modifierId;
         private readonly float _damageBonus;

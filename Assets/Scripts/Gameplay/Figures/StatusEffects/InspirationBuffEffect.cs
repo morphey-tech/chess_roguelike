@@ -6,6 +6,7 @@ namespace Project.Gameplay.Gameplay.Figures.StatusEffects
     public sealed class InspirationBuffEffect : StatusEffectBase
     {
         public override string Id => "inspiration_buff";
+        public override EffectCategory Category => EffectCategory.Buff;
 
         private readonly BuffType _buffType;
         private readonly float _value;

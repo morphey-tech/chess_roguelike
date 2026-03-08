@@ -7,6 +7,7 @@ namespace Project.Gameplay.Gameplay.Figures.StatusEffects
     public class StatusEffectBase : IStatusEffect
     {
         public virtual string Id { get; }
+        public virtual EffectCategory Category => EffectCategory.None;
         public virtual int Priority => TriggerPriorities.Normal;
         public virtual TriggerGroup Group => TriggerGroup.Default;
         public virtual TriggerPhase Phase => TriggerPhase.Default;

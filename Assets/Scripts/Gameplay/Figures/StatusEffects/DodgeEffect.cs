@@ -7,6 +7,7 @@ namespace Project.Gameplay.Gameplay.Figures.StatusEffects
     public class DodgeEffect : StatusEffectBase, IOnBeforeHit
     {
         public override string Id => "dodge";
+        public override EffectCategory Category => EffectCategory.Buff;
 
         private readonly float _chance;
         private readonly IRandomService _random;
@@ -33,22 +34,23 @@ namespace Project.Gameplay.Gameplay.Figures.StatusEffects
             return context.Target == ctx.Target && RemainingUses > 0;
         }
 
-        public override TriggerResult Execute(TriggerContext context)
+        public TriggerResult Execute(TriggerContext context)
         {
-            if (!context.TryGetData<BeforeHitContext>(out BeforeHitContext ctx))
-            {
-                return TriggerResult.Continue;
-            }
+            if (context is not IDamageContext dc) return TriggerResult.Continue;
+            return HandleBeforeHit(dc);
+        }
 
+        public TriggerResult HandleBeforeHit(IDamageContext context)
+        {
             if (!TryConsumeUse())
             {
                 return TriggerResult.Continue;
             }
             if (_random.Chance(_chance))
             {
-                ctx.IsDodged = true;
-                ctx.IsCancelled = true;
-                return TriggerResult.Cancel; // Cancel the hit
+                context.IsDodged = true;
+                context.IsCancelled = true;
+                return TriggerResult.Cancel;
             }
             return TriggerResult.Continue;
         }

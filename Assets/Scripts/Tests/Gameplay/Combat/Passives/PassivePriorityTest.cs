@@ -60,18 +60,8 @@ namespace Project.Tests.Combat.Passives
             
             // Act
             var context = CreateBeforeHitContext(attacker, target, baseDamage: 10);
-            
-            // Execute in BeforeHit phase (where crit should apply)
-            TriggerService.Execute(TriggerType.OnBeforeHit, TriggerPhase.BeforeHit,
-                new TriggerContextBuilder()
-                    .WithType(TriggerType.OnBeforeHit)
-                    .WithPhase(TriggerPhase.BeforeHit)
-                    .WithActor(attacker)
-                    .WithTarget(target)
-                    .WithValue(10)
-                    .WithData(context)
-                    .Build());
-            
+            ExecuteBeforeHit(context);
+
             // Assert: Critical should be applied
             Assert.That(context.IsCritical, Is.True);
             Assert.That(context.DamageMultiplier, Is.GreaterThan(1.0f));
@@ -84,20 +74,11 @@ namespace Project.Tests.Combat.Passives
             var attacker = CreateFigure(attack: 10);
             var target = CreateFigure(hp: 20, maxHp: 100, position: new GridPosition(0, 5)); // 20% HP
             attacker.AddPassive(new ExecutePassive("execute", 0.3f, 1.5f));
-            
+
             // Act
             var context = CreateBeforeHitContext(attacker, target, baseDamage: 10);
-            
-            TriggerService.Execute(TriggerType.OnBeforeHit, TriggerPhase.BeforeHit,
-                new TriggerContextBuilder()
-                    .WithType(TriggerType.OnBeforeHit)
-                    .WithPhase(TriggerPhase.BeforeHit)
-                    .WithActor(attacker)
-                    .WithTarget(target)
-                    .WithValue(10)
-                    .WithData(context)
-                    .Build());
-            
+            ExecuteBeforeHit(context);
+
             // Assert: Execute multiplier should be applied
             Assert.That(context.DamageMultiplier, Is.GreaterThan(1.0f));
         }

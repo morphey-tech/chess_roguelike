@@ -27,26 +27,34 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
             {
                 return false;
             }
-            if (!context.TryGetData<BeforeHitContext>(out BeforeHitContext beforeHit))
+            if (context.Target == null)
             {
                 return false;
             }
-            return !_cachedTargets.Contains(beforeHit.Target);
+            return !_cachedTargets.Contains(context.Target);
         }
 
         public TriggerResult Execute(TriggerContext context)
         {
-            if (!context.TryGetData<BeforeHitContext>(out BeforeHitContext beforeHit))
+            if (context is not IDamageContext damageContext)
             {
                 return TriggerResult.Continue;
             }
+            return HandleBeforeHit(damageContext);
+        }
 
-            if (_cachedTargets.Contains(beforeHit.Target))
+        public TriggerResult HandleBeforeHit(IDamageContext context)
+        {
+            if (context.Target == null)
             {
                 return TriggerResult.Continue;
             }
-            _cachedTargets.Add(beforeHit.Target);
-            beforeHit.BonusDamage = _damage;
+            if (_cachedTargets.Contains(context.Target))
+            {
+                return TriggerResult.Continue;
+            }
+            _cachedTargets.Add(context.Target);
+            context.BonusDamage = _damage;
 
             return TriggerResult.Continue;
         }
