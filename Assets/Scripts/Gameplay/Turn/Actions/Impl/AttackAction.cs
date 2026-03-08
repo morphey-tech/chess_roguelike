@@ -16,6 +16,7 @@ using Project.Gameplay.Gameplay.Visual;
 using Project.Gameplay.Gameplay.Visual.Commands;
 using Project.Core.Core.Configs.Stats;
 using Project.Core.Core.Grid;
+using Project.Core.Core.Triggers;
 using Project.Gameplay.Gameplay.Attack.Rules;
 
 namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
@@ -37,7 +38,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
         private readonly IAttackResolver _attackResolver;
         private readonly CombatResolver _combatResolver;
         private readonly ICombatVisualPlanner _visualPlanner;
-        private readonly PassiveTriggerService _passives;
+        private readonly TriggerService _triggerService;
         private readonly VisualPipeline _visualPipeline;
         private readonly IPublisher<FigureDeathMessage> _deathPublisher;
         private readonly IPublisher<FigureAttackStartedMessage> _attackStartedPublisher;
@@ -55,7 +56,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
             IAttackResolver attackResolver,
             CombatResolver combatResolver,
             ICombatVisualPlanner visualPlanner,
-            PassiveTriggerService passives,
+            TriggerService triggerService,
             VisualPipeline visualPipeline,
             IPublisher<FigureDeathMessage> deathPublisher,
             IPublisher<FigureAttackStartedMessage> attackStartedPublisher,
@@ -72,7 +73,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
             _attackResolver = attackResolver;
             _combatResolver = combatResolver;
             _visualPlanner = visualPlanner;
-            _passives = passives;
+            _triggerService = triggerService;
             _visualPipeline = visualPipeline;
             _deathPublisher = deathPublisher;
             _attackStartedPublisher = attackStartedPublisher;
@@ -210,7 +211,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
                 context,
                 context.Grid,
                 _deathPublisher,
-                _passives,
+                _triggerService,
                 _lootService,
                 _damageApplier,
                 _figureLifeService,

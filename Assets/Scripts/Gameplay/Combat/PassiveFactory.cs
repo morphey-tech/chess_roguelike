@@ -56,7 +56,7 @@ namespace Project.Gameplay.Gameplay.Combat
                     config.GetFloat("defence_bonus", 2f),
                     config.GetFloat("evasion_bonus", 0.1f),
                     _random, config.GetInt("duration", 2)),
-                PROVOCATION => new ProvocationPassive(config.Id),
+                PROVOCATION => new ProvocationPassive(),
                 DESPERATION => new DesperationPassive(config.Id),
                 ROYAL_PRESENCE => new RoyalPresencePassive(config.Id, config.GetFloat("damage_bonus", 1f), config.GetInt("aura_radius", 2)),
                 ESCAPE => new EscapePassive(config.Id),

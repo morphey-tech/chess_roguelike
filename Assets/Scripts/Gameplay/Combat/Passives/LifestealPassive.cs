@@ -1,7 +1,6 @@
+using Project.Core.Core.Triggers;
 using Project.Gameplay.Gameplay.Combat.Contexts;
 using Project.Gameplay.Gameplay.Combat.Effects.Impl;
-using Project.Gameplay.Gameplay.Combat.Triggers;
-using Project.Gameplay.Gameplay.Figures;
 
 namespace Project.Gameplay.Gameplay.Combat.Passives
 {
@@ -11,8 +10,10 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
     public sealed class LifestealPassive : IPassive, IOnAfterHit
     {
         public string Id { get; }
-        public int Priority => 100;
-        
+        public int Priority => TriggerPriorities.Normal;
+        public TriggerGroup Group => TriggerGroup.Default;
+        public TriggerPhase Phase => TriggerPhase.AfterHit;
+
         private readonly float _percent;
 
         public LifestealPassive(string id, float percent)
@@ -21,19 +22,34 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
             _percent = percent;
         }
 
-        public void OnAfterHit(Figure owner, AfterHitContext context)
+        public bool Matches(TriggerContext context)
         {
-            if (owner != context.Attacker)
+            if (context.Type != TriggerType.OnAfterHit)
             {
-                return;
+                return false;
+            }
+            if (!context.TryGetData<AfterHitContext>(out AfterHitContext afterHit))
+            {
+                return false;
+            }
+            return context.Actor == afterHit.Attacker;
+        }
+
+        public TriggerResult Execute(TriggerContext context)
+        {
+            if (!context.TryGetData<AfterHitContext>(out AfterHitContext afterHit))
+            {
+                return TriggerResult.Continue;
             }
 
-            int heal = (int)(context.DamageDealt * _percent);
+            int heal = (int)(afterHit.DamageDealt * _percent);
             if (heal > 0)
             {
-                context.Attacker.Stats.Heal(heal);
-                context.Effects.Add(new HealEffect(context.Attacker, heal));
+                afterHit.Attacker.Stats.Heal(heal);
+                afterHit.Effects.Add(new HealEffect(afterHit.Attacker, heal));
             }
+
+            return TriggerResult.Continue;
         }
     }
 }

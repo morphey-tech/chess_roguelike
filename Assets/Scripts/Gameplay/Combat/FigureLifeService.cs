@@ -47,8 +47,8 @@ namespace Project.Gameplay.Gameplay.Combat
             context.Logger?.Info($"{unit} died!");
 
             cell?.RemoveFigure();
-            _boardRemovedPublisher.Publish(new FigureBoardRemovedMessage(unit.Id, unit.Team));
-            context.AddVisualEvent(new DeathVisualEvent(unit.Id, null));
+            _boardRemovedPublisher.Publish(new FigureBoardRemovedMessage(unit.EntityId, unit.Team));
+            context.AddVisualEvent(new DeathVisualEvent(unit.EntityId, null));
 
             if (!string.IsNullOrEmpty(unit.LootTableId))
             {
@@ -57,7 +57,7 @@ namespace Project.Gameplay.Gameplay.Combat
                     context.AddVisualEvent(new LootVisualEvent(cell.Position, lootResult));
             }
 
-            _deathPublisher.Publish(new FigureDeathMessage(unit.Id, unit.Team, unit.LootTableId, fromCombat: true));
+            _deathPublisher.Publish(new FigureDeathMessage(unit.EntityId, unit.Team, unit.LootTableId, fromCombat: true));
             if (unit.Team == Team.Player)
                 _capacityService.ReleaseByType(unit.TypeId);
             context.ActionContext.LastAttackKilledTarget = true;
@@ -66,8 +66,8 @@ namespace Project.Gameplay.Gameplay.Combat
         public void HandleDeathDomainOnly(Figure unit, BoardCell cell)
         {
             cell?.RemoveFigure();
-            _boardRemovedPublisher.Publish(new FigureBoardRemovedMessage(unit.Id, unit.Team));
-            _deathPublisher.Publish(new FigureDeathMessage(unit.Id, unit.Team, unit.LootTableId, fromCombat: true));
+            _boardRemovedPublisher.Publish(new FigureBoardRemovedMessage(unit.EntityId, unit.Team));
+            _deathPublisher.Publish(new FigureDeathMessage(unit.EntityId, unit.Team, unit.LootTableId, fromCombat: true));
             if (unit.Team == Team.Player)
             {
                 _capacityService.ReleaseByType(unit.TypeId);
@@ -77,11 +77,11 @@ namespace Project.Gameplay.Gameplay.Combat
         public async UniTask HandleDeathDirectAsync(Figure unit, BoardCell cell)
         {
             cell?.RemoveFigure();
-            _boardRemovedPublisher.Publish(new FigureBoardRemovedMessage(unit.Id, unit.Team));
+            _boardRemovedPublisher.Publish(new FigureBoardRemovedMessage(unit.EntityId, unit.Team));
 
-            _figurePresenter.HideFigureHealthBar(unit.Id);
-            await _figurePresenter.PlayDeathEffectAsync(unit.Id);
-            await _figurePresenter.RemoveFigureAsync(unit.Id);
+            _figurePresenter.HideFigureHealthBar(unit.EntityId);
+            await _figurePresenter.PlayDeathEffectAsync(unit.EntityId);
+            await _figurePresenter.RemoveFigureAsync(unit.EntityId);
 
             if (!string.IsNullOrEmpty(unit.LootTableId) && cell != null)
             {
@@ -90,7 +90,7 @@ namespace Project.Gameplay.Gameplay.Combat
                     await _lootPresenter.PresentAsync(new LootVisualContext(cell.Position, lootResult));
             }
 
-            _deathPublisher.Publish(new FigureDeathMessage(unit.Id, unit.Team, unit.LootTableId, fromCombat: true));
+            _deathPublisher.Publish(new FigureDeathMessage(unit.EntityId, unit.Team, unit.LootTableId, fromCombat: true));
             if (unit.Team == Team.Player)
             {
                 _capacityService.ReleaseByType(unit.TypeId);

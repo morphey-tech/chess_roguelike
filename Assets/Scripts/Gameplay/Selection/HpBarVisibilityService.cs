@@ -181,7 +181,7 @@ namespace Project.Gameplay.Gameplay.Selection
                 _config.HpBarVisibilityModeAllies,
                 _config.HpBarVisibilityModeEnemies,
                 figure.Team,
-                isHovered: _hoveredFigureId == figure.Id,
+                isHovered: _hoveredFigureId == figure.EntityId,
                 hasFriendlySelection: _selectedFriendlyFigureId.HasValue);
         }
 

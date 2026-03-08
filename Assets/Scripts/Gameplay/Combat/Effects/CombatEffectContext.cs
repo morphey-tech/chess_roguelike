@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using MessagePipe;
 using Project.Core.Core.Logging;
+using Project.Core.Core.Triggers;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Combat.Visual;
@@ -23,18 +24,18 @@ namespace Project.Gameplay.Gameplay.Combat.Effects
         public ActionContext ActionContext { get; }
         public BoardGrid Grid { get; }
         public IPublisher<FigureDeathMessage> DeathPublisher { get; }
-        public PassiveTriggerService Passives { get; }
+        public TriggerService TriggerService { get; }
         public LootService LootService { get; }
         public DamageApplier DamageApplier { get; }
         public IFigureLifeService FigureLifeService { get; }
         public ILogger Logger { get; }
-        
+
         /// <summary>
         /// Visual events recorded during effects execution.
         /// CombatVisualPlanner converts these to visual commands later.
         /// </summary>
         public List<ICombatVisualEvent> VisualEvents { get; }
-        
+
         /// <summary>
         /// Effects added during Apply. Processed after current effect.
         /// </summary>
@@ -44,7 +45,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects
             ActionContext actionContext,
             BoardGrid grid,
             IPublisher<FigureDeathMessage> deathPublisher,
-            PassiveTriggerService passives,
+            TriggerService triggerService,
             LootService lootService,
             DamageApplier damageApplier,
             IFigureLifeService figureLifeService,
@@ -54,7 +55,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects
             ActionContext = actionContext;
             Grid = grid;
             DeathPublisher = deathPublisher;
-            Passives = passives;
+            TriggerService = triggerService;
             LootService = lootService;
             DamageApplier = damageApplier;
             FigureLifeService = figureLifeService;

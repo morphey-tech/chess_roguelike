@@ -219,11 +219,6 @@ namespace Project.Unity.Unity.Installers
             builder.Register<DamageApplier>(Lifetime.Singleton);
             builder.Register<ProjectileHitApplyService>(Lifetime.Singleton).As<IProjectileHitApplyService>();
 
-            // ArtifactEventSubscriber — слушает события и вызывает триггеры артефактов
-            builder.Register<ArtifactEventSubscriber>(Lifetime.Singleton)
-                .AsImplementedInterfaces()
-                .AsSelf();
-            
             // ActionBuilderContext (needs VisualPipeline, ActionContextAccessor, etc. registered above)
             builder.Register<ActionBuilderContext>(Lifetime.Singleton).As<IActionBuilderContext>();
             
@@ -281,7 +276,6 @@ namespace Project.Unity.Unity.Installers
             resolver.Resolve<StormHighlightRenderer>();
             resolver.Resolve<StormDamageService>();
             resolver.Resolve<FigureInfoPreviewService>();
-            resolver.Resolve<ArtifactEventSubscriber>();
 
             // UI must be force-resolved so its constructor runs InitAsync
             // (loads WindowsController prefab). Without this, static UI methods

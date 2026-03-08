@@ -37,9 +37,10 @@ namespace Project.Unity.Unity.Views.Presentations
             _figure = figure;
             _initialized = true;
             _disposables = new CompositeDisposable();
-            
+
             if (_cachedWorldUi == null)
             {
+                await UIService.Initialized;
                 _cachedWorldUi = await UIService.GetOrCreateAsync<WorldUIWindow>();
             }
             

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
+using Project.Core.Core.Triggers;
 using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Combat.Contexts;
 using Project.Gameplay.Gameplay.Grid;
@@ -16,19 +17,19 @@ namespace Project.Gameplay.Gameplay.Figures
         public BoardGrid? Grid { get; private set; }
 
         private readonly MovementStrategyFactory _strategyFactory;
-        private readonly PassiveTriggerService _passiveTriggerService;
+        private readonly TriggerService _triggerService;
         private readonly TurnService _turnService;
         private readonly ILogger<MovementService> _logger;
 
         [Inject]
         private MovementService(
             MovementStrategyFactory strategyFactory,
-            PassiveTriggerService passiveTriggerService,
+            TriggerService triggerService,
             TurnService turnService,
             ILogService logService)
         {
             _strategyFactory = strategyFactory;
-            _passiveTriggerService = passiveTriggerService;
+            _triggerService = triggerService;
             _turnService = turnService;
             _logger = logService.CreateLogger<MovementService>();
         }
@@ -133,7 +134,7 @@ namespace Project.Gameplay.Gameplay.Figures
                 CurrentTurn = _turnService.TurnNumber,
                 DidMove = true
             };
-            _passiveTriggerService.TriggerMove(figure, moveContext);
+            _triggerService.TriggerMove(figure, moveContext);
 
             _logger.Info($"Moved {figure} from ({from.Row},{from.Column}) to ({to.Row},{to.Column})");
         }

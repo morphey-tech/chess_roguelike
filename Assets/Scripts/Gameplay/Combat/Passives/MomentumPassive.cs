@@ -1,6 +1,6 @@
 using Project.Core.Core.Grid;
+using Project.Core.Core.Triggers;
 using Project.Gameplay.Gameplay.Combat.Contexts;
-using Project.Gameplay.Gameplay.Combat.Triggers;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
 
@@ -13,7 +13,9 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
     public sealed class MomentumPassive : IPassive, IOnMove
     {
         public string Id { get; }
-        public int Priority => 50;
+        public int Priority => TriggerPriorities.Normal;
+        public TriggerGroup Group => TriggerGroup.Additive;
+        public TriggerPhase Phase => TriggerPhase.AfterMove;
 
         private readonly float _damagePerCell;
 
@@ -23,23 +25,36 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
             _damagePerCell = damagePerCell;
         }
 
-        public void OnMove(MoveContext context)
+        public bool Matches(TriggerContext context)
         {
-            if (!context.DidMove)
+            if (context.Type != TriggerType.OnMove)
             {
-                return;
+                return false;
+            }
+            if (!context.TryGetData<MoveContext>(out MoveContext move))
+            {
+                return false;
+            }
+            return move.DidMove;
+        }
+
+        public TriggerResult Execute(TriggerContext context)
+        {
+            if (!context.TryGetData<MoveContext>(out MoveContext move))
+            {
+                return TriggerResult.Continue;
             }
 
-            Figure actor = context.Actor;
-            BoardGrid grid = context.Grid;
+            Figure actor = move.Actor;
+            BoardGrid grid = move.Grid;
 
-            GridPosition from = context.From;
-            GridPosition to = context.To;
+            GridPosition from = move.From;
+            GridPosition to = move.To;
             GridPosition? enemyPos = grid.GetNearestEnemy(actor);
 
             if (!enemyPos.HasValue)
             {
-                return;
+                return TriggerResult.Continue;
             }
 
             int oldDist = Attack.AttackUtils.GetDistance(from, enemyPos.Value);
@@ -47,13 +62,16 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
 
             if (newDist >= oldDist)
             {
-                return;
+                return TriggerResult.Continue;
             }
 
             int moved = oldDist - newDist;
             float bonus = moved * _damagePerCell;
-            FlatModifier<float> modifier = new($"{Id}", bonus, 0, 1, true, ModifierSourceContext.PreviewCalculation);
+            FlatModifier<float> modifier = new($"{Id}", bonus, 0, 1,
+                true, ModifierSourceContext.PreviewCalculation);
             actor.Stats.Attack.AddModifier(modifier);
+
+            return TriggerResult.Continue;
         }
     }
 }

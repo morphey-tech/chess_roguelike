@@ -1,12 +1,13 @@
 using Project.Core.Core.Configs.Artifacts;
 using Project.Core.Core.Random;
-using Project.Gameplay.Gameplay.Artifacts.Triggers;
+using Project.Core.Core.Triggers;
 
 namespace Project.Gameplay.Gameplay.Artifacts.Effects
 {
+    #region Battle Start
+
     /// <summary>
     /// Старая Корона: Король начинает бой с щитом 5 HP.
-    /// Tags: Defense, Battle
     /// </summary>
     public sealed class WornCrownArtifact : ArtifactBase, IOnBattleStart
     {
@@ -17,17 +18,23 @@ namespace Project.Gameplay.Gameplay.Artifacts.Effects
             _shieldValue = (int)config.Effect.Value;
         }
 
-        public override int Priority => ArtifactPriorities.Low;
+        public override int Priority => TriggerPriorities.Low;
 
-        public void OnBattleStart(ArtifactTriggerContext context)
+        public override bool Matches(TriggerContext context)
+        {
+            return context.Type == TriggerType.OnBattleStart;
+        }
+
+        public override TriggerResult Execute(TriggerContext context)
         {
             // TODO: Apply shield to king figure
+            // context.Actor is the king figure
+            return TriggerResult.Continue;
         }
     }
 
     /// <summary>
     /// Щит Новичка: Все фигуры +2 щит в начале боя.
-    /// Tags: Defense, Battle
     /// </summary>
     public sealed class PawnsGuardArtifact : ArtifactBase, IOnBattleStart
     {
@@ -38,17 +45,26 @@ namespace Project.Gameplay.Gameplay.Artifacts.Effects
             _shieldValue = (int)config.Effect.Value;
         }
 
-        public override int Priority => ArtifactPriorities.Low;
+        public override int Priority => TriggerPriorities.Low;
 
-        public void OnBattleStart(ArtifactTriggerContext context)
+        public override bool Matches(TriggerContext context)
+        {
+            return context.Type == TriggerType.OnBattleStart;
+        }
+
+        public override TriggerResult Execute(TriggerContext context)
         {
             // TODO: Apply shield to all team figures
+            return TriggerResult.Continue;
         }
     }
 
+    #endregion
+
+    #region Battle End
+
     /// <summary>
     /// Кошелёк Наёмника: +1 крона за победу.
-    /// Tags: Economy, Battle
     /// </summary>
     public sealed class MercenariesPouchArtifact : ArtifactBase, IOnBattleEnd
     {
@@ -59,17 +75,26 @@ namespace Project.Gameplay.Gameplay.Artifacts.Effects
             _crownsValue = (int)config.Effect.Value;
         }
 
-        public override int Priority => ArtifactPriorities.Cleanup;
+        public override int Priority => TriggerPriorities.Cleanup;
 
-        public void OnBattleEnd(ArtifactTriggerContext context)
+        public override bool Matches(TriggerContext context)
+        {
+            return context.Type == TriggerType.OnBattleEnd;
+        }
+
+        public override TriggerResult Execute(TriggerContext context)
         {
             // TODO: Add crowns to run resources
+            return TriggerResult.Continue;
         }
     }
 
+    #endregion
+
+    #region Damage Received
+
     /// <summary>
     /// Игральная Кость: 10% шанс уклониться от атаки.
-    /// Tags: Utility, Defense
     /// </summary>
     public sealed class GamblersDieArtifact : ArtifactBase, IOnDamageReceived
     {
@@ -82,20 +107,32 @@ namespace Project.Gameplay.Gameplay.Artifacts.Effects
             _randomService = randomService;
         }
 
-        public override int Priority => ArtifactPriorities.High;
+        public override int Priority => TriggerPriorities.High;
 
-        public void OnDamageReceived(ArtifactTriggerContext context)
+        public override bool Matches(TriggerContext context)
+        {
+            return context.Type == TriggerType.OnDamageReceived;
+        }
+
+        public override TriggerResult Execute(TriggerContext context)
         {
             if (_randomService.Chance(_dodgeChance))
             {
-                // TODO: Cancel damage
+                // TODO: Cancel damage via context
+                // context.Value = damage amount
+                // context.Target = figure taking damage
+                return TriggerResult.Cancel; // Cancel the damage
             }
+            return TriggerResult.Continue;
         }
     }
 
+    #endregion
+
+    #region Unit Death
+
     /// <summary>
     /// Мина-Ловушка: Смерть фигуры: 3 урона соседям.
-    /// Tags: Death, Control
     /// </summary>
     public sealed class AmbushChargeArtifact : ArtifactBase, IOnUnitDeath
     {
@@ -108,17 +145,27 @@ namespace Project.Gameplay.Gameplay.Artifacts.Effects
             _radius = (int)config.Effect.Radius;
         }
 
-        public override int Priority => ArtifactPriorities.Critical;
+        public override int Priority => TriggerPriorities.Critical;
 
-        public void OnUnitDeath(ArtifactTriggerContext context)
+        public override bool Matches(TriggerContext context)
+        {
+            return context.Type == TriggerType.OnUnitDeath;
+        }
+
+        public override TriggerResult Execute(TriggerContext context)
         {
             // TODO: Deal damage to all figures within radius
+            // context.Target = died figure
+            return TriggerResult.Continue;
         }
     }
 
+    #endregion
+
+    #region Passive (No Trigger)
+
     /// <summary>
     /// Меч Гроссмейстера: Игнорировать 1 броню врага.
-    /// Tags: Attack, Utility
     /// </summary>
     public sealed class GrandmasterBladeArtifact : ArtifactBase
     {
@@ -129,14 +176,24 @@ namespace Project.Gameplay.Gameplay.Artifacts.Effects
             _armorPenetration = (int)config.Effect.Value;
         }
 
-        public override int Priority => ArtifactPriorities.High;
+        public override int Priority => TriggerPriorities.High;
+
+        public override bool Matches(TriggerContext context)
+        {
+            return false; // Passive effect - queried directly via GetArmorPenetration()
+        }
+
+        public override TriggerResult Execute(TriggerContext context)
+        {
+            // Passive effect - not triggered
+            return TriggerResult.Continue;
+        }
 
         public int GetArmorPenetration() => _armorPenetration;
     }
 
     /// <summary>
     /// Ветреные Сапоги: +1 к дальности хода всем фигурам.
-    /// Tags: Movement, Utility
     /// </summary>
     public sealed class SwiftStriderArtifact : ArtifactBase
     {
@@ -147,8 +204,21 @@ namespace Project.Gameplay.Gameplay.Artifacts.Effects
             _movementBonus = (int)config.Effect.Value;
         }
 
-        public override int Priority => ArtifactPriorities.Normal;
+        public override int Priority => TriggerPriorities.Normal;
+
+        public override bool Matches(TriggerContext context)
+        {
+            return false; // Passive effect - queried directly via GetMovementBonus()
+        }
+
+        public override TriggerResult Execute(TriggerContext context)
+        {
+            // Passive effect - not triggered
+            return TriggerResult.Continue;
+        }
 
         public int GetMovementBonus() => _movementBonus;
     }
+
+    #endregion
 }

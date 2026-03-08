@@ -21,20 +21,31 @@ namespace Project.Gameplay.Gameplay.UI
     public static CanvasGroup CanvasGroup => GetController().CanvasGroup;
 
     private static IWindowsController? _controller;
+    private static UniTaskCompletionSource? _initCompletionSource;
     public static bool IsValid => IsControllerValid();
-    
+    public static UniTask Initialized => _initCompletionSource?.Task ?? UniTask.CompletedTask;
+
     [Inject]
     private UIService(
       IAssetService assetService,
       ILogService logService)
     {
+      _initCompletionSource = new UniTaskCompletionSource();
       InitAsync(assetService, logService, null).Forget();
     }
 
     private static async UniTask InitAsync(IAssetService assetService, ILogService logService,
       IWindowsController? controller)
     {
-      await LoadControllerAsync(assetService, logService, controller);
+      try
+      {
+        await LoadControllerAsync(assetService, logService, controller);
+        _initCompletionSource?.TrySetResult();
+      }
+      catch (Exception e)
+      {
+        _initCompletionSource?.TrySetException(e);
+      }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

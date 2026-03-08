@@ -1,6 +1,5 @@
+using Project.Core.Core.Triggers;
 using Project.Gameplay.Gameplay.Combat.Contexts;
-using Project.Gameplay.Gameplay.Combat.Triggers;
-using Project.Gameplay.Gameplay.Figures;
 
 namespace Project.Gameplay.Gameplay.Combat.Passives
 {
@@ -11,24 +10,38 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
     public class EscapePassive : IPassive, IOnAfterHit
     {
         public string Id { get; }
-        public int Priority => 100;
+        public int Priority => TriggerPriorities.Normal;
+        public TriggerGroup Group => TriggerGroup.Default;
+        public TriggerPhase Phase => TriggerPhase.AfterHit;
 
         public EscapePassive(string id)
         {
             Id = id;
         }
 
-        void IOnAfterHit.OnAfterHit(Figure owner, AfterHitContext context)
+        public bool Matches(TriggerContext context)
         {
-            // Only trigger if owner was the target and didn't die
-            if (owner != context.Target || context.TargetDied)
+            if (context.Type != TriggerType.OnAfterHit)
             {
-                return;
+                return false;
+            }
+            if (!context.TryGetData<AfterHitContext>(out AfterHitContext afterHit))
+            {
+                return false;
+            }
+            return context.Target == afterHit.Target && !afterHit.TargetDied;
+        }
+
+        public TriggerResult Execute(TriggerContext context)
+        {
+            if (!context.TryGetData<AfterHitContext>(out AfterHitContext afterHit))
+            {
+                return TriggerResult.Continue;
             }
 
-            // Grant bonus move within 1 cell
-            // This is handled by setting a flag that BonusMoveSession checks
-            owner.MovedThisTurn = false; // Allow movement this turn
+            afterHit.Target.MovedThisTurn = false;
+
+            return TriggerResult.Continue;
         }
     }
 }

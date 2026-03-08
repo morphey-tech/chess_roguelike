@@ -55,9 +55,10 @@ namespace Project.Gameplay.Gameplay.UI
                 return;
 
             _isInitializing = true;
-            
+
             try
             {
+                await UIService.Initialized;
                 _tooltipWindow = await UIService.GetOrCreateAsync<TooltipWindow>();
                 _tooltipWindow.Hide();
             }

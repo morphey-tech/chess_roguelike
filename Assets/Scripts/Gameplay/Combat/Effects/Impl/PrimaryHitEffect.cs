@@ -1,6 +1,7 @@
 using System;
 using Project.Core.Core.Configs.Stats;
 using Project.Core.Core.Grid;
+using Project.Core.Core.Triggers;
 using Project.Gameplay.Gameplay.Combat.Contexts;
 using Project.Gameplay.Gameplay.Combat.Damage;
 using Project.Gameplay.Gameplay.Combat.Passives;
@@ -58,8 +59,14 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
             };
 
             // Trigger passives FIRST - they apply modifiers to stats
-            context.Passives.TriggerBeforeHit(_attacker, _target, before);
-            context.ActionContext.Actor.Effects.TriggerBeforeHit(before);
+            bool hitProceeds = context.TriggerService.TriggerBeforeHit(_attacker, _target, before);
+
+            // Check if hit was cancelled (e.g., by dodge or shield)
+            if (before.IsCancelled || hitProceeds == false)
+            {
+                before.IsDodged = true;
+                return; // Hit cancelled - skip damage
+            }
 
             // NOW calculate final damage after all modifiers are applied
             float atk = _attacker.Stats.Attack.Value;
@@ -98,7 +105,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
                 bool hasSplash = HasSplashPassive(_attacker);
                 
                 context.AddVisualEvent(new DamageVisualEvent(
-                    _target.Id,
+                    _target.EntityId,
                     damageResult.Final,
                     before.IsCritical,
                     before.IsDodged,
@@ -120,8 +127,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
                     WasDodged = before.IsDodged
                 };
 
-                context.Passives.TriggerAfterHit(_attacker, _target, after);
-                context.ActionContext.Actor.Effects.TriggerAfterHit(after);
+                context.TriggerService.TriggerAfterHit(_attacker, _target, after);
                 foreach (ICombatEffect effect in after.Effects)
                 {
                     context.AddEffect(effect);
@@ -129,8 +135,8 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
 
                 if (died)
                 {
-                    context.Passives.TriggerKill(_attacker, _target);
-                    context.Passives.TriggerDeath(_target, _attacker);
+                    context.TriggerService.TriggerKill(_attacker, _target);
+                    context.TriggerService.TriggerDeath(_target, _attacker);
 
                     BoardCell targetCell = context.Grid.GetBoardCell(_targetPosition);
                     context.FigureLifeService.HandleDeathFromCombat(context, _target, targetCell);
@@ -142,8 +148,8 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
                 // Event carries raw base-for-pipeline damage and crit flag; pipeline is applied once on hit.
                 AddPrimaryDeliveryEvent(context, finalDamage, before.IsCritical);
                 context.AddVisualEvent(new ProjectileHitApplyEvent(
-                    _attacker.Id,
-                    _target.Id,
+                    _attacker.EntityId,
+                    _target.EntityId,
                     _targetPosition,
                     finalDamage,
                     before.IsCritical,
@@ -163,10 +169,10 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
             {
                 case DeliveryType.Projectile:
                     context.AddVisualEvent(new ProjectileVisualEvent(
-                        _attacker.Id,
+                        _attacker.EntityId,
                         _attackerPosition,
                         _targetPosition,
-                        _target.Id,
+                        _target.EntityId,
                         _projectileConfigId,
                         finalDamage,
                         isCritical,
@@ -177,23 +183,23 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
                     break;
                 case DeliveryType.Beam:
                     context.AddVisualEvent(new BeamVisualEvent(
-                        _attacker.Id,
+                        _attacker.EntityId,
                         _attackerPosition,
                         _targetPosition,
-                        _target.Id,
+                        _target.EntityId,
                         attackType));
                     break;
                 case DeliveryType.Wave:
                     context.AddVisualEvent(new WaveVisualEvent(
-                        _attacker.Id,
+                        _attacker.EntityId,
                         _attackerPosition,
                         _targetPosition,
-                        _target.Id,
+                        _target.EntityId,
                         attackType));
                     break;
                 default:
                     context.AddVisualEvent(new AttackVisualEvent(
-                        _attacker.Id,
+                        _attacker.EntityId,
                         _targetPosition,
                         attackType));
                     break;

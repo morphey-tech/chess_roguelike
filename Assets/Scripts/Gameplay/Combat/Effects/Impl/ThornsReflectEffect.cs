@@ -35,7 +35,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
                 false, "thorns", Array.Empty<IDamageModifier>());
             (DamageResult result, _) = context.DamageApplier.Apply(context, dmgCtx);
 
-            context.AddVisualEvent(new DamageVisualEvent(_target.Id, result.Final, damageType: "thorns"));
+            context.AddVisualEvent(new DamageVisualEvent(_target.EntityId, result.Final, damageType: "thorns"));
             context.Logger.Info($"{_target} takes {result.Final} thorns damage. HP: {_target.Stats.CurrentHp.Value}/{_target.Stats.MaxHp}");
         }
     }

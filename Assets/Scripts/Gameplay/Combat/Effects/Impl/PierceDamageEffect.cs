@@ -35,7 +35,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
                 "pierce", Array.Empty<IDamageModifier>());
             (DamageResult result, _) = context.DamageApplier.Apply(context, dmgCtx);
 
-            context.AddVisualEvent(new DamageVisualEvent(_target.Id, result.Final, false, false,
+            context.AddVisualEvent(new DamageVisualEvent(_target.EntityId, result.Final, false, false,
                 "pierce"));
             context.Logger.Info($"Pierce hit {_target} for {result.Final} damage. HP: {_target.Stats.CurrentHp.Value}/{_target.Stats.MaxHp}");
         }

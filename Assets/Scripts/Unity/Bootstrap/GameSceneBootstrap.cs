@@ -51,7 +51,7 @@ namespace Project.Unity.Unity.Bootstrap
 
             // Start new run: reset economy (includes artifacts)
             _economyService.StartNewRun();
-            ShowResourcesWindow();
+            await ShowResourcesWindowAsync();
 
             Run run = _runFactory.Create(runConfig);
             _runHolder.Set(run);
@@ -62,9 +62,10 @@ namespace Project.Unity.Unity.Bootstrap
             Log.Info($"Starting run: {runConfig.Id}");
         }
 
-        private void ShowResourcesWindow()
+        private async UniTask ShowResourcesWindowAsync()
         {
-            UIService.ShowAsync<ResourcesWindow>().Forget();
+            await UIService.Initialized;
+            await UIService.ShowAsync<ResourcesWindow>();
             Log.Info("Resources window shown");
         }
 

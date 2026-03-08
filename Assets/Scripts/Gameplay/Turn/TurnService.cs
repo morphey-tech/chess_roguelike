@@ -2,6 +2,7 @@ using System;
 using Cysharp.Threading.Tasks;
 using MessagePipe;
 using Project.Core.Core.Logging;
+using Project.Core.Core.Triggers;
 using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Combat.Contexts;
 using Project.Gameplay.Gameplay.Figures;
@@ -20,7 +21,7 @@ namespace Project.Gameplay.Gameplay.Turn
 
         private readonly IPublisher<TurnChangedMessage> _turnChangedPublisher;
         private readonly IGameUiService _uiService;
-        private readonly PassiveTriggerService _passiveTriggerService;
+        private readonly TriggerService _triggerService;
         private readonly RunHolder _runHolder;
         private readonly IFigureRegistry _figureRegistry;
         private readonly ILogger<TurnService> _logger;
@@ -31,14 +32,14 @@ namespace Project.Gameplay.Gameplay.Turn
             ISubscriber<EndTurnRequestedMessage> endTurnSubscriber,
             IPublisher<TurnChangedMessage> turnChangedPublisher,
             IGameUiService uiService,
-            PassiveTriggerService passiveTriggerService,
+            TriggerService triggerService,
             RunHolder runHolder,
             IFigureRegistry figureRegistry,
             ILogService logService)
         {
             _turnChangedPublisher = turnChangedPublisher;
             _uiService = uiService;
-            _passiveTriggerService = passiveTriggerService;
+            _triggerService = triggerService;
             _runHolder = runHolder;
             _figureRegistry = figureRegistry;
             _logger = logService.CreateLogger<TurnService>();
@@ -63,7 +64,10 @@ namespace Project.Gameplay.Gameplay.Turn
                 CurrentTurn = TurnNumber
             };
 
-            _passiveTriggerService.TriggerTurnEnd(turnContext);
+            _triggerService.Execute(TriggerType.OnTurnEnd, TriggerContextBuilder
+                .For(TriggerType.OnTurnEnd, TriggerPhase.OnTurnEnd)
+                .WithData(turnContext)
+                .Build());
 
             foreach (Figure figure in _figureRegistry.GetAll())
                 figure.Stats.Tick();
@@ -75,12 +79,15 @@ namespace Project.Gameplay.Gameplay.Turn
             foreach (Figure figure in _figureRegistry.GetAll())
                 figure.MovedThisTurn = false;
 
-            _passiveTriggerService.TriggerTurnStart(new TurnContext
-            {
-                Grid = boardGrid ?? throw new NullReferenceException("Board Grid not set"),
-                Team = CurrentTeam,
-                CurrentTurn = TurnNumber
-            });
+            _triggerService.Execute(TriggerType.OnTurnStart, TriggerContextBuilder
+                .For(TriggerType.OnTurnStart, TriggerPhase.OnTurnStart)
+                .WithData(new TurnContext
+                {
+                    Grid = boardGrid ?? throw new NullReferenceException("Board Grid not set"),
+                    Team = CurrentTeam,
+                    CurrentTurn = TurnNumber
+                })
+                .Build());
             _turnChangedPublisher.Publish(new TurnChangedMessage(CurrentTeam, TurnNumber));
             _logger.Info($"Turn ended: {previousTeam} -> {CurrentTeam}, Turn #{TurnNumber}");
         }

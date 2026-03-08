@@ -25,7 +25,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
 
         public void Apply(CombatEffectContext context)
         {
-            context.AddVisualEvent(new AttackVisualEvent(_attacker.Id, _targetPosition, _attackId));
+            context.AddVisualEvent(new AttackVisualEvent(_attacker.EntityId, _targetPosition, _attackId));
             context.Logger.Info($"{_attacker} [{_attackId}] attacks");
         }
     }

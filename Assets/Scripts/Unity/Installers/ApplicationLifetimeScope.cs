@@ -1,6 +1,8 @@
 using System;
+using MessagePipe;
 using Project.Core.Core.Logging;
 using Project.Core.Window;
+using Project.Gameplay.Gameplay.Artifacts.Messages;
 using Project.Gameplay.Gameplay.Assets;
 using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Configs;
@@ -18,6 +20,7 @@ using VContainer.Unity;
 using IRandomService = Project.Core.Core.Random.IRandomService;
 using RandomService = Project.Core.Core.Random.RandomService;
 using Project.Core.Core.Configs.Artifacts;
+using Project.Core.Core.Triggers;
 using Project.Gameplay.Gameplay.Artifacts;
 
 namespace Project.Unity.Unity.Installers
@@ -34,6 +37,12 @@ namespace Project.Unity.Unity.Installers
         protected override void Configure(IContainerBuilder builder)
         {
             UnitySaveEnvironment saveEnvironment = new();
+
+            // Register MessagePipe for Artifact messages
+            MessagePipeOptions options = builder.RegisterMessagePipe();
+            builder.RegisterMessageBroker<ArtifactAddedMessage>(options);
+            builder.RegisterMessageBroker<ArtifactRemovedMessage>(options);
+            builder.RegisterMessageBroker<ArtifactsClearedMessage>(options);
 
             builder.Register<LogService>(Lifetime.Singleton)
                 .WithParameter(_minLogLevel)
@@ -53,6 +62,7 @@ namespace Project.Unity.Unity.Installers
                 .AsImplementedInterfaces()
                 .AsSelf();
 
+            builder.Register<TriggerService>(Lifetime.Singleton);
             builder.Register<PlayerLoadoutService>(Lifetime.Singleton);
             builder.Register<PlayerRunStateService>(Lifetime.Singleton);
             builder.Register<PlayerMetaProgressService>(Lifetime.Singleton);
@@ -83,9 +93,6 @@ namespace Project.Unity.Unity.Installers
                 .AsSelf();
             builder.Register<ArtifactSaveAdapter>(Lifetime.Singleton)
                 .AsImplementedInterfaces();
-            builder.Register<ArtifactTriggerService>(Lifetime.Singleton)
-                .AsImplementedInterfaces()
-                .AsSelf();
 
             builder.Register<MemoryCleanService>(Lifetime.Singleton)
                 .AsImplementedInterfaces()

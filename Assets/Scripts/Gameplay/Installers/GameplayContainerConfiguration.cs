@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Project.Core.Core.Random;
 using Project.Core.Core.Storm.Core;
 using Project.Core.Core.Storm.Strategies;
+using Project.Core.Core.Triggers;
 using Project.Gameplay.Gameplay.Attack;
 using Project.Gameplay.Gameplay.Attack.Rules;
 using Project.Gameplay.Gameplay.Attack.Strategies;
@@ -147,7 +148,6 @@ namespace Project.Gameplay.Gameplay.Installers
                 });
 
             // Combat
-            builder.Register<PassiveTriggerService>(Lifetime.Singleton);
             builder.Register<DamagePipeline>(Lifetime.Singleton)
                 .WithParameter<IEnumerable<IDamageModifier>>(new IDamageModifier[] { new CritDamageModifier() })
                 .As<IDamagePipeline>();

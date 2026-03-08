@@ -18,6 +18,7 @@ namespace Project.Unity.Presentations
         {
             if (_cachedWorldUi == null)
             {
+                await UIService.Initialized;
                 _cachedWorldUi = await UIService.GetOrCreateAsync<WorldUIWindow>();
             }
                 

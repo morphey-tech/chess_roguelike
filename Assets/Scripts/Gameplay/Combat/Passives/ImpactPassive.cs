@@ -1,8 +1,7 @@
 using Project.Core.Core.Grid;
+using Project.Core.Core.Triggers;
 using Project.Gameplay.Gameplay.Combat.Contexts;
 using Project.Gameplay.Gameplay.Combat.Effects.Impl;
-using Project.Gameplay.Gameplay.Combat.Triggers;
-using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
 
 namespace Project.Gameplay.Gameplay.Combat.Passives
@@ -14,7 +13,9 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
     public class ImpactPassive : IPassive, IOnAfterHit
     {
         public string Id { get; }
-        public int Priority => 100;
+        public int Priority => TriggerPriorities.Normal;
+        public TriggerGroup Group => TriggerGroup.Default;
+        public TriggerPhase Phase => TriggerPhase.AfterHit;
 
         private readonly int _bonusDamage;
 
@@ -24,28 +25,42 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
             _bonusDamage = bonusDamage;
         }
 
-        void IOnAfterHit.OnAfterHit(Figure owner, AfterHitContext context)
+        public bool Matches(TriggerContext context)
         {
-            // Only trigger if owner was the attacker
-            if (owner != context.Attacker)
+            if (context.Type != TriggerType.OnAfterHit)
             {
-                return;
+                return false;
+            }
+            if (!context.TryGetData<AfterHitContext>(out AfterHitContext afterHit))
+            {
+                return false;
+            }
+            return context.Actor == afterHit.Attacker;
+        }
+
+        public TriggerResult Execute(TriggerContext context)
+        {
+            if (!context.TryGetData<AfterHitContext>(out AfterHitContext afterHit))
+            {
+                return TriggerResult.Continue;
             }
 
-            BoardGrid grid = context.Grid;
-            (int dirRow, int dirCol) = context.GetAttackDirection();
+            BoardGrid grid = afterHit.Grid;
+            (int dirRow, int dirCol) = afterHit.GetAttackDirection();
 
-            GridPosition pushTo = new(context.TargetPosition.Row + dirRow, context.TargetPosition.Column + dirCol);
+            GridPosition pushTo = new(afterHit.TargetPosition.Row + dirRow, afterHit.TargetPosition.Column + dirCol);
             bool hasCollision = grid.HasCollision(pushTo);
 
             PushEffect pushEffect = new(
-                context.Attacker,
-                context.Target,
-                context.TargetPosition,
+                afterHit.Attacker,
+                afterHit.Target,
+                afterHit.TargetPosition,
                 pushTo,
                 hasCollision ? _bonusDamage : 0);
 
-            context.AddEffect(pushEffect);
+            afterHit.AddEffect(pushEffect);
+
+            return TriggerResult.Continue;
         }
     }
 }

@@ -19,11 +19,13 @@ namespace Project.Unity.UI
 
         public async UniTask ShowWorldUiAsync()
         {
+            await UIService.Initialized;
             await UIService.ShowAsync<WorldUIWindow>();
         }
 
         public async UniTask ShowPreparePhaseAsync()
         {
+            await UIService.Initialized;
             TurnWindow? wnd = await UIService.ShowAsync<TurnWindow>();
             wnd?.SetPreparePhase();
             // Board capacity window disabled temporarily

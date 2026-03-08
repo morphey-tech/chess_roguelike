@@ -1,20 +1,16 @@
 using Project.Core.Core.Configs.Artifacts;
+using Project.Core.Core.Triggers;
 
 namespace Project.Gameplay.Gameplay.Artifacts
 {
     /// <summary>
     /// Base interface for all artifact effects.
+    /// Now implements ITrigger for unified execution.
     /// </summary>
-    public interface IArtifact
+    public interface IArtifact : ITrigger
     {
         /// <summary>Artifact config ID.</summary>
         string ConfigId { get; }
-
-        /// <summary>
-        /// Priority for trigger execution order.
-        /// Lower values execute first.
-        /// </summary>
-        int Priority { get; }
 
         /// <summary>
         /// Tags for categorization and synergies.

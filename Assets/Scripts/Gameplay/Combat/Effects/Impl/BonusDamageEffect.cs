@@ -37,7 +37,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
                 false, _source, Array.Empty<IDamageModifier>());
             (DamageResult result, _) = context.DamageApplier.Apply(context, dmgCtx);
 
-            context.AddVisualEvent(new DamageVisualEvent(_target.Id, result.Final, damageType: _source));
+            context.AddVisualEvent(new DamageVisualEvent(_target.EntityId, result.Final, damageType: _source));
             context.Logger.Info($"{_target} took {result.Final} bonus damage from {_source}. HP: {_target.Stats.CurrentHp.Value}/{_target.Stats.MaxHp}");
         }
     }

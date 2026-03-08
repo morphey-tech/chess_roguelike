@@ -1,12 +1,13 @@
 using System.Collections.Generic;
 using Project.Core.Core.Grid;
+using Project.Core.Core.Triggers;
 using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Figures.StatusEffects;
 using Project.Gameplay.Gameplay.Turn;
 
 namespace Project.Gameplay.Gameplay.Figures
 {
-    public class Figure : Entity
+    public class Figure : Entity, ITriggerEntity
     {
         public string TypeId { get; }
         public string MovementId { get; }
@@ -23,8 +24,20 @@ namespace Project.Gameplay.Gameplay.Figures
         public GridPosition? PreviousPosition { get; set; }
         public string? LootTableId { get; set; }
 
+        // ITriggerEntity implementation
+        string ITriggerEntity.Id => TriggerId;
+        public string TriggerId => base.Id.ToString();
+
+        /// <summary>
+        /// Numeric entity ID for visual and grid systems.
+        /// </summary>
+        public int EntityId => base.Id;
+
+        private readonly TriggerService? _triggerService;
+
         public Figure(int id, string typeId, string movementId, string attackId,
-            string turnPatternsId, FigureStats stats, Team team, string? infoId = null) : base(id)
+            string turnPatternsId, FigureStats stats, Team team, string? infoId = null,
+            TriggerService? triggerService = null) : base(id)
         {
             TypeId = typeId;
             MovementId = movementId;
@@ -33,6 +46,7 @@ namespace Project.Gameplay.Gameplay.Figures
             InfoId = infoId;
             Stats = stats;
             Team = team;
+            _triggerService = triggerService;
             Effects = new(this);
         }
 
@@ -48,8 +62,20 @@ namespace Project.Gameplay.Gameplay.Figures
                 return;
             }
             BasePassives.Add(passive);
+            _triggerService?.Register(passive);
         }
 
-        public override string ToString() => $"{TypeId}#{Id}";
+        public void RemovePassive(IPassive passive)
+        {
+            if (BasePassives.Remove(passive))
+            {
+                _triggerService?.Unregister(passive);
+            }
+        }
+    }
+
+    public static class FigureExtensions
+    {
+        public static string ToString(this Figure figure) => $"{figure.TypeId}#{figure.Id}";
     }
 }

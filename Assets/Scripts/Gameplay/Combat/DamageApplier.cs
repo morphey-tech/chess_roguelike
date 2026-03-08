@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using Project.Core.Core.Triggers;
 using Project.Gameplay.Gameplay.Combat.Damage;
 using Project.Gameplay.Gameplay.Combat.Effects;
 using Project.Gameplay.Gameplay.Grid;
@@ -13,17 +14,17 @@ namespace Project.Gameplay.Gameplay.Combat
     public sealed class DamageApplier
     {
         private readonly IDamagePipeline _pipeline;
-        private readonly PassiveTriggerService _passives;
+        private readonly TriggerService _triggerService;
         private readonly IFigureLifeService _lifeService;
 
         [Inject]
         private DamageApplier(
             IDamagePipeline pipeline,
-            PassiveTriggerService passives,
+            TriggerService triggerService,
             IFigureLifeService lifeService)
         {
             _pipeline = pipeline;
-            _passives = passives;
+            _triggerService = triggerService;
             _lifeService = lifeService;
         }
 
@@ -38,13 +39,13 @@ namespace Project.Gameplay.Gameplay.Combat
             {
                 return (result, false);
             }
-            
+
             bool died = dmgCtx.Target.Stats.TakeDamage(result.Final);
 
             if (died)
             {
-                _passives.TriggerKill(dmgCtx.Attacker, dmgCtx.Target);
-                _passives.TriggerDeath(dmgCtx.Target, dmgCtx.Attacker);
+                _triggerService.TriggerKill(dmgCtx.Attacker, dmgCtx.Target);
+                _triggerService.TriggerDeath(dmgCtx.Target, dmgCtx.Attacker);
 
                 BoardCell cell = context.Grid.FindFigure(dmgCtx.Target);
                 _lifeService.HandleDeathFromCombat(context, dmgCtx.Target, cell);
@@ -78,12 +79,12 @@ namespace Project.Gameplay.Gameplay.Combat
             {
                 return (result, false);
             }
-            
+
             bool died = dmgCtx.Target.Stats.TakeDamage(result.Final);
             if (died)
             {
-                _passives.TriggerKill(dmgCtx.Attacker, dmgCtx.Target);
-                _passives.TriggerDeath(dmgCtx.Target, dmgCtx.Attacker);
+                _triggerService.TriggerKill(dmgCtx.Attacker, dmgCtx.Target);
+                _triggerService.TriggerDeath(dmgCtx.Target, dmgCtx.Attacker);
                 _lifeService.HandleDeathDomainOnly(dmgCtx.Target, targetCell);
             }
 

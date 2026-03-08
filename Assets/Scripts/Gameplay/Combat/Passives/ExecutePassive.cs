@@ -1,6 +1,5 @@
+using Project.Core.Core.Triggers;
 using Project.Gameplay.Gameplay.Combat.Contexts;
-using Project.Gameplay.Gameplay.Combat.Triggers;
-using Project.Gameplay.Gameplay.Figures;
 
 namespace Project.Gameplay.Gameplay.Combat.Passives
 {
@@ -10,8 +9,10 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
     public sealed class ExecutePassive : IPassive, IOnBeforeHit
     {
         public string Id { get; }
-        public int Priority => 10;
-        
+        public int Priority => TriggerPriorities.Normal;
+        public TriggerGroup Group => TriggerGroup.Multiplicative;
+        public TriggerPhase Phase => TriggerPhase.BeforeHit;
+
         private readonly float _hpThreshold;
         private readonly float _damageMultiplier;
 
@@ -22,19 +23,39 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
             _damageMultiplier = damageMultiplier;
         }
 
-        public void OnBeforeHit(Figure owner, BeforeHitContext context)
+        public bool Matches(TriggerContext context)
         {
-            // Only trigger when the owner is attacking
-            if (owner != context.Attacker)
+            if (context.Type != TriggerType.OnBeforeHit)
             {
-                return;
+                return false;
+            }
+            if (!context.TryGetData<BeforeHitContext>(out BeforeHitContext beforeHit))
+            {
+                return false;
+            }
+            if (context.Actor != beforeHit.Attacker)
+            {
+                return false;
             }
 
-            float hpPercent = context.Target.Stats.CurrentHp.Value / context.Target.Stats.MaxHp;
+            float hpPercent = beforeHit.Target.Stats.CurrentHp.Value / beforeHit.Target.Stats.MaxHp;
+            return hpPercent <= _hpThreshold;
+        }
+
+        public TriggerResult Execute(TriggerContext context)
+        {
+            if (!context.TryGetData<BeforeHitContext>(out BeforeHitContext beforeHit))
+            {
+                return TriggerResult.Continue;
+            }
+
+            float hpPercent = beforeHit.Target.Stats.CurrentHp.Value / beforeHit.Target.Stats.MaxHp;
             if (hpPercent <= _hpThreshold)
             {
-                context.DamageMultiplier *= _damageMultiplier;
+                beforeHit.DamageMultiplier *= _damageMultiplier;
             }
+
+            return TriggerResult.Continue;
         }
     }
 }

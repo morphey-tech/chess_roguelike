@@ -1,5 +1,6 @@
 using MessagePipe;
 using Project.Core.Core.Logging;
+using Project.Core.Core.Triggers;
 using Project.Gameplay.Gameplay.Attack;
 using Project.Gameplay.Gameplay.Attack.Rules;
 using Project.Gameplay.Gameplay.Combat;
@@ -20,7 +21,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions
         public IAttackResolver AttackResolver { get; }
         public CombatResolver CombatResolver { get; }
         public ICombatVisualPlanner VisualPlanner { get; }
-        public PassiveTriggerService Passives { get; }
+        public TriggerService TriggerService { get; }
         public VisualPipeline VisualPipeline { get; }
         public IPublisher<FigureDeathMessage> DeathPublisher { get; }
         public IPublisher<FigureAttackStartedMessage> AttackStartedPublisher { get; }
@@ -38,14 +39,14 @@ namespace Project.Gameplay.Gameplay.Turn.Actions
             IAttackResolver attackResolver,
             CombatResolver combatResolver,
             ICombatVisualPlanner visualPlanner,
-            PassiveTriggerService passives,
+            TriggerService triggerService,
             VisualPipeline visualPipeline,
             IPublisher<FigureDeathMessage> deathPublisher,
             IPublisher<FigureAttackStartedMessage> attackStartedPublisher,
             LootService lootService,
             DamageApplier damageApplier,
             IFigureLifeService figureLifeService,
-            Turn.ActionContextAccessor contextAccessor,
+            ActionContextAccessor contextAccessor,
             ILogService logService,
             IAttackQueryService attackQueryService,
             AttackRuleService attackRuleService)
@@ -55,7 +56,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions
             AttackResolver = attackResolver;
             CombatResolver = combatResolver;
             VisualPlanner = visualPlanner;
-            Passives = passives;
+            TriggerService = triggerService;
             VisualPipeline = visualPipeline;
             DeathPublisher = deathPublisher;
             AttackStartedPublisher = attackStartedPublisher;

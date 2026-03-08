@@ -114,12 +114,18 @@ namespace Project.Gameplay.Gameplay.Scene
 
         private static LifetimeScope? FindLifetimeScopeInScene(UnityEngine.SceneManagement.Scene scene)
         {
-            if (!scene.IsValid()) return null;
+            if (!scene.IsValid())
+            {
+                return null;
+            }
             
             foreach (GameObject root in scene.GetRootGameObjects())
             {
                 LifetimeScope? scope = root.GetComponentInChildren<LifetimeScope>(true);
-                if (scope != null) return scope;
+                if (scope != null)
+            {
+                return scope;
+            }
             }
             
             return null;

@@ -1,6 +1,6 @@
+using Project.Core.Core.Triggers;
 using Project.Gameplay.Gameplay.Combat.Contexts;
 using Project.Gameplay.Gameplay.Combat.Imp;
-using Project.Gameplay.Gameplay.Combat.Triggers;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
 
@@ -13,30 +13,53 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
     public sealed class DesperationPassive : IPassive, IOnBeforeHit
     {
         public string Id { get; }
-        public int Priority => 50; // Execute BEFORE Swarm (Priority 100)
+        public int Priority => TriggerPriorities.High; // Execute BEFORE Swarm
+        public TriggerGroup Group => TriggerGroup.First;
+        public TriggerPhase Phase => TriggerPhase.BeforeCalculation;
 
         public DesperationPassive(string id)
         {
             Id = id;
         }
 
-        public void OnBeforeHit(Figure owner, BeforeHitContext context)
+        public bool Matches(TriggerContext context)
         {
-            int allies = context.Grid.CountAlliesAround(owner);
+            if (context.Type != TriggerType.OnBeforeHit)
+            {
+                return false;
+            }
+            if (!context.TryGetData<BeforeHitContext>(out BeforeHitContext beforeHit))
+            {
+                return false;
+            }
+
+            int allies = beforeHit.Grid.CountAlliesAround(beforeHit.Attacker);
+            return allies == 0;
+        }
+
+        public TriggerResult Execute(TriggerContext context)
+        {
+            if (!context.TryGetData<BeforeHitContext>(out BeforeHitContext beforeHit))
+            {
+                return TriggerResult.Continue;
+            }
+
+            int allies = beforeHit.Grid.CountAlliesAround(beforeHit.Attacker);
 
             if (allies == 0)
             {
-                // No allies nearby: set Attack to 1 via modifier
-                // Remove old modifier first to avoid stacking
+                Figure owner = beforeHit.Attacker;
                 owner.Stats.Attack.RemoveModifiersById(Id);
 
-                // Calculate the delta needed to bring Attack to 1
                 float currentAttack = owner.Stats.Attack.Value;
                 float delta = 1f - currentAttack;
 
-                CombatFlatModifier modifier = new(Id, delta, 0, 1, false, ModifierSourceContext.PreviewCalculation);
+                CombatFlatModifier modifier = new(Id, delta, 0, 1, false,
+                    ModifierSourceContext.PreviewCalculation);
                 owner.Stats.Attack.AddModifier(modifier);
             }
+
+            return TriggerResult.Continue;
         }
     }
 }

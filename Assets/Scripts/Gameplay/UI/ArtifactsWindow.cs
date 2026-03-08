@@ -93,7 +93,7 @@ namespace Project.Gameplay.UI
                 
                 // Instantiate with DI using UIAssetService
                 ArtifactItemView? view = _uiAssetService.Instantiate(_itemPrefab, _contentParent);
-                await view.Initialize(config);
+                await view.Initialize(config, instance.Stack);
                 _itemViews.Add(view);
             }
         }

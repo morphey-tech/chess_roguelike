@@ -1,9 +1,10 @@
 using Project.Core.Core.Random;
+using Project.Core.Core.Triggers;
 using Project.Gameplay.Gameplay.Combat.Contexts;
 
 namespace Project.Gameplay.Gameplay.Figures.StatusEffects
 {
-    public class DodgeEffect : StatusEffectBase
+    public class DodgeEffect : StatusEffectBase, IOnBeforeHit
     {
         public override string Id => "dodge";
 
@@ -19,21 +20,37 @@ namespace Project.Gameplay.Gameplay.Figures.StatusEffects
             _random = random;
         }
 
-        public override void OnBeforeHit(Figure owner, BeforeHitContext ctx)
+        public override bool Matches(TriggerContext context)
         {
-            if (ctx.Target != owner)
+            if (context.Type != TriggerType.OnBeforeHit)
             {
-                return;
+                return false;
             }
+            if (!context.TryGetData<BeforeHitContext>(out BeforeHitContext ctx))
+            {
+                return false;
+            }
+            return context.Target == ctx.Target && RemainingUses > 0;
+        }
+
+        public override TriggerResult Execute(TriggerContext context)
+        {
+            if (!context.TryGetData<BeforeHitContext>(out BeforeHitContext ctx))
+            {
+                return TriggerResult.Continue;
+            }
+
             if (!TryConsumeUse())
             {
-                return;
+                return TriggerResult.Continue;
             }
             if (_random.Chance(_chance))
             {
                 ctx.IsDodged = true;
                 ctx.IsCancelled = true;
+                return TriggerResult.Cancel; // Cancel the hit
             }
+            return TriggerResult.Continue;
         }
     }
 }

@@ -18,7 +18,8 @@ namespace Project.Gameplay.Gameplay.UI
         [Header("References")]
         [SerializeField] private Image _icon;
         [SerializeField] private Image _rarityBG;
-
+        [SerializeField] private TextMeshProUGUI _stacks;
+        
         [Header("Rarity Colors")]
         [SerializeField] private Color _commonColor = new(0.5f, 0.5f, 0.5f, 0.3f);
         [SerializeField] private Color _rareColor = new(0.2f, 0.6f, 1f, 0.3f);
@@ -32,7 +33,7 @@ namespace Project.Gameplay.Gameplay.UI
             _assetService = assetService;
         }
 
-        public async UniTask Initialize(ArtifactConfig config)
+        public async UniTask Initialize(ArtifactConfig config, int stacks = 0)
         {
             Color rarityColor = config.ParseRarity() switch
             {
@@ -41,8 +42,9 @@ namespace Project.Gameplay.Gameplay.UI
                 _ => _commonColor
             };
 
-            //Message to exception
             _rarityBG.color = rarityColor;
+            _stacks.text = stacks <= 0 ? string.Empty : stacks.ToString();
+            //Message to exception
             _icon.sprite = await _assetService.LoadAssetAsync<Sprite>(config.Icon) 
                            ?? throw new InvalidOperationException();
         }

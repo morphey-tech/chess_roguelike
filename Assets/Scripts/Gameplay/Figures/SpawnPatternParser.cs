@@ -61,7 +61,7 @@ namespace Project.Gameplay.Gameplay.Figures
                         continue;
                     }
 
-                    if (!_aliasToFigure.TryGetValue(alias, out FigureConfig figure))
+                    if (!_aliasToFigure.TryGetValue(alias, out FigureConfig config))
                     {
                         _logger.Warning($"Unknown alias '{alias}' at ({row}, {col})");
                         continue;
@@ -69,7 +69,7 @@ namespace Project.Gameplay.Gameplay.Figures
 
                     result.Add(new EnemySpawnData
                     {
-                        TypeId = figure.Id,
+                        TypeId = config.Id,
                         Row = gameRow,
                         Column = col
                     });

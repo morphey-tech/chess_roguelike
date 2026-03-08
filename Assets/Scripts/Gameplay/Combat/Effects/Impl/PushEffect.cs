@@ -31,7 +31,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
         public void Apply(CombatEffectContext context)
         {
             context.Logger.Info($"{_target} pushed from ({_fromPosition.Row}, {_fromPosition.Column}) to ({_toPosition.Row}, {_toPosition.Column})");
-            context.AddVisualEvent(new PushVisualEvent(_target.Id, _fromPosition, _toPosition));
+            context.AddVisualEvent(new PushVisualEvent(_target.EntityId, _fromPosition, _toPosition));
 
             if (_bonusDamage > 0)
             {

@@ -5,6 +5,7 @@ using Project.Core.Core.Configs.Figure;
 using Project.Core.Core.Configs.Passive;
 using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
+using Project.Core.Core.Triggers;
 using Project.Gameplay.Gameplay.Board.Capacity;
 using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Configs;
@@ -25,6 +26,7 @@ namespace Project.Gameplay.Gameplay.Figures
         private readonly BoardCapacityService _capacityService;
         private readonly MovementStrategyFactory _movementStrategyFactory;
         private readonly PassiveFactory _passiveFactory;
+        private readonly TriggerService _triggerService;
         private readonly IPublisher<FigureSpawnedMessage> _spawnedPublisher;
         private readonly IFigureRegistry _figureRegistry;
         private readonly ILogger<FigureSpawnService> _logger;
@@ -42,6 +44,7 @@ namespace Project.Gameplay.Gameplay.Figures
             BoardCapacityService capacityService,
             MovementStrategyFactory movementStrategyFactory,
             PassiveFactory passiveFactory,
+            TriggerService triggerService,
             IPublisher<FigureSpawnedMessage> spawnedPublisher,
             IFigureRegistry figureRegistry,
             ILogService logService)
@@ -124,7 +127,8 @@ namespace Project.Gameplay.Gameplay.Figures
                 description.TurnPatternsId,
                 stats,
                 team,
-                figureConfig.InfoId);
+                figureConfig.InfoId,
+                _triggerService);
 
             if (!string.IsNullOrEmpty(description.LootTableId))
             {

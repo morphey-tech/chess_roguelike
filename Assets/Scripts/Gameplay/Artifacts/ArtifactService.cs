@@ -2,10 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using MessagePipe;
 using Project.Core.Core.Configs.Artifacts;
 using Project.Core.Core.Configs.Gameplay;
 using Project.Core.Core.Logging;
+using Project.Core.Core.Triggers;
 using Project.Gameplay.Gameplay.Artifacts.Effects;
+using Project.Gameplay.Gameplay.Artifacts.Messages;
 using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.Gameplay.UI;
 using Project.Gameplay.UI;
@@ -15,8 +18,9 @@ namespace Project.Gameplay.Gameplay.Artifacts
 {
     /// <summary>
     /// Service for managing player's artifacts during a run.
+    /// Registers artifact triggers automatically.
     /// </summary>
-    public sealed class ArtifactService
+    public sealed class ArtifactService : IDisposable
     {
         public int ArtifactCount => _artifacts.Count;
         public int TotalStackCount => _artifacts.Sum(a => a.Stack);
@@ -25,24 +29,33 @@ namespace Project.Gameplay.Gameplay.Artifacts
 
         private readonly List<ArtifactInstance> _artifacts = new();
         private readonly ArtifactFactory _factory;
-        private readonly ArtifactTriggerService _triggerService;
+        private readonly TriggerService _triggerService;
+        private readonly IPublisher<ArtifactAddedMessage> _addedPublisher;
+        private readonly IPublisher<ArtifactRemovedMessage> _removedPublisher;
+        private readonly IPublisher<ArtifactsClearedMessage> _clearedPublisher;
         private readonly ConfigProvider _configProvider;
         private readonly ILogger<ArtifactService> _logger;
-        
+
         private int _maxArtifacts = 8;  // Default
 
         [Inject]
         private ArtifactService(
             ArtifactFactory factory,
-            ArtifactTriggerService triggerService,
+            TriggerService triggerService,
+            IPublisher<ArtifactAddedMessage> addedPublisher,
+            IPublisher<ArtifactRemovedMessage> removedPublisher,
+            IPublisher<ArtifactsClearedMessage> clearedPublisher,
             ConfigProvider configProvider,
             ILogService logService)
         {
             _factory = factory;
             _triggerService = triggerService;
+            _addedPublisher = addedPublisher;
+            _removedPublisher = removedPublisher;
+            _clearedPublisher = clearedPublisher;
             _configProvider = configProvider;
             _logger = logService.CreateLogger<ArtifactService>();
-            
+
             // Load max artifacts from config
             LoadMaxArtifacts().Forget();
         }
@@ -51,7 +64,7 @@ namespace Project.Gameplay.Gameplay.Artifacts
         {
             try
             {
-                var gameplayConfig = await _configProvider.Get<GameplayConfig>("gameplay_conf");
+                GameplayConfig? gameplayConfig = await _configProvider.Get<GameplayConfig>("gameplay_conf");
                 _maxArtifacts = gameplayConfig.GetMaxArtifacts();
                 _logger.Debug($"Max artifacts limit: {_maxArtifacts}");
             }
@@ -77,6 +90,7 @@ namespace Project.Gameplay.Gameplay.Artifacts
 
         /// <summary>
         /// Add an artifact. Stacks if same artifact exists.
+        /// Registers artifact triggers automatically.
         /// </summary>
         public async UniTask<ArtifactInstance> Add(string configId, int stackCount = 1)
         {
@@ -96,10 +110,7 @@ namespace Project.Gameplay.Gameplay.Artifacts
 
                 existing.Stack += stackCount;
                 _logger.Info($"Artifact stacked: {configId} x{existing.Stack}");
-
-                _triggerService.InvalidateCache();
-                TryOpenOrRefreshArtifactsWindow();
-
+                _addedPublisher.Publish(new ArtifactAddedMessage(existing));
                 return existing;
             }
 
@@ -110,12 +121,14 @@ namespace Project.Gameplay.Gameplay.Artifacts
             };
 
             _artifacts.Add(instance);
+            
+            // Register trigger
+            _triggerService.Register(artifact);
+            
             artifact.OnAcquired(new ArtifactContext { OwnerId = 0, ArtifactId = instance.Id });
             _logger.Info($"Artifact acquired: {artifact.ConfigId} x{stackCount} ({artifact.GetType().Name})");
 
-            _triggerService.InvalidateCache();
-            TryOpenOrRefreshArtifactsWindow();
-
+            _addedPublisher.Publish(new ArtifactAddedMessage(instance));
             return instance;
         }
 
@@ -123,7 +136,7 @@ namespace Project.Gameplay.Gameplay.Artifacts
         {
             try
             {
-                var repository = await _configProvider.Get<ArtifactConfigRepository>("artifacts_conf");
+                ArtifactConfigRepository? repository = await _configProvider.Get<ArtifactConfigRepository>("artifacts_conf");
                 return repository.Get(configId);
             }
             catch (Exception ex)
@@ -133,38 +146,22 @@ namespace Project.Gameplay.Gameplay.Artifacts
             }
         }
 
-        private static void TryOpenOrRefreshArtifactsWindow()
-        {
-            try
-            {
-                if (!UIService.IsValid) return;
-
-                if (UIService.IsVisible<ArtifactsWindow>())
-                {
-                    var window = UIService.FindWindow<ArtifactsWindow>();
-                    window?.Refresh();
-                }
-                else
-                {
-                    UIService.ShowAsync<ArtifactsWindow>().Forget();
-                }
-            }
-            catch (Exception ex)
-            {
-                UnityEngine.Debug.LogWarning($"Failed to open/refresh artifacts window: {ex.Message}");
-            }
-        }
-
         public bool Remove(string instanceId)
         {
             ArtifactInstance? instance = Find(instanceId);
-            if (instance == null) return false;
+            if (instance == null)
+            {
+                return false;
+            }
 
+            // Unregister trigger
+            _triggerService.Unregister(instance.Artifact);
+            
             instance.Artifact.OnRemoved(new ArtifactContext { OwnerId = 0, ArtifactId = instance.Id });
             _artifacts.Remove(instance);
             _logger.Info($"Artifact removed: {instance.ConfigId}");
 
-            _triggerService.InvalidateCache();
+            _removedPublisher.Publish(new ArtifactRemovedMessage(instance.ConfigId));
 
             return true;
         }
@@ -223,13 +220,18 @@ namespace Project.Gameplay.Gameplay.Artifacts
         {
             foreach (ArtifactInstance? instance in _artifacts)
             {
+                _triggerService.Unregister(instance.Artifact);
                 instance.Artifact.OnRemoved(new ArtifactContext { OwnerId = 0, ArtifactId = instance.Id });
             }
             _artifacts.Clear();
-
-            _triggerService.InvalidateCache();
-
+            _clearedPublisher.Publish(new ArtifactsClearedMessage());
             _logger.Info("All artifacts cleared");
+        }
+
+        public void Dispose()
+        {
+            Clear();
+            _triggerService.Dispose();
         }
     }
 }

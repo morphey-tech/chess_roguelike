@@ -11,7 +11,7 @@ namespace Project.Gameplay.Gameplay.Combat.Visual
         public Type EventType => typeof(AttackVisualEvent);
         public IEnumerable<IVisualCommand> Map(ICombatVisualEvent visualEvent)
         {
-            var evt = (AttackVisualEvent)visualEvent;
+            AttackVisualEvent evt = (AttackVisualEvent)visualEvent;
             yield return new AttackCommand(new AttackVisualContext(
                 evt.AttackerId,
                 evt.TargetPosition,
@@ -84,7 +84,7 @@ namespace Project.Gameplay.Gameplay.Combat.Visual
         public Type EventType => typeof(BeamVisualEvent);
         public IEnumerable<IVisualCommand> Map(ICombatVisualEvent visualEvent)
         {
-            var evt = (BeamVisualEvent)visualEvent;
+            BeamVisualEvent evt = (BeamVisualEvent)visualEvent;
             yield return new BeamCommand(new BeamVisualContext(
                 evt.AttackerId,
                 evt.TargetId,

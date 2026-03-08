@@ -82,6 +82,7 @@ namespace Project.Gameplay.Gameplay.UI
         {
             _figureInfoCache = await _configProvider.Get<FigureInfoConfigRepository>("figures_info_conf");
             _passiveCache = await _configProvider.Get<PassiveConfigRepository>("passives_conf");
+            await UIService.Initialized;
             _window = await UIService.GetOrCreateAsync<FigureInfoWindow>();
         }
 

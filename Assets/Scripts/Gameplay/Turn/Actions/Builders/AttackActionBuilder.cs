@@ -15,7 +15,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Builders
                 builderContext.AttackResolver,
                 builderContext.CombatResolver,
                 builderContext.VisualPlanner,
-                builderContext.Passives,
+                builderContext.TriggerService,
                 builderContext.VisualPipeline,
                 builderContext.DeathPublisher,
                 builderContext.AttackStartedPublisher,

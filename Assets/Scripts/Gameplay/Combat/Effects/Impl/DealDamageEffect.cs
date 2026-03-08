@@ -38,7 +38,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
                 "primary", Array.Empty<IDamageModifier>());
             (DamageResult result, bool _) = context.DamageApplier.Apply(context, dmgCtx);
 
-            context.AddVisualEvent(new DamageVisualEvent(_target.Id, result.Final, _isCritical,
+            context.AddVisualEvent(new DamageVisualEvent(_target.EntityId, result.Final, _isCritical,
                 _isDodged,"primary"));
             context.ActionContext.LastDamageDealt = result.Final;
 

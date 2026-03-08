@@ -45,7 +45,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
 
                 // IsParallel = true — команды будут выполнены параллельно
                 context.AddVisualEvent(new DamageVisualEvent(
-                    target.Id,
+                    target.EntityId,
                     result.Final,
                     isCritical: false,
                     isDodged: false,

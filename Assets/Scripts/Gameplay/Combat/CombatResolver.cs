@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
+using Project.Core.Core.Triggers;
 using Project.Gameplay.Gameplay.Combat.Contexts;
 using Project.Gameplay.Gameplay.Combat.Effects;
 using Project.Gameplay.Gameplay.Combat.Effects.Impl;
@@ -19,15 +20,15 @@ namespace Project.Gameplay.Gameplay.Combat
     public sealed class CombatResolver
     {
         private readonly ILogger<CombatResolver> _logger;
-        private readonly PassiveTriggerService _passiveTriggerService;
+        private readonly TriggerService _triggerService;
 
         [Inject]
         private CombatResolver(
             ILogService logService,
-            PassiveTriggerService passiveTriggerService)
+            TriggerService triggerService)
         {
             _logger = logService.CreateLogger<CombatResolver>();
-            _passiveTriggerService = passiveTriggerService;
+            _triggerService = triggerService;
         }
 
         public CombatResult Resolve(HitContext context)
@@ -76,7 +77,7 @@ namespace Project.Gameplay.Gameplay.Combat
         /// </summary>
         public void ApplyPassivesForPreview(Figure attacker, Figure target, BeforeHitContext context)
         {
-            _passiveTriggerService.TriggerBeforeHit(attacker, target, context);
+            _triggerService.TriggerBeforeHit(attacker, target, context);
         }
 
         /// <summary>
@@ -93,7 +94,12 @@ namespace Project.Gameplay.Gameplay.Combat
                 BaseDamage = attacker.Stats.Attack.Value
             };
 
-            _passiveTriggerService.TriggerBeforeHit(attacker, target, beforeContext);
+            bool hitProceeds = _triggerService.TriggerBeforeHit(attacker, target, beforeContext);
+            if (!hitProceeds)
+            {
+                // Hit cancelled (e.g., by dodge) - preview shows 0 damage
+                return 0f;
+            }
 
             float atk = attacker.Stats.Attack.Value;
             float def = target.Stats.Defence.Value;

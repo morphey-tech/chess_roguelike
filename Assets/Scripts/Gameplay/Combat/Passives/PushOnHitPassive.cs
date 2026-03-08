@@ -1,8 +1,7 @@
 using Project.Core.Core.Grid;
+using Project.Core.Core.Triggers;
 using Project.Gameplay.Gameplay.Combat.Contexts;
 using Project.Gameplay.Gameplay.Combat.Effects.Impl;
-using Project.Gameplay.Gameplay.Combat.Triggers;
-using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
 using UnityEngine;
 
@@ -15,7 +14,9 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
     public sealed class PushOnHitPassive : IPassive, IOnAfterHit
     {
         public string Id { get; }
-        public int Priority => 50;
+        public int Priority => TriggerPriorities.Normal;
+        public TriggerGroup Group => TriggerGroup.Default;
+        public TriggerPhase Phase => TriggerPhase.AfterHit;
 
         private readonly int _bonusDamageIfBlocked;
 
@@ -25,48 +26,60 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
             _bonusDamageIfBlocked = bonusDamageIfBlocked;
         }
 
-        public void OnAfterHit(Figure owner, AfterHitContext context)
+        public bool Matches(TriggerContext context)
         {
-            if (owner != context.Attacker)
+            if (context.Type != TriggerType.OnAfterHit)
             {
-                Debug.Log($"[PushOnHit] Skipped: owner={owner} is not attacker={context.Attacker}");
-                return;
+                return false;
+            }
+            if (!context.TryGetData<AfterHitContext>(out AfterHitContext afterHit))
+            {
+                return false;
+            }
+            return context.Actor == afterHit.Attacker;
+        }
+
+        public TriggerResult Execute(TriggerContext context)
+        {
+            if (!context.TryGetData<AfterHitContext>(out AfterHitContext afterHit))
+            {
+                return TriggerResult.Continue;
             }
 
-            if (context.TargetDied || context.Target == null || context.Grid == null)
+            if (afterHit.TargetDied || afterHit.Target == null || afterHit.Grid == null)
             {
-                Debug.Log($"[PushOnHit] Skipped: TargetDied={context.TargetDied}, Target={context.Target}, Grid={context.Grid}");
-                return;
+                Debug.Log($"[PushOnHit] Skipped: TargetDied={afterHit.TargetDied}, Target={afterHit.Target}, Grid={afterHit.Grid}");
+                return TriggerResult.Continue;
             }
 
-            GridPosition attackerPos = context.AttackerPosition;
-            GridPosition targetPos = context.TargetPosition;
+            GridPosition attackerPos = afterHit.AttackerPosition;
+            GridPosition targetPos = afterHit.TargetPosition;
 
             if (!attackerPos.IsValid || !targetPos.IsValid)
             {
                 Debug.Log($"[PushOnHit] Skipped: invalid positions");
-                return;
+                return TriggerResult.Continue;
             }
 
             // Calculate push direction (away from attacker)
-            (int dirRow, int dirCol) = context.GetAttackDirection();
+            (int dirRow, int dirCol) = afterHit.GetAttackDirection();
             GridPosition pushTo = new(targetPos.Row + dirRow, targetPos.Column + dirCol);
 
-            Debug.Log($"[PushOnHit] Trying to push {context.Target} from ({targetPos.Row},{targetPos.Column}) to ({pushTo.Row},{pushTo.Column})");
+            Debug.Log($"[PushOnHit] Trying to push {afterHit.Target} from ({targetPos.Row},{targetPos.Column}) to ({pushTo.Row},{pushTo.Column})");
 
-            if (context.Grid.IsInside(pushTo))
+            if (afterHit.Grid.IsInside(pushTo))
             {
-                BoardCell pushCell = context.Grid.GetBoardCell(pushTo);
+                BoardCell pushCell = afterHit.Grid.GetBoardCell(pushTo);
                 if (pushCell.IsFree)
                 {
                     // Move in grid (state change)
-                    context.Grid.RemoveFigure(context.Target);
-                    context.Grid.PlaceFigure(context.Target, pushTo);
+                    afterHit.Grid.RemoveFigure(afterHit.Target);
+                    afterHit.Grid.PlaceFigure(afterHit.Target, pushTo);
 
                     // Add effect for visual update
-                    context.Effects.Add(new PushEffect(owner, context.Target, targetPos, pushTo));
-                    Debug.Log($"[PushOnHit] {context.Target} pushed to ({pushTo.Row},{pushTo.Column})");
-                    return;
+                    afterHit.Effects.Add(new PushEffect(afterHit.Attacker, afterHit.Target, targetPos, pushTo));
+                    Debug.Log($"[PushOnHit] {afterHit.Target} pushed to ({pushTo.Row},{pushTo.Column})");
+                    return TriggerResult.Continue;
                 }
 
                 Debug.Log($"[PushOnHit] Push blocked: cell occupied by {pushCell.OccupiedBy}");
@@ -77,8 +90,10 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
             }
 
             // Push blocked - deal bonus damage
-            context.Effects.Add(new BonusDamageEffect(owner, context.Target, _bonusDamageIfBlocked, "push blocked"));
-            Debug.Log($"[PushOnHit] {context.Target} takes {_bonusDamageIfBlocked} bonus damage (push blocked)");
+            afterHit.Effects.Add(new BonusDamageEffect(afterHit.Attacker, afterHit.Target, _bonusDamageIfBlocked, "push blocked"));
+            Debug.Log($"[PushOnHit] {afterHit.Target} takes {_bonusDamageIfBlocked} bonus damage (push blocked)");
+
+            return TriggerResult.Continue;
         }
     }
 }

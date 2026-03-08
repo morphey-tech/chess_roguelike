@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using Project.Core.Core.Triggers;
 using Project.Gameplay.Gameplay.Combat.Contexts;
-using Project.Gameplay.Gameplay.Combat.Triggers;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Figures.StatusEffects;
 using Project.Gameplay.Gameplay.Grid;
@@ -15,7 +15,9 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
     public class RoyalPresencePassive : IPassive, IOnTurnStart, IOnMove
     {
         public string Id { get; }
-        public int Priority => 100;
+        public int Priority => TriggerPriorities.Normal;
+        public TriggerGroup Group => TriggerGroup.Default;
+        public TriggerPhase Phase => TriggerPhase.AfterMove;
 
         private readonly float _damageBonus;
         private readonly int _auraRadius;
@@ -27,32 +29,66 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
             _auraRadius = auraRadius;
         }
 
-        void IOnTurnStart.OnTurnStart(Figure figure, TurnContext context)
+        public bool Matches(TriggerContext context)
         {
+            return context.Type == TriggerType.OnTurnStart || context.Type == TriggerType.OnMove;
+        }
+
+        public TriggerResult Execute(TriggerContext context)
+        {
+            switch (context.Type)
+            {
+                case TriggerType.OnTurnStart:
+                    ExecuteTurnStart(context);
+                    break;
+                case TriggerType.OnMove:
+                    ExecuteMove(context);
+                    break;
+            }
+
+            return TriggerResult.Continue;
+        }
+
+        private static void ExecuteTurnStart(TriggerContext context)
+        {
+            if (!(context.Actor is Figure figure))
+            {
+                return;
+            }
             figure.MovedThisTurn = false;
         }
 
-        void IOnMove.OnMove(MoveContext context)
+        private void ExecuteMove(TriggerContext context)
         {
-            if (context.Actor.MovedThisTurn)
+            if (!(context.Actor is Figure actor))
             {
-                BoardGrid grid = context.Grid;
-                BoardCell? kingCell = grid.FindFigure(context.Actor);
-                if (kingCell == null)
-                {
-                    return;
-                }
+                return;
+            }
+            if (!actor.MovedThisTurn)
+            {
+                return;
+            }
+            if (!(context.Data is MoveContext move))
+            {
+                return;
+            }
 
-                List<Figure> alliesInRange = grid.GetFiguresInRadius(kingCell.Position, _auraRadius)
-                    .Where(f => f.Team == context.Actor.Team && f != context.Actor)
-                    .ToList();
+            BoardGrid grid = move.Grid;
+            BoardCell? kingCell = grid.FindFigure(actor);
+            if (kingCell == null)
+            {
+                return;
+            }
 
-                foreach (Figure? ally in alliesInRange)
-                {
-                    ally.Effects.Remove("royal_presence");
-                    RoyalPresenceBuffEffect buff = new(context.Actor.Id.ToString(), _damageBonus, turns: 1);
-                    ally.Effects.AddOrStack(buff);
-                }
+            List<Figure> alliesInRange = grid.GetFiguresInRadius(kingCell.Position, _auraRadius)
+                .Where(f => f.Team == actor.Team && f != actor)
+                .ToList();
+
+            foreach (Figure? ally in alliesInRange)
+            {
+                ally.Effects.Remove("royal_presence");
+                RoyalPresenceBuffEffect buff = new(actor.Id.ToString(), _damageBonus, turns: 1);
+                ally.Effects.AddOrStack(buff);
             }
         }
     }

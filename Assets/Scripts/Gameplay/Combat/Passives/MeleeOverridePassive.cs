@@ -1,6 +1,5 @@
+using Project.Core.Core.Triggers;
 using Project.Gameplay.Gameplay.Combat.Contexts;
-using Project.Gameplay.Gameplay.Combat.Triggers;
-using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
 
 namespace Project.Gameplay.Gameplay.Combat.Passives
@@ -12,7 +11,9 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
     public class MeleeOverridePassive : IPassive, IOnBeforeHit
     {
         public string Id { get; }
-        public int Priority => 100;
+        public int Priority => TriggerPriorities.Normal;
+        public TriggerGroup Group => TriggerGroup.Multiplicative;
+        public TriggerPhase Phase => TriggerPhase.BeforeHit;
 
         private readonly float _meleeDamageMultiplier;
 
@@ -22,20 +23,53 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
             _meleeDamageMultiplier = meleeDamageMultiplier;
         }
 
-        void IOnBeforeHit.OnBeforeHit(Figure owner, BeforeHitContext context)
+        public bool Matches(TriggerContext context)
         {
-            BoardGrid grid = context.Grid;
-            BoardCell? attackerCell = grid.FindFigure(context.Attacker);
-            
+            if (context.Type != TriggerType.OnBeforeHit)
+            {
+                return false;
+            }
+            if (!context.TryGetData<BeforeHitContext>(out BeforeHitContext beforeHit))
+            {
+                return false;
+            }
+
+            BoardGrid grid = beforeHit.Grid;
+            BoardCell? attackerCell = grid.FindFigure(beforeHit.Attacker);
             if (attackerCell == null)
             {
-                return;
+                return false;
+            }
+
+            foreach (BoardCell? cell in grid.GetAdjacentCells(attackerCell.Position))
+            {
+                if (cell.OccupiedBy != null && cell.OccupiedBy.Team != beforeHit.Attacker.Team)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public TriggerResult Execute(TriggerContext context)
+        {
+            if (!context.TryGetData<BeforeHitContext>(out BeforeHitContext beforeHit))
+            {
+                return TriggerResult.Continue;
+            }
+
+            BoardGrid grid = beforeHit.Grid;
+            BoardCell? attackerCell = grid.FindFigure(beforeHit.Attacker);
+
+            if (attackerCell == null)
+            {
+                return TriggerResult.Continue;
             }
 
             bool enemyAdjacent = false;
             foreach (BoardCell? cell in grid.GetAdjacentCells(attackerCell.Position))
             {
-                if (cell.OccupiedBy != null && cell.OccupiedBy.Team != context.Attacker.Team)
+                if (cell.OccupiedBy != null && cell.OccupiedBy.Team != beforeHit.Attacker.Team)
                 {
                     enemyAdjacent = true;
                     break;
@@ -44,8 +78,10 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
 
             if (enemyAdjacent)
             {
-                context.BonusDamage *= _meleeDamageMultiplier;
+                beforeHit.BonusDamage *= _meleeDamageMultiplier;
             }
+
+            return TriggerResult.Continue;
         }
     }
 }

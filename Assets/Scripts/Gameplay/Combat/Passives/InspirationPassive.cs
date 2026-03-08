@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using Project.Core.Core.Random;
+using Project.Core.Core.Triggers;
 using Project.Gameplay.Gameplay.Combat.Contexts;
-using Project.Gameplay.Gameplay.Combat.Triggers;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Figures.StatusEffects;
 using Project.Gameplay.Gameplay.Grid;
@@ -10,12 +10,14 @@ using Project.Gameplay.Gameplay.Grid;
 namespace Project.Gameplay.Gameplay.Combat.Passives
 {
     /// <summary>
-    /// Inspiration: at turn start, grants a random buff to a random adjacent ally.
+    /// Inspiration: at turn start, grants a buff to a random adjacent ally.
     /// </summary>
     public class InspirationPassive : IPassive, IOnTurnStart
     {
         public string Id { get; }
-        public int Priority => 100;
+        public int Priority => TriggerPriorities.Normal;
+        public TriggerGroup Group => TriggerGroup.Default;
+        public TriggerPhase Phase => TriggerPhase.OnTurnStart;
 
         private readonly float _attackBonus;
         private readonly float _defenceBonus;
@@ -27,7 +29,7 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
             float attackBonus,
             float defenceBonus,
             float evasionBonus,
-            IRandomService random,
+            IRandomService random,  
             int buffDuration = 2)
         {
             Id = id;
@@ -38,18 +40,48 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
             _random = random;
         }
 
-        void IOnTurnStart.OnTurnStart(Figure figure, TurnContext context)
+        public bool Matches(TriggerContext context)
         {
-            if (context.Team != figure.Team)
+            if (context.Type != TriggerType.OnTurnStart)
             {
-                return;
+                return false;
+            }
+            if (!(context.Data is TurnContext turn))
+            {
+                return false;
+            }
+            if (!(context.Actor is Figure figure))
+            {
+                return false;
+            }
+            return turn.Team == figure.Team;
+        }
+
+        public TriggerResult Execute(TriggerContext context)
+        {
+            if (context.Type != TriggerType.OnTurnStart)
+            {
+                return TriggerResult.Continue;
+            }
+            if (!(context.Data is TurnContext turn))
+            {
+                return TriggerResult.Continue;
+            }
+            if (!(context.Actor is Figure figure))
+            {
+                return TriggerResult.Continue;
             }
 
-            BoardGrid grid = context.Grid;
+            if (turn.Team != figure.Team)
+            {
+                return TriggerResult.Continue;
+            }
+
+            BoardGrid grid = turn.Grid;
             BoardCell? ownerCell = grid.FindFigure(figure);
             if (ownerCell == null)
             {
-                return;
+                return TriggerResult.Continue;
             }
 
             List<Figure> adjacentAllies = grid.GetAdjacentCells(ownerCell.Position)
@@ -60,7 +92,7 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
 
             if (adjacentAllies.Count == 0)
             {
-                return;
+                return TriggerResult.Continue;
             }
 
             Figure target = adjacentAllies[_random.Range(0, adjacentAllies.Count - 1)];
@@ -75,6 +107,8 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
 
             InspirationBuffEffect buff = new(buffType, value, _buffDuration);
             target.Effects.AddOrStack(buff);
+
+            return TriggerResult.Continue;
         }
     }
 }

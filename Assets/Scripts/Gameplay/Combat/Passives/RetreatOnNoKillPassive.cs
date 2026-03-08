@@ -1,7 +1,6 @@
+using Project.Core.Core.Triggers;
 using Project.Gameplay.Gameplay.Combat.Contexts;
 using Project.Gameplay.Gameplay.Combat.Effects.Impl;
-using Project.Gameplay.Gameplay.Combat.Triggers;
-using Project.Gameplay.Gameplay.Figures;
 using UnityEngine;
 
 namespace Project.Gameplay.Gameplay.Combat.Passives
@@ -14,8 +13,10 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
     public sealed class RetreatOnNoKillPassive : IPassive, IOnAfterHit
     {
         public string Id { get; }
-        public int Priority => 40;
-        
+        public int Priority => TriggerPriorities.Normal;
+        public TriggerGroup Group => TriggerGroup.Default;
+        public TriggerPhase Phase => TriggerPhase.AfterHit;
+
         private readonly int _retreatDistance;
 
         public RetreatOnNoKillPassive(string id, int retreatDistance)
@@ -24,22 +25,36 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
             _retreatDistance = retreatDistance;
         }
 
-        public void OnAfterHit(Figure owner, AfterHitContext context)
+        public bool Matches(TriggerContext context)
         {
-            if (owner != context.Attacker)
+            if (context.Type != TriggerType.OnAfterHit)
             {
-                Debug.Log($"[RetreatOnNoKill] Skipped: owner={owner} is not attacker={context.Attacker}");
-                return;
+                return false;
+            }
+            if (!context.TryGetData<AfterHitContext>(out AfterHitContext afterHit))
+            {
+                return false;
+            }
+            return context.Actor == afterHit.Attacker;
+        }
+
+        public TriggerResult Execute(TriggerContext context)
+        {
+            if (!context.TryGetData<AfterHitContext>(out AfterHitContext afterHit))
+            {
+                return TriggerResult.Continue;
             }
 
-            if (context.TargetDied)
+            if (afterHit.TargetDied)
             {
-                Debug.Log($"[RetreatOnNoKill] {owner}: target died, no bonus move");
-                return;
+                Debug.Log($"[RetreatOnNoKill] {context.Actor}: target died, no bonus move");
+                return TriggerResult.Continue;
             }
 
-            context.Effects.Add(new BonusMoveRequestEffect(context.Attacker, _retreatDistance));
-            Debug.Log($"[RetreatOnNoKill] {owner}: target survived! Granting bonus move distance={_retreatDistance}");
+            afterHit.Effects.Add(new BonusMoveRequestEffect(afterHit.Attacker, _retreatDistance));
+            Debug.Log($"[RetreatOnNoKill] {context.Actor}: target survived! Granting bonus move distance={_retreatDistance}");
+
+            return TriggerResult.Continue;
         }
     }
 }

@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Project.Gameplay.Gameplay.Combat.Contexts;
-using Sirenix.Utilities;
 
 namespace Project.Gameplay.Gameplay.Figures.StatusEffects
 {
@@ -9,12 +8,14 @@ namespace Project.Gameplay.Gameplay.Figures.StatusEffects
     {
         private readonly Figure _owner;
         private readonly Dictionary<string, IStatusEffect> _effects = new();
-       
+
+        private List<IStatusEffect>? _currentEffects;
+
         public StatusEffectSystem(Figure owner)
         {
             _owner = owner;
         }
-        
+
         public void AddOrStack(IStatusEffect effect)
         {
             if (_effects.TryGetValue(effect.Id, out IStatusEffect existing))
@@ -39,40 +40,21 @@ namespace Project.Gameplay.Gameplay.Figures.StatusEffects
             }
         }
 
-        public void TriggerBeforeHit(BeforeHitContext ctx)
+        /// <summary>
+        /// Get all active status effects.
+        /// </summary>
+        public IEnumerable<IStatusEffect> GetEffects()
         {
-            _effects.ForEach(e =>
-            {
-                e.Value.OnBeforeHit(_owner, ctx);
-            });
-            Cleanup();
+            return _effects.Values;
         }
 
-        public void TriggerTurnStart(Figure owner, TurnContext ctx)
-        {
-            _effects.ForEach(e =>
-            {
-                e.Value.OnTurnStart(owner, ctx);
-            });
-            Cleanup();
-        }
-
-        public void TriggerAfterHit(AfterHitContext ctx)
-        {
-            _effects.ForEach(e =>
-            {
-                e.Value.OnAfterHit(_owner, ctx);
-            });
-            Cleanup();
-        }
-        
         private void Cleanup()
         {
             List<string> expired = _effects
                 .Where(e => e.Value.IsExpired)
                 .Select(e => e.Key)
                 .ToList();
-            
+
             foreach (string key in expired)
             {
                 _effects[key].OnRemove(_owner);
