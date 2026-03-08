@@ -1,3 +1,4 @@
+using Project.Core.Core.Combat;
 using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
@@ -181,7 +182,7 @@ namespace Project.Gameplay.Gameplay.Selection
                 _config.HpBarVisibilityModeAllies,
                 _config.HpBarVisibilityModeEnemies,
                 figure.Team,
-                isHovered: _hoveredFigureId == figure.EntityId,
+                isHovered: _hoveredFigureId == figure.Id,
                 hasFriendlySelection: _selectedFriendlyFigureId.HasValue);
         }
 

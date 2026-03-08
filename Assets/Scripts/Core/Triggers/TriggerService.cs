@@ -18,6 +18,11 @@ namespace Project.Core.Core.Triggers
         private readonly object _lock = new();
         private TriggerExecutor<ITrigger>? _executor;
         private bool _isDirty = true;
+        
+        /// <summary>
+        /// Cache: (TriggerType, TriggerPhase) → filtered triggers
+        /// </summary>
+        private readonly Dictionary<(TriggerType, TriggerPhase), List<ITrigger>> _matchesCache = new();
 
         [Inject]
         public TriggerService(ILogService logService)
@@ -36,6 +41,7 @@ namespace Project.Core.Core.Triggers
                 {
                     _triggers.Add(trigger);
                     _isDirty = true;
+                    _matchesCache.Clear();  // Invalidate cache
                 }
             }
         }
@@ -50,6 +56,7 @@ namespace Project.Core.Core.Triggers
                 if (_triggers.Remove(trigger))
                 {
                     _isDirty = true;
+                    _matchesCache.Clear();  // Invalidate cache
                 }
             }
         }
@@ -68,11 +75,19 @@ namespace Project.Core.Core.Triggers
         public TriggerResult Execute(TriggerType type, TriggerPhase phase, TriggerContext context)
         {
             List<ITrigger> triggers;
+            var cacheKey = (type, phase);
+            
             lock (_lock)
             {
-                triggers = _triggers.Where(t => t.Matches(context))
-                                   .OrderBy(t => t.Priority)
-                                   .ToList();
+                // Try get from cache
+                if (!_matchesCache.TryGetValue(cacheKey, out triggers))
+                {
+                    // Cache miss — filter and cache
+                    triggers = _triggers.Where(t => t.Matches(context))
+                                       .OrderBy(t => t.Priority)
+                                       .ToList();
+                    _matchesCache[cacheKey] = triggers;
+                }
             }
 
             if (triggers.Count == 0)
@@ -98,6 +113,7 @@ namespace Project.Core.Core.Triggers
         public void Dispose()
         {
             _triggers.Clear();
+            _matchesCache.Clear();
             _isDirty = true;
         }
     }

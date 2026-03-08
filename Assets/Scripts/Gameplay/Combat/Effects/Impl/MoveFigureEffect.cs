@@ -28,7 +28,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
         {
             context.Logger.Info($"{_figure} moved to ({_newPosition.Row}, {_newPosition.Column})");
 
-            context.AddVisualEvent(new MoveVisualEvent(_figure.EntityId, _newPosition));
+            context.AddVisualEvent(new MoveVisualEvent(_figure.Id, _newPosition));
             
             // Domain: Update context if needed
             if (_updateActionContextFrom)

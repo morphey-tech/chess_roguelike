@@ -1,3 +1,4 @@
+using Project.Core.Core.Combat;
 using Project.Core.Core.Triggers;
 using Project.Gameplay.Gameplay.Combat.Contexts;
 
@@ -33,7 +34,8 @@ namespace Project.Gameplay.Gameplay.Figures.StatusEffects
 
         public virtual bool Matches(TriggerContext context)
         {
-            return true; // Default: match all contexts for status effects
+            // Auto-remove expired effects
+            return !IsExpired;
         }
 
         public virtual TriggerResult Execute(TriggerContext context)

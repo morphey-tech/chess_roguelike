@@ -1,10 +1,12 @@
+using JetBrains.Annotations;
+using Project.Core.Core.Combat;
 using Project.Core.Core.Configs.Stats;
 using Project.Core.Core.Grid;
-using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
 
 namespace Project.Gameplay.Gameplay.Attack
 {
+    [UsedImplicitly]
     public sealed class TargetingService : ITargetingService
     {
         public bool CanTarget(GridPosition from, GridPosition to, AttackProfile attack,

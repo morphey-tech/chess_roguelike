@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Project.Core.Core.Assets;
+using Project.Core.Core.Combat;
 using Project.Core.Core.Configs.Figure;
 using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;

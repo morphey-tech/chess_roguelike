@@ -38,7 +38,7 @@ namespace Project.Core.Core.Triggers
             return this;
         }
 
-        public TriggerContextBuilder WithValue(int value)
+        public TriggerContextBuilder WithValue(float value)
         {
             _context.BaseValue = value;
             _context.CurrentValue = value;

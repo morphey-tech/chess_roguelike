@@ -1,3 +1,5 @@
+using Project.Core.Core.Combat;
+
 namespace Project.Gameplay.Gameplay.Figures
 {
     public readonly struct FigureDeathMessage

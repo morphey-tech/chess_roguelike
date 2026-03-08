@@ -1,3 +1,4 @@
+using Project.Core.Core.Combat;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using MessagePipe;
@@ -151,10 +152,10 @@ namespace Project.Gameplay.Gameplay.Prepare
                 }
                 context.PreviousSelectedId = null;
 
-                int figureIdForView = figure.EntityId;
+                int figureIdForView = figure.Id;
                 context.RunState.ReturnToHand(figureState.Id);
                 context.Grid.RemoveFigure(figure);
-                _figureRemovedPublisher.Publish(new FigureBoardRemovedMessage(figure.EntityId, figure.Team));
+                _figureRemovedPublisher.Publish(new FigureBoardRemovedMessage(figure.Id, figure.Team));
                 _figureRegistry.Unregister(figure);
 
                 await _figurePresenter.RemoveFigureAsync(figureIdForView).AttachExternalCancellation(cancellationToken);

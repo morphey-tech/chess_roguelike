@@ -1,3 +1,4 @@
+using Project.Core.Core.Combat;
 using Project.Core.Core.Grid;
 
 namespace Project.Gameplay.Gameplay.Figures

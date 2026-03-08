@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Linq;
+using Project.Core.Core.Combat;
 using Project.Core.Core.Grid;
 using Project.Core.Core.Triggers;
 using Project.Gameplay.Gameplay.Combat;
@@ -23,21 +25,13 @@ namespace Project.Gameplay.Gameplay.Figures
         public bool MovedThisTurn { get; set; }
         public GridPosition? PreviousPosition { get; set; }
         public string? LootTableId { get; set; }
+        string ITriggerEntity.Id => base.Id.ToString();
 
-        // ITriggerEntity implementation
-        string ITriggerEntity.Id => TriggerId;
-        public string TriggerId => base.Id.ToString();
-
-        /// <summary>
-        /// Numeric entity ID for visual and grid systems.
-        /// </summary>
-        public int EntityId => base.Id;
-
-        private readonly TriggerService? _triggerService;
+        private readonly TriggerService _triggerService;
 
         public Figure(int id, string typeId, string movementId, string attackId,
-            string turnPatternsId, FigureStats stats, Team team, string? infoId = null,
-            TriggerService? triggerService = null) : base(id)
+            string turnPatternsId, FigureStats stats, Team team,
+            TriggerService triggerService, string? infoId = null) : base(id)
         {
             TypeId = typeId;
             MovementId = movementId;
@@ -47,7 +41,7 @@ namespace Project.Gameplay.Gameplay.Figures
             Stats = stats;
             Team = team;
             _triggerService = triggerService;
-            Effects = new(this);
+            Effects = new(this, triggerService);
         }
 
         public void SetTurnPatternSet(TurnPattern pattern)
@@ -61,6 +55,13 @@ namespace Project.Gameplay.Gameplay.Figures
             {
                 return;
             }
+            
+            // Prevent duplicate passives
+            if (BasePassives.Any(p => p.GetType() == passive.GetType()))
+            {
+                return;
+            }
+            
             BasePassives.Add(passive);
             _triggerService?.Register(passive);
         }

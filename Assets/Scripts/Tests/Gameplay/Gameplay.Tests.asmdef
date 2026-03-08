@@ -1,0 +1,22 @@
+{
+    "name": "Gameplay.Tests",
+    "rootNamespace": "Project.Gameplay.Tests",
+    "references": [
+        "Project.Core",
+        "Project.Gameplay",
+        "Gameplay",
+        "Core",
+        "UniRx"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

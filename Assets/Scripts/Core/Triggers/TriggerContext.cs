@@ -49,14 +49,14 @@ namespace Project.Core.Core.Triggers
         /// Base value (original, unmodified). Immutable after creation.
         /// Use MutableData for modifications.
         /// </summary>
-        public int BaseValue { get; internal set; }
+        public float BaseValue { get; internal set; }
 
         internal TriggerContext() { }
 
         /// <summary>
         /// Current value (can be modified by triggers).
         /// </summary>
-        public int CurrentValue { get; set; }
+        public float CurrentValue { get; set; }
 
         /// <summary>
         /// Optional additional data.
@@ -93,7 +93,7 @@ namespace Project.Core.Core.Triggers
         /// <summary>
         /// Total delta from all modifications.
         /// </summary>
-        public int TotalDelta => CurrentValue - BaseValue;
+        public float TotalDelta => CurrentValue - BaseValue;
 
         public static TriggerContext Create(TriggerType type)
         {
@@ -234,9 +234,9 @@ namespace Project.Core.Core.Triggers
         /// <summary>
         /// Modify CurrentValue with trace logging.
         /// </summary>
-        public void ModifyValue(int delta, string source)
+        public void ModifyValue(float delta, string source)
         {
-            int oldValue = CurrentValue;
+            float oldValue = CurrentValue;
             CurrentValue += delta;
             LogMutation(source, delta, CurrentValue);
             AddTrace(source, oldValue, delta, CurrentValue);
@@ -245,10 +245,10 @@ namespace Project.Core.Core.Triggers
         /// <summary>
         /// Set CurrentValue with trace logging.
         /// </summary>
-        public void SetValue(int newValue, string source)
+        public void SetValue(float newValue, string source)
         {
-            int oldValue = CurrentValue;
-            int delta = newValue - CurrentValue;
+            float oldValue = CurrentValue;
+            float delta = newValue - CurrentValue;
             CurrentValue = newValue;
             LogMutation(source, delta, CurrentValue);
             AddTrace(source, oldValue, delta, CurrentValue, isSet: true);
@@ -259,9 +259,9 @@ namespace Project.Core.Core.Triggers
         /// </summary>
         public void MultiplyValue(float multiplier, string source)
         {
-            int oldValue = CurrentValue;
-            CurrentValue = (int)(CurrentValue * multiplier);
-            int delta = CurrentValue - oldValue;
+            float oldValue = CurrentValue;
+            CurrentValue = CurrentValue * multiplier;
+            float delta = CurrentValue - oldValue;
             LogMutation(source, delta, CurrentValue);
             AddTrace(source, oldValue, delta, CurrentValue, multiplier: multiplier);
         }
@@ -274,7 +274,7 @@ namespace Project.Core.Core.Triggers
             CurrentValue = BaseValue;
         }
 
-        private void LogMutation(string source, int delta, int newValue)
+        private void LogMutation(string source, float delta, float newValue)
         {
             _mutationLog ??= new List<MutationRecord>();
             _mutationLog.Add(new MutationRecord
@@ -286,7 +286,7 @@ namespace Project.Core.Core.Triggers
             });
         }
 
-        private void AddTrace(string source, int oldValue, int delta, int newValue, bool isSet = false, float multiplier = 1f)
+        private void AddTrace(string source, float oldValue, float delta, float newValue, bool isSet = false, float multiplier = 1f)
         {
             _traceLog ??= new List<TraceRecord>();
             _traceLog.Add(new TraceRecord
@@ -349,13 +349,13 @@ namespace Project.Core.Core.Triggers
     public sealed class MutationRecord
     {
         public string Source { get; set; } = "";
-        public int Delta { get; set; }
-        public int NewValue { get; set; }
+        public float Delta { get; set; }
+        public float NewValue { get; set; }
         public DateTime Timestamp { get; set; }
 
         public override string ToString()
         {
-            return $"{Source}: {Delta:+#;-#;0} → {NewValue}";
+            return $"{Source}: {Delta:+#.##;-#.##;0} → {NewValue}";
         }
     }
 
@@ -365,9 +365,9 @@ namespace Project.Core.Core.Triggers
     public sealed class TraceRecord
     {
         public string Source { get; set; } = "";
-        public int OldValue { get; set; }
-        public int Delta { get; set; }
-        public int NewValue { get; set; }
+        public float OldValue { get; set; }
+        public float Delta { get; set; }
+        public float NewValue { get; set; }
         public float Multiplier { get; set; } = 1f;
         public bool IsSet { get; set; }
         public DateTime Timestamp { get; set; }

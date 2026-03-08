@@ -105,7 +105,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
                 bool hasSplash = HasSplashPassive(_attacker);
                 
                 context.AddVisualEvent(new DamageVisualEvent(
-                    _target.EntityId,
+                    _target.Id,
                     damageResult.Final,
                     before.IsCritical,
                     before.IsDodged,
@@ -148,8 +148,8 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
                 // Event carries raw base-for-pipeline damage and crit flag; pipeline is applied once on hit.
                 AddPrimaryDeliveryEvent(context, finalDamage, before.IsCritical);
                 context.AddVisualEvent(new ProjectileHitApplyEvent(
-                    _attacker.EntityId,
-                    _target.EntityId,
+                    _attacker.Id,
+                    _target.Id,
                     _targetPosition,
                     finalDamage,
                     before.IsCritical,
@@ -169,10 +169,10 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
             {
                 case DeliveryType.Projectile:
                     context.AddVisualEvent(new ProjectileVisualEvent(
-                        _attacker.EntityId,
+                        _attacker.Id,
                         _attackerPosition,
                         _targetPosition,
-                        _target.EntityId,
+                        _target.Id,
                         _projectileConfigId,
                         finalDamage,
                         isCritical,
@@ -183,23 +183,23 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
                     break;
                 case DeliveryType.Beam:
                     context.AddVisualEvent(new BeamVisualEvent(
-                        _attacker.EntityId,
+                        _attacker.Id,
                         _attackerPosition,
                         _targetPosition,
-                        _target.EntityId,
+                        _target.Id,
                         attackType));
                     break;
                 case DeliveryType.Wave:
                     context.AddVisualEvent(new WaveVisualEvent(
-                        _attacker.EntityId,
+                        _attacker.Id,
                         _attackerPosition,
                         _targetPosition,
-                        _target.EntityId,
+                        _target.Id,
                         attackType));
                     break;
                 default:
                     context.AddVisualEvent(new AttackVisualEvent(
-                        _attacker.EntityId,
+                        _attacker.Id,
                         _targetPosition,
                         attackType));
                     break;

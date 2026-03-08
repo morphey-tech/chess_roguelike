@@ -1,3 +1,4 @@
+using Project.Core.Core.Combat;
 using System;
 using Cysharp.Threading.Tasks;
 using MessagePipe;
@@ -127,8 +128,7 @@ namespace Project.Gameplay.Gameplay.Figures
                 description.TurnPatternsId,
                 stats,
                 team,
-                figureConfig.InfoId,
-                _triggerService);
+                _triggerService, figureConfig.InfoId);
 
             if (!string.IsNullOrEmpty(description.LootTableId))
             {

@@ -38,7 +38,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects.Impl
                 return;
             }
 
-            context.AddVisualEvent(new HealVisualEvent(_target.EntityId, _healedAmount));
+            context.AddVisualEvent(new HealVisualEvent(_target.Id, _healedAmount));
             context.Logger.Info($"{_target} healed for {_healedAmount}. HP: {_target.Stats.CurrentHp.Value}/{_target.Stats.MaxHp}");
         }
     }

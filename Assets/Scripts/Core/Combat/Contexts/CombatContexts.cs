@@ -1,133 +1,141 @@
+using Project.Core.Core.Combat;
+using Project.Core.Core.Grid;
+
 namespace Project.Core.Core.Combat.Contexts
 {
     /// <summary>
-    /// Lightweight damage context for trigger system.
-    /// Uses object references to avoid dependency on Figure.
+    /// Base interface for damage-related contexts.
+    /// Core layer uses object references to avoid dependency on Figure.
     /// </summary>
-    public sealed class DamageContext
+    public interface IDamageContext
     {
         /// <summary>
         /// The attacker (Figure in gameplay layer).
         /// </summary>
-        public object Attacker { get; set; } = null!;
+        object Attacker { get; }
 
         /// <summary>
         /// The target (Figure in gameplay layer).
         /// </summary>
-        public object Target { get; set; } = null!;
+        object Target { get; }
 
         /// <summary>
         /// Base damage before modifiers.
         /// </summary>
-        public int BaseDamage { get; set; }
+        float BaseDamage { get; }
 
         /// <summary>
         /// Damage multiplier (crit, buffs, etc.).
         /// </summary>
-        public float DamageMultiplier { get; set; } = 1f;
+        float DamageMultiplier { get; set; }
 
         /// <summary>
         /// Flat bonus damage added to base.
         /// </summary>
-        public int BonusDamage { get; set; }
+        float BonusDamage { get; set; }
 
         /// <summary>
         /// Is this hit a critical?
         /// </summary>
-        public bool IsCritical { get; set; }
+        bool IsCritical { get; set; }
 
         /// <summary>
         /// Was this hit dodged?
         /// </summary>
-        public bool IsDodged { get; set; }
+        bool IsDodged { get; set; }
 
         /// <summary>
         /// Should this hit be cancelled?
         /// </summary>
+        bool IsCancelled { get; set; }
+    }
+
+    /// <summary>
+    /// Mutable damage context for Core layer operations.
+    /// </summary>
+    public sealed class DamageContext : IDamageContext
+    {
+        public object Attacker { get; set; } = null!;
+        public object Target { get; set; } = null!;
+        public float BaseDamage { get; set; }
+        public float DamageMultiplier { get; set; } = 1f;
+        public float BonusDamage { get; set; }
+        public bool IsCritical { get; set; }
+        public bool IsDodged { get; set; }
         public bool IsCancelled { get; set; }
     }
 
     /// <summary>
     /// Context for kill events.
     /// </summary>
-    public sealed class KillContext
+    public interface IKillContext
     {
         /// <summary>
         /// The figure that dealt the killing blow.
         /// </summary>
-        public object Killer { get; set; } = null!;
+        object Killer { get; }
 
         /// <summary>
         /// The figure that was killed.
         /// </summary>
-        public object Victim { get; set; } = null!;
+        object Victim { get; }
     }
 
     /// <summary>
     /// Context for death events.
     /// </summary>
-    public sealed class DeathContext
+    public interface IDeathContext
     {
         /// <summary>
         /// The figure that died.
         /// </summary>
-        public object Victim { get; set; } = null!;
+        object Victim { get; }
 
         /// <summary>
         /// The figure that caused the death (if any).
         /// </summary>
-        public object Killer { get; set; } = null!;
+        object? Killer { get; }
     }
 
     /// <summary>
     /// Context for movement events.
     /// </summary>
-    public sealed class MoveContext
+    public interface IMoveContext
     {
         /// <summary>
         /// The figure that moved.
         /// </summary>
-        public object Actor { get; set; } = null!;
+        object Actor { get; }
 
         /// <summary>
-        /// Starting X position.
+        /// Starting position.
         /// </summary>
-        public int FromX { get; set; }
+        GridPosition From { get; }
 
         /// <summary>
-        /// Starting Y position.
+        /// Destination position.
         /// </summary>
-        public int FromY { get; set; }
+        GridPosition To { get; }
 
         /// <summary>
-        /// Destination X position.
+        /// Did the figure actually move?
         /// </summary>
-        public int ToX { get; set; }
-
-        /// <summary>
-        /// Destination Y position.
-        /// </summary>
-        public int ToY { get; set; }
-
-        /// <summary>
-        /// Current turn number.
-        /// </summary>
-        public int CurrentTurn { get; set; }
+        bool DidMove { get; }
     }
 
     /// <summary>
     /// Context for turn events.
     /// </summary>
-    public sealed class TurnContext
+    public interface ITurnContext
     {
         /// <summary>
         /// Current turn number.
         /// </summary>
-        public int CurrentTurn { get; set; }
+        int TurnNumber { get; }
 
         /// <summary>
-        /// Team ID (0 = player, 1 = enemy, etc.).
+        /// Team whose turn it is.
         /// </summary>
-        public int TeamId { get; set; }
+        Team Team { get; }
     }
 }

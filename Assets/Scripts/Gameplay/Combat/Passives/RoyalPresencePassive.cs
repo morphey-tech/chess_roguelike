@@ -12,7 +12,7 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
     /// Royal Presence: allies within 2 cells gain +1 DMG if the King moved this turn.
     /// The buff is applied after the King moves and lasts until the King's next turn.
     /// </summary>
-    public class RoyalPresencePassive : IPassive, IOnTurnStart, IOnMove
+    public class RoyalPresencePassive : IPassive, IOnMove
     {
         public string Id { get; }
         public int Priority => TriggerPriorities.Normal;
@@ -31,31 +31,17 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
 
         public bool Matches(TriggerContext context)
         {
-            return context.Type == TriggerType.OnTurnStart || context.Type == TriggerType.OnMove;
+            return context.Type == TriggerType.OnMove;
         }
 
         public TriggerResult Execute(TriggerContext context)
         {
-            switch (context.Type)
+            if (context.Type == TriggerType.OnMove)
             {
-                case TriggerType.OnTurnStart:
-                    ExecuteTurnStart(context);
-                    break;
-                case TriggerType.OnMove:
-                    ExecuteMove(context);
-                    break;
+                ExecuteMove(context);
             }
 
             return TriggerResult.Continue;
-        }
-
-        private static void ExecuteTurnStart(TriggerContext context)
-        {
-            if (!(context.Actor is Figure figure))
-            {
-                return;
-            }
-            figure.MovedThisTurn = false;
         }
 
         private void ExecuteMove(TriggerContext context)

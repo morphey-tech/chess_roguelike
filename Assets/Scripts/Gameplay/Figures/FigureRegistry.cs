@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Project.Core.Core.Combat;
 
 namespace Project.Gameplay.Gameplay.Figures
 {

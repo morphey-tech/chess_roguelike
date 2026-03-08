@@ -1,4 +1,4 @@
-using Project.Gameplay.Gameplay.Figures;
+using Project.Core.Core.Combat;
 
 namespace Project.Gameplay.Gameplay.Turn
 {
