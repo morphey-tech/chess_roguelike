@@ -1,19 +1,23 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using MessagePipe;
+using JetBrains.Annotations;
 using Project.Core.Core.Logging;
+using VContainer;
 
 namespace Project.Gameplay.Gameplay.Artifacts
 {
     /// <summary>
     /// Registry for artifact synergies.
     /// </summary>
-    public class ArtifactSynergyRegistry
+    [UsedImplicitly]
+    public class ArtifactSynergyRegistry : IDisposable
     {
         private readonly Dictionary<string, ArtifactSynergyConfig> _synergies = new();
         private readonly ILogger<ArtifactSynergyRegistry> _logger;
 
-        public ArtifactSynergyRegistry(ILogService logService)
+        [Inject]
+        private ArtifactSynergyRegistry(ILogService logService)
         {
             _logger = logService.CreateLogger<ArtifactSynergyRegistry>();
         }
@@ -48,6 +52,11 @@ namespace Project.Gameplay.Gameplay.Artifacts
         {
             _synergies.TryGetValue(synergyId, out var config);
             return config;
+        }
+
+        void IDisposable.Dispose()
+        {
+            _synergies.Clear();
         }
     }
 }

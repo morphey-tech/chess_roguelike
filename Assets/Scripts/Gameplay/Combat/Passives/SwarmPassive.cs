@@ -56,9 +56,7 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
 
             beforeHit.Attacker.Stats.Attack.RemoveModifiersById(Id);
 
-            CombatFlatModifier modifier = new(Id, totalBonus, 0, _duration, false,
-                ModifierSourceContext.PreviewCalculation);
-
+            CombatFlatModifier modifier = new(Id, totalBonus, 0, _duration, false);
             beforeHit.Attacker.Stats.Attack.AddModifier(modifier);
 
             return TriggerResult.Continue;

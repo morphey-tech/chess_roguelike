@@ -117,7 +117,7 @@ namespace Project.Core.Core.Triggers
                                     // Continue processing with modified context
                                     break;
 
-                                case TriggerResult.Continue:
+                                case TriggerResult.Continue: 
                                 default:
                                     break;
                             }

@@ -13,7 +13,7 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
     public sealed class DesperationPassive : IPassive, IOnBeforeHit
     {
         public string Id { get; }
-        public int Priority => TriggerPriorities.High; // Execute BEFORE Swarm
+        public int Priority => TriggerPriorities.High;
         public TriggerGroup Group => TriggerGroup.First;
         public TriggerPhase Phase => TriggerPhase.BeforeCalculation;
 
@@ -28,12 +28,11 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
             {
                 return false;
             }
-            if (!context.TryGetData<BeforeHitContext>(out BeforeHitContext beforeHit))
+            if (!context.TryGetData(out BeforeHitContext? beforeHit))
             {
                 return false;
             }
-
-            int allies = beforeHit.Grid.CountAlliesAround(beforeHit.Attacker);
+            int allies = beforeHit!.Grid.CountAlliesAround(beforeHit.Attacker);
             return allies == 0;
         }
 
@@ -48,12 +47,12 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
 
         public TriggerResult HandleBeforeHit(IDamageContext context)
         {
-            if (!context.TryGetData<BeforeHitContext>(out BeforeHitContext beforeHit))
+            if (!context.TryGetData(out BeforeHitContext? beforeHit))
             {
                 return TriggerResult.Continue;
             }
 
-            int allies = beforeHit.Grid.CountAlliesAround(beforeHit.Attacker);
+            int allies = beforeHit!.Grid.CountAlliesAround(beforeHit.Attacker);
 
             if (allies == 0)
             {
@@ -63,8 +62,7 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
                 float currentAttack = owner.Stats.Attack.Value;
                 float delta = 1f - currentAttack;
 
-                CombatFlatModifier modifier = new(Id, delta, 0, 1, false,
-                    ModifierSourceContext.PreviewCalculation);
+                CombatFlatModifier modifier = new(Id, delta, 0, 1, false);
                 owner.Stats.Attack.AddModifier(modifier);
             }
 

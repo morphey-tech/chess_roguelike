@@ -57,6 +57,7 @@ namespace Project.Gameplay.Gameplay.Figures
             _capacityService = capacityService;
             _movementStrategyFactory = movementStrategyFactory;
             _passiveFactory = passiveFactory;
+            _triggerService = triggerService;
             _spawnedPublisher = spawnedPublisher;
             _figureRegistry = figureRegistry;
             _logger = logService.CreateLogger<FigureSpawnService>();

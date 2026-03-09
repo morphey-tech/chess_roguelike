@@ -85,14 +85,12 @@ namespace Project.Unity.Unity.Installers
                 .AsImplementedInterfaces();
 
             // Artifacts system (base services - accessible everywhere)
-            builder.Register<ArtifactConfigRepository>(Lifetime.Singleton)
-                .AsSelf();
-            builder.Register<ArtifactFactory>(Lifetime.Singleton)
-                .AsSelf();
-            builder.Register<ArtifactService>(Lifetime.Singleton)
-                .AsSelf();
+            builder.Register<ArtifactConfigRepository>(Lifetime.Singleton);
+            builder.Register<ArtifactFactory>(Lifetime.Singleton);
+            builder.Register<ArtifactService>(Lifetime.Singleton);
             builder.Register<ArtifactSaveAdapter>(Lifetime.Singleton)
                 .AsImplementedInterfaces();
+            builder.Register<ArtifactSynergyRegistry>(Lifetime.Singleton);
 
             builder.Register<MemoryCleanService>(Lifetime.Singleton)
                 .AsImplementedInterfaces()

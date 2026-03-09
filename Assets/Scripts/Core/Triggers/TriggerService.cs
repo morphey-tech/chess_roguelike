@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Project.Core.Core.Logging;
 using Project.Core.Core.Triggers;
+using UnityEngine;
 using VContainer;
 
 namespace Project.Core.Core.Triggers
@@ -75,7 +76,7 @@ namespace Project.Core.Core.Triggers
         public TriggerResult Execute(TriggerType type, TriggerPhase phase, TriggerContext context)
         {
             List<ITrigger> triggers;
-            var cacheKey = (type, phase);
+            (TriggerType type, TriggerPhase phase) cacheKey = (type, phase);
             
             lock (_lock)
             {
@@ -83,9 +84,9 @@ namespace Project.Core.Core.Triggers
                 if (!_matchesCache.TryGetValue(cacheKey, out triggers))
                 {
                     // Cache miss — filter and cache
-                    triggers = _triggers.Where(t => t.Matches(context))
-                                       .OrderBy(t => t.Priority)
-                                       .ToList();
+                    triggers = _triggers
+                        .OrderBy(t => t.Priority)
+                        .ToList();
                     _matchesCache[cacheKey] = triggers;
                 }
             }
