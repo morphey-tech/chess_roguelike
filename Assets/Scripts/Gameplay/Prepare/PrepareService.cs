@@ -78,7 +78,10 @@ namespace Project.Gameplay.Gameplay.Prepare
 
             try
             {
-                await _uiService.ShowWorldUiAsync().AttachExternalCancellation(context.CancellationToken);
+                _uiService.ShowWorldUiAsync()
+                    .AttachExternalCancellation(context.CancellationToken)
+                    .ForgetLogged(_logger, "Show world ui failed", context.CancellationToken);
+                
                 await SpawnPrepareZoneAsync(context);
                 if (_context != context)
                 {
@@ -87,9 +90,11 @@ namespace Project.Gameplay.Gameplay.Prepare
 
                 _highlightService.BuildPlacementCache(context);
                 _highlightService.ApplyAll(context);
-
-                await _uiService.ShowPreparePhaseAsync().AttachExternalCancellation(context.CancellationToken);
                 context.IsInputReady = true;
+
+                _uiService.ShowPreparePhaseAsync()
+                    .AttachExternalCancellation(context.CancellationToken)
+                    .Forget();
             }
             catch (OperationCanceledException) when (context.CancellationToken.IsCancellationRequested)
             {
