@@ -63,8 +63,28 @@ namespace Project.Gameplay.UI
             _defenceText.text = $"{stats.Defence.Value}";
             _evasionText.text = $"{stats.Evasion.Value}";
             _attackRangeText.text = $"{stats.AttackRange}";
-            
+
+            SetStatColor(_attackText, stats.Attack.Value, stats.Attack.BaseValue);
+            SetStatColor(_defenceText, stats.Defence.Value, stats.Defence.BaseValue);
+            SetStatColor(_evasionText, stats.Evasion.Value, stats.Evasion.BaseValue);
+
             RenderPassives(passiveConfigs).Forget();
+        }
+
+        private static void SetStatColor(TextMeshProUGUI text, float currentValue, float baseValue)
+        {
+            if (currentValue > baseValue)
+            {
+                text.color = Color.green;
+            }
+            else if (currentValue < baseValue)
+            {
+                text.color = Color.red;
+            }
+            else
+            {
+                text.color = Color.white;
+            }
         }
 
         //Надо бы это всё дело на пулы перетащить либо еще куда, дестрой просто так - фе

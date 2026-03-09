@@ -11,6 +11,9 @@ namespace Project.Gameplay.Gameplay.Figures
         /// <summary>For debug: see which mods are applied (e.g. "+5 Aura", "x1.2 Rage").</summary>
         public IReadOnlyList<IStatModifier<T>> Mods => _mods.AsReadOnly();
         
+        /// <summary>Base value without modifiers.</summary>
+        public T BaseValue => _baseValue;
+
         private readonly T _baseValue;
         private readonly List<IStatModifier<T>> _mods = new();
 
