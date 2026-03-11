@@ -15,7 +15,7 @@ namespace Project.Gameplay.Gameplay.Stage.Phase
     public sealed class BattleDuelPhase : IStagePhase, IDisposable
     {
         private readonly TurnService _turnService;
-        private readonly ISubscriber<FigureDeathMessage> _deathSubscriber;
+        private readonly ISubscriber<FigureDiedMessage> _deathSubscriber;
         private readonly ISubscriber<TurnChangedMessage> _turnChangedSubscriber;
         private readonly ILogger<BattleDuelPhase> _logger;
 
@@ -28,7 +28,7 @@ namespace Project.Gameplay.Gameplay.Stage.Phase
 
         public BattleDuelPhase(
             TurnService turnService,
-            ISubscriber<FigureDeathMessage> deathSubscriber,
+            ISubscriber<FigureDiedMessage> deathSubscriber,
             ISubscriber<TurnChangedMessage> turnChangedSubscriber,
             ILogService logService)
         {
@@ -68,7 +68,7 @@ namespace Project.Gameplay.Gameplay.Stage.Phase
             CheckBattleEnd();
         }
 
-        private void OnFigureDeath(FigureDeathMessage message)
+        private void OnFigureDeath(FigureDiedMessage message)
         {
             if (message.Team == Team.Enemy && _combatStats != null)
                 _combatStats.Kills++;

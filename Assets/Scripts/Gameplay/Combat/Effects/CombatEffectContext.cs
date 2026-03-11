@@ -23,28 +23,19 @@ namespace Project.Gameplay.Gameplay.Combat.Effects
     {
         public ActionContext ActionContext { get; }
         public BoardGrid Grid { get; }
-        public IPublisher<FigureDeathMessage> DeathPublisher { get; }
+        public IPublisher<FigureAttackMessage> AttackPublisher { get; }
         public TriggerService TriggerService { get; }
         public LootService LootService { get; }
         public DamageApplier DamageApplier { get; }
         public IFigureLifeService FigureLifeService { get; }
         public ILogger Logger { get; }
-
-        /// <summary>
-        /// Visual events recorded during effects execution.
-        /// CombatVisualPlanner converts these to visual commands later.
-        /// </summary>
         public List<ICombatVisualEvent> VisualEvents { get; }
-
-        /// <summary>
-        /// Effects added during Apply. Processed after current effect.
-        /// </summary>
         public List<ICombatEffect> PendingEffects { get; } = new();
 
         public CombatEffectContext(
             ActionContext actionContext,
             BoardGrid grid,
-            IPublisher<FigureDeathMessage> deathPublisher,
+            IPublisher<FigureAttackMessage> attackPublisher,
             TriggerService triggerService,
             LootService lootService,
             DamageApplier damageApplier,
@@ -54,7 +45,7 @@ namespace Project.Gameplay.Gameplay.Combat.Effects
         {
             ActionContext = actionContext;
             Grid = grid;
-            DeathPublisher = deathPublisher;
+            AttackPublisher = attackPublisher;
             TriggerService = triggerService;
             LootService = lootService;
             DamageApplier = damageApplier;
@@ -63,7 +54,10 @@ namespace Project.Gameplay.Gameplay.Combat.Effects
             Logger = logger;
         }
         
-        public void AddEffect(ICombatEffect effect) => PendingEffects.Add(effect);
+        public void AddEffect(ICombatEffect effect)
+        {
+            PendingEffects.Add(effect);
+        }
 
         public void AddVisualEvent(ICombatVisualEvent? visualEvent)
         {

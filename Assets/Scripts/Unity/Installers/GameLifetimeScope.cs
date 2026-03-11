@@ -99,15 +99,14 @@ namespace Project.Unity.Unity.Installers
             options.HandlingSubscribeDisposedPolicy = HandlingSubscribeDisposedPolicy.Throw;
             options.EnableCaptureStackTrace = true;
 
-            // Explicit registration of all message types for cross-scope usage
             // Input messages
             builder.RegisterMessageBroker<RawClickMessage>(options);
             builder.RegisterMessageBroker<CellClickedMessage>(options);
+            builder.RegisterMessageBroker<HandFigureClickedMessage>(options);
             builder.RegisterMessageBroker<EndTurnRequestedMessage>(options);
             builder.RegisterMessageBroker<CancelRequestedMessage>(options);
             builder.RegisterMessageBroker<FigureHoverChangedMessage>(options);
             builder.RegisterMessageBroker<RightClickMessage>(options);
-            builder.RegisterMessageBroker<HandFigureClickedMessage>(options);
 
             // Turn messages
             builder.RegisterMessageBroker<TurnChangedMessage>(options);
@@ -119,12 +118,10 @@ namespace Project.Unity.Unity.Installers
             builder.RegisterMessageBroker<PrepareCompleteRequestedMessage>(options);
 
             // Figure messages
-            builder.RegisterMessageBroker<FigureSpawnedMessage>(options);
-            builder.RegisterMessageBroker<FigureSelectedMessage>(options);
-            builder.RegisterMessageBroker<FigureDeselectedMessage>(options);
-            builder.RegisterMessageBroker<FigureDeathMessage>(options);
-            builder.RegisterMessageBroker<FigureBoardRemovedMessage>(options);
-            builder.RegisterMessageBroker<FigureAttackStartedMessage>(options);
+            builder.RegisterMessageBroker<string, FigureSelectMessage>(options);
+            builder.RegisterMessageBroker<string, FigureBoardMessage>(options);
+            builder.RegisterMessageBroker<FigureAttackMessage>(options);
+            builder.RegisterMessageBroker<FigureDiedMessage>(options);
 
             // Board messages
             builder.RegisterMessageBroker<BoardCapacityChangedMessage>(options);
@@ -293,7 +290,7 @@ namespace Project.Unity.Unity.Installers
             builder.RegisterEntryPoint<PrepareInputHandler>();
             builder.RegisterEntryPoint<PrepareVisualSyncService>();
             builder.RegisterEntryPoint<HpBarVisibilityService>();
-            builder.Register<DamagePreviewService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
+            builder.RegisterEntryPoint<DamagePreviewService>();
             builder.RegisterEntryPoint<FigureInfoPreviewService>();
             builder.RegisterEntryPoint<TooltipService>();
             

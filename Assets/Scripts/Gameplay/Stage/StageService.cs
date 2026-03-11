@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using MessagePipe;
+using Project.Core.Core.Configs.Figure;
 using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Components;
@@ -26,9 +27,7 @@ namespace Project.Gameplay.Gameplay.Stage
     {
         private readonly IStageQueryService _query;
         private readonly IStageHighlightRenderer _renderer;
-        private readonly ISubscriber<FigureSpawnedMessage> _figureSpawnedSubscriber;
-        private readonly ISubscriber<FigureSelectedMessage> _selectionSubscriber;
-        private readonly ISubscriber<FigureDeselectedMessage> _figureDeselectedSubscriber;
+        private readonly ISubscriber<string, FigureSelectMessage> _figureSelectSubscriber;
         private readonly ISubscriber<TurnChangedMessage> _turnSubscriber;
         private readonly ISubscriber<BonusMoveStartedMessage> _bonusMoveStartedSubscriber;
         private readonly ISubscriber<BonusMoveCompletedMessage> _bonusMoveCompletedSubscriber;
@@ -41,9 +40,7 @@ namespace Project.Gameplay.Gameplay.Stage
         private StageService(
             IStageQueryService query,
             IStageHighlightRenderer renderer,
-            ISubscriber<FigureSpawnedMessage> figureSpawnedSubscriber,
-            ISubscriber<FigureSelectedMessage> selectionSubscriber,
-            ISubscriber<FigureDeselectedMessage> figureDeselectedSubscriber,
+            ISubscriber<string, FigureSelectMessage> figureSelectSubscriber,
             ISubscriber<TurnChangedMessage> turnSubscriber,
             ISubscriber<BonusMoveStartedMessage> bonusMoveStartedSubscriber,
             ISubscriber<BonusMoveCompletedMessage> bonusMoveCompletedSubscriber,
@@ -51,9 +48,7 @@ namespace Project.Gameplay.Gameplay.Stage
         {
             _query = query;
             _renderer = renderer;
-            _figureSpawnedSubscriber = figureSpawnedSubscriber;
-            _selectionSubscriber = selectionSubscriber;
-            _figureDeselectedSubscriber = figureDeselectedSubscriber;
+            _figureSelectSubscriber = figureSelectSubscriber;
             _turnSubscriber = turnSubscriber;
             _bonusMoveStartedSubscriber = bonusMoveStartedSubscriber;
             _bonusMoveCompletedSubscriber = bonusMoveCompletedSubscriber;
@@ -64,18 +59,12 @@ namespace Project.Gameplay.Gameplay.Stage
         void IInitializable.Initialize()
         {
             DisposableBagBuilder bag = DisposableBag.CreateBuilder();
-            _figureSpawnedSubscriber.Subscribe(OnFigureSpawned).AddTo(bag);
-            _selectionSubscriber.Subscribe(OnFigureSelected).AddTo(bag);
-            _figureDeselectedSubscriber.Subscribe(OnFigureDeselected).AddTo(bag);
+            _figureSelectSubscriber.Subscribe(FigureSelectMessage.SELECTED, OnFigureSelected).AddTo(bag);
+            _figureSelectSubscriber.Subscribe(FigureSelectMessage.DESELECTED, OnFigureDeselected).AddTo(bag);
             _turnSubscriber.Subscribe(OnTurnChanged).AddTo(bag);
             _bonusMoveStartedSubscriber.Subscribe(OnBonusMoveStarted).AddTo(bag);
             _bonusMoveCompletedSubscriber.Subscribe(OnBonusMoveCompleted).AddTo(bag);
             _disposable = bag.Build();
-        }
-
-        private void OnFigureSpawned(FigureSpawnedMessage message)
-        {
-            _logger.Debug($"Figure {message.Figure.Id} spawned at ({message.Position.Row}, {message.Position.Column})");
         }
 
         private void OnBonusMoveStarted(BonusMoveStartedMessage message)
@@ -93,7 +82,7 @@ namespace Project.Gameplay.Gameplay.Stage
             _logger.Debug($"Bonus move completed for {message.Actor}, clearing highlights");
         }
 
-        private void OnFigureSelected(FigureSelectedMessage message)
+        private void OnFigureSelected(FigureSelectMessage message)
         {
             if (_mode == StageMode.BonusMove)
             {
@@ -114,7 +103,7 @@ namespace Project.Gameplay.Gameplay.Stage
             }
         }
         
-        private void OnFigureDeselected(FigureDeselectedMessage message)
+        private void OnFigureDeselected(FigureSelectMessage message)
         {
             message.Figure.Del<SelectTag>();
             if (_mode != StageMode.BonusMove)

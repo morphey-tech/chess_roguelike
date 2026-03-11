@@ -16,14 +16,14 @@ namespace Project.Gameplay.Gameplay.Loot
     public sealed class EnemyDeathLootHandler : IStartable, IDisposable
     {
         private readonly LootService _lootService;
-        private readonly ISubscriber<FigureDeathMessage> _deathSubscriber;
+        private readonly ISubscriber<FigureDiedMessage> _deathSubscriber;
         private readonly ILogger _logger;
         private IDisposable? _subscription;
 
         [Inject]
         private EnemyDeathLootHandler(
             LootService lootService,
-            ISubscriber<FigureDeathMessage> deathSubscriber,
+            ISubscriber<FigureDiedMessage> deathSubscriber,
             ILogService logService)
         {
             _lootService = lootService;
@@ -37,7 +37,7 @@ namespace Project.Gameplay.Gameplay.Loot
             _logger.Debug("EnemyDeathLootHandler subscribed to FigureDeathMessage");
         }
 
-        private void OnFigureDeath(FigureDeathMessage message)
+        private void OnFigureDeath(FigureDiedMessage message)
         {
             if (message.Team != Team.Enemy)
             {

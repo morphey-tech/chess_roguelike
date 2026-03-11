@@ -28,7 +28,7 @@ namespace Project.Gameplay.Gameplay.Figures
         private readonly MovementStrategyFactory _movementStrategyFactory;
         private readonly PassiveFactory _passiveFactory;
         private readonly TriggerService _triggerService;
-        private readonly IPublisher<FigureSpawnedMessage> _spawnedPublisher;
+        private readonly IPublisher<string, FigureBoardMessage> _figureBoardPublisher;
         private readonly IFigureRegistry _figureRegistry;
         private readonly ILogger<FigureSpawnService> _logger;
 
@@ -46,7 +46,7 @@ namespace Project.Gameplay.Gameplay.Figures
             MovementStrategyFactory movementStrategyFactory,
             PassiveFactory passiveFactory,
             TriggerService triggerService,
-            IPublisher<FigureSpawnedMessage> spawnedPublisher,
+            IPublisher<string, FigureBoardMessage> figureBoardPublisher,
             IFigureRegistry figureRegistry,
             ILogService logService)
         {
@@ -58,7 +58,7 @@ namespace Project.Gameplay.Gameplay.Figures
             _movementStrategyFactory = movementStrategyFactory;
             _passiveFactory = passiveFactory;
             _triggerService = triggerService;
-            _spawnedPublisher = spawnedPublisher;
+            _figureBoardPublisher = figureBoardPublisher;
             _figureRegistry = figureRegistry;
             _logger = logService.CreateLogger<FigureSpawnService>();
         }
@@ -182,7 +182,8 @@ namespace Project.Gameplay.Gameplay.Figures
                 await _figurePresenter.CreateFigure(figure, figureConfig.AssetKey, position, team);
                 _figureRegistry.Register(figure);
                 _logger.Info($"Spawned {figure} [{description.Id}] HP:{stats.CurrentHp.Value}/{stats.MaxHp} ATK:{stats.Attack}");
-                _spawnedPublisher.Publish(new FigureSpawnedMessage(figure, position));
+                _figureBoardPublisher.Publish(FigureBoardMessage.SPAWNED, 
+                    new FigureBoardMessage(figure, position));
                 return figure;
             }
             catch

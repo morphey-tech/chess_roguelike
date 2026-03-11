@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using MessagePipe;
 using Project.Core.Core.Logging;
 using Project.Core.Core.Triggers;
@@ -11,9 +12,7 @@ using Project.Gameplay.Gameplay.Visual;
 
 namespace Project.Gameplay.Gameplay.Turn.Actions
 {
-    /// <summary>
-    /// Implementation of IActionBuilderContext providing all services needed to build actions.
-    /// </summary>
+    [UsedImplicitly(ImplicitUseKindFlags.Assign)]
     public sealed class ActionBuilderContext : IActionBuilderContext
     {
         public MovementService MovementService { get; }
@@ -23,8 +22,8 @@ namespace Project.Gameplay.Gameplay.Turn.Actions
         public ICombatVisualPlanner VisualPlanner { get; }
         public TriggerService TriggerService { get; }
         public VisualPipeline VisualPipeline { get; }
-        public IPublisher<FigureDeathMessage> DeathPublisher { get; }
-        public IPublisher<FigureAttackStartedMessage> AttackStartedPublisher { get; }
+        public IPublisher<FigureAttackMessage> AttackPublisher { get; }
+        public IPublisher<FigureDiedMessage> DiePublisher { get; }
         public LootService LootService { get; }
         public DamageApplier DamageApplier { get; }
         public IFigureLifeService FigureLifeService { get; }
@@ -41,8 +40,8 @@ namespace Project.Gameplay.Gameplay.Turn.Actions
             ICombatVisualPlanner visualPlanner,
             TriggerService triggerService,
             VisualPipeline visualPipeline,
-            IPublisher<FigureDeathMessage> deathPublisher,
-            IPublisher<FigureAttackStartedMessage> attackStartedPublisher,
+            IPublisher<FigureAttackMessage> attackPublisher,
+            IPublisher<FigureDiedMessage> diePublisher,
             LootService lootService,
             DamageApplier damageApplier,
             IFigureLifeService figureLifeService,
@@ -58,8 +57,8 @@ namespace Project.Gameplay.Gameplay.Turn.Actions
             VisualPlanner = visualPlanner;
             TriggerService = triggerService;
             VisualPipeline = visualPipeline;
-            DeathPublisher = deathPublisher;
-            AttackStartedPublisher = attackStartedPublisher;
+            AttackPublisher = attackPublisher;
+            DiePublisher = diePublisher;
             LootService = lootService;
             DamageApplier = damageApplier;
             FigureLifeService = figureLifeService;

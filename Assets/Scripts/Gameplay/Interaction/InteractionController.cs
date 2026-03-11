@@ -29,12 +29,11 @@ namespace Project.Gameplay.Gameplay.Interaction
         private readonly ITurnController _turnController;
         private readonly TurnService _turnService;
         private readonly RunHolder _runHolder;
-        private readonly IPublisher<FigureSelectedMessage> _figureSelectedPublisher;
-        private readonly IPublisher<FigureDeselectedMessage> _figureDeselectedPublisher;
+        private readonly IPublisher<string, FigureSelectMessage> _figureSelectPublisher;
         private readonly ILogger<InteractionController> _logger;
-        private readonly IDisposable _subscriptions;
 
         private BoardGrid? _grid;
+        private readonly IDisposable _disposable;
 
         public bool IsActive { get; private set; }
         public Figure? SelectedFigure { get; private set; }
@@ -51,8 +50,7 @@ namespace Project.Gameplay.Gameplay.Interaction
             ISubscriber<CellClickedMessage> cellClickedSubscriber,
             ISubscriber<CancelRequestedMessage> cancelSubscriber,
             ISubscriber<TurnChangedMessage> turnChangedSubscriber,
-            IPublisher<FigureSelectedMessage> figureSelectedPublisher,
-            IPublisher<FigureDeselectedMessage> figureDeselectedPublisher,
+            IPublisher<string, FigureSelectMessage> figureSelectPublisher,
             ILogService logService)
         {
             _interactionLock = interactionLock;
@@ -60,15 +58,14 @@ namespace Project.Gameplay.Gameplay.Interaction
             _turnController = turnController;
             _turnService = turnService;
             _runHolder = runHolder;
-            _figureSelectedPublisher = figureSelectedPublisher;
-            _figureDeselectedPublisher = figureDeselectedPublisher;
+            _figureSelectPublisher = figureSelectPublisher;
             _logger = logService.CreateLogger<InteractionController>();
 
             DisposableBagBuilder bag = DisposableBag.CreateBuilder();
             cellClickedSubscriber.Subscribe(OnCellClicked).AddTo(bag);
             cancelSubscriber.Subscribe(_ => ClearSelection()).AddTo(bag);
             turnChangedSubscriber.Subscribe(OnTurnChanged).AddTo(bag);
-            _subscriptions = bag.Build();
+            _disposable = bag.Build();
         }
 
         /// <summary>
@@ -161,7 +158,7 @@ namespace Project.Gameplay.Gameplay.Interaction
             // If we already have a selection, deselect first
             if (SelectedFigure != null)
             {
-                Deselect(SelectedFigure);
+                Deselect(SelectedFigure, SelectedPosition.Value);
             }
 
             Select(intent.TargetFigure, intent.To.Value);
@@ -176,7 +173,7 @@ namespace Project.Gameplay.Gameplay.Interaction
             // Deselect and clear before executing
             if (SelectedFigure != null)
             {
-                Deselect(SelectedFigure);
+                Deselect(SelectedFigure, SelectedPosition.Value);
             }
             ClearSelectionInternal();
 
@@ -193,7 +190,7 @@ namespace Project.Gameplay.Gameplay.Interaction
             // Deselect and clear before executing
             if (SelectedFigure != null)
             {
-                Deselect(SelectedFigure);
+                Deselect(SelectedFigure, SelectedPosition.Value);
             }
             ClearSelectionInternal();
 
@@ -205,13 +202,14 @@ namespace Project.Gameplay.Gameplay.Interaction
         {
             SelectedFigure = figure;
             SelectedPosition = position;
-            _logger.Debug($"Selected {figure} at ({position.Row},{position.Column})");
-            _figureSelectedPublisher.Publish(new FigureSelectedMessage(figure, position));
+            _figureSelectPublisher.Publish(FigureSelectMessage.SELECTED,
+                new FigureSelectMessage(figure, position));
         }
 
-        private void Deselect(Figure figure)
+        private void Deselect(Figure figure, GridPosition position)
         {
-            _figureDeselectedPublisher.Publish(new FigureDeselectedMessage(figure));
+            _figureSelectPublisher.Publish(FigureSelectMessage.DESELECTED, 
+                new FigureSelectMessage(figure, position));
         }
 
         /// <summary>
@@ -221,11 +219,12 @@ namespace Project.Gameplay.Gameplay.Interaction
         {
             if (SelectedFigure != null)
             {
-                Deselect(SelectedFigure);
+                Deselect(SelectedFigure, SelectedPosition.Value);
                 _logger.Debug("Selection cleared");
             }
             ClearSelectionInternal();
-            _figureSelectedPublisher.Publish(new FigureSelectedMessage(null, default));
+            _figureSelectPublisher.Publish(FigureSelectMessage.SELECTED, 
+                new FigureSelectMessage(null, default));
         }
 
         private void ClearSelectionInternal()
@@ -241,7 +240,7 @@ namespace Project.Gameplay.Gameplay.Interaction
 
         void IDisposable.Dispose()
         {
-            _subscriptions?.Dispose();
+            _disposable?.Dispose();
         }
     }
 }

@@ -1,18 +1,17 @@
 using Project.Core.Core.Combat;
 using System;
-using System.Linq;
 using MessagePipe;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Attack.Rules;
+using Project.Gameplay.Gameplay.Bootstrap;
 using Project.Gameplay.Gameplay.Combat;
-using Project.Gameplay.Gameplay.Combat.Damage;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Input.Messages;
 using Project.Gameplay.Gameplay.Run;
 using Project.Gameplay.Gameplay.Turn;
-using UnityEngine;
 using VContainer;
+using IInitializable = VContainer.Unity.IInitializable;
 
 namespace Project.Gameplay.Gameplay.Selection
 {
@@ -20,18 +19,23 @@ namespace Project.Gameplay.Gameplay.Selection
     /// Shows damage preview on HP bar when hovering over enemy figure.
     /// Uses the same damage pipeline as real combat (in preview mode).
     /// </summary>
-    public sealed class DamagePreviewService : IDisposable
+    public sealed class DamagePreviewService : IInitializable, IDisposable
     {
         private readonly IFigurePresenter _figurePresenter;
         private readonly RunHolder _runHolder;
         private readonly CombatResolver _combatResolver;
         private readonly AttackRuleService _attackRuleService;
-        private readonly IDisposable _subscriptions;
+        private readonly ISubscriber<string, FigureSelectMessage> _figureSelectSubscriber;
+        private readonly ISubscriber<string, FigureBoardMessage> _figureBoardSubscriber;
+        private readonly ISubscriber<FigureAttackMessage> _figureAttackSubscriber;
+        private readonly ISubscriber<FigureHoverChangedMessage> _hoverChangedSubscriber;
+        private readonly ISubscriber<TurnChangedMessage> _turnChangedSubscriber;
         private readonly ILogger<DamagePreviewService> _logger;
 
         private int? _hoveredFigureId;
         private int? _selectedFriendlyFigureId;
         private int? _lastPreviewFigureId;
+        private IDisposable _disposable;
 
         [Inject]
         private DamagePreviewService(
@@ -39,31 +43,38 @@ namespace Project.Gameplay.Gameplay.Selection
             RunHolder runHolder,
             CombatResolver combatResolver,
             AttackRuleService attackRuleService,
-            ISubscriber<FigureSelectedMessage> selectedSubscriber,
-            ISubscriber<FigureDeselectedMessage> deselectedSubscriber,
+            ISubscriber<string, FigureSelectMessage> figureSelectSubscriber,
+            ISubscriber<string, FigureBoardMessage> figureBoardSubscriber,
+            ISubscriber<FigureAttackMessage> figureAttackSubscriber,
             ISubscriber<FigureHoverChangedMessage> hoverChangedSubscriber,
             ISubscriber<TurnChangedMessage> turnChangedSubscriber,
-            ISubscriber<FigureBoardRemovedMessage> figureRemovedSubscriber,
-            ISubscriber<FigureAttackStartedMessage> attackStartedSubscriber,
             ILogService logService)
         {
             _figurePresenter = figurePresenter;
             _runHolder = runHolder;
             _combatResolver = combatResolver;
             _attackRuleService = attackRuleService;
+            _figureSelectSubscriber = figureSelectSubscriber;
+            _figureBoardSubscriber = figureBoardSubscriber;
+            _figureAttackSubscriber = figureAttackSubscriber;
+            _hoverChangedSubscriber = hoverChangedSubscriber;
+            _turnChangedSubscriber = turnChangedSubscriber;
             _logger = logService.CreateLogger<DamagePreviewService>();
-
-            DisposableBagBuilder bag = DisposableBag.CreateBuilder();
-            selectedSubscriber.Subscribe(OnFigureSelected).AddTo(bag);
-            deselectedSubscriber.Subscribe(OnFigureDeselected).AddTo(bag);
-            hoverChangedSubscriber.Subscribe(OnHoverChanged).AddTo(bag);
-            turnChangedSubscriber.Subscribe(OnTurnChanged).AddTo(bag);
-            figureRemovedSubscriber.Subscribe(OnFigureBoardRemoved).AddTo(bag);
-            attackStartedSubscriber.Subscribe(OnAttackStarted).AddTo(bag);
-            _subscriptions = bag.Build();
         }
 
-        private void OnFigureSelected(FigureSelectedMessage message)
+        void IInitializable.Initialize()
+        {
+            DisposableBagBuilder bag = DisposableBag.CreateBuilder();
+            _figureSelectSubscriber.Subscribe(FigureSelectMessage.SELECTED, OnFigureSelected).AddTo(bag);
+            _figureSelectSubscriber.Subscribe(FigureSelectMessage.DESELECTED, OnFigureDeselected).AddTo(bag);
+            _figureBoardSubscriber.Subscribe(FigureBoardMessage.REMOVED, OnFigureBoardRemoved).AddTo(bag);
+            _hoverChangedSubscriber.Subscribe(OnHoverChanged).AddTo(bag);
+            _figureAttackSubscriber.Subscribe(OnAttackStarted).AddTo(bag);
+            _turnChangedSubscriber.Subscribe(OnTurnChanged).AddTo(bag);
+            _disposable = bag.Build();
+        }
+
+        private void OnFigureSelected(FigureSelectMessage message)
         {
             _logger.Debug($"[DamagePreview] OnFigureSelected: FigureId={message.Figure?.Id}, Team={message.Figure?.Team}");
             _selectedFriendlyFigureId = message.Figure?.Team == Team.Player 
@@ -71,7 +82,7 @@ namespace Project.Gameplay.Gameplay.Selection
             UpdateDamagePreview();
         }
 
-        private void OnFigureDeselected(FigureDeselectedMessage message)
+        private void OnFigureDeselected(FigureSelectMessage message)
         {
             _logger.Debug($"[DamagePreview] OnFigureDeselected: FigureId={message.Figure?.Id}");
             
@@ -84,6 +95,23 @@ namespace Project.Gameplay.Gameplay.Selection
             UpdateDamagePreview();
         }
 
+        private void OnFigureBoardRemoved(FigureBoardMessage message)
+        {
+            _logger.Debug($"[DamagePreview] OnFigureBoardRemoved: FigureId={message.Figure.Id}");
+            
+            if (_lastPreviewFigureId == message.Figure.Id)
+            {
+                _figurePresenter.SetDamagePreview(_lastPreviewFigureId.Value, null);
+                _lastPreviewFigureId = null;
+            }
+            
+            if (_selectedFriendlyFigureId == message.Figure.Id)
+            {
+                _selectedFriendlyFigureId = null;
+                UpdateDamagePreview();
+            }
+        }
+        
         private void OnHoverChanged(FigureHoverChangedMessage message)
         {
             _logger.Debug($"[DamagePreview] OnHoverChanged: FigureId={message.FigureId}");
@@ -99,34 +127,14 @@ namespace Project.Gameplay.Gameplay.Selection
             UpdateDamagePreview();
         }
 
-        private void OnFigureBoardRemoved(FigureBoardRemovedMessage message)
-        {
-            _logger.Debug($"[DamagePreview] OnFigureBoardRemoved: FigureId={message.FigureId}");
-            
-            // Если удалена фигура, на которой показан превью — очищаем
-            if (_lastPreviewFigureId == message.FigureId)
-            {
-                _figurePresenter.SetDamagePreview(_lastPreviewFigureId.Value, null);
-                _lastPreviewFigureId = null;
-            }
-            
-            // Если удалена выбранная фигура — сбрасываем превью
-            if (_selectedFriendlyFigureId == message.FigureId)
-            {
-                _selectedFriendlyFigureId = null;
-                UpdateDamagePreview();
-            }
-        }
 
-        private void OnAttackStarted(FigureAttackStartedMessage message)
+        private void OnAttackStarted(FigureAttackMessage message)
         {
-            _logger.Debug($"[DamagePreview] OnAttackStarted: Attacker={message.AttackerId}, Target={message.TargetId}");
+            _logger.Debug($"[DamagePreview] OnAttackStarted: Attacker={message.ActorID}," +
+                          $" Target={message.TargetID}");
             
-            // Скрываем превью с цели атаки
-            _figurePresenter.SetDamagePreview(message.TargetId, null);
-            
-            // Если превью был показан на этой фигуре — сбрасываем
-            if (_lastPreviewFigureId == message.TargetId)
+            _figurePresenter.SetDamagePreview(message.TargetID, null);
+            if (_lastPreviewFigureId == message.TargetID)
             {
                 _lastPreviewFigureId = null;
             }
@@ -136,7 +144,6 @@ namespace Project.Gameplay.Gameplay.Selection
         {
             _logger.Debug($"[DamagePreview] UpdatePreview: hovered={_hoveredFigureId?.ToString() ?? "null"}, selected={_selectedFriendlyFigureId?.ToString() ?? "null"}, lastPreview={_lastPreviewFigureId?.ToString() ?? "null"}");
 
-            // Очищаем предыдущий превью при смене цели
             if (_lastPreviewFigureId.HasValue && _lastPreviewFigureId != _hoveredFigureId)
             {
                 _logger.Debug($"[DamagePreview] Clearing old preview for FigureId={_lastPreviewFigureId}");
@@ -144,15 +151,13 @@ namespace Project.Gameplay.Gameplay.Selection
                 _lastPreviewFigureId = null;
             }
 
-            // Если нет условий для показа превью — выходим
             if (!_hoveredFigureId.HasValue || !_selectedFriendlyFigureId.HasValue)
             {
                 _logger.Debug("[DamagePreview] No hover or selection — preview cleared");
                 return;
             }
 
-            // Пытаемся получить валидный превью
-            if (!TryGetValidPreview(out var damage))
+            if (!TryGetValidPreview(out float damage))
             {
                 _logger.Debug("[DamagePreview] No valid preview — cleared");
                 _figurePresenter.SetDamagePreview(_hoveredFigureId.Value, null);
@@ -160,7 +165,6 @@ namespace Project.Gameplay.Gameplay.Selection
                 return;
             }
 
-            // Показываем превью и запоминаем ID
             _figurePresenter.SetDamagePreview(_hoveredFigureId.Value, damage);
             _lastPreviewFigureId = _hoveredFigureId;
             _logger.Debug($"[DamagePreview] Preview SET for FigureId={_hoveredFigureId}: DMG={damage}");
@@ -225,11 +229,10 @@ namespace Project.Gameplay.Gameplay.Selection
                 return false;
             }
 
-            // Используем CombatResolver для расчёта урона с учётом пассивок
             damage = _combatResolver.CalculatePreviewDamage(
                 attacker,
                 target,
-                (BoardGrid)grid);
+                grid);
 
             _logger.Debug($"[DamagePreview] CombatResolver: Final={damage}");
 
@@ -251,8 +254,9 @@ namespace Project.Gameplay.Gameplay.Selection
                 _lastPreviewFigureId = null;
             }
 
-            _subscriptions?.Dispose();
+            _disposable?.Dispose();
             _logger.Debug("[DamagePreviewService] Disposed");
         }
+
     }
 }

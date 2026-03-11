@@ -39,7 +39,7 @@ namespace Project.Gameplay.ShrinkingZone
             IPublisher<StormDamageDealtMessage> damageDealtPublisher,
             IPublisher<FigureTakeStormDamageMessage> figureDamagePublisher,
             ISubscriber<TurnChangedMessage> turnSubscriber,
-            ISubscriber<FigureDeathMessage> figureDeathSubscriber,
+            ISubscriber<FigureDiedMessage> figureDeathSubscriber,
             ILogService logService,
             RunHolder runHolder)
         {
@@ -226,7 +226,7 @@ namespace Project.Gameplay.ShrinkingZone
             return _zoneSystem?.CalculateDamage(unitMaxHP) ?? 0;
         }
 
-        private void OnFigureDeath(FigureDeathMessage msg)
+        private void OnFigureDeath(FigureDiedMessage msg)
         {
             if (_zoneSystem is { CurrentState: StormState.Inactive })
             {

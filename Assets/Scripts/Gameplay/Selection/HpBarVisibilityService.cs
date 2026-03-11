@@ -27,11 +27,10 @@ namespace Project.Gameplay.Gameplay.Selection
         private readonly IFigurePresenter _figurePresenter;
         private readonly RunHolder _runHolder;
         private readonly ConfigProvider _configProvider;
-        private readonly ISubscriber<FigureSelectedMessage> _selectedSubscriber;
-        private readonly ISubscriber<FigureDeselectedMessage> _deselectedSubscriber;
         private readonly ISubscriber<FigureHoverChangedMessage> _hoverChangedSubscriber;
-        private readonly ISubscriber<FigureSpawnedMessage> _figureSpawnedSubscriber;
-        private readonly ISubscriber<FigureDeathMessage> _figureDeathSubscriber;
+        private readonly ISubscriber<string, FigureSelectMessage> _figureSelectSubscriber;
+        private readonly ISubscriber<string, FigureBoardMessage> _figureBoardSubscriber;
+        private readonly ISubscriber<FigureDiedMessage> _figureDeathSubscriber;
         private readonly ISubscriber<TurnChangedMessage> _turnChangedSubscriber;
         private readonly ISubscriber<PreparePhaseCompletedMessage> _prepareCompletedSubscriber;
         private readonly ISubscriber<StageStartedMessage> _stageStartedSubscriber;
@@ -50,11 +49,10 @@ namespace Project.Gameplay.Gameplay.Selection
             IFigurePresenter figurePresenter,
             RunHolder runHolder,
             ConfigProvider configProvider,
-            ISubscriber<FigureSelectedMessage> selectedSubscriber,
-            ISubscriber<FigureDeselectedMessage> deselectedSubscriber,
             ISubscriber<FigureHoverChangedMessage> hoverChangedSubscriber,
-            ISubscriber<FigureSpawnedMessage> figureSpawnedSubscriber,
-            ISubscriber<FigureDeathMessage> figureDeathSubscriber,
+            ISubscriber<string, FigureSelectMessage> figureSelectSubscriber,
+            ISubscriber<string, FigureBoardMessage> figureBoardSubscriber,
+            ISubscriber<FigureDiedMessage> figureDeathSubscriber,
             ISubscriber<TurnChangedMessage> turnChangedSubscriber,
             ISubscriber<PreparePhaseCompletedMessage> prepareCompletedSubscriber,
             ISubscriber<StageStartedMessage> stageStartedSubscriber,
@@ -63,10 +61,9 @@ namespace Project.Gameplay.Gameplay.Selection
             _figurePresenter = figurePresenter;
             _runHolder = runHolder;
             _configProvider = configProvider;
-            _selectedSubscriber = selectedSubscriber;
-            _deselectedSubscriber = deselectedSubscriber;
             _hoverChangedSubscriber = hoverChangedSubscriber;
-            _figureSpawnedSubscriber = figureSpawnedSubscriber;
+            _figureSelectSubscriber = figureSelectSubscriber;
+            _figureBoardSubscriber = figureBoardSubscriber;
             _figureDeathSubscriber = figureDeathSubscriber;
             _turnChangedSubscriber = turnChangedSubscriber;
             _prepareCompletedSubscriber = prepareCompletedSubscriber;
@@ -79,11 +76,11 @@ namespace Project.Gameplay.Gameplay.Selection
         void IInitializable.Initialize()
         {
             DisposableBagBuilder bag = DisposableBag.CreateBuilder();
-            _selectedSubscriber.Subscribe(OnFigureSelected).AddTo(bag);
-            _deselectedSubscriber.Subscribe(OnFigureDeselected).AddTo(bag);
-            _hoverChangedSubscriber.Subscribe(OnHoverChanged).AddTo(bag);
-            _figureSpawnedSubscriber.Subscribe(OnFigureSpawned).AddTo(bag);
+            _figureBoardSubscriber.Subscribe(FigureSelectMessage.SELECTED, OnFigureSelected).AddTo(bag);
+            _figureBoardSubscriber.Subscribe(FigureSelectMessage.DESELECTED, OnFigureDeselected).AddTo(bag);
+            _figureBoardSubscriber.Subscribe(FigureBoardMessage.SPAWNED, OnFigureSpawned).AddTo(bag);
             _figureDeathSubscriber.Subscribe(OnFigureDeath).AddTo(bag);
+            _hoverChangedSubscriber.Subscribe(OnHoverChanged).AddTo(bag);
             _turnChangedSubscriber.Subscribe(OnTurnChanged).AddTo(bag);
             _prepareCompletedSubscriber.Subscribe(OnPrepareCompleted).AddTo(bag);
             _stageStartedSubscriber.Subscribe(OnStageStarted).AddTo(bag);
@@ -112,7 +109,7 @@ namespace Project.Gameplay.Gameplay.Selection
             _isPreparePhase = true;
         }
 
-        private void OnFigureSelected(FigureSelectedMessage message)
+        private void OnFigureSelected(FigureBoardMessage message)
         {
             if (message.Figure is { Team: Team.Player })
             {
@@ -126,7 +123,7 @@ namespace Project.Gameplay.Gameplay.Selection
             RefreshAll();
         }
 
-        private void OnFigureDeselected(FigureDeselectedMessage message)
+        private void OnFigureDeselected(FigureBoardMessage message)
         {
             if (_selectedFriendlyFigureId.HasValue && _selectedFriendlyFigureId.Value == message.Figure.Id)
                 _selectedFriendlyFigureId = null;
@@ -140,12 +137,12 @@ namespace Project.Gameplay.Gameplay.Selection
             RefreshAll();
         }
 
-        private void OnFigureSpawned(FigureSpawnedMessage message)
+        private void OnFigureSpawned(FigureBoardMessage boardMessage)
         {
-            ApplyToFigure(message.Figure);
+            ApplyToFigure(boardMessage.Figure);
         }
 
-        private void OnFigureDeath(FigureDeathMessage message)
+        private void OnFigureDeath(FigureDiedMessage message)
         {
             if (_hoveredFigureId == message.FigureId)
                 _hoveredFigureId = null;

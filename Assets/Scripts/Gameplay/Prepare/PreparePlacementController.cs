@@ -26,7 +26,7 @@ namespace Project.Gameplay.Gameplay.Prepare
         private readonly IFigureRegistry _figureRegistry;
         private readonly IGameUiService _uiService;
         private readonly IPublisher<PrepareSelectionChangedMessage> _selectionChangedPublisher;
-        private readonly IPublisher<FigureBoardRemovedMessage> _figureRemovedPublisher;
+        private readonly IPublisher<string, FigureBoardMessage> _figureBoardPublisher;
         private readonly ILogger<PreparePlacementController> _logger;
         private bool _isPlacing;
 
@@ -39,7 +39,7 @@ namespace Project.Gameplay.Gameplay.Prepare
             IFigureRegistry figureRegistry,
             IGameUiService uiService,
             IPublisher<PrepareSelectionChangedMessage> selectionChangedPublisher,
-            IPublisher<FigureBoardRemovedMessage> figureRemovedPublisher,
+            IPublisher<string, FigureBoardMessage> figureBoardPublisher,
             ILogService logService)
         {
             _figureSpawnService = figureSpawnService;
@@ -49,7 +49,7 @@ namespace Project.Gameplay.Gameplay.Prepare
             _figureRegistry = figureRegistry;
             _uiService = uiService;
             _selectionChangedPublisher = selectionChangedPublisher;
-            _figureRemovedPublisher = figureRemovedPublisher;
+            _figureBoardPublisher = figureBoardPublisher;
             _logger = logService.CreateLogger<PreparePlacementController>();
         }
 
@@ -154,7 +154,8 @@ namespace Project.Gameplay.Gameplay.Prepare
                 int figureIdForView = figure.Id;
                 context.RunState.ReturnToHand(figureState.Id);
                 context.Grid.RemoveFigure(figure);
-                _figureRemovedPublisher.Publish(new FigureBoardRemovedMessage(figure.Id, figure.Team));
+                _figureBoardPublisher.Publish(FigureBoardMessage.REMOVED,
+                    new FigureBoardMessage(figure, cell.Position));
                 _figureRegistry.Unregister(figure);
 
                 await _figurePresenter.RemoveFigureAsync(figureIdForView).AttachExternalCancellation(cancellationToken);

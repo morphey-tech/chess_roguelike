@@ -40,8 +40,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
         private readonly ICombatVisualPlanner _visualPlanner;
         private readonly TriggerService _triggerService;
         private readonly VisualPipeline _visualPipeline;
-        private readonly IPublisher<FigureDeathMessage> _deathPublisher;
-        private readonly IPublisher<FigureAttackStartedMessage> _attackStartedPublisher;
+        private readonly IPublisher<FigureAttackMessage> _figureAttackPublisher;
         private readonly LootService _lootService;
         private readonly DamageApplier _damageApplier;
         private readonly IFigureLifeService _figureLifeService;
@@ -58,8 +57,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
             ICombatVisualPlanner visualPlanner,
             TriggerService triggerService,
             VisualPipeline visualPipeline,
-            IPublisher<FigureDeathMessage> deathPublisher,
-            IPublisher<FigureAttackStartedMessage> attackStartedPublisher,
+            IPublisher<FigureAttackMessage> figureAttackPublisher,
             LootService lootService,
             DamageApplier damageApplier,
             IFigureLifeService figureLifeService,
@@ -75,8 +73,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
             _visualPlanner = visualPlanner;
             _triggerService = triggerService;
             _visualPipeline = visualPipeline;
-            _deathPublisher = deathPublisher;
-            _attackStartedPublisher = attackStartedPublisher;
+            _figureAttackPublisher = figureAttackPublisher;
             _lootService = lootService;
             _damageApplier = damageApplier;
             _figureLifeService = figureLifeService;
@@ -198,7 +195,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
             context.ActionExecuted = true;
 
             // Публикуем сообщение о начале атаки (для скрытия превью урона)
-            _attackStartedPublisher.Publish(new FigureAttackStartedMessage(context.Actor.Id, defender.Id));
+            _figureAttackPublisher.Publish(new FigureAttackMessage(context.Actor.Id, defender.Id));
 
             // === DOMAIN PHASE ===
             CombatResult result = _combatResolver.Resolve(hitContext);
@@ -210,7 +207,7 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
             CombatEffectContext effectContext = new(
                 context,
                 context.Grid,
-                _deathPublisher,
+                _figureAttackPublisher,
                 _triggerService,
                 _lootService,
                 _damageApplier,
