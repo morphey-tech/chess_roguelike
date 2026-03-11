@@ -12,7 +12,8 @@
         "ZLogger.Unity",
         "MessagePipe",
         "DOTween.Modules",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "LiteUI"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

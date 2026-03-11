@@ -15,25 +15,35 @@ using Project.Gameplay.Gameplay.Run;
 using Project.Gameplay.Gameplay.Stage.Messages;
 using Project.Gameplay.Gameplay.Turn;
 using VContainer;
+using VContainer.Unity;
 
 namespace Project.Gameplay.Gameplay.Selection
 {
     /// <summary>
     /// Applies HP bar visibility policy based on config + hover + selection state.
     /// </summary>
-    public sealed class HpBarVisibilityService : IDisposable
+    public sealed class HpBarVisibilityService : IInitializable, IDisposable
     {
         private readonly IFigurePresenter _figurePresenter;
         private readonly RunHolder _runHolder;
         private readonly ConfigProvider _configProvider;
+        private readonly ISubscriber<FigureSelectedMessage> _selectedSubscriber;
+        private readonly ISubscriber<FigureDeselectedMessage> _deselectedSubscriber;
+        private readonly ISubscriber<FigureHoverChangedMessage> _hoverChangedSubscriber;
+        private readonly ISubscriber<FigureSpawnedMessage> _figureSpawnedSubscriber;
+        private readonly ISubscriber<FigureDeathMessage> _figureDeathSubscriber;
+        private readonly ISubscriber<TurnChangedMessage> _turnChangedSubscriber;
+        private readonly ISubscriber<PreparePhaseCompletedMessage> _prepareCompletedSubscriber;
+        private readonly ISubscriber<StageStartedMessage> _stageStartedSubscriber;
         private readonly ILogger<HpBarVisibilityService> _logger;
-        private readonly IDisposable _subscriptions;
-        private readonly CancellationTokenSource _disposeCts = new();
 
         private GameplayConfig _config = new();
         private int? _hoveredFigureId;
         private int? _selectedFriendlyFigureId;
         private bool _isPreparePhase = true;
+        
+        private readonly CancellationTokenSource _disposeCts = new();
+        private IDisposable _subscriptions = null!;
 
         [Inject]
         private HpBarVisibilityService(
@@ -53,22 +63,35 @@ namespace Project.Gameplay.Gameplay.Selection
             _figurePresenter = figurePresenter;
             _runHolder = runHolder;
             _configProvider = configProvider;
+            _selectedSubscriber = selectedSubscriber;
+            _deselectedSubscriber = deselectedSubscriber;
+            _hoverChangedSubscriber = hoverChangedSubscriber;
+            _figureSpawnedSubscriber = figureSpawnedSubscriber;
+            _figureDeathSubscriber = figureDeathSubscriber;
+            _turnChangedSubscriber = turnChangedSubscriber;
+            _prepareCompletedSubscriber = prepareCompletedSubscriber;
+            _stageStartedSubscriber = stageStartedSubscriber;
             _logger = logService.CreateLogger<HpBarVisibilityService>();
 
-            DisposableBagBuilder bag = DisposableBag.CreateBuilder();
-            selectedSubscriber.Subscribe(OnFigureSelected).AddTo(bag);
-            deselectedSubscriber.Subscribe(OnFigureDeselected).AddTo(bag);
-            hoverChangedSubscriber.Subscribe(OnHoverChanged).AddTo(bag);
-            figureSpawnedSubscriber.Subscribe(OnFigureSpawned).AddTo(bag);
-            figureDeathSubscriber.Subscribe(OnFigureDeath).AddTo(bag);
-            turnChangedSubscriber.Subscribe(OnTurnChanged).AddTo(bag);
-            prepareCompletedSubscriber.Subscribe(OnPrepareCompleted).AddTo(bag);
-            stageStartedSubscriber.Subscribe(OnStageStarted).AddTo(bag);
-            _subscriptions = bag.Build();
 
-            LoadConfigAsync()
-                .AttachExternalCancellation(_disposeCts.Token)
-                .ForgetLogged(_logger, "Failed to load gameplay config for HP bar policy", _disposeCts.Token);
+        }
+
+        void IInitializable.Initialize()
+        {
+            DisposableBagBuilder bag = DisposableBag.CreateBuilder();
+            _selectedSubscriber.Subscribe(OnFigureSelected).AddTo(bag);
+            _deselectedSubscriber.Subscribe(OnFigureDeselected).AddTo(bag);
+            _hoverChangedSubscriber.Subscribe(OnHoverChanged).AddTo(bag);
+            _figureSpawnedSubscriber.Subscribe(OnFigureSpawned).AddTo(bag);
+            _figureDeathSubscriber.Subscribe(OnFigureDeath).AddTo(bag);
+            _turnChangedSubscriber.Subscribe(OnTurnChanged).AddTo(bag);
+            _prepareCompletedSubscriber.Subscribe(OnPrepareCompleted).AddTo(bag);
+            _stageStartedSubscriber.Subscribe(OnStageStarted).AddTo(bag);
+            _subscriptions = bag.Build();
+            
+            LoadConfigAsync().AttachExternalCancellation(_disposeCts.Token)
+                .ForgetLogged(_logger, "Failed to load gameplay config for HP bar policy", 
+                    _disposeCts.Token);
         }
 
         private async UniTask LoadConfigAsync()

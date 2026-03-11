@@ -4,6 +4,7 @@ using Project.Gameplay.Gameplay.Visual.Commands.Contexts;
 using Project.Gameplay.UI;
 using Project.Unity.UI.Components;
 using UnityEngine;
+using VContainer;
 
 namespace Project.Unity.Presentations
 {
@@ -13,15 +14,22 @@ namespace Project.Unity.Presentations
         [SerializeField] private Transform _pivot;
 
         private static WorldUIWindow? _cachedWorldUi;
+        private static IUIService? _uiService;
+
+        [Inject]
+        private void Construct(IUIService uiService)
+        {
+            _uiService = uiService;
+        }
 
         public async UniTask ShowFor(DamageVisualContext ctx)
         {
             if (_cachedWorldUi == null)
             {
-                await UIService.Initialized;
-                _cachedWorldUi = await UIService.GetOrCreateAsync<WorldUIWindow>();
+                await _uiService!.Initialized;
+                _cachedWorldUi = await _uiService.GetOrCreateAsync<WorldUIWindow>();
             }
-                
+
             DamageText? damageText = _cachedWorldUi.Add(_template, _pivot);
             damageText?.Play(ctx);
         }

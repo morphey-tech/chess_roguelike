@@ -77,8 +77,7 @@ namespace Project.Gameplay.Gameplay.Prepare
                     return PreparePlacementResult.Ignored;
                 }
 
-                bool canSpawn = await _capacityService.CanSpawnByTypeAsync(state.TypeId);
-                if (!canSpawn)
+                if (!_capacityService.CanSpawnByTypeAsync(state.TypeId))
                 {
                     _uiService.ShowWarning("No board capacity");
                     return new PreparePlacementResult(true, false, false);
@@ -159,7 +158,7 @@ namespace Project.Gameplay.Gameplay.Prepare
                 _figureRegistry.Unregister(figure);
 
                 await _figurePresenter.RemoveFigureAsync(figureIdForView).AttachExternalCancellation(cancellationToken);
-                await _capacityService.RecalculateFromBoard(context.Grid.GetFiguresByTeam(Team.Player));
+                _capacityService.RecalculateFromBoard(context.Grid.GetFiguresByTeam(Team.Player));
 
                 context.State.Restore(figureState.Id);
                 await _preparePresenter.RestoreFigureAsync(figureState.Id).AttachExternalCancellation(cancellationToken);

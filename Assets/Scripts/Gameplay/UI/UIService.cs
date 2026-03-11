@@ -1,205 +1,229 @@
 #nullable enable
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using Cysharp.Threading.Tasks;
-using Project.Core.Core.Assets;
 using Project.Core.Core.Logging;
 using Project.Core.Window;
+using Project.Gameplay.Gameplay.UI;
 using UnityEngine;
 using VContainer;
 using Object = UnityEngine.Object;
 
 namespace Project.Gameplay.Gameplay.UI
 {
-  public class UIService
-  {
-    public static Canvas Canvas => GetController().Canvas;
-
-    public static CanvasGroup CanvasGroup => GetController().CanvasGroup;
-
-    private static IWindowsController? _controller;
-    private static UniTaskCompletionSource? _initCompletionSource;
-    public static bool IsValid => IsControllerValid();
-    public static UniTask Initialized => _initCompletionSource?.Task ?? UniTask.CompletedTask;
-
-    [Inject]
-    private UIService(
-      IAssetService assetService,
-      ILogService logService)
+    public interface IUIService
     {
-      _initCompletionSource = new UniTaskCompletionSource();
-      InitAsync(assetService, logService, null).Forget();
+        Canvas Canvas { get; }
+        CanvasGroup CanvasGroup { get; }
+        UniTask Initialized { get; }
+
+        UniTask InitializeAsync();
+
+        IReadOnlyList<Window> GetVisibleStack();
+        IReadOnlyCollection<Window> GetAllWindows();
+        void HideVisibleStack();
+        int VisibleCount();
+
+        T GetOrCreate<T>() where T : Window;
+        Window GetOrCreate(Type type);
+        Window GetOrCreate(string typeName);
+
+        T Show<T>(bool immediate = false) where T : ParameterlessWindow;
+        T Show<T, A1>(A1 a1, bool immediate = false) where T : ParameterWindow<A1>;
+        T Show<T, A1, A2>(A1 a1, A2 a2, bool immediate = false) where T : ParameterWindow<A1, A2>;
+        T Show<T, A1, A2, A3>(A1 a1, A2 a2, A3 a3, bool immediate = false) where T : ParameterWindow<A1, A2, A3>;
+
+        void Close<T>() where T : Window;
+        void Hide<T>() where T : Window;
+
+        T FindWindow<T>() where T : Window;
+        Window FindWindow(Type type);
+        bool IsVisible<T>() where T : Window;
+        bool IsVisible(Type type);
+
+        bool HasVisibleByInterface<TInterface>() where TInterface : class;
+        TInterface GetTopVisibleByInterface<TInterface>() where TInterface : class;
+        IReadOnlyList<TInterface> GetVisibleByInterface<TInterface>() where TInterface : class;
+
+        UniTask<T> ShowAsync<T>() where T : ParameterlessWindow;
+        UniTask<T> ShowAsync<T, A1>(A1 a1) where T : ParameterWindow<A1>;
+        UniTask<T> GetOrCreateAsync<T>() where T : Window;
+        UniTask<Window> GetOrCreateAsync(Type windowType);
     }
 
-    private static async UniTask InitAsync(IAssetService assetService, ILogService logService,
-      IWindowsController? controller)
+    public sealed class UIService : IUIService
     {
-      try
-      {
-        await LoadControllerAsync(assetService, logService, controller);
-        _initCompletionSource?.TrySetResult();
-      }
-      catch (Exception e)
-      {
-        _initCompletionSource?.TrySetException(e);
-      }
+        private readonly WindowsControllerInitializer _controllerInitializer;
+        private readonly ILogger<UIService> _logger;
+        private readonly UniTaskCompletionSource _initCompletionSource;
+
+        public Canvas Canvas => _controllerInitializer.Controller.Canvas;
+
+        public CanvasGroup CanvasGroup => _controllerInitializer.Controller.CanvasGroup;
+
+        public UniTask Initialized => _initCompletionSource.Task;
+
+        [Inject]
+        public UIService(
+            WindowsControllerInitializer controllerInitializer,
+            ILogService logService)
+        {
+            _controllerInitializer = controllerInitializer;
+            _logger = logService.CreateLogger<UIService>();
+            _initCompletionSource = new UniTaskCompletionSource();
+        }
+
+        public async UniTask InitializeAsync()
+        {
+            if (_initCompletionSource.Task.Status == UniTaskStatus.Succeeded)
+            {
+                _logger.Trace("[UIService] Already initialized");
+                return;
+            }
+
+            _logger.Debug("[UIService] InitializeAsync started");
+
+            try
+            {
+                await _controllerInitializer.InitializeAsync();
+                _initCompletionSource.TrySetResult();
+                _logger.Debug("[UIService] InitializeAsync completed");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"[UIService] InitializeAsync failed: {ex.Message}", ex);
+                _initCompletionSource.TrySetException(ex);
+                throw;
+            }
+        }
+
+        public IReadOnlyList<Window> GetVisibleStack() => _controllerInitializer.Controller.GetVisibleStack();
+
+        public IReadOnlyCollection<Window> GetAllWindows() => _controllerInitializer.Controller.GetAllWindows();
+
+        public void HideVisibleStack() => _controllerInitializer.Controller.HideVisibleStack();
+
+        public int VisibleCount() => _controllerInitializer.Controller.GetVisibleStack().Count;
+
+        public T GetOrCreate<T>() where T : Window
+        {
+            return _controllerInitializer.Controller.GetOrCreateWindow<T>();
+        }
+
+        public Window GetOrCreate(Type type)
+        {
+            return _controllerInitializer.Controller.GetOrCreateWindow(type);
+        }
+
+        public Window GetOrCreate(string typeName)
+        {
+            var asm = typeof(Window).Assembly;
+            var type = asm.GetType(typeName);
+            return _controllerInitializer.Controller.GetOrCreateWindow(type);
+        }
+
+        public T Show<T>(bool immediate = false) where T : ParameterlessWindow
+        {
+            return _controllerInitializer.Controller.ShowWindow<T>(immediate);
+        }
+
+        public T Show<T, A1>(A1 a1, bool immediate = false) where T : ParameterWindow<A1>
+        {
+            return _controllerInitializer.Controller.ShowWindow<T, A1>(a1, immediate);
+        }
+
+        public T Show<T, A1, A2>(A1 a1, A2 a2, bool immediate = false) where T : ParameterWindow<A1, A2>
+        {
+            return _controllerInitializer.Controller.ShowWindow<T, A1, A2>(a1, a2, immediate);
+        }
+
+        public T Show<T, A1, A2, A3>(A1 a1, A2 a2, A3 a3, bool immediate = false)
+            where T : ParameterWindow<A1, A2, A3>
+        {
+            return _controllerInitializer.Controller.ShowWindow<T, A1, A2, A3>(a1, a2, a3, immediate);
+        }
+
+        public void Close<T>() where T : Window
+        {
+            _controllerInitializer.Controller.CloseWindow<T>();
+        }
+
+        public void Hide<T>() where T : Window
+        {
+            _controllerInitializer.Controller.HideWindow<T>();
+        }
+
+        public T FindWindow<T>() where T : Window
+        {
+            return _controllerInitializer.Controller.GetWindow<T>();
+        }
+
+        public Window FindWindow(Type type)
+        {
+            return _controllerInitializer.Controller.GetWindow(type);
+        }
+
+        public bool IsVisible<T>() where T : Window
+        {
+            return _controllerInitializer.Controller.IsWindowVisible<T>();
+        }
+
+        public bool IsVisible(Type type)
+        {
+            return _controllerInitializer.Controller.IsWindowVisible(type);
+        }
+
+        public bool HasVisibleByInterface<TInterface>() where TInterface : class
+        {
+            return _controllerInitializer.Controller.HasVisibleByInterface<TInterface>();
+        }
+
+        public TInterface GetTopVisibleByInterface<TInterface>() where TInterface : class
+        {
+            return _controllerInitializer.Controller.GetTopVisibleByInterface<TInterface>();
+        }
+
+        public IReadOnlyList<TInterface> GetVisibleByInterface<TInterface>() where TInterface : class
+        {
+            return _controllerInitializer.Controller.GetVisibleByInterface<TInterface>();
+        }
+
+        public async UniTask<T> ShowAsync<T>() where T : ParameterlessWindow
+        {
+            return await _controllerInitializer.Controller.ShowWindowAsync<T>();
+        }
+
+        public async UniTask<T> ShowAsync<T, A1>(A1 a1) where T : ParameterWindow<A1>
+        {
+            return await _controllerInitializer.Controller.ShowWindowAsync<T, A1>(a1);
+        }
+
+        public async UniTask<T> GetOrCreateAsync<T>() where T : Window
+        {
+            return (T)await GetOrCreateAsync(typeof(T));
+        }
+
+        public async UniTask<Window> GetOrCreateAsync(Type windowType)
+        {
+            return await _controllerInitializer.Controller.GetOrCreateWindowAsync(windowType);
+        }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static IWindowsController GetController() => IsValid ? _controller! : throw new Exception("UI is not valid");
-
-    private static async UniTask LoadControllerAsync(IAssetService assetService, ILogService logService,
-      IWindowsController? controller)
+    public static class UIServiceExtensions
     {
-      if (controller != null)
-        _controller = controller;
+        public static async UniTask<T> ShowAsync<T, A1, A2>(this IUIService uiService, A1 a1, A2 a2)
+            where T : ParameterWindow<A1, A2>
+        {
+            return await uiService.GetOrCreateAsync<T>();
+        }
 
-      if (!IsControllerValid())
-      {
-        var instance = Object.Instantiate(await assetService.LoadAssetAsync<GameObject>("UI/Windows")).GetComponent<WindowsController>();
-        Object.DontDestroyOnLoad(instance);
-        _controller = instance;
-      }
-
-      await _controller!.InitAsync(assetService, logService);
+        public static async UniTask<T> ShowAsync<T, A1, A2, A3>(this IUIService uiService, A1 a1, A2 a2, A3 a3)
+            where T : ParameterWindow<A1, A2, A3>
+        {
+            return await uiService.GetOrCreateAsync<T>();
+        }
     }
-
-    private static bool IsControllerValid() => (_controller as Component) != null;
-
-    public static IReadOnlyList<Window> GetVisibleStack() => GetController().GetVisibleStack();
-    public static IReadOnlyCollection<Window> GetAllWindows() => GetController().GetAllWindows();
-    public static void HideVisibleStack() => GetController().HideVisibleStack();
-    public static int VisibleCount() => GetController().GetVisibleStack().Count;
-
-    public static Coroutine? StartCoroutine(IEnumerator coroutine)
-    {
-      return !IsValid ? null : _controller.StartCoroutine(coroutine);
-    }
-
-    public static T GetOrCreate<T>() where T : Window
-    {
-      return GetController().GetOrCreateWindow<T>();
-    }
-
-    public static Window GetOrCreate(Type type)
-    {
-      return GetController().GetOrCreateWindow(type);
-    }
-
-    public static Window GetOrCreate(string typeName)
-    {
-      Assembly asm = typeof(Window).Assembly;
-      Type type = asm.GetType(typeName);
-      return GetController().GetOrCreateWindow(type);
-    }
-
-    public static T Show<T>(bool immediate = false) where T : ParameterlessWindow
-    {
-      return GetController().ShowWindow<T>(immediate);
-    }
-
-    public static T Show<T, A1>(A1 a1, bool immediate = false) where T : ParameterWindow<A1>
-    {
-      return GetController().ShowWindow<T, A1>(a1, immediate);
-    }
-
-    public static T Show<T, A1, A2>(A1 a1, A2 a2, bool immediate = false) where T : ParameterWindow<A1, A2>
-    {
-      return GetController().ShowWindow<T, A1, A2>(a1, a2, immediate);
-    }
-
-    public static T Show<T, A1, A2, A3>(A1 a1, A2 a2, A3 a3, bool immediate = false)
-      where T : ParameterWindow<A1, A2, A3>
-    {
-      return GetController().ShowWindow<T, A1, A2, A3>(a1, a2, a3, immediate);
-    }
-
-    public static void Close<T>() where T : Window
-    {
-      if (!IsValid)
-        return;
-
-      GetController().CloseWindow<T>();
-    }
-
-    public static void Hide<T>() where T : Window
-    {
-      GetController().HideWindow<T>();
-    }
-
-    public static T FindWindow<T>() where T : Window
-    {
-      return GetController().GetWindow<T>();
-    }
-
-    public static bool TryFindWindow<T>(out T window) where T : Window
-    {
-      window = GetController().GetWindow<T>();
-      return window != null;
-    }
-
-    public static Window FindWindow(Type type)
-    {
-      return GetController().GetWindow(type);
-    }
-
-    public static bool IsVisible<T>() where T : Window
-    {
-      return GetController().IsWindowVisible<T>();
-    }
-
-    public static bool IsVisible(Type type)
-    {
-      return GetController().IsWindowVisible(type);
-    }
-
-    // Interface-based queries
-    public static bool HasVisibleByInterface<TInterface>() where TInterface : class
-    {
-      return GetController().HasVisibleByInterface<TInterface>();
-    }
-
-    public static TInterface GetTopVisibleByInterface<TInterface>() where TInterface : class
-    {
-      return GetController().GetTopVisibleByInterface<TInterface>();
-    }
-
-    public static IReadOnlyList<TInterface> GetVisibleByInterface<TInterface>() where TInterface : class
-    {
-      return GetController().GetVisibleByInterface<TInterface>();
-    }
-
-    /*public static async UniTask PreloadWindowsAsync(EnumWindowPreloadGroup group)
-    {
-      await GetController().PreloadWindowsAsync(group);
-    }
-
-    public static void ReleasePreloadedWindows(EnumWindowPreloadGroup group)
-    {
-      GetController().ReleasePreloadedWindows(group);
-    }*/
-
-    public static async UniTask<T> ShowAsync<T>() where T : ParameterlessWindow
-    {
-      return await GetController().ShowWindowAsync<T>();
-    }
-
-    public static async UniTask<T> ShowAsync<T, A1>(A1 a1) where T : ParameterWindow<A1>
-    {
-      return await GetController().ShowWindowAsync<T, A1>(a1);
-    }
-
-    public static async UniTask<T> GetOrCreateAsync<T>() where T : Window
-    {
-      return await GetController().GetOrCreateWindowAsync<T>();
-    }
-
-    public static async UniTask<Window> GetOrCreateAsync(Type windowType)
-    {
-      return await GetController().GetOrCreateWindowAsync(windowType);
-    }
-  }
 }

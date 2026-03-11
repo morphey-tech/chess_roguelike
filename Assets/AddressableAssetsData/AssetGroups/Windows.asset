@@ -16,52 +16,44 @@ MonoBehaviour:
   m_GUID: 47c52735aa63fc12e8af0a64d1ff14dd
   m_SerializeEntries:
   - m_GUID: 4114a4204b400b64880cb0915e6ec963
-    m_Address: Project.Gameplay.UI.WorldUIWindow
+    m_Address: WorldUIWindow
     m_ReadOnly: 0
-    m_SerializedLabels:
-    - ui
+    m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 78a2a125c2a4e488993789766b39273c
-    m_Address: Project.Gameplay.UI.ResourcesWindow
+    m_Address: ResourcesWindow
     m_ReadOnly: 0
-    m_SerializedLabels:
-    - ui
+    m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 96453e84471ff24e0bf2c5ca7475698c
-    m_Address: Project.Gameplay.UI.FigureInfoWindow
+    m_Address: FigureInfoWindow
     m_ReadOnly: 0
-    m_SerializedLabels:
-    - ui
+    m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9aded6957e63139a3a4765095a4e433e
-    m_Address: Project.Gameplay.UI.TooltipWindow
+    m_Address: TooltipWindow
     m_ReadOnly: 0
-    m_SerializedLabels:
-    - ui
+    m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6
-    m_Address: Project.Gameplay.UI.StageOutcomeWindow
+    m_Address: StageOutcomeWindow
     m_ReadOnly: 0
-    m_SerializedLabels:
-    - ui
+    m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b44556a4dbc76e1b0b8a921fdbe8bc8f
-    m_Address: Project.Gameplay.UI.ArtifactsWindow
+    m_Address: ArtifactsWindow
     m_ReadOnly: 0
-    m_SerializedLabels:
-    - ui
+    m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cb53cfd1a482bcb3ea09b8b1340a8e01
-    m_Address: Project.Gameplay.UI.TurnWindow
+    m_Address: TurnWindow
     m_ReadOnly: 0
-    m_SerializedLabels:
-    - ui
+    m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d5e2e02100fb4f56a5f2ab6f4873ff55
-    m_Address: Project.Gameplay.UI.BoardCapacityWindow
+    m_Address: BoardCapacityWindow
     m_ReadOnly: 0
-    m_SerializedLabels:
-    - ui
+    m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ebe3530bbc70efe338c696403ae290b8
     m_Address: UI/Windows

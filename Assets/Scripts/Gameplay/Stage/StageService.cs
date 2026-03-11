@@ -22,19 +22,19 @@ namespace Project.Gameplay.Gameplay.Stage
     /// - SelectTag management on figures
     /// - Reacting to turn changes for cleanup
     /// </summary>
-    public class StageService : IDisposable
+    public class StageService : IInitializable, IDisposable
     {
         private readonly IStageQueryService _query;
         private readonly IStageHighlightRenderer _renderer;
+        private readonly ISubscriber<FigureSpawnedMessage> _figureSpawnedSubscriber;
+        private readonly ISubscriber<FigureSelectedMessage> _selectionSubscriber;
+        private readonly ISubscriber<FigureDeselectedMessage> _figureDeselectedSubscriber;
+        private readonly ISubscriber<TurnChangedMessage> _turnSubscriber;
+        private readonly ISubscriber<BonusMoveStartedMessage> _bonusMoveStartedSubscriber;
+        private readonly ISubscriber<BonusMoveCompletedMessage> _bonusMoveCompletedSubscriber;
         private readonly ILogger<StageService> _logger;
-        private readonly IDisposable _subscriptions;
 
-        private enum StageMode
-        {
-            Normal,
-            BonusMove
-        }
-
+        private IDisposable _disposable = null!;
         private StageMode _mode;
 
         [Inject]
@@ -51,16 +51,26 @@ namespace Project.Gameplay.Gameplay.Stage
         {
             _query = query;
             _renderer = renderer;
+            _figureSpawnedSubscriber = figureSpawnedSubscriber;
+            _selectionSubscriber = selectionSubscriber;
+            _figureDeselectedSubscriber = figureDeselectedSubscriber;
+            _turnSubscriber = turnSubscriber;
+            _bonusMoveStartedSubscriber = bonusMoveStartedSubscriber;
+            _bonusMoveCompletedSubscriber = bonusMoveCompletedSubscriber;
             _logger = logService.CreateLogger<StageService>();
 
+        }
+
+        void IInitializable.Initialize()
+        {
             DisposableBagBuilder bag = DisposableBag.CreateBuilder();
-            figureSpawnedSubscriber.Subscribe(OnFigureSpawned).AddTo(bag);
-            selectionSubscriber.Subscribe(OnFigureSelected).AddTo(bag);
-            figureDeselectedSubscriber.Subscribe(OnFigureDeselected).AddTo(bag);
-            turnSubscriber.Subscribe(OnTurnChanged).AddTo(bag);
-            bonusMoveStartedSubscriber.Subscribe(OnBonusMoveStarted).AddTo(bag);
-            bonusMoveCompletedSubscriber.Subscribe(OnBonusMoveCompleted).AddTo(bag);
-            _subscriptions = bag.Build();
+            _figureSpawnedSubscriber.Subscribe(OnFigureSpawned).AddTo(bag);
+            _selectionSubscriber.Subscribe(OnFigureSelected).AddTo(bag);
+            _figureDeselectedSubscriber.Subscribe(OnFigureDeselected).AddTo(bag);
+            _turnSubscriber.Subscribe(OnTurnChanged).AddTo(bag);
+            _bonusMoveStartedSubscriber.Subscribe(OnBonusMoveStarted).AddTo(bag);
+            _bonusMoveCompletedSubscriber.Subscribe(OnBonusMoveCompleted).AddTo(bag);
+            _disposable = bag.Build();
         }
 
         private void OnFigureSpawned(FigureSpawnedMessage message)
@@ -122,7 +132,14 @@ namespace Project.Gameplay.Gameplay.Stage
 
         void IDisposable.Dispose()
         {
-            _subscriptions?.Dispose();
+            _disposable?.Dispose();
         }
+        
+        private enum StageMode
+        {
+            Normal,
+            BonusMove
+        }
+
     }
 }

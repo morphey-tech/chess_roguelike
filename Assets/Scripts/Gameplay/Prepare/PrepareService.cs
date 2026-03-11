@@ -71,17 +71,11 @@ namespace Project.Gameplay.Gameplay.Prepare
             _context = context;
 
             // Preload in background, but under session lifetime.
-            _figureSpawnService
-                .PreloadConfigsAsync()
-                .AttachExternalCancellation(context.CancellationToken)
-                .ForgetLogged(_logger, "Prepare preload failed", context.CancellationToken);
+            await _figureSpawnService.PreloadConfigsAsync();
 
             try
             {
-                _uiService.ShowWorldUiAsync()
-                    .AttachExternalCancellation(context.CancellationToken)
-                    .ForgetLogged(_logger, "Show world ui failed", context.CancellationToken);
-                
+                _uiService.ShowWorldUiAsync().Forget();
                 await SpawnPrepareZoneAsync(context);
                 if (_context != context)
                 {
@@ -92,9 +86,7 @@ namespace Project.Gameplay.Gameplay.Prepare
                 _highlightService.ApplyAll(context);
                 context.IsInputReady = true;
 
-                _uiService.ShowPreparePhaseAsync()
-                    .AttachExternalCancellation(context.CancellationToken)
-                    .Forget();
+                _uiService.ShowPreparePhaseAsync().Forget();
             }
             catch (OperationCanceledException) when (context.CancellationToken.IsCancellationRequested)
             {
@@ -155,8 +147,21 @@ namespace Project.Gameplay.Gameplay.Prepare
         public void HandleHandFigureClicked(HandFigureClickedMessage message)
         {
             PrepareContext? context = _context;
-            if (context == null || !context.State.IsActive || !context.IsInputReady)
+            if (context == null)
             {
+                _logger.Debug($"HandFigureClicked ignored: context is null");
+                return;
+            }
+            
+            if (!context.State.IsActive)
+            {
+                _logger.Debug($"HandFigureClicked ignored: state not active");
+                return;
+            }
+            
+            if (!context.IsInputReady)
+            {
+                _logger.Debug($"HandFigureClicked ignored: input not ready yet");
                 return;
             }
 
@@ -183,8 +188,21 @@ namespace Project.Gameplay.Gameplay.Prepare
         public void HandleCellClicked(CellClickedMessage message)
         {
             PrepareContext? context = _context;
-            if (context == null || !context.State.IsActive || !context.IsInputReady)
+            if (context == null)
             {
+                _logger.Debug($"Click ignored: context is null (phase active={context?.State.IsActive}, inputReady={context?.IsInputReady})");
+                return;
+            }
+            
+            if (!context.State.IsActive)
+            {
+                _logger.Debug($"Click ignored: state not active");
+                return;
+            }
+            
+            if (!context.IsInputReady)
+            {
+                _logger.Debug($"Click ignored: input not ready yet");
                 return;
             }
 

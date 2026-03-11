@@ -1,15 +1,28 @@
 using System;
 using System.Collections.Generic;
+using LiteUI.Addressable.Service;
+using LiteUI.Binding;
+using LiteUI.UI.Registry;
 using LiteUI.UI.Service;
 using MessagePipe;
+using Project.Core.Core.Annotation;
 using Project.Core.Core.Configs.Artifacts;
+using Project.Core.Core.Filters;
+using Project.Core.Core.Filters.Messages;
 using Project.Core.Core.Logging;
 using Project.Core.Core.Storm.Messages;
+using Project.Core.Core.Triggers;
 using Project.Core.Core.World;
 using Project.Gameplay.Gameplay.Artifacts;
+using Project.Gameplay.Gameplay.Artifacts.Messages;
+using Project.Gameplay.Gameplay.Board;
+using Project.Gameplay.Gameplay.Board.Capacity;
 using Project.Gameplay.Gameplay.Board.Messages;
 using Project.Gameplay.Gameplay.Combat;
+using Project.Gameplay.Gameplay.Economy;
 using Project.Gameplay.Gameplay.Figures;
+using Project.Gameplay.Gameplay.Filters;
+using Project.Gameplay.Gameplay.Filters.Impl;
 using Project.Gameplay.Gameplay.Input.Messages;
 using Project.Gameplay.Gameplay.Interaction;
 using Project.Gameplay.Gameplay.Prepare;
@@ -45,6 +58,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using VContainer;
 using VContainer.Unity;
+using UIService = Project.Gameplay.Gameplay.UI.UIService;
 
 namespace Project.Unity.Unity.Installers
 {
@@ -57,7 +71,7 @@ namespace Project.Unity.Unity.Installers
         [SerializeField] private WorldObjectCollector _worldObjectCollector;
         [SerializeField] private UiObjectCollector _uiObjectCollector;
 
-        private IObjectResolver _resolver = null!;
+        private readonly IObjectResolver _resolver = null!;
         private ILogger<GameLifetimeScope> _logger = null!;
 
         protected override void Configure(IContainerBuilder builder)
@@ -68,7 +82,7 @@ namespace Project.Unity.Unity.Installers
             ConfigureEntities(builder);
             ConfigureViews(builder);
             ConfigureServices(builder);
-            builder.RegisterBuildCallback(OnContainerBuilt);
+            Construct(builder);
         }
 
         private void ConfigureEntities(IContainerBuilder builder)
@@ -137,6 +151,11 @@ namespace Project.Unity.Unity.Installers
             // UI messages
             builder.RegisterMessageBroker<TooltipShowRequestMessage>(options);
             builder.RegisterMessageBroker<TooltipHideRequestMessage>(options);
+            
+            builder.RegisterMessageBroker<ArtifactAddedMessage>(options);
+            builder.RegisterMessageBroker<ArtifactRemovedMessage>(options);
+            builder.RegisterMessageBroker<ArtifactsClearedMessage>(options);
+            builder.RegisterMessageBroker<string, AppFilterMessage>(options);
         }
 
         private void ConfigureInput(IContainerBuilder builder)
@@ -160,13 +179,10 @@ namespace Project.Unity.Unity.Installers
 
         private void ConfigureViews(IContainerBuilder builder)
         {
-            // AnchorToTargetTicker — это ILateTickable, не MonoBehaviour
-            // RegisterEntryPoint создаст экземпляр и будет вызывать LateTick()
-            builder.RegisterEntryPoint<AnchorToTargetTicker>()
-                .As<IAnchorToTargetTicker>();
-            
             // Views are regular classes - they implement Core interfaces
-            builder.Register<BoardPresenter>(Lifetime.Singleton)
+            builder.Register<FigurePresenter>(Lifetime.Scoped)
+                .AsImplementedInterfaces();
+            builder.Register<BoardPresenter>(Lifetime.Scoped)
                 .AsImplementedInterfaces();
 
             // Board appear
@@ -177,8 +193,7 @@ namespace Project.Unity.Unity.Installers
                     new BoardCellsRainDropAnimationStrategy()
                 });
 
-            builder.Register<FigurePresenter>(Lifetime.Singleton)
-                .AsImplementedInterfaces();
+            builder.RegisterEntryPoint<FigurePresenter>();
 
             builder.Register<ProjectilePresenter>(Lifetime.Singleton)
                 .AsImplementedInterfaces();
@@ -203,14 +218,49 @@ namespace Project.Unity.Unity.Installers
             builder.Register<PreparePresenter>(Lifetime.Singleton)
                 .AsImplementedInterfaces();
 
-            // Unity-side input handlers
-            builder.Register<HandFigureClickHandler>(Lifetime.Singleton)
-                .AsImplementedInterfaces()
-                .AsSelf();
+            builder.RegisterEntryPoint<HandFigureClickHandler>();
         }
 
         private void ConfigureServices(IContainerBuilder builder)
         {
+            //LiteUI
+            builder.Register<UIMetaRegistry>(Lifetime.Singleton);
+            builder.Register<BindingService>(Lifetime.Singleton);
+            builder.RegisterEntryPoint<BindingMonoBehaviourService>();
+            builder.Register<AddressableManager>(Lifetime.Singleton);
+
+            // UI Services
+            builder.RegisterEntryPoint<AnchorToTargetTicker>().As<IAnchorToTargetTicker>();
+            builder.Register<UIAssetService>(Lifetime.Singleton).As<IUIAssetService>();
+            builder.Register<WindowsControllerInitializer>(Lifetime.Singleton);
+            builder.Register<UIService>(Lifetime.Singleton).As<IUIService>();
+            
+            //Capacity
+            builder.Register<BoardCapacityModel>(Lifetime.Singleton);
+            builder.Register<BoardCapacityService>(Lifetime.Singleton);
+            
+            //TODO: скорее всего придется разбивать фильтры, на app и game хз пока
+            builder.Register<AnnotationScanService>(Lifetime.Singleton);
+            builder.Register<AppFilterService>(Lifetime.Transient)
+                .As<IAppFilterService>();
+            builder.Register<AddressablesInitFilter>(Lifetime.Transient);
+            builder.Register<AnnotationScanFilter>(Lifetime.Transient);
+            builder.Register<UIInitializationFilter>(Lifetime.Transient);
+            
+            builder.Register<TriggerService>(Lifetime.Singleton);
+            builder.Register<ItemFactory>(Lifetime.Singleton);
+            builder.Register<EconomyService>(Lifetime.Singleton)
+                .AsSelf();
+            builder.Register<EconomySaveAdapter>(Lifetime.Singleton)
+                .AsImplementedInterfaces();
+
+            builder.Register<ArtifactConfigRepository>(Lifetime.Singleton);
+            builder.Register<ArtifactFactory>(Lifetime.Singleton);
+            builder.Register<ArtifactService>(Lifetime.Singleton);
+            builder.Register<ArtifactSaveAdapter>(Lifetime.Singleton)
+                .AsImplementedInterfaces();
+            builder.Register<ArtifactSynergyRegistry>(Lifetime.Singleton);
+            
             // Gameplay (domain) scope — в модуле Gameplay
             GameplayContainerConfiguration.Register(builder);
 
@@ -225,14 +275,11 @@ namespace Project.Unity.Unity.Installers
             // Register SequentialActionBuilder after ActionBuilderRegistry is created
             builder.RegisterBuildCallback(resolver =>
             {
-                var registry = resolver.Resolve<ActionBuilderRegistry>();
+                ActionBuilderRegistry registry = resolver.Resolve<ActionBuilderRegistry>();
                 registry.RegisterSequentialBuilder();
             });
 
             // Unity-only: консоль, UI, prepare-зона и фазы (LootPresenter — в ConfigureViews)
-            builder.Register<ReloadStageConsoleCommands>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
-            builder.Register<StageOutcomeConsoleCommands>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
-            builder.Register<EconomyConsoleCommands>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
             builder.Register<GameUiService>(Lifetime.Singleton).As<IGameUiService>();
 
             builder.Register<PrepareZonePrefabCache>(Lifetime.Singleton)
@@ -243,51 +290,28 @@ namespace Project.Unity.Unity.Installers
             builder.Register<PrepareHighlightService>(Lifetime.Singleton);
             builder.Register<PreparePlacementController>(Lifetime.Singleton);
             builder.Register<PrepareService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
-            builder.Register<PrepareInputHandler>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
-            builder.Register<PrepareVisualSyncService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
-            builder.Register<HpBarVisibilityService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
+            builder.RegisterEntryPoint<PrepareInputHandler>();
+            builder.RegisterEntryPoint<PrepareVisualSyncService>();
+            builder.RegisterEntryPoint<HpBarVisibilityService>();
             builder.Register<DamagePreviewService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
-            builder.Register<FigureInfoPreviewService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
-            builder.Register<UIAssetService>(Lifetime.Singleton).As<IUIAssetService>();
-            builder.Register<TooltipService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
+            builder.RegisterEntryPoint<FigureInfoPreviewService>();
+            builder.RegisterEntryPoint<TooltipService>();
+            
+            // Debug commands
+            builder.RegisterEntryPoint<EconomyConsoleCommands>();
+            builder.RegisterEntryPoint<ArtifactConsoleCommands>();
+            builder.RegisterEntryPoint<ReloadStageConsoleCommands>();
+            builder.RegisterEntryPoint<StageOutcomeConsoleCommands>();
         }
-
-        private void OnContainerBuilt(IObjectResolver resolver)
+        
+        private void Construct(IContainerBuilder builder)
         {
-            _resolver = resolver;
-            _logger = resolver.Resolve<ILogService>()
-                .CreateLogger<GameLifetimeScope>();
-
-            // Force-create services with subscriptions
-            resolver.Resolve<TurnService>();
-            resolver.Resolve<InteractionController>();
-            resolver.Resolve<ITurnController>();
-            resolver.Resolve<IBonusMoveSession>(); // Has click subscription
-            resolver.Resolve<StageService>();
-            resolver.Resolve<RunFlowService>();
-            resolver.Resolve<PrepareService>();
-            resolver.Resolve<PrepareInputHandler>();
-            resolver.Resolve<PrepareVisualSyncService>();
-            resolver.Resolve<HpBarVisibilityService>();
-            resolver.Resolve<DamagePreviewService>();
-            resolver.Resolve<HandFigureClickHandler>();
-            resolver.Resolve<StormBattleService>();
-            resolver.Resolve<StormInitService>();
-            resolver.Resolve<StormHighlightRenderer>();
-            resolver.Resolve<StormDamageService>();
-            resolver.Resolve<FigureInfoPreviewService>();
-
-            // UI must be force-resolved so its constructor runs InitAsync
-            // (loads WindowsController prefab). Without this, static UI methods
-            // throw "UI is not valid" because _controller is never set.
-            resolver.Resolve<Gameplay.Gameplay.UI.UIService>();
-
-            // Inject MonoSceneBootstrap
-            MonoSceneBootstrap? bootstrap = _worldObjectCollector.GetObjectByType<MonoSceneBootstrap>();
-            if (bootstrap != null)
+            builder.RegisterBuildCallback(r =>
             {
-                resolver.Inject(bootstrap);
-            }
+                r.Resolve<IFigurePresenter>();
+                r.Resolve<IBoardPresenter>();
+                r.Resolve<IStageHighlightRenderer>();
+            });
         }
 
         protected override void OnDestroy()
@@ -298,6 +322,7 @@ namespace Project.Unity.Unity.Installers
             }
             catch (Exception ex)
             {
+                _logger = _resolver.Resolve<ILogger<GameLifetimeScope>>();
                 _logger.Error(ex.Message);
             }
             base.OnDestroy();

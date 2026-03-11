@@ -1,7 +1,14 @@
 using System;
+using LiteUI.Addressable.Service;
+using LiteUI.Binding;
+using LiteUI.DI;
+using LiteUI.Dialog.Service;
+using LiteUI.UI.Registry;
+using LiteUI.UI.Service;
 using MessagePipe;
+using Project.Core.Core.Annotation;
 using Project.Core.Core.Logging;
-using Project.Core.Window;
+using Project.Gameplay.Gameplay.UI;
 using Project.Gameplay.Gameplay.Artifacts.Messages;
 using Project.Gameplay.Gameplay.Assets;
 using Project.Gameplay.Gameplay.Combat;
@@ -13,6 +20,7 @@ using Project.Gameplay.Gameplay.Save;
 using Project.Gameplay.Gameplay.Save.Adapter;
 using Project.Gameplay.Gameplay.Save.Service;
 using Project.Gameplay.Gameplay.Scene;
+using Project.Gameplay.Gameplay.UI;
 using Project.Unity.Unity.Debug;
 using UnityEngine;
 using VContainer;
@@ -20,8 +28,16 @@ using VContainer.Unity;
 using IRandomService = Project.Core.Core.Random.IRandomService;
 using RandomService = Project.Core.Core.Random.RandomService;
 using Project.Core.Core.Configs.Artifacts;
+using Project.Core.Core.Filters;
+using Project.Core.Core.Filters.Messages;
+using Project.Core.Core.Scene;
 using Project.Core.Core.Triggers;
 using Project.Gameplay.Gameplay.Artifacts;
+using Project.Gameplay.Gameplay.Board.Capacity;
+using Project.Gameplay.Gameplay.Filters;
+using Project.Gameplay.Gameplay.Filters.Impl;
+using Project.Unity.UI.Components;
+using UIService = Project.Gameplay.Gameplay.UI.UIService;
 
 namespace Project.Unity.Unity.Installers
 {
@@ -40,10 +56,7 @@ namespace Project.Unity.Unity.Installers
 
             // Register MessagePipe for Artifact messages
             MessagePipeOptions options = builder.RegisterMessagePipe();
-            builder.RegisterMessageBroker<ArtifactAddedMessage>(options);
-            builder.RegisterMessageBroker<ArtifactRemovedMessage>(options);
-            builder.RegisterMessageBroker<ArtifactsClearedMessage>(options);
-
+            
             builder.Register<LogService>(Lifetime.Singleton)
                 .WithParameter(_minLogLevel)
                 .AsImplementedInterfaces()
@@ -58,11 +71,9 @@ namespace Project.Unity.Unity.Installers
             builder.Register<ConfigProvider>(Lifetime.Singleton)
                 .AsImplementedInterfaces()
                 .AsSelf();
-            builder.Register<ConfigHotReloadService>(Lifetime.Singleton)
-                .AsImplementedInterfaces()
+            builder.RegisterEntryPoint<ConfigHotReloadService>()
                 .AsSelf();
 
-            builder.Register<TriggerService>(Lifetime.Singleton);
             builder.Register<PlayerLoadoutService>(Lifetime.Singleton);
             builder.Register<PlayerRunStateService>(Lifetime.Singleton);
             builder.Register<PlayerMetaProgressService>(Lifetime.Singleton);
@@ -77,36 +88,13 @@ namespace Project.Unity.Unity.Installers
                 .AsImplementedInterfaces()
                 .AsSelf();
 
-            builder.Register<PassiveFactory>(Lifetime.Singleton);
-            builder.Register<ItemFactory>(Lifetime.Singleton);
-            builder.Register<EconomyService>(Lifetime.Singleton)
-                .AsSelf();
-            builder.Register<EconomySaveAdapter>(Lifetime.Singleton)
-                .AsImplementedInterfaces();
-
-            // Artifacts system (base services - accessible everywhere)
-            builder.Register<ArtifactConfigRepository>(Lifetime.Singleton);
-            builder.Register<ArtifactFactory>(Lifetime.Singleton);
-            builder.Register<ArtifactService>(Lifetime.Singleton);
-            builder.Register<ArtifactSaveAdapter>(Lifetime.Singleton)
-                .AsImplementedInterfaces();
-            builder.Register<ArtifactSynergyRegistry>(Lifetime.Singleton);
-
             builder.Register<MemoryCleanService>(Lifetime.Singleton)
                 .AsImplementedInterfaces()
                 .AsSelf();
             builder.Register<SceneLoader>(Lifetime.Singleton);
             builder.Register<SceneTransitionService>(Lifetime.Singleton);
             builder.Register<SceneService>(Lifetime.Singleton)
-                .AsImplementedInterfaces();
-
-            // Debug commands
-            builder.Register<EconomyConsoleCommands>(Lifetime.Singleton)
-                .AsImplementedInterfaces()
-                .AsSelf();
-            builder.Register<ArtifactConsoleCommands>(Lifetime.Singleton)
-                .AsImplementedInterfaces()
-                .AsSelf();
+                .As<ISceneService>();
 
             builder.RegisterInstance(saveEnvironment)
                 .As<Project.Core.Core.Save.ISaveEnvironment>();

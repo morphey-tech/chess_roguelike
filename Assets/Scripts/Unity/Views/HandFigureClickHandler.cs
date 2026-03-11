@@ -6,6 +6,7 @@ using Project.Gameplay.Gameplay.Prepare;
 using Project.Unity.Unity.Views.Components;
 using UnityEngine;
 using VContainer;
+using VContainer.Unity;
 
 namespace Project.Unity.Unity.Views
 {
@@ -13,18 +14,26 @@ namespace Project.Unity.Unity.Views
     /// Unity-side handler that detects clicks on hand figures.
     /// Listens to RawClickMessage, does raycast, publishes HandFigureClickedMessage.
     /// </summary>
-    public sealed class HandFigureClickHandler : IDisposable
+    public sealed class HandFigureClickHandler : IStartable, IDisposable
     {
+        private readonly ISubscriber<RawClickMessage> _rawClickSubscriber;
         private readonly IPublisher<HandFigureClickedMessage> _handFigureClickedPublisher;
-        private readonly IDisposable _subscription;
+
+        private IDisposable _subscription;
 
         [Inject]
-        public HandFigureClickHandler(
+        private HandFigureClickHandler(
             ISubscriber<RawClickMessage> rawClickSubscriber,
             IPublisher<HandFigureClickedMessage> handFigureClickedPublisher)
         {
+            _rawClickSubscriber = rawClickSubscriber;
             _handFigureClickedPublisher = handFigureClickedPublisher;
-            _subscription = rawClickSubscriber.Subscribe(OnRawClick);
+        }
+
+        void IStartable.Start()
+        {
+            _subscription = _rawClickSubscriber.Subscribe(OnRawClick);
+            UnityEngine.Debug.Log("[HandFigureClickHandler] Started");
         }
 
         private void OnRawClick(RawClickMessage message)
@@ -48,5 +57,6 @@ namespace Project.Unity.Unity.Views
         {
             _subscription?.Dispose();
         }
+
     }
 }

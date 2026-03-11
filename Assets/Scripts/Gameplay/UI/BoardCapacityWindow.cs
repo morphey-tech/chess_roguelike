@@ -1,6 +1,7 @@
 using System;
 using MessagePipe;
 using Project.Core.Window;
+using Project.Gameplay.Gameplay.UI;
 using Project.Gameplay.Gameplay.Board.Capacity;
 using Project.Gameplay.Gameplay.Board.Messages;
 using TMPro;

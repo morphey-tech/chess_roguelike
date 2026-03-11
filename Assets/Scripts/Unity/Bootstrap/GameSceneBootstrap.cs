@@ -3,13 +3,16 @@ using Cysharp.Threading.Tasks;
 using Project.Core.Core.Configs.Artifacts;
 using Project.Core.Core.Configs.Run;
 using Project.Core.Core.Configs.Suites;
+using Project.Core.Core.Filters;
 using Project.Core.Core.Random;
 using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.Gameplay.Economy;
 using Project.Gameplay.Gameplay.Run;
 using Project.Gameplay.Gameplay.Save.Service;
 using Project.Gameplay.Gameplay.UI;
-using Project.Core.Window;
+using Project.Gameplay.Gameplay.UI;
+using Project.Gameplay.Gameplay.Filters;
+using Project.Gameplay.Gameplay.Filters.Impl;
 using Project.Gameplay.UI;
 
 namespace Project.Unity.Unity.Bootstrap
@@ -27,6 +30,8 @@ namespace Project.Unity.Unity.Bootstrap
         private PlayerLoadoutService _loadoutService;
         private RandomService _randomService;
         private EconomyService _economyService;
+        private IAppFilterService _filterService;
+        private IUIService _uiService;
 
         private const string DefaultRunId = "tutorial";
 
@@ -39,33 +44,52 @@ namespace Project.Unity.Unity.Bootstrap
             _loadoutService = Resolve<PlayerLoadoutService>();
             _randomService = Resolve<RandomService>();
             _economyService = Resolve<EconomyService>();
+            _filterService = Resolve<IAppFilterService>();
+            _uiService = Resolve<IUIService>();
         }
 
         protected override async UniTask OnBootstrapAsync()
         {
-            Log.Info("Game bootstrap started");
+            await RunFilters();
+            //TODO: в фильтры надо вытащить думаю предзагрузку всякого в том числе ui базового
             await _configProvider.PreloadAllAsync(this.GetCancellationTokenOnDestroy());
 
             RunConfig runConfig = await LoadRunConfigAsync(DefaultRunId);
             await InitializeRunStateAsync(runConfig);
 
-            // Start new run: reset economy (includes artifacts)
             _economyService.StartNewRun();
             await ShowResourcesWindowAsync();
 
             Run run = _runFactory.Create(runConfig);
             _runHolder.Set(run);
-
-            // Fire-and-forget: game loop runs indefinitely (phases wait for player input).
-            // Awaiting here would block the bootstrap and prevent the previous scene from unloading.
             run.Begin().Forget();
-            Log.Info($"Starting run: {runConfig.Id}");
+        }
+        
+        private async UniTask RunFilters()
+        {
+            _filterService.AddFilter<AddressablesInitFilter>();
+            _filterService.AddFilter<AnnotationScanFilter>();
+            _filterService.AddFilter<UIInitializationFilter>();
+
+            try
+            {
+                await _filterService.RunAsync();
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+            catch (Exception e)
+            {
+                Log.Error("Error at run filters", e);
+            }
+            Log.Info("App filters executed");
         }
 
         private async UniTask ShowResourcesWindowAsync()
         {
-            await UIService.Initialized;
-            await UIService.ShowAsync<ResourcesWindow>();
+            // UIService уже инициализирован фильтром UIInitializationFilter
+            await _uiService.ShowAsync<ResourcesWindow>();
             Log.Info("Resources window shown");
         }
 

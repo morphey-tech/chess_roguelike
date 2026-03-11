@@ -1,5 +1,4 @@
 using LiteUI.Popup.Manager;
-using MessagePipe;
 using VContainer;
 
 namespace LiteUI.DI
@@ -11,17 +10,10 @@ namespace LiteUI.DI
             return new PopupModule();
         }
         
-        public void Register(IContainerBuilder builder, MessagePipeOptions options)
+        public void Register(IContainerBuilder builder)
         {
-            builder.Register<PopupManager>(Lifetime.Scoped).AsSelf().AsImplementedInterfaces();
-            builder.Register<IPopupLoader, SimplePopupLoader>(Lifetime.Scoped);
-
-            RegisterPipes(builder, options);
-        }
-        
-        private static void RegisterPipes(IContainerBuilder builder, MessagePipeOptions options)
-        {
-            // builder.RegisterMessageBroker<string, DialogEvent>(options);
+            builder.Register<PopupManager>(Lifetime.Singleton);
+            builder.Register<IPopupLoader, SimplePopupLoader>(Lifetime.Singleton);
         }
     }
 }

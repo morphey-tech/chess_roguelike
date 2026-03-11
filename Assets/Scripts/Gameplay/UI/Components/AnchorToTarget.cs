@@ -1,7 +1,7 @@
 using System.Collections.Generic;
+using Project.Gameplay.Gameplay.UI;
 using Project.Unity.UI.Extensions;
 using UnityEngine;
-using UI = Project.Core.Window;
 using VContainer;
 
 namespace Project.Unity.UI.Components
@@ -9,6 +9,9 @@ namespace Project.Unity.UI.Components
   [RequireComponent(typeof(RectTransform))]
   public class AnchorToTarget : MonoBehaviour
   {
+    private IUIService _uiService = null!;
+    private Canvas _canvas = null!;
+    
     public struct ClampBorders
     {
       public Vector2 TopBorderA;
@@ -72,12 +75,12 @@ namespace Project.Unity.UI.Components
         if (_screenRect == null || _prevSize != _rectTransform.rect.size)
         {
           Vector3 leftBottomCorner = _useSafeArea
-            ? Gameplay.Gameplay.UI.UIService.Canvas.ScreenToCanvasPosition(Screen.safeArea.min)
-            : Gameplay.Gameplay.UI.UIService.Canvas.ViewportToCanvasPosition(new Vector3(0, 0));
+            ? _canvas.ScreenToCanvasPosition(Screen.safeArea.min)
+            : _canvas.ViewportToCanvasPosition(new Vector3(0, 0));
 
           Vector3 rightTopCorner = _useSafeArea
-            ? Gameplay.Gameplay.UI.UIService.Canvas.ScreenToCanvasPosition(Screen.safeArea.max)
-            : Gameplay.Gameplay.UI.UIService.Canvas.ViewportToCanvasPosition(new Vector3(1, 1));
+            ? _canvas.ScreenToCanvasPosition(Screen.safeArea.max)
+            : _canvas.ViewportToCanvasPosition(new Vector3(1, 1));
 
           leftBottomCorner += (Vector3)_screenLeftBottomBorders;
           rightTopCorner -= (Vector3)_screenRightTopBorders;
@@ -98,9 +101,11 @@ namespace Project.Unity.UI.Components
     public float CameraDistance { get; private set; }
 
     [Inject]
-    private void Construct(IAnchorToTargetTicker ticker)
+    private void Construct(IAnchorToTargetTicker ticker, IUIService uiService)
     {
       _ticker = ticker;
+      _uiService = uiService;
+      _canvas = uiService.Canvas;
 
       // Регистрируем если объект уже активен
       if (gameObject.activeInHierarchy)
@@ -211,7 +216,7 @@ namespace Project.Unity.UI.Components
       if (!_targetPosition.HasValue && _target == null)
       {
         _rectTransform.anchoredPosition =
-          Gameplay.Gameplay.UI.UIService.Canvas.ViewportToCanvasPosition(_nonTargetViewportPosition);
+          _canvas.ViewportToCanvasPosition(_nonTargetViewportPosition);
         return;
       }
 
@@ -244,7 +249,7 @@ namespace Project.Unity.UI.Components
         targetPosition = _targetPosition ?? _target.position + _target.rotation * _worldLocalOffset;
       }
 
-      targetPosition = Gameplay.Gameplay.UI.UIService.Canvas.WorldToCanvasPosition(targetPosition + _worldOffset, main) + _anchorOffset;
+      targetPosition = _canvas.WorldToCanvasPosition(targetPosition + _worldOffset, main) + _anchorOffset;
 
       IsOnScreen = ScreenRect.Contains(targetPosition);
 

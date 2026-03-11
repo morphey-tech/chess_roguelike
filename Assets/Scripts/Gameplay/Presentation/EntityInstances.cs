@@ -15,14 +15,15 @@ namespace Project.Gameplay.Presentations
     {
       try
       {
-        if(!instance.TryGetComponent(out EntityLink link))
+        if (!instance.TryGetComponent(out EntityLink link))
+        {
           link = instance.AddComponent<EntityLink>();
-          
+        }
+
         link.Init(entity, this);
         link.Map = this;
         
-        // Create new list each time to avoid race conditions during parallel spawning
-        List<IPresenter> presenters = new List<IPresenter>();
+        List<IPresenter> presenters = new();
         instance.GetComponentsInChildren(includeInactive:true, presenters);
         
         Debug.Log($"[PresentationManagerInstances] InitEntity {instance.name}: found {presenters.Count} presenters");
@@ -37,7 +38,7 @@ namespace Project.Gameplay.Presentations
           }
           catch (Exception e)
           {
-            Debug.LogError($"[PresentationManagerInstances] Failed to init presenter: {e.Message}");
+            Debug.LogError($"[PresentationManagerInstances] Failed to init presenter {presenter.GetType().Name}: {e.Message}");
           }
         }
 
@@ -61,7 +62,7 @@ namespace Project.Gameplay.Presentations
 
     public void DestroyView(int id)
     {
-      var link = _presentationsList[id];
+      EntityLink? link = _presentationsList[id];
       _presentationsList.Remove(id);
       UnityEngine.Object.Destroy(link.gameObject);
     }

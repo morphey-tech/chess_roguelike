@@ -30,7 +30,7 @@ namespace LiteUI.Dialog.Service
     private static readonly IUILogger _logger = LoggerFactory.GetLogger<DialogManager>();
 
     private readonly IDialogLoader _dialogLoader;
-    private readonly IPublisher<string, DialogEvent> _dialogPublisher;
+    private readonly IPublisher<string, DialogMessage> _dialogPublisher;
 
     private GameObject _dialogContainer = null!;
 
@@ -45,7 +45,7 @@ namespace LiteUI.Dialog.Service
 
     [Inject]
     private DialogManager(IDialogLoader dialogLoader,
-                          IPublisher<string, DialogEvent> dialogPublisher)
+                          IPublisher<string, DialogMessage> dialogPublisher)
     {
       _dialogLoader = dialogLoader;
       _dialogPublisher = dialogPublisher;
@@ -137,7 +137,7 @@ namespace LiteUI.Dialog.Service
         _dialogBackgroundShade.DOFade(DIALOG_SHADE_ALPHA, 0.3f);
 
         await uiDialog.ShowAsync();
-        _dialogPublisher.Publish(DialogEvent.OPENED, new DialogEvent(controllerType));
+        _dialogPublisher.Publish(DialogMessage.OPENED, new DialogMessage(controllerType));
         return loadedDialog;
       }
       catch
@@ -167,7 +167,7 @@ namespace LiteUI.Dialog.Service
       _logger.Debug($"Will hide dialog of type={uiDialog.DialogType?.Name}");
       _dialogBackgroundShade.DOFade(0f, 0.3f);
       await HideAsync(uiDialog);
-      _dialogPublisher.Publish(DialogEvent.CLOSED, new DialogEvent(uiDialog.DialogType));
+      _dialogPublisher.Publish(DialogMessage.CLOSED, new DialogMessage(uiDialog.DialogType));
     }
 
     public void HideAll()

@@ -4,13 +4,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
-using Project.Core.Core.Assets;
 using Project.Core.Core.Logging;
+using Project.Core.Window;
 using Project.Gameplay.Gameplay.UI;
 using Sirenix.Utilities;
 using UnityEngine.UI;
+using VContainer;
 
-namespace Project.Core.Window
+namespace Project.Gameplay.Gameplay.UI
 {
 
   [DisallowMultipleComponent]
@@ -35,8 +36,6 @@ namespace Project.Core.Window
     private Action _animationCompleteCallback;
     private CanvasGroup _canvasGroup;
     private AnimationMode _animationMode;
-    private IEnumerable<Window> _windowsBeforeShow;
-    private IAssetService _assetService;
     private ILogger<Window> _log;
 
     protected Canvas Canvas { get; private set; }
@@ -50,9 +49,8 @@ namespace Project.Core.Window
       CONTROLLER
     }
 
-    public void Init(IAssetService assetService, ILogService logService)
+    public void Init(ILogService logService)
     {
-      _assetService = assetService;
       _log = logService.CreateLogger<Window>();
       if (TryGetComponent(out _wndAnimator))
       {
@@ -126,26 +124,48 @@ namespace Project.Core.Window
       yield return null;
     }
 
+    public async UniTask CloseAsync()
+    {
+      if (_isClosed)
+      {
+        _log.Warning("Window is already closed");
+        return;
+      }
+
+      OnBeforeClosed();
+      Hide();
+      await CloseRoutineAsync();
+    }
+
+    private async UniTask CloseRoutineAsync()
+    {
+      await UniTask.Yield();
+
+      _isClosed = true;
+
+      OnClose?.Invoke(this);
+      OnAfterClosed();
+      OnAfterClose?.Invoke(this);
+      Destroy(gameObject);
+    }
+
     public void Close()
     {
       if (_isClosed)
       {
         _log.Warning("Window is already closed");
         return;
-      } //FIX for NullReferenceException: Object reference not set to an instance of an object. Window+<ClearRoutine>d__19.MoveNext ()
+      }
 
       OnBeforeClosed();
       Hide();
-      UIService.StartCoroutine(CloseRoutine());
+      CloseRoutineAsync().Forget(ex => _log.Error($"Error in CloseRoutineAsync: {ex}"));
     }
 
     public void CloseImmediate()
     {
       if (_isClosed)
         return;
-
-      if (HideOtherWindows)
-        ShowOtherWindows();
 
       OnBeforeClosed();
       OnHidden();
@@ -184,16 +204,6 @@ namespace Project.Core.Window
             _windowAnimatorOpenController.Show();
             break;
         }
-      }
-
-      if (HideOtherWindows)
-      {
-        _windowsBeforeShow ??= UIService.GetVisibleStack().Where(w => w != this).ToList();
-        _windowsBeforeShow?.ForEach(w =>
-        {
-          if (w != null && !w.IgnoreHideOthersWindows)
-            w.SetInvisible(true);
-        });
       }
 
       OnShowed();
@@ -306,28 +316,11 @@ namespace Project.Core.Window
 
       void DefaultHide()
       {
-        if (HideOtherWindows)
-        {
-          ShowOtherWindows();
-        }
-
         AnimationIsPlaying = false;
-
         OnHidden();
         SetVisible(false);
         OnHide?.Invoke(this);
       }
-    }
-
-    private void ShowOtherWindows()
-    {
-      _windowsBeforeShow?.ForEach(w =>
-      {
-        if (w != null && !w.IgnoreHideOthersWindows)
-          w.SetInvisible(false);
-      });
-
-      _windowsBeforeShow = null;
     }
 
     protected virtual void OnHidden()
@@ -378,8 +371,8 @@ namespace Project.Core.Window
 
     protected virtual string WindowCloseSfx => "window_close";
 
-    protected virtual bool HideOtherWindows => false;
-    protected virtual bool IgnoreHideOthersWindows => false;
+    public virtual bool HideOtherWindows => false;
+    public virtual bool IgnoreHideOthersWindows => false;
 
     public IEnumerator CloseWithDelay(float delay)
     {

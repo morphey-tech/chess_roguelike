@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using MessagePipe;
 using Project.Core.Core.Assets;
@@ -24,26 +25,25 @@ namespace Project.Gameplay.Gameplay.UI
     /// Открывает окно при клике на фигуру (ЛКМ).
     /// Закрывает окно при клике вне фигуры или по ПКМ.
     /// </summary>
-    public sealed class FigureInfoPreviewService : IStartable, IDisposable
+    public sealed class FigureInfoPreviewService : IInitializable, IDisposable
     {
         private readonly ISubscriber<FigureHoverChangedMessage> _figureHoverPublisher;
         private readonly ISubscriber<CellClickedMessage> _cellClickedPublisher;
         private readonly ISubscriber<RightClickMessage> _rightClickPublisher;
         private readonly ISubscriber<CancelRequestedMessage> _cancelPublisher;
         private readonly ITooltipService _tooltipService;
+        private readonly IUIService _uiService;
         private readonly RunHolder _runHolder;
         private readonly ConfigProvider _configProvider;
         private readonly CombatResolver _combatResolver;
         private readonly ILogger<FigureInfoPreviewService> _logger;
 
         private int? _hoveredFigureId;
-        private IDisposable? _hoverSubscription;
-        private IDisposable? _clickSubscription;
-        private IDisposable? _rightClickSubscription;
-        private IDisposable? _cancelSubscription;
         private FigureInfoWindow? _window;
         private FigureInfoConfigRepository? _figureInfoCache;
         private PassiveConfigRepository? _passiveCache;
+        private CancellationTokenSource? _cts;
+        private IDisposable _disposable = null!;
 
         [Inject]
         private FigureInfoPreviewService(
@@ -52,6 +52,7 @@ namespace Project.Gameplay.Gameplay.UI
             ISubscriber<RightClickMessage> rightClickPublisher,
             ISubscriber<CancelRequestedMessage> cancelPublisher,
             ITooltipService tooltipService,
+            IUIService uiService,
             RunHolder runHolder,
             ConfigProvider configProvider,
             CombatResolver combatResolver,
@@ -63,27 +64,28 @@ namespace Project.Gameplay.Gameplay.UI
             _rightClickPublisher = rightClickPublisher;
             _cancelPublisher = cancelPublisher;
             _tooltipService = tooltipService;
+            _uiService = uiService;
             _runHolder = runHolder;
             _configProvider = configProvider;
             _combatResolver = combatResolver;
             _logger = logService.CreateLogger<FigureInfoPreviewService>();
         }
 
-        void IStartable.Start()
+        void IInitializable.Initialize()
         {
-            _hoverSubscription = _figureHoverPublisher.Subscribe(OnFigureHoverChanged);
-            _clickSubscription = _cellClickedPublisher.Subscribe(OnCellClicked);
-            _rightClickSubscription = _rightClickPublisher.Subscribe(OnRightClick);
-            _cancelSubscription = _cancelPublisher.Subscribe(OnCancelRequested);
-            InitializeAsync().Forget();
+            DisposableBagBuilder bag = DisposableBag.CreateBuilder();
+            _figureHoverPublisher.Subscribe(OnFigureHoverChanged).AddTo(bag);
+            _cellClickedPublisher.Subscribe(OnCellClicked).AddTo(bag);
+            _rightClickPublisher.Subscribe(OnRightClick).AddTo(bag);
+            _cancelPublisher.Subscribe(OnCancelRequested).AddTo(bag);
+            _disposable = bag.Build();
+            EnsureConfigsAsync().Forget();
         }
 
-        private async UniTask InitializeAsync()
+        private async UniTaskVoid EnsureConfigsAsync()
         {
             _figureInfoCache = await _configProvider.Get<FigureInfoConfigRepository>("figures_info_conf");
             _passiveCache = await _configProvider.Get<PassiveConfigRepository>("passives_conf");
-            await UIService.Initialized;
-            _window = await UIService.GetOrCreateAsync<FigureInfoWindow>();
         }
 
         private void OnFigureHoverChanged(FigureHoverChangedMessage message)
@@ -114,7 +116,20 @@ namespace Project.Gameplay.Gameplay.UI
                 return;
             }
 
-            ShowFigureInfo(figure);
+            _cts?.Cancel();
+            _cts = new CancellationTokenSource();
+            try
+            {
+                ShowFigureInfo(figure, _cts.Token).Forget();
+            }
+            catch (OperationCanceledException)
+            {
+                //Swallow
+            }
+            catch (Exception e)
+            {
+                _logger.Error($"[FigureInfoPreviewService] Catch exception while try show figure info. e={e.Message}");
+            }
         }
 
         private void OnRightClick(RightClickMessage message)
@@ -136,27 +151,44 @@ namespace Project.Gameplay.Gameplay.UI
             _tooltipService.HideTooltip();
         }
 
-        private void ShowFigureInfo(Figure figure)
+        private async UniTask ShowFigureInfo(Figure figure, CancellationToken token = default)
         {
+            token.ThrowIfCancellationRequested();
+
             if (_window == null)
             {
-                _logger.Debug("FigureInfoWindow is not initialized yet, skipping");
-                return;
+                try
+                {
+                    _window = await _uiService.GetOrCreateAsync<FigureInfoWindow>();
+                    token.ThrowIfCancellationRequested();
+                }
+                catch (OperationCanceledException)
+                {
+                    //Swallow
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error($"[FigureInfoPreviewService] Failed to create FigureInfoWindow: {ex.Message}", ex);
+                    return;
+                }
             }
 
             if (_passiveCache == null)
             {
-                _logger.Debug("Passive cache is not loaded yet, skipping");
+                _logger.Debug("[FigureInfoPreviewService] Passive cache is not loaded yet, skipping");
                 return;
             }
 
             try
             {
+                token.ThrowIfCancellationRequested();
                 BeforeHitContext previewContext = new()
                 {
                     Attacker = figure,
                     Target = figure,
-                    Grid = _runHolder.Current?.CurrentStage?.Grid ?? throw new InvalidOperationException("Grid is null"),
+                    Grid = _runHolder.Current?.CurrentStage?.Grid ??
+                           throw new InvalidOperationException("Grid is null"),
                     BaseDamage = figure.Stats.Attack.Value
                 };
 
@@ -171,6 +203,7 @@ namespace Project.Gameplay.Gameplay.UI
                 List<PassiveConfig> passiveConfigs = new();
                 foreach (IPassive? passive in figure.BasePassives)
                 {
+                    token.ThrowIfCancellationRequested();
                     PassiveConfig? passiveConfig = _passiveCache.Get(passive.Id);
                     if (passiveConfig != null)
                     {
@@ -178,6 +211,7 @@ namespace Project.Gameplay.Gameplay.UI
                     }
                 }
 
+                token.ThrowIfCancellationRequested();
                 FigureInfoWindow.FigureInfoModel model = new()
                 {
                     Figure = figure,
@@ -186,24 +220,25 @@ namespace Project.Gameplay.Gameplay.UI
                 };
 
                 _window.Show(model);
-
-                // Очищаем модификаторы превью
                 figure.Stats.Attack.ClearByContext(ModifierSourceContext.PreviewCalculation);
                 figure.Stats.Defence.ClearByContext(ModifierSourceContext.PreviewCalculation);
                 figure.Stats.Evasion.ClearByContext(ModifierSourceContext.PreviewCalculation);
             }
+            catch (OperationCanceledException)
+            {
+                // Swallow
+            }
             catch (Exception ex)
             {
-                _logger.Error($"Failed to show figure info window: {ex.Message}");
+                _logger.Error($"[FigureInfoPreviewService] Failed to show figure info window: {ex.Message}");
             }
         }
 
         void IDisposable.Dispose()
         {
-            _hoverSubscription?.Dispose();
-            _clickSubscription?.Dispose();
-            _rightClickSubscription?.Dispose();
-            _cancelSubscription?.Dispose();
+            _disposable.Dispose();
+            _cts?.Cancel();
+            _cts?.Dispose();
         }
     }
 }

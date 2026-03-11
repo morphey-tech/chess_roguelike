@@ -14,14 +14,14 @@ namespace LiteUI.DI
         
         public void Register(IContainerBuilder builder, MessagePipeOptions options)
         {
-            builder.Register<DialogManager>(Lifetime.Singleton).AsSelf();
+            builder.Register<DialogManager>(Lifetime.Singleton);
             builder.Register<IDialogLoader, SimpleDialogLoader>(Lifetime.Singleton);
             RegisterPipes(builder, options);
         }
         
         private static void RegisterPipes(IContainerBuilder builder, MessagePipeOptions options)
         {
-            builder.RegisterMessageBroker<string, DialogEvent>(options);
+            builder.RegisterMessageBroker<string, DialogMessage>(options);
         }
     }
 }

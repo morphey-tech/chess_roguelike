@@ -7,6 +7,7 @@ using Project.Gameplay.UI;
 using Project.Unity.UI.Components.Game;
 using UniRx;
 using UnityEngine;
+using VContainer;
 
 namespace Project.Unity.Unity.Views.Presentations
 {
@@ -19,13 +20,20 @@ namespace Project.Unity.Unity.Views.Presentations
         [SerializeField] private Transform _pivot;
 
         private static WorldUIWindow? _cachedWorldUi;
-        
+        private static IUIService? _uiService;
+
         private EntityLink _entityLink;
         private HealthBar? _healthView;
         private Figure? _figure;
         private CanvasGroup? _canvasGroup;
         private bool _initialized = false;
         private CompositeDisposable? _disposables;
+
+        [Inject]
+        private void Construct(IUIService uiService)
+        {
+            _uiService = uiService;
+        }
 
         public async UniTask Init(EntityLink link)
         {
@@ -41,10 +49,10 @@ namespace Project.Unity.Unity.Views.Presentations
 
             if (_cachedWorldUi == null)
             {
-                await UIService.Initialized;
-                _cachedWorldUi = await UIService.GetOrCreateAsync<WorldUIWindow>();
+                await _uiService!.Initialized;
+                _cachedWorldUi = await _uiService.GetOrCreateAsync<WorldUIWindow>();
             }
-            
+
             TryCreateHealthBar();
             _figure.Stats.CurrentHp
                 .Skip(1)

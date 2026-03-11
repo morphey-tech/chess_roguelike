@@ -123,18 +123,14 @@ namespace Project.Gameplay.ShrinkingZone
 
         private void ApplyDamageToFiguresInZone(Team team)
         {
-            _logger.Debug($"ApplyDamageToFiguresInZone called for team={team}");
-
             if (_zoneSystem == null)
             {
                 _logger.Warning("ZoneSystem is null, skipping damage");
                 return;
             }
-            _logger.Debug($"ZoneSystem exists, state={_zoneSystem.CurrentState}, layer={_zoneSystem.CurrentLayer}, step={_zoneSystem.StepInLayer}, dangerCells={_zoneSystem.GetDangerCellsCount()}");
-
             if (_zoneSystem.CurrentState != StormState.Active && _zoneSystem.CurrentState != StormState.MinSizeReached)
             {
-                _logger.Warning($"Zone state is {_zoneSystem.CurrentState}, skipping damage (need Active or MinSizeReached)");
+                _logger.Debug($"Zone state is {_zoneSystem.CurrentState}, skipping damage (need Active or MinSizeReached)");
                 return;
             }
 
@@ -144,7 +140,6 @@ namespace Project.Gameplay.ShrinkingZone
                 _logger.Warning("Grid is null, cannot apply zone damage");
                 return;
             }
-            _logger.Debug($"Grid found: {grid.Width}x{grid.Height}");
 
             int figuresInDanger = 0;
             int figuresTotal = 0;
@@ -175,7 +170,6 @@ namespace Project.Gameplay.ShrinkingZone
                     _logger.Debug($"Applying {damage} damage to {figure.Id} at ({cell.Position.Row},{cell.Position.Column}) at start of turn");
                     _figureDamagePublisher.Publish(new FigureTakeStormDamageMessage(
                         new FigureStormDamageTarget(figure), damage, cell.Position));
-                    _logger.Debug($"Published FigureTakeZoneDamageMessage for {figure.Id}");
                 }
             }
 

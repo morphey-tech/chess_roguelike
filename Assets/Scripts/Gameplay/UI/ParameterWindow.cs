@@ -3,7 +3,7 @@ using System;
 namespace Project.Core.Window
 {
 
-  public abstract class ParameterlessWindow : Window
+  public abstract class ParameterlessWindow : Gameplay.Gameplay.UI.Window
   {
     public new void Show(bool immediate = false)
     {
@@ -11,7 +11,7 @@ namespace Project.Core.Window
     }
   }
 
-  public abstract class ParameterWindow<A1> : Window
+  public abstract class ParameterWindow<A1> : Gameplay.Gameplay.UI.Window
   {
     public void Show(A1 a, bool immediate = false)
     {
@@ -32,7 +32,7 @@ namespace Project.Core.Window
     protected new abstract void OnShow(A1 value);
   }
 
-  public abstract class ParameterWindow<A1, A2> : Window
+  public abstract class ParameterWindow<A1, A2> : Gameplay.Gameplay.UI.Window
   {
     public void Show(A1 a1, A2 a2, bool immediate = false)
     {
@@ -52,7 +52,7 @@ namespace Project.Core.Window
     protected new abstract void OnShow(A1 a1, A2 a2);
   }
 
-  public abstract class ParameterWindow<A1, A2, A3> : Window
+  public abstract class ParameterWindow<A1, A2, A3> : Gameplay.Gameplay.UI.Window
   {
     public void Show(A1 a1, A2 a2, A3 a3, bool immediate = false)
     {

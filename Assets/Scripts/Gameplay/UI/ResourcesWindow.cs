@@ -1,10 +1,11 @@
 using System;
+using Project.Core.Window;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UniRx;
 using VContainer;
-using Project.Core.Window;
+using Project.Gameplay.Gameplay.UI;
 using Project.Gameplay.Gameplay.Economy;
 
 namespace Project.Gameplay.UI
@@ -22,8 +23,8 @@ namespace Project.Gameplay.UI
         [SerializeField] private Image _scrollsIcon;
         [SerializeField] private TextMeshProUGUI _scrollsText;
 
-        protected override bool HideOtherWindows => false;
-        protected override bool IgnoreHideOthersWindows => true;
+        public override bool HideOtherWindows => false;
+        public override bool IgnoreHideOthersWindows => true;
         public override bool NeedShowBackground => false;
         public override int ZOrder => 100;
         

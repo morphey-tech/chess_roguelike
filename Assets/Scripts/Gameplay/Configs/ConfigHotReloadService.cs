@@ -28,7 +28,7 @@ namespace Project.Gameplay.Gameplay.Configs
             _logger = log.CreateLogger<ConfigHotReloadService>();
         }
 
-        public void Start()
+        void IStartable.Start()
         {
 #if !UNITY_EDITOR && !DEVELOPMENT_BUILD
             return;

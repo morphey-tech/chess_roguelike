@@ -5,51 +5,47 @@ using Project.Gameplay.Gameplay.Stage.Flow;
 using Project.Gameplay.Gameplay.UI;
 using Project.Gameplay.UI;
 using UnityEngine;
+using VContainer;
 
 namespace Project.Unity.UI
 {
     public sealed class GameUiService : IGameUiService
     {
         private readonly ILogger<GameUiService> _logger;
+        private readonly IUIService _uiService;
 
-        public GameUiService(ILogService logService)
+        [Inject]
+        public GameUiService(ILogService logService, IUIService uiService)
         {
             _logger = logService.CreateLogger<GameUiService>();
+            _uiService = uiService;
         }
 
         public async UniTask ShowWorldUiAsync()
         {
-            await UIService.Initialized;
-            await UIService.ShowAsync<WorldUIWindow>();
+            await _uiService.Initialized;
+            await _uiService.ShowAsync<WorldUIWindow>();
         }
 
         public async UniTask ShowPreparePhaseAsync()
         {
-            await UIService.Initialized;
-            TurnWindow? wnd = await UIService.ShowAsync<TurnWindow>();
+            await _uiService.Initialized;
+            TurnWindow? wnd = await _uiService.ShowAsync<TurnWindow>();
             wnd?.SetPreparePhase();
             // Board capacity window disabled temporarily
-            // await UIService.ShowAsync<BoardCapacityWindow>();
+            // await _uiService.ShowAsync<BoardCapacityWindow>();
         }
 
         public async UniTask SetGamePhase()
         {
-            if (!UIService.IsValid)
-            {
-                return;
-            }
-
-            TurnWindow? wnd = await UIService.GetOrCreateAsync<TurnWindow>();
+            TurnWindow? wnd = await _uiService.GetOrCreateAsync<TurnWindow>();
             wnd?.SetGamePhase();
         }
 
         public UniTask HideCombatUiAsync()
         {
-            if (UIService.IsValid)
-            {
-                UIService.Hide<TurnWindow>();
+            _uiService.Hide<TurnWindow>();
                 // UIService.Hide<BoardCapacityWindow>();
-            }
             return UniTask.CompletedTask;
         }
 
@@ -84,10 +80,7 @@ namespace Project.Unity.UI
         /// </summary>
         public void ShowArtifacts()
         {
-            if (UIService.IsValid)
-            {
-                UIService.Show<ArtifactsWindow>();
-            }
+            _uiService.Show<ArtifactsWindow>();
         }
 
         private async UniTask<StageFlowAction> ShowOutcomeScreenAsync(
@@ -95,12 +88,7 @@ namespace Project.Unity.UI
             string body,
             params (string label, StageFlowAction action)[] actions)
         {
-            if (!UIService.IsValid)
-            {
-                return StageFlowAction.RestartStage;
-            }
-
-            StageOutcomeWindow? window = await UIService.GetOrCreateAsync<StageOutcomeWindow>();
+            StageOutcomeWindow? window = await _uiService.GetOrCreateAsync<StageOutcomeWindow>();
             return await window.ShowAsync(new StageOutcomeWindow.Model
             {
                 Title = title,

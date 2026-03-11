@@ -2,17 +2,17 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using Project.Core.Core.Assets;
 using Project.Core.Core.Logging;
+using Project.Core.Window;
 using UnityEngine;
 
-namespace Project.Core.Window
+namespace Project.Gameplay.Gameplay.UI
 {
   public interface IWindowsController
   {
     Canvas Canvas { get; }
     CanvasGroup CanvasGroup { get; }
-    UniTask InitAsync(IAssetService assetService, ILogService logService);
+    UniTask InitAsync(IUIAssetService uiAssetService, ILogService logService);
     T ShowWindow<T>(bool instant = false) where T : ParameterlessWindow;
     T ShowWindow<T, A1>(A1 a1, bool immediate = false) where T : ParameterWindow<A1>;
     T ShowWindow<T, A1, A2>(A1 a1, A2 a2, bool immediate = false) where T : ParameterWindow<A1, A2>;

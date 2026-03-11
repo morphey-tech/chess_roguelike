@@ -10,21 +10,27 @@ using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Save.Service;
 using VContainer;
+using VContainer.Unity;
 
 namespace Project.Gameplay.Gameplay.Board.Capacity
 {
     public sealed class BoardCapacityService
     {
+        public int Used => _model.Used;
+        public int Capacity => _model.Capacity;
+        public int Free => _model.Free;
+        
         private readonly BoardCapacityModel _model;
         private readonly ConfigProvider _configProvider;
         private readonly PlayerRunStateService _runStateService;
         private readonly IPublisher<BoardCapacityChangedMessage> _publisher;
         private readonly ILogger<BoardCapacityService> _logger;
 
-        private FigureDescriptionConfigRepository? _figureConfigCache;
+        private FigureConfigRepository _figureConfigRepository = null!;
+        private FigureDescriptionConfigRepository _figureDescriptionRepository = null!;
 
         [Inject]
-        public BoardCapacityService(
+        private BoardCapacityService(
             BoardCapacityModel model,
             ConfigProvider configProvider,
             PlayerRunStateService runStateService,
@@ -38,10 +44,6 @@ namespace Project.Gameplay.Gameplay.Board.Capacity
             _logger = logService.CreateLogger<BoardCapacityService>();
         }
 
-        public int Used => _model.Used;
-        public int Capacity => _model.Capacity;
-        public int Free => _model.Free;
-
         public async UniTask InitializeForBoardAsync(BoardConfig boardConfig)
         {
             await EnsureFigureConfigsAsync();
@@ -49,7 +51,7 @@ namespace Project.Gameplay.Gameplay.Board.Capacity
             int configuredMax = boardConfig.MaxCapacity > 0 ? boardConfig.MaxCapacity : boardConfig.BaseCapacity;
             int defaultCapacity = boardConfig.BaseCapacity;
 
-            if (_runStateService.HasRun && _runStateService.Current != null)
+            if (_runStateService is { HasRun: true, Current: not null })
             {
                 int savedCapacity = _runStateService.Current.BoardCapacity;
                 int savedUsed = _runStateService.Current.UsedCapacity;
@@ -73,9 +75,8 @@ namespace Project.Gameplay.Gameplay.Board.Capacity
             return _model.CanReserve(config.Load);
         }
 
-        public async UniTask<bool> CanSpawnByTypeAsync(string figureTypeId)
+        public bool CanSpawnByTypeAsync(string figureTypeId)
         {
-            await EnsureFigureConfigsAsync();
             int load = GetLoadByTypeId(figureTypeId);
             return _model.CanReserve(load);
         }
@@ -92,9 +93,8 @@ namespace Project.Gameplay.Gameplay.Board.Capacity
             return ok;
         }
 
-        public async UniTask<bool> TryReserveByTypeAsync(string figureTypeId)
+        public bool TryReserveByTypeAsync(string figureTypeId)
         {
-            await EnsureFigureConfigsAsync();
             int load = GetLoadByTypeId(figureTypeId);
             bool ok = _model.TryReserve(load);
             if (ok)
@@ -121,10 +121,8 @@ namespace Project.Gameplay.Gameplay.Board.Capacity
             Publish();
         }
 
-        public async UniTask RecalculateFromBoard(IEnumerable<Figure> figures)
+        public void RecalculateFromBoard(IEnumerable<Figure> figures)
         {
-            await EnsureFigureConfigsAsync();
-
             int sum = 0;
             foreach (Figure figure in figures)
             {
@@ -141,26 +139,27 @@ namespace Project.Gameplay.Gameplay.Board.Capacity
 
         private async UniTask EnsureFigureConfigsAsync()
         {
-            _figureConfigCache ??= await _configProvider
+            _figureConfigRepository = await _configProvider.Get<FigureConfigRepository>("figures_conf");
+            _figureDescriptionRepository = await _configProvider
                 .Get<FigureDescriptionConfigRepository>("figure_descriptions_conf");
         }
 
         private int GetLoadByTypeId(string figureTypeId)
         {
-            if (_figureConfigCache == null)
-            {
-                _logger.Warning($"Figure config cache is not initialized; load fallback=0 for '{figureTypeId}'");
-                return 0;
-            }
-
-            FigureDescriptionConfig? config = _figureConfigCache.Get(figureTypeId);
-            if (config == null)
+            FigureConfig? figure = _figureConfigRepository.Get(figureTypeId);
+            if (figure == null)
             {
                 _logger.Warning($"Figure config '{figureTypeId}' not found; load fallback=0");
                 return 0;
             }
-
-            return config.Load < 0 ? 0 : config.Load;
+            
+            FigureDescriptionConfig? description = _figureDescriptionRepository.Get(figure.DescriptionId);
+            if (description == null)
+            {
+                _logger.Warning($"Figure description config '{figure.DescriptionId}' not found; load fallback=0");
+                return 0;
+            }
+            return description.Load < 0 ? 0 : description.Load;
         }
 
         private void SyncToRunState()
@@ -176,6 +175,7 @@ namespace Project.Gameplay.Gameplay.Board.Capacity
         {
             _publisher.Publish(new BoardCapacityChangedMessage(_model.Used, _model.Capacity));
         }
+
     }
 }
 

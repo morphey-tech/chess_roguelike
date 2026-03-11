@@ -129,7 +129,8 @@ namespace Project.Gameplay.Gameplay.Figures
                 description.TurnPatternsId,
                 stats,
                 team,
-                _triggerService, figureConfig.InfoId);
+                _triggerService,
+                figureConfig.InfoId);
 
             if (!string.IsNullOrEmpty(description.LootTableId))
             {
@@ -149,7 +150,9 @@ namespace Project.Gameplay.Gameplay.Figures
                 }
 
                 if (figure.BasePassives.Count > 0)
+                {
                     _logger.Debug($"{figure} passives: {string.Join(", ", description.Passives)}");
+                }
             }
 
             try
@@ -185,7 +188,9 @@ namespace Project.Gameplay.Gameplay.Figures
             catch
             {
                 if (reservedCapacity)
+                {
                     _capacityService.ReleaseByType(figure.TypeId);
+                }
                 throw;
             }
         }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Project.Core.Core.Filters;
 using Project.Core.Core.Random;
 using Project.Core.Core.Storm.Core;
 using Project.Core.Core.Storm.Strategies;
@@ -12,6 +13,7 @@ using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Combat.Damage;
 using Project.Gameplay.Gameplay.Combat.Visual;
 using Project.Gameplay.Gameplay.Figures;
+using Project.Gameplay.Gameplay.Filters;
 using Project.Gameplay.Gameplay.Input;
 using Project.Gameplay.Gameplay.Interaction;
 using Project.Gameplay.Gameplay.Loot;
@@ -29,7 +31,6 @@ using Project.Gameplay.Gameplay.Turn.BonusMove;
 using Project.Gameplay.Gameplay.Turn.Conditions;
 using Project.Gameplay.Gameplay.Turn.Conditions.Impl;
 using Project.Gameplay.Gameplay.Turn.Execution;
-using Project.Gameplay.Gameplay.UI;
 using Project.Gameplay.ShrinkingZone;
 using VContainer;
 using VContainer.Unity;
@@ -45,22 +46,21 @@ namespace Project.Gameplay.Gameplay.Installers
         public static void Register(IContainerBuilder builder)
         {
             // Core services
-            builder.Register<RandomService>(Lifetime.Singleton).As<IRandomService>();
+            builder.Register<RandomService>(Lifetime.Singleton)
+                .As<IRandomService>();
 
             // Run & Stage
             builder.Register<RunHolder>(Lifetime.Singleton);
             builder.Register<RunFactory>(Lifetime.Singleton);
             builder.Register<StageFactory>(Lifetime.Singleton);
             builder.Register<StagePhaseFactory>(Lifetime.Singleton);
-            builder.Register<BoardCapacityModel>(Lifetime.Singleton);
-            builder.Register<BoardCapacityService>(Lifetime.Singleton);
 
             // Loot (ILootPresenter регистрируется в Unity в ConfigureViews вместе с другими презентерами)
             builder.Register<LootService>(Lifetime.Singleton).AsSelf();
-            builder.Register<EnemyDeathLootHandler>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
+            builder.RegisterEntryPoint<EnemyDeathLootHandler>();
 
             // Input
-            builder.Register<InputDispatcher>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
+            builder.RegisterEntryPoint<InputDispatcher>();
 
             // Interaction & Turn
             builder.Register<InteractionLockService>(Lifetime.Singleton).As<IInteractionLock>().AsSelf();
@@ -92,8 +92,8 @@ namespace Project.Gameplay.Gameplay.Installers
             // Stage
             builder.Register<StageQueryService>(Lifetime.Singleton).As<IStageQueryService>();
             builder.Register<AttackQueryService>(Lifetime.Singleton).As<IAttackQueryService>();
-            builder.Register<StageHighlightRenderer>(Lifetime.Singleton).As<IStageHighlightRenderer>();
-            builder.Register<StageService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
+            builder.Register<StageHighlightRenderer>(Lifetime.Scoped).AsImplementedInterfaces();
+            builder.RegisterEntryPoint<StageService>();
             builder.Register<StageRunStateResetService>(Lifetime.Singleton);
             builder.Register<StageRuntimeResetService>(Lifetime.Singleton);
             builder.Register<StageCacheResetService>(Lifetime.Singleton);
@@ -208,7 +208,6 @@ namespace Project.Gameplay.Gameplay.Installers
             builder.Register<BoardSpawnService>(Lifetime.Singleton);
             builder.Register<FigureSpawnService>(Lifetime.Singleton);
             builder.Register<MovementService>(Lifetime.Singleton);
-            builder.Register<UIService>(Lifetime.Singleton);
             builder.Register<PassiveFactory>(Lifetime.Singleton);
         }
     }

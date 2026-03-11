@@ -100,11 +100,14 @@ namespace Project.Gameplay.Gameplay.Input
 
         private void OnClickStarted(InputAction.CallbackContext context)
         {
+            UnityEngine.Debug.Log($"[InputDispatcher] OnClickStarted called");
+            
             if (_camera == null)
             {
                 _camera = Camera.main;
                 if (_camera == null)
                 {
+                    UnityEngine.Debug.LogWarning("[InputDispatcher] Camera.main is null");
                     return;
                 }
             }
@@ -113,6 +116,7 @@ namespace Project.Gameplay.Gameplay.Input
             Ray ray = _camera.ScreenPointToRay(screenPos);
 
             // Always publish raw click for services that need it (PrepareService, etc.)
+            UnityEngine.Debug.Log($"[InputDispatcher] Publishing RawClickMessage");
             _rawClickPublisher.Publish(new RawClickMessage(ray, screenPos));
             UpdateHoveredFigure(ray, screenPos);
 

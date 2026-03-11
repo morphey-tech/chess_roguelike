@@ -18,12 +18,13 @@ namespace Project.Gameplay.Gameplay.UI
     {
         private readonly ISubscriber<TooltipShowRequestMessage> _showRequestPublisher;
         private readonly ISubscriber<TooltipHideRequestMessage> _hideRequestPublisher;
+        private readonly IUIService _uiService;
         private readonly ILogger<TooltipService> _logger;
 
         private TooltipWindow? _tooltipWindow;
         private IDisposable? _showSubscription;
         private IDisposable? _hideSubscription;
-        
+
         // Задержка перед показом (чтобы не мелькало)
         private const float ShowDelay = 0.15f;
         private CancellationTokenSource? _showDelayCts;
@@ -33,10 +34,12 @@ namespace Project.Gameplay.Gameplay.UI
         private TooltipService(
             ISubscriber<TooltipShowRequestMessage> showRequestPublisher,
             ISubscriber<TooltipHideRequestMessage> hideRequestPublisher,
+            IUIService uiService,
             ILogService logService)
         {
             _showRequestPublisher = showRequestPublisher;
             _hideRequestPublisher = hideRequestPublisher;
+            _uiService = uiService;
             _logger = logService.CreateLogger<TooltipService>();
         }
 
@@ -58,8 +61,8 @@ namespace Project.Gameplay.Gameplay.UI
 
             try
             {
-                await UIService.Initialized;
-                _tooltipWindow = await UIService.GetOrCreateAsync<TooltipWindow>();
+                await _uiService.Initialized;
+                _tooltipWindow = await _uiService.GetOrCreateAsync<TooltipWindow>();
                 _tooltipWindow.Hide();
             }
             catch (Exception ex)

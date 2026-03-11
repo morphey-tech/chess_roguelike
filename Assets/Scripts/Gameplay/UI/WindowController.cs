@@ -6,11 +6,12 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using Project.Core.Core.Assets;
 using Project.Core.Core.Logging;
+using Project.Core.Window;
 using UnityEngine;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
-namespace Project.Core.Window
+namespace Project.Gameplay.Gameplay.UI
 {
   public class WindowsController : MonoBehaviour, IWindowsController
   {
@@ -37,16 +38,18 @@ namespace Project.Core.Window
 
     public CanvasGroup CanvasGroup => _canvasGroup;
 
-    private Core.Logging.ILogger<WindowsController> _log;
-    private IAssetService _assetService;
+    private ILogger<WindowsController> _log;
+    private IUIAssetService _uiAssetService;
     private ILogService _logService;
 
-    public async UniTask InitAsync(IAssetService assetService, ILogService logService)
+    public async UniTask InitAsync(IUIAssetService uiAssetService, ILogService logService)
     {
-      _assetService = assetService;
+      _uiAssetService = uiAssetService;
       _logService = logService;
       _log = _logService.CreateLogger<WindowsController>();
+      _log.Debug("[WindowsController] InitAsync started");
       SetCanvasSettings();
+      _log.Debug("[WindowsController] InitAsync completed");
     }
 
     private void SetCanvasSettings()
@@ -69,13 +72,37 @@ namespace Project.Core.Window
     public T ShowWindow<T>(bool instant = false) where T : ParameterlessWindow
     {
       var wnd = GetOrCreateWindow<T>();
+      
+      // Скрываем другие окна, если это окно требует этого
+      if (wnd.HideOtherWindows)
+      {
+        HideOtherWindowsExcept(wnd);
+      }
+      
       wnd.Show(instant);
       return wnd;
+    }
+
+    private void HideOtherWindowsExcept(Window exceptWindow)
+    {
+      foreach (var window in _visibleWindows)
+      {
+        if (window != exceptWindow && !window.IgnoreHideOthersWindows)
+        {
+          window.SetInvisible(true);
+        }
+      }
     }
 
     public async UniTask<T> ShowWindowAsync<T>() where T : ParameterlessWindow
     {
       var wnd = (T)(await GetOrCreateWindowAsync(typeof(T)));
+      
+      if (wnd.HideOtherWindows)
+      {
+        HideOtherWindowsExcept(wnd);
+      }
+      
       wnd.Show();
       return wnd;
     }
@@ -83,6 +110,12 @@ namespace Project.Core.Window
     public async UniTask<T> ShowWindowAsync<T, A1>(A1 a1) where T : ParameterWindow<A1>
     {
       var wnd = (T)(await GetOrCreateWindowAsync(typeof(T)));
+      
+      if (wnd.HideOtherWindows)
+      {
+        HideOtherWindowsExcept(wnd);
+      }
+      
       wnd.Show(a1);
       return wnd;
     }
@@ -90,14 +123,25 @@ namespace Project.Core.Window
     public T ShowWindow<T, A1>(A1 a1, bool immediate = false) where T : ParameterWindow<A1>
     {
       var wnd = GetOrCreateWindow<T>();
+      
+      if (wnd.HideOtherWindows)
+      {
+        HideOtherWindowsExcept(wnd);
+      }
+      
       wnd.Show(a1, immediate);
-
       return wnd;
     }
 
     public T ShowWindow<T, A1, A2>(A1 a1, A2 a2, bool immediate = false) where T : ParameterWindow<A1, A2>
     {
       var wnd = GetOrCreateWindow<T>();
+      
+      if (wnd.HideOtherWindows)
+      {
+        HideOtherWindowsExcept(wnd);
+      }
+      
       wnd.Show(a1, a2, immediate);
       return wnd;
     }
@@ -106,6 +150,12 @@ namespace Project.Core.Window
       where T : ParameterWindow<A1, A2, A3>
     {
       var wnd = GetOrCreateWindow<T>();
+      
+      if (wnd.HideOtherWindows)
+      {
+        HideOtherWindowsExcept(wnd);
+      }
+      
       wnd.Show(a1, a2, a3, immediate);
       return wnd;
     }
@@ -327,17 +377,21 @@ namespace Project.Core.Window
     {
       try
       {
-        var window =
-          (await _assetService.InstantiateAsync(windowType.FullName, Vector3.zero, Quaternion.identity,
-            _windowContainer.transform)).GetComponent<Window>();
+        string address = windowType.Name;
+
+        Window gameObject = await _uiAssetService.CreateAsync<Window>(
+            address,
+            parent: _windowContainer.transform);
+
+        var window = gameObject.GetComponent<Window>();
         var id = windowType;
         _windows.Add(id, window);
-        
+
         //хз почему оно просто не спавнится так как надо
         window.GetComponent<RectTransform>().anchoredPosition = window.transform.parent.GetComponent<RectTransform>().anchoredPosition;
         window.GetComponent<RectTransform>().sizeDelta = window.transform.parent.GetComponent<RectTransform>().sizeDelta;
         window.name = id.Name;
-        window.Init(_assetService, _logService);
+        window.Init(_logService);
 
         OnCreateWindow?.Invoke(window);
 

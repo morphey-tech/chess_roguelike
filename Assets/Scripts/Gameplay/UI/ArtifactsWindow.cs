@@ -1,13 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UniRx;
 using VContainer;
 using MessagePipe;
-using Project.Core.Window;
+using Project.Gameplay.Gameplay.UI;
 using Project.Gameplay.Gameplay.Artifacts;
 using Project.Core.Core.Configs.Artifacts;
+using Project.Core.Window;
 using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.Gameplay.UI;
 
@@ -17,7 +19,6 @@ namespace Project.Gameplay.UI
     {
         [Header("Layout")]
         [SerializeField] private Transform _contentParent;
-        [SerializeField] private ArtifactItemView _itemPrefab;
 
         [Header("Empty State")]
         [SerializeField] private GameObject _emptyState;
@@ -32,8 +33,8 @@ namespace Project.Gameplay.UI
         private CompositeDisposable _disposables = null!;
         private IDisposable? _subscription;
 
-        protected override bool HideOtherWindows => false;
-        protected override bool IgnoreHideOthersWindows => true;
+        public override bool HideOtherWindows => false;
+        public override bool IgnoreHideOthersWindows => true;
         public override bool NeedShowBackground => false;
         public override int ZOrder => 90;
 
@@ -82,6 +83,8 @@ namespace Project.Gameplay.UI
         //Calcellation token
         private async UniTask CreateItemViews()
         {
+            CancellationToken ct = gameObject.GetCancellationTokenOnDestroy();
+            
             // Clear existing
             foreach (ArtifactItemView? view in _itemViews)
             {
@@ -92,7 +95,6 @@ namespace Project.Gameplay.UI
             }
             _itemViews.Clear();
 
-            // Create views for each artifact
             IReadOnlyList<ArtifactInstance> artifacts = _artifactService.Artifacts;
             _emptyState?.SetActive(artifacts.Count == 0);
 
@@ -103,9 +105,11 @@ namespace Project.Gameplay.UI
                 {
                     continue;
                 }
-                
-                // Instantiate with DI using UIAssetService
-                ArtifactItemView? view = _uiAssetService.Instantiate(_itemPrefab, _contentParent);
+
+                ArtifactItemView? view = await _uiAssetService.CreateAsync<ArtifactItemView>(
+                    "ArtifactItemView",
+                    parent: _contentParent,
+                    cancellationToken: ct);
                 await view.Initialize(config, instance.Stack);
                 _itemViews.Add(view);
             }

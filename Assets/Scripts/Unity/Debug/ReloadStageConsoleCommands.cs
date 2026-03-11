@@ -23,7 +23,7 @@ namespace Project.Unity.Unity.Debug
             _logger = logService.CreateLogger<ReloadStageConsoleCommands>();
         }
 
-        public void Start()
+        void IStartable.Start()
         {
 #if !UNITY_EDITOR && !DEVELOPMENT_BUILD
             return;
@@ -43,13 +43,12 @@ namespace Project.Unity.Unity.Debug
             _stageReloadService.ReloadCurrentStageAsync().Forget();
         }
 
-        public void Dispose()
+        void IDisposable.Dispose()
         {
             if (!_registered)
             {
                 return;
             }
-
             DebugLogConsole.RemoveCommand("reload_stage");
             _registered = false;
         }

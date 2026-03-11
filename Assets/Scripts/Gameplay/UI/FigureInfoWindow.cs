@@ -1,8 +1,10 @@
 using System.Collections.Generic;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using Project.Core.Core.Configs.Figure;
 using Project.Core.Core.Configs.Passive;
 using Project.Core.Window;
+using Project.Gameplay.Gameplay.UI;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.UI;
 using TMPro;
@@ -29,10 +31,9 @@ namespace Project.Gameplay.UI
 
         [Header("Passives")]
         [SerializeField] private RectTransform _passivesContainer;
-        [SerializeField] private PassiveIconView _passiveIconPrefab;
 
         private readonly List<PassiveIconView> _activePassiveIcons = new();
-        private IUIAssetService _iuiAssetService;
+        private IUIAssetService _iuiAssetService = null!;
 
         [Inject]
         private void Construct(IUIAssetService iuiAssetService)
@@ -45,7 +46,6 @@ namespace Project.Gameplay.UI
             Figure figure = figureInfoModel.Figure;
             FigureStats stats = figure.Stats;
             FigureInfoConfig? infoConfig = figureInfoModel.InfoConfig;
-            List<PassiveConfig> passiveConfigs = figureInfoModel.PassiveConfigs;
 
             if (infoConfig != null)
             {
@@ -68,6 +68,7 @@ namespace Project.Gameplay.UI
             SetStatColor(_defenceText, stats.Defence.Value, stats.Defence.BaseValue);
             SetStatColor(_evasionText, stats.Evasion.Value, stats.Evasion.BaseValue);
 
+            List<PassiveConfig> passiveConfigs = figureInfoModel.PassiveConfigs;
             RenderPassives(passiveConfigs).Forget();
         }
 
@@ -117,21 +118,24 @@ namespace Project.Gameplay.UI
             }
 
             List<UniTask> setupTasks = new(passiveConfigs.Count);
+            CancellationToken ct = gameObject.GetCancellationTokenOnDestroy();
+            
             foreach (PassiveConfig? passiveConfig in passiveConfigs)
             {
-                PassiveIconView? iconView = _iuiAssetService.Instantiate(_passiveIconPrefab,
-                    _passivesContainer);
+                PassiveIconView? iconView = await _iuiAssetService.CreateAsync<PassiveIconView>(
+                    "PassiveIconView", 
+                    parent: _passivesContainer,
+                    cancellationToken: ct);
                 setupTasks.Add(iconView.Setup(passiveConfig));
                 _activePassiveIcons.Add(iconView);
             }
-            await UniTask.WhenAll(setupTasks)
-                .AttachExternalCancellation(gameObject.GetCancellationTokenOnDestroy());
+            await UniTask.WhenAll(setupTasks);
         }
 
         public class FigureInfoModel
         {
             public Figure Figure { get; set; }
-            public FigureInfoConfig? InfoConfig { get; set; }  // Готовый конфиг из FigureConfig.InfoId
+            public FigureInfoConfig? InfoConfig { get; set; }
             public List<PassiveConfig> PassiveConfigs { get; set; } = new();
         }
     }
