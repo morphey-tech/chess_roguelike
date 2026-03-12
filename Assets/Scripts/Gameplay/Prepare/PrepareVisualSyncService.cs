@@ -14,22 +14,19 @@ namespace Project.Gameplay.Gameplay.Prepare
     public sealed class PrepareVisualSyncService : IInitializable, IDisposable
     {
         private readonly IPreparePresenter _presenter;
-        private readonly ISubscriber<PrepareSelectionChangedMessage> _changedSelectionSubscriber;
-        private readonly ISubscriber<PrepareVisualResetMessage> _resetSubscriber;
+        private readonly ISubscriber<string, PrepareMessage> _prepareSubscriber;
         private readonly ILogger<PrepareVisualSyncService> _logger;
-        
+
         private IDisposable _subscriptions = null!;
 
         [Inject]
         private PrepareVisualSyncService(
             IPreparePresenter presenter,
-            ISubscriber<PrepareSelectionChangedMessage> selectionChangedSubscriber,
-            ISubscriber<PrepareVisualResetMessage> visualResetSubscriber,
+            ISubscriber<string, PrepareMessage> prepareSubscriber,
             ILogService logService)
         {
             _presenter = presenter;
-            _changedSelectionSubscriber = selectionChangedSubscriber;
-            _resetSubscriber = visualResetSubscriber;
+            _prepareSubscriber = prepareSubscriber;
             _logger = logService.CreateLogger<PrepareVisualSyncService>();
 
         }
@@ -37,18 +34,23 @@ namespace Project.Gameplay.Gameplay.Prepare
         void IInitializable.Initialize()
         {
             DisposableBagBuilder bag = DisposableBag.CreateBuilder();
-            _changedSelectionSubscriber.Subscribe(OnSelectionChanged).AddTo(bag);
-            _resetSubscriber.Subscribe(_ => OnVisualReset()).AddTo(bag);
+            _prepareSubscriber.Subscribe(PrepareMessage.SELECTION_CHANGED, OnPrepareSelectionChanged).AddTo(bag);
+            _prepareSubscriber.Subscribe(PrepareMessage.VISUAL_RESET, OnPrepareVisualReset).AddTo(bag);
             _subscriptions = bag.Build();
         }
 
-        private void OnSelectionChanged(PrepareSelectionChangedMessage message)
+        private void OnPrepareSelectionChanged(PrepareMessage message)
         {
             if (string.IsNullOrEmpty(message.FigureId))
             {
                 return;
             }
             _presenter.SetSelected(message.FigureId, message.IsSelected);
+        }
+
+        private void OnPrepareVisualReset(PrepareMessage message)
+        {
+            OnVisualReset();
         }
 
         private void OnVisualReset()

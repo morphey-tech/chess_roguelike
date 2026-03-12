@@ -112,10 +112,7 @@ namespace Project.Unity.Unity.Installers
             builder.RegisterMessageBroker<TurnChangedMessage>(options);
 
             // Prepare messages
-            builder.RegisterMessageBroker<PreparePhaseCompletedMessage>(options);
-            builder.RegisterMessageBroker<PrepareSelectionChangedMessage>(options);
-            builder.RegisterMessageBroker<PrepareVisualResetMessage>(options);
-            builder.RegisterMessageBroker<PrepareCompleteRequestedMessage>(options);
+            builder.RegisterMessageBroker<string, PrepareMessage>(options);
 
             // Figure messages
             builder.RegisterMessageBroker<string, FigureSelectMessage>(options);
@@ -146,9 +143,8 @@ namespace Project.Unity.Unity.Installers
             builder.RegisterMessageBroker<FigureTakeStormDamageMessage>(options);
 
             // UI messages
-            builder.RegisterMessageBroker<TooltipShowRequestMessage>(options);
-            builder.RegisterMessageBroker<TooltipHideRequestMessage>(options);
-            
+            builder.RegisterMessageBroker<string, TooltipMessage>(options);
+
             builder.RegisterMessageBroker<ArtifactAddedMessage>(options);
             builder.RegisterMessageBroker<ArtifactRemovedMessage>(options);
             builder.RegisterMessageBroker<ArtifactsClearedMessage>(options);

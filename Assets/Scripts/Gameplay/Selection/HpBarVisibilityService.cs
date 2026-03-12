@@ -32,7 +32,7 @@ namespace Project.Gameplay.Gameplay.Selection
         private readonly ISubscriber<string, FigureBoardMessage> _figureBoardSubscriber;
         private readonly ISubscriber<FigureDiedMessage> _figureDeathSubscriber;
         private readonly ISubscriber<TurnChangedMessage> _turnChangedSubscriber;
-        private readonly ISubscriber<PreparePhaseCompletedMessage> _prepareCompletedSubscriber;
+        private readonly ISubscriber<string, PrepareMessage> _prepareSubscriber;
         private readonly ISubscriber<StageStartedMessage> _stageStartedSubscriber;
         private readonly ILogger<HpBarVisibilityService> _logger;
 
@@ -40,7 +40,7 @@ namespace Project.Gameplay.Gameplay.Selection
         private int? _hoveredFigureId;
         private int? _selectedFriendlyFigureId;
         private bool _isPreparePhase = true;
-        
+
         private readonly CancellationTokenSource _disposeCts = new();
         private IDisposable _subscriptions = null!;
 
@@ -54,7 +54,7 @@ namespace Project.Gameplay.Gameplay.Selection
             ISubscriber<string, FigureBoardMessage> figureBoardSubscriber,
             ISubscriber<FigureDiedMessage> figureDeathSubscriber,
             ISubscriber<TurnChangedMessage> turnChangedSubscriber,
-            ISubscriber<PreparePhaseCompletedMessage> prepareCompletedSubscriber,
+            ISubscriber<string, PrepareMessage> prepareSubscriber,
             ISubscriber<StageStartedMessage> stageStartedSubscriber,
             ILogService logService)
         {
@@ -66,7 +66,7 @@ namespace Project.Gameplay.Gameplay.Selection
             _figureBoardSubscriber = figureBoardSubscriber;
             _figureDeathSubscriber = figureDeathSubscriber;
             _turnChangedSubscriber = turnChangedSubscriber;
-            _prepareCompletedSubscriber = prepareCompletedSubscriber;
+            _prepareSubscriber = prepareSubscriber;
             _stageStartedSubscriber = stageStartedSubscriber;
             _logger = logService.CreateLogger<HpBarVisibilityService>();
 
@@ -82,7 +82,7 @@ namespace Project.Gameplay.Gameplay.Selection
             _figureDeathSubscriber.Subscribe(OnFigureDeath).AddTo(bag);
             _hoverChangedSubscriber.Subscribe(OnHoverChanged).AddTo(bag);
             _turnChangedSubscriber.Subscribe(OnTurnChanged).AddTo(bag);
-            _prepareCompletedSubscriber.Subscribe(OnPrepareCompleted).AddTo(bag);
+            _prepareSubscriber.Subscribe(PrepareMessage.PHASE_COMPLETED, OnPreparePhaseCompleted).AddTo(bag);
             _stageStartedSubscriber.Subscribe(OnStageStarted).AddTo(bag);
             _subscriptions = bag.Build();
             
@@ -98,7 +98,7 @@ namespace Project.Gameplay.Gameplay.Selection
             _logger.Info($"HP bar policy loaded: allies={_config.HpBarVisibilityModeAllies}, enemies={_config.HpBarVisibilityModeEnemies}, hideDuringPrepare={_config.HideHpBarsDuringPrepare}");
         }
 
-        private void OnPrepareCompleted(PreparePhaseCompletedMessage message)
+        private void OnPreparePhaseCompleted(PrepareMessage message)
         {
             _isPreparePhase = false;
             RefreshAll();

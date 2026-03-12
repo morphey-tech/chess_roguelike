@@ -15,7 +15,7 @@ namespace Project.Gameplay.Gameplay.Stage.Phase
     public sealed class PreparePlacementPhase : IStagePhase, IDisposable
     {
         private readonly PrepareService _prepareService;
-        private readonly ISubscriber<PreparePhaseCompletedMessage> _prepareCompletedSubscriber;
+        private readonly ISubscriber<string, PrepareMessage> _prepareSubscriber;
         private readonly IPublisher<PhaseCompletedMessage> _phaseCompletedPublisher;
         private readonly ILogger<PreparePlacementPhase> _logger;
 
@@ -24,12 +24,12 @@ namespace Project.Gameplay.Gameplay.Stage.Phase
 
         public PreparePlacementPhase(
             PrepareService prepareService,
-            ISubscriber<PreparePhaseCompletedMessage> prepareCompletedSubscriber,
+            ISubscriber<string, PrepareMessage> prepareSubscriber,
             IPublisher<PhaseCompletedMessage> phaseCompletedPublisher,
             ILogService logService)
         {
             _prepareService = prepareService;
-            _prepareCompletedSubscriber = prepareCompletedSubscriber;
+            _prepareSubscriber = prepareSubscriber;
             _phaseCompletedPublisher = phaseCompletedPublisher;
             _logger = logService.CreateLogger<PreparePlacementPhase>();
         }
@@ -37,7 +37,7 @@ namespace Project.Gameplay.Gameplay.Stage.Phase
         public async UniTask<PhaseResult> ExecuteAsync(StageContext context)
         {
             _context = context;
-            _subscription = _prepareCompletedSubscriber.Subscribe(OnPrepareCompleted);
+            _subscription = _prepareSubscriber.Subscribe(PrepareMessage.PHASE_COMPLETED, OnPreparePhaseCompleted);
 
             _logger.Info("PreparePlacementPhase starting");
             IPreparePlacementRules rules = new FrontRowsPlacementRules(context.Grid, allowedRows: 2);
@@ -45,15 +45,14 @@ namespace Project.Gameplay.Gameplay.Stage.Phase
             return PhaseResult.WaitForCompletion;
         }
 
-        private void OnPrepareCompleted(PreparePhaseCompletedMessage message)
+        private void OnPreparePhaseCompleted(PrepareMessage message)
         {
-            _logger.Info($"Prepare completed: {message.PlacedFiguresCount} figures placed");
-
             _subscription?.Dispose();
             _subscription = null;
 
             _context?.CompletePhase?.Invoke(PhaseResult.Continue);
             _phaseCompletedPublisher.Publish(new PhaseCompletedMessage(PhaseIds.PreparePlacement));
+            _logger.Info($"Prepare completed: {message.PlacedFiguresCount} figures placed");
         }
 
         void IDisposable.Dispose()

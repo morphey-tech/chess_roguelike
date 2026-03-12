@@ -20,22 +20,19 @@ namespace Project.Gameplay.UI
         [SerializeField] private Image _iconImage = null!;
 
         private IAssetService _assetService = null!;
-        private IPublisher<TooltipShowRequestMessage> _tooltipShowPublisher = null!;
-        private IPublisher<TooltipHideRequestMessage> _tooltipHidePublisher = null!;
+        private IPublisher<string, TooltipMessage> _tooltipPublisher = null!;
         private ILogger<PassiveIconView> _logger = null!;
-        
+
         private PassiveConfig? _currentConfig;
 
         [Inject]
         private void Construct(
             IAssetService assetService,
-            IPublisher<TooltipShowRequestMessage> tooltipShowPublisher,
-            IPublisher<TooltipHideRequestMessage> tooltipHidePublisher,
+            IPublisher<string, TooltipMessage> tooltipPublisher,
             ILogService logService)
         {
             _assetService = assetService;
-            _tooltipShowPublisher = tooltipShowPublisher;
-            _tooltipHidePublisher = tooltipHidePublisher;
+            _tooltipPublisher = tooltipPublisher;
             _logger = logService.CreateLogger<PassiveIconView>();
         }
 
@@ -72,12 +69,13 @@ namespace Project.Gameplay.UI
                 return;
             }
             string content = $"{_currentConfig.Name}\n{_currentConfig.Description}";
-            _tooltipShowPublisher.Publish(new TooltipShowRequestMessage(content, eventData.position));
+            _tooltipPublisher.Publish(TooltipMessage.SHOW, 
+                TooltipMessage.Show(content, eventData.position));
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
-            _tooltipHidePublisher.Publish(new TooltipHideRequestMessage());
+            _tooltipPublisher.Publish(TooltipMessage.HIDE, TooltipMessage.Hide());
         }
     }
 }

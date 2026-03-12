@@ -25,7 +25,7 @@ namespace Project.Gameplay.Gameplay.Prepare
         private readonly IFigurePresenter _figurePresenter;
         private readonly IFigureRegistry _figureRegistry;
         private readonly IGameUiService _uiService;
-        private readonly IPublisher<PrepareSelectionChangedMessage> _selectionChangedPublisher;
+        private readonly IPublisher<string, PrepareMessage> _preparePublisher;
         private readonly IPublisher<string, FigureBoardMessage> _figureBoardPublisher;
         private readonly ILogger<PreparePlacementController> _logger;
         private bool _isPlacing;
@@ -38,7 +38,7 @@ namespace Project.Gameplay.Gameplay.Prepare
             IFigurePresenter figurePresenter,
             IFigureRegistry figureRegistry,
             IGameUiService uiService,
-            IPublisher<PrepareSelectionChangedMessage> selectionChangedPublisher,
+            IPublisher<string, PrepareMessage> preparePublisher,
             IPublisher<string, FigureBoardMessage> figureBoardPublisher,
             ILogService logService)
         {
@@ -48,7 +48,7 @@ namespace Project.Gameplay.Gameplay.Prepare
             _figurePresenter = figurePresenter;
             _figureRegistry = figureRegistry;
             _uiService = uiService;
-            _selectionChangedPublisher = selectionChangedPublisher;
+            _preparePublisher = preparePublisher;
             _figureBoardPublisher = figureBoardPublisher;
             _logger = logService.CreateLogger<PreparePlacementController>();
         }
@@ -147,7 +147,8 @@ namespace Project.Gameplay.Gameplay.Prepare
                 context.State.ClearSelection();
                 if (context.PreviousSelectedId != null)
                 {
-                    _selectionChangedPublisher.Publish(new PrepareSelectionChangedMessage(context.PreviousSelectedId, false));
+                    _preparePublisher.Publish(PrepareMessage.SELECTION_CHANGED, 
+                        PrepareMessage.SelectionChanged(context.PreviousSelectedId, false));
                 }
                 context.PreviousSelectedId = null;
 

@@ -14,48 +14,47 @@ namespace Project.Gameplay.Gameplay.UI
     /// <summary>
     /// Сервис управления tooltip через MessagePipe.
     /// </summary>
-    public sealed class TooltipService : ITooltipService, IStartable, IDisposable
+    public sealed class TooltipService : ITooltipService, IInitializable, IDisposable
     {
-        private readonly ISubscriber<TooltipShowRequestMessage> _showRequestPublisher;
-        private readonly ISubscriber<TooltipHideRequestMessage> _hideRequestPublisher;
+        // Задержка перед показом (чтобы не мелькало)
+        private const float ShowDelay = 0.15f;
+        
+        private readonly ISubscriber<string, TooltipMessage> _tooltipSubscriber;
         private readonly IUIService _uiService;
         private readonly ILogger<TooltipService> _logger;
 
         private TooltipWindow? _tooltipWindow;
-        private IDisposable? _showSubscription;
-        private IDisposable? _hideSubscription;
+        private IDisposable? _disposable;
 
-        // Задержка перед показом (чтобы не мелькало)
-        private const float ShowDelay = 0.15f;
         private CancellationTokenSource? _showDelayCts;
         private bool _isInitializing;
 
         [Inject]
         private TooltipService(
-            ISubscriber<TooltipShowRequestMessage> showRequestPublisher,
-            ISubscriber<TooltipHideRequestMessage> hideRequestPublisher,
+            ISubscriber<string, TooltipMessage> tooltipSubscriber,
             IUIService uiService,
             ILogService logService)
         {
-            _showRequestPublisher = showRequestPublisher;
-            _hideRequestPublisher = hideRequestPublisher;
+            _tooltipSubscriber = tooltipSubscriber;
             _uiService = uiService;
             _logger = logService.CreateLogger<TooltipService>();
         }
 
-        void IStartable.Start()
+        void IInitializable.Initialize()
         {
-            _showSubscription = _showRequestPublisher.Subscribe(OnTooltipShowRequested);
-            _hideSubscription = _hideRequestPublisher.Subscribe(OnTooltipHideRequested);
-            
-            // Не инициализируем окно сразу - сделаем это при первом запросе
+            DisposableBagBuilder bag = DisposableBag.CreateBuilder();
+            _tooltipSubscriber.Subscribe(TooltipMessage.SHOW, OnTooltipShow).AddTo(bag);
+            _tooltipSubscriber.Subscribe(TooltipMessage.HIDE, OnTooltipHide ).AddTo(bag);
+            _disposable = bag.Build();
             _isInitializing = false;
         }
-
+        
         private async UniTask EnsureInitializedAsync()
         {
             if (_isInitializing || _tooltipWindow != null)
+            {
                 return;
+            }
 
             _isInitializing = true;
 
@@ -75,13 +74,17 @@ namespace Project.Gameplay.Gameplay.UI
             }
         }
 
-        private void OnTooltipShowRequested(TooltipShowRequestMessage message)
+        private void OnTooltipShow(TooltipMessage message)
         {
             ShowTooltipAsync(message.Content, message.Position).Forget();
         }
 
-        private void OnTooltipHideRequested(TooltipHideRequestMessage message)
+        private void OnTooltipHide(TooltipMessage message)
         {
+            if (string.IsNullOrEmpty(message.Content))
+            {
+                return;
+            }
             HideTooltip();
         }
 
@@ -121,11 +124,6 @@ namespace Project.Gameplay.Gameplay.UI
             }
         }
 
-        public UniTaskVoid ShowTooltipAsync(string content, System.Numerics.Vector2 position)
-        {
-            throw new NotImplementedException();
-        }
-
         public void HideTooltip()
         {
             // Отменяем показ если был в задержке
@@ -139,10 +137,10 @@ namespace Project.Gameplay.Gameplay.UI
 
         public void Dispose()
         {
-            _showSubscription?.Dispose();
-            _hideSubscription?.Dispose();
+            _disposable?.Dispose();
             _showDelayCts?.Cancel();
             _showDelayCts?.Dispose();
         }
+
     }
 }

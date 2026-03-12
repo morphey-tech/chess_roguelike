@@ -25,9 +25,7 @@ namespace Project.Gameplay.Gameplay.Prepare
         private readonly PreparePlacementController _placementController;
         private readonly PrepareHighlightService _highlightService;
         private readonly IGameUiService _uiService;
-        private readonly IPublisher<PreparePhaseCompletedMessage> _completedPublisher;
-        private readonly IPublisher<PrepareSelectionChangedMessage> _selectionChangedPublisher;
-        private readonly IPublisher<PrepareVisualResetMessage> _visualResetPublisher;
+        private readonly IPublisher<string, PrepareMessage> _preparePublisher;
         private readonly ILogger<PrepareService> _logger;
 
         private PrepareContext? _context;
@@ -40,9 +38,7 @@ namespace Project.Gameplay.Gameplay.Prepare
             PreparePlacementController placementController,
             PrepareHighlightService highlightService,
             IGameUiService uiService,
-            IPublisher<PreparePhaseCompletedMessage> completedPublisher,
-            IPublisher<PrepareSelectionChangedMessage> selectionChangedPublisher,
-            IPublisher<PrepareVisualResetMessage> visualResetPublisher,
+            IPublisher<string, PrepareMessage> preparePublisher,
             ILogService logService)
         {
             _figureSpawnService = figureSpawnService;
@@ -50,9 +46,7 @@ namespace Project.Gameplay.Gameplay.Prepare
             _placementController = placementController;
             _highlightService = highlightService;
             _uiService = uiService;
-            _completedPublisher = completedPublisher;
-            _selectionChangedPublisher = selectionChangedPublisher;
-            _visualResetPublisher = visualResetPublisher;
+            _preparePublisher = preparePublisher;
             _logger = logService.CreateLogger<PrepareService>();
         }
 
@@ -140,7 +134,8 @@ namespace Project.Gameplay.Gameplay.Prepare
             }
 
             context.State.Complete();
-            _completedPublisher.Publish(new PreparePhaseCompletedMessage(context.RunState.FiguresOnBoard.Count));
+            _preparePublisher.Publish(PrepareMessage.PHASE_COMPLETED, 
+                PrepareMessage.PhaseCompleted(context.RunState.FiguresOnBoard.Count));
             EndSession(clearVisuals: true);
         }
 
@@ -167,7 +162,8 @@ namespace Project.Gameplay.Gameplay.Prepare
 
             if (context.PreviousSelectedId != null)
             {
-                _selectionChangedPublisher.Publish(new PrepareSelectionChangedMessage(context.PreviousSelectedId, false));
+                _preparePublisher.Publish(PrepareMessage.SELECTION_CHANGED, 
+                    PrepareMessage.SelectionChanged(context.PreviousSelectedId, false));
             }
 
             context.State.Select(message.FigureId);
@@ -177,7 +173,8 @@ namespace Project.Gameplay.Gameplay.Prepare
             }
 
             context.PreviousSelectedId = message.FigureId;
-            _selectionChangedPublisher.Publish(new PrepareSelectionChangedMessage(message.FigureId, true));
+            _preparePublisher.Publish(PrepareMessage.SELECTION_CHANGED, 
+                PrepareMessage.SelectionChanged(message.FigureId, true));
             FigureState? selected = context.GetSelectedFigure();
             if (selected != null)
             {
@@ -273,8 +270,8 @@ namespace Project.Gameplay.Gameplay.Prepare
 
             if (context.PreviousSelectedId != null)
             {
-                _selectionChangedPublisher.Publish(new 
-                    PrepareSelectionChangedMessage(context.PreviousSelectedId, false));
+                _preparePublisher.Publish(PrepareMessage.SELECTION_CHANGED, 
+                    PrepareMessage.SelectionChanged(context.PreviousSelectedId, false));
             }
 
             _logger.Debug("Selection cancelled");
@@ -308,7 +305,7 @@ namespace Project.Gameplay.Gameplay.Prepare
 
             if (clearVisuals)
             {
-                _visualResetPublisher.Publish(new PrepareVisualResetMessage());
+                _preparePublisher.Publish(PrepareMessage.VISUAL_RESET, PrepareMessage.VisualReset());
             }
         }
 

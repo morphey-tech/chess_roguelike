@@ -18,7 +18,7 @@ namespace Project.Gameplay.Gameplay.Prepare
         private readonly ISubscriber<HandFigureClickedMessage> _figureClickedSubscriber;
         private readonly ISubscriber<CellClickedMessage> _cellClickedSubscriber;
         private readonly ISubscriber<CancelRequestedMessage> _cancelSubscriber;
-        private readonly ISubscriber<PrepareCompleteRequestedMessage> _prepareCompletedSubscriber;
+        private readonly ISubscriber<string, PrepareMessage> _prepareSubscriber;
 
         private IDisposable _subscriptions = null!;
 
@@ -28,13 +28,13 @@ namespace Project.Gameplay.Gameplay.Prepare
             ISubscriber<HandFigureClickedMessage> handFigureClickedSubscriber,
             ISubscriber<CellClickedMessage> cellClickedSubscriber,
             ISubscriber<CancelRequestedMessage> cancelSubscriber,
-            ISubscriber<PrepareCompleteRequestedMessage> prepareCompleteRequestedSubscriber)
+            ISubscriber<string, PrepareMessage> prepareSubscriber)
         {
             _prepareService = prepareService;
             _figureClickedSubscriber = handFigureClickedSubscriber;
             _cellClickedSubscriber = cellClickedSubscriber;
             _cancelSubscriber = cancelSubscriber;
-            _prepareCompletedSubscriber = prepareCompleteRequestedSubscriber;
+            _prepareSubscriber = prepareSubscriber;
         }
 
         void IStartable.Start()
@@ -43,12 +43,15 @@ namespace Project.Gameplay.Gameplay.Prepare
             _figureClickedSubscriber.Subscribe(_prepareService.HandleHandFigureClicked).AddTo(bag);
             _cellClickedSubscriber.Subscribe(_prepareService.HandleCellClicked).AddTo(bag);
             _cancelSubscriber.Subscribe(_ => _prepareService.HandleCancelRequested()).AddTo(bag);
-            _prepareCompletedSubscriber.Subscribe(_ => _prepareService.RequestCompletePrepare()).AddTo(bag);
+            _prepareSubscriber.Subscribe(PrepareMessage.COMPLETE_REQUESTED, OnPrepareMessage).AddTo(bag);
             _subscriptions = bag.Build();
-            
-            UnityEngine.Debug.Log("[PrepareInputHandler] Started and subscribed to messages");
         }
-        
+
+        private void OnPrepareMessage(PrepareMessage message)
+        {
+            _prepareService.RequestCompletePrepare();
+        }
+
         void IDisposable.Dispose()
         {
             _subscriptions.Dispose();

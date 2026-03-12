@@ -3,10 +3,8 @@ using DG.Tweening;
 using System;
 using MessagePipe;
 using Project.Core.Window;
-using Project.Gameplay.Gameplay.UI;
 using Project.Gameplay.Gameplay.Board.Capacity;
 using Project.Gameplay.Gameplay.Board.Messages;
-using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Prepare.Messages;
 using Project.Gameplay.Gameplay.Turn;
 using UnityEngine;
@@ -22,29 +20,29 @@ namespace Project.Gameplay.UI
     [SerializeField] private RectTransform _botStep;
     [SerializeField] private Text _capacityText;
     [SerializeField] private Button _finishPrepareButton;
-    
+
     private ISubscriber<TurnChangedMessage> _turnChangedPublisher;
     private ISubscriber<BoardCapacityChangedMessage> _capacityChangedSubscriber;
-    private IPublisher<PrepareCompleteRequestedMessage> _prepareCompletePublisher;
+    private IPublisher<string, PrepareMessage> _preparePublisher;
     private BoardCapacityService _capacityService;
     private IDisposable _turnChangedSubscription;
     private IDisposable _capacityChangedSubscription;
     private Team? _currentTurnTeam = null;
     private bool _isPreparePhase = false;
-    
+
     [Inject]
     private void Construct(
       ISubscriber<TurnChangedMessage> turnChangedPublisher,
       ISubscriber<BoardCapacityChangedMessage> capacityChangedSubscriber,
-      IPublisher<PrepareCompleteRequestedMessage> prepareCompletePublisher,
+      IPublisher<string, PrepareMessage> preparePublisher,
       BoardCapacityService capacityService)
     {
       _turnChangedPublisher = turnChangedPublisher;
       _capacityChangedSubscriber = capacityChangedSubscriber;
-      _prepareCompletePublisher = prepareCompletePublisher;
+      _preparePublisher = preparePublisher;
       _capacityService = capacityService;
     }
-    
+
     protected override void OnShowed()
     {
       _turnChangedSubscription ??= _turnChangedPublisher.Subscribe(OnTurnChanged);
@@ -65,15 +63,15 @@ namespace Project.Gameplay.UI
       _botStep.anchoredPosition = Vector2.up * 100;
       _playerStep.anchoredPosition = -Vector2.up * 100;
     }
-    
+
     private void OnTurnChanged(TurnChangedMessage msg)
     {
-      _currentTurnTeam =  msg.CurrentTeam;
-      
-      var activeTurn = _currentTurnTeam == Team.Player ?  _playerStep : _botStep;
-      var inactiveTurn = activeTurn == _playerStep ? _botStep : _playerStep;
+      _currentTurnTeam = msg.CurrentTeam;
+      RectTransform activeTurn = _currentTurnTeam == Team.Player ? _playerStep : _botStep;
+      RectTransform inactiveTurn = activeTurn == _playerStep ? _botStep : _playerStep;
       activeTurn.DOAnchorPos(Vector2.zero, 0.25f).SetEase(Ease.OutCubic);
-      inactiveTurn.DOAnchorPos(_currentTurnTeam == Team.Player ? Vector2.up * 100f : -Vector2.up * 100f, 0.25f).SetEase(Ease.OutCubic);
+      inactiveTurn.DOAnchorPos(_currentTurnTeam == Team.Player ? Vector2.up * 100f : -Vector2.up * 100f, 0.25f)
+        .SetEase(Ease.OutCubic);
     }
 
     public void SetPreparePhase()
@@ -88,7 +86,9 @@ namespace Project.Gameplay.UI
       _isPreparePhase = false;
       _preparePhase.DOFade(0, 0.35f).SetEase(Ease.OutCubic);
       if (_finishPrepareButton != null)
+      {
         _finishPrepareButton.gameObject.SetActive(false);
+      }
     }
 
     private void EnsureFinishPrepareButton()
@@ -103,7 +103,7 @@ namespace Project.Gameplay.UI
 
     private void OnFinishPrepareClicked()
     {
-      _prepareCompletePublisher.Publish(new PrepareCompleteRequestedMessage());
+      _preparePublisher.Publish(PrepareMessage.COMPLETE_REQUESTED, PrepareMessage.CompleteRequested());
     }
 
     private void OnCapacityChanged(BoardCapacityChangedMessage msg)
@@ -114,8 +114,9 @@ namespace Project.Gameplay.UI
     private void UpdateCapacity(int used, int capacity)
     {
       if (_capacityText == null)
+      {
         return;
-
+      }
       _capacityText.text = $"{used}/{capacity}";
     }
   }
