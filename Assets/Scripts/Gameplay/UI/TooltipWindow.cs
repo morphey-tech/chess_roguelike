@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using Project.Core.Window;
 using Project.Gameplay.Gameplay.UI;
 using TMPro;
@@ -21,6 +23,7 @@ namespace Project.Gameplay.UI
         [SerializeField] private float _maxWidth = 300f;
         [SerializeField] private float _minWidth = 150f;  // Минимальная ширина tooltip
         [SerializeField] private float _cursorOffset = 10f;  // Отступ от курсора
+        [SerializeField] private TMP_FontAsset[] _fallbackFontAssets = Array.Empty<TMP_FontAsset>();  // Fallback шрифты
 
         private RectTransform _rectTransform;
 
@@ -28,18 +31,9 @@ namespace Project.Gameplay.UI
         {
             base.OnInit();
             _rectTransform = GetComponent<RectTransform>();
-            
-            // Добавляем VerticalLayoutGroup на Root если нет
-            if (_rootRect != null && _rootRect.GetComponent<VerticalLayoutGroup>() == null)
+            if (_fallbackFontAssets is { Length: > 0 })
             {
-                var layout = _rootRect.gameObject.AddComponent<VerticalLayoutGroup>();
-                layout.padding = new RectOffset((int)_paddingX, (int)_paddingX, (int)_paddingY, (int)_paddingY);
-                layout.spacing = 0;
-                layout.childAlignment = TextAnchor.UpperLeft;
-                layout.childForceExpandWidth = false;
-                layout.childForceExpandHeight = false;
-                layout.childControlWidth = false;
-                layout.childControlHeight = false;
+                _contentText.font.fallbackFontAssetTable = new List<TMP_FontAsset>(_fallbackFontAssets);
             }
         }
 

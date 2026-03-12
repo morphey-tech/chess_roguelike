@@ -81,10 +81,6 @@ namespace Project.Gameplay.Gameplay.UI
 
         private void OnTooltipHide(TooltipMessage message)
         {
-            if (string.IsNullOrEmpty(message.Content))
-            {
-                return;
-            }
             HideTooltip();
         }
 
@@ -92,7 +88,7 @@ namespace Project.Gameplay.Gameplay.UI
         {
             // Ленивая инициализация
             await EnsureInitializedAsync();
-            
+
             if (_tooltipWindow == null)
             {
                 _logger.Debug("TooltipWindow is not initialized yet");
@@ -102,17 +98,17 @@ namespace Project.Gameplay.Gameplay.UI
             // Отменяем предыдущую задержку
             _showDelayCts?.Cancel();
             _showDelayCts = new CancellationTokenSource();
-            
+
             var cts = _showDelayCts;
-            
+
             try
             {
                 // Показываем с задержкой
                 await UniTask.Delay(TimeSpan.FromSeconds(ShowDelay), ignoreTimeScale: false, cancellationToken: cts.Token);
-                
+
                 if (cts.Token.IsCancellationRequested)
                     return;
-                    
+
                 if (_tooltipWindow != null && !_tooltipWindow.IsVisible())
                 {
                     _tooltipWindow.Show(content, position);

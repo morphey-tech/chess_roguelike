@@ -12,21 +12,23 @@ namespace Project.Gameplay.Gameplay.Input.Messages
 
         public readonly string Content;
         public readonly Vector2 Position;
+        public readonly bool UseStaticPosition;
 
-        private TooltipMessage(string content, Vector2 position)
+        private TooltipMessage(string content, Vector2 position, bool useStaticPosition)
         {
             Content = content;
             Position = position;
+            UseStaticPosition = useStaticPosition;
         }
 
-        public static TooltipMessage Show(string content, Vector2 position)
+        public static TooltipMessage Show(string content, Vector2 position, bool useStaticPosition = false)
         {
-            return new TooltipMessage(content, position);
+            return new TooltipMessage(content, position, useStaticPosition);
         }
 
         public static TooltipMessage Hide()
         {
-            return new TooltipMessage(string.Empty, Vector2.zero);
+            return new TooltipMessage(string.Empty, Vector2.zero, false);
         }
     }
 }

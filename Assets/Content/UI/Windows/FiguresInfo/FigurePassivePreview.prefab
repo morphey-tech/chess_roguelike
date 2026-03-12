@@ -125,4 +125,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Gameplay::Project.Gameplay.UI.PassiveIconView
   _iconImage: {fileID: 8897291762861104952}
-  _tooltipText: {fileID: 0}
+  _tooltipOffset: {x: 50, y: 0}

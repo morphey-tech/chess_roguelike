@@ -7,6 +7,7 @@ using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Input.Messages;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 using VContainer;
 
@@ -18,6 +19,7 @@ namespace Project.Gameplay.UI
     public class PassiveIconView : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
         [SerializeField] private Image _iconImage = null!;
+        [SerializeField] private Vector2 _tooltipOffset;
 
         private IAssetService _assetService = null!;
         private IPublisher<string, TooltipMessage> _tooltipPublisher = null!;
@@ -68,9 +70,16 @@ namespace Project.Gameplay.UI
             {
                 return;
             }
-            string content = $"{_currentConfig.Name}\n{_currentConfig.Description}";
-            _tooltipPublisher.Publish(TooltipMessage.SHOW, 
-                TooltipMessage.Show(content, eventData.position));
+
+            string content = $"<size=25><color=#FFFFFF>{_currentConfig.Name}</color></size>\n" +
+                             $"<size=20><color=#D4B9B9>{_currentConfig.Description}</color></size>";
+            
+            Vector2 staticPosition = _iconImage.rectTransform.TransformPoint(Vector3.zero);
+            staticPosition.x += _tooltipOffset.x;
+            staticPosition.y += _tooltipOffset.y;
+
+            _tooltipPublisher.Publish(TooltipMessage.SHOW,
+                TooltipMessage.Show(content, staticPosition, useStaticPosition: true));
         }
 
         public void OnPointerExit(PointerEventData eventData)
