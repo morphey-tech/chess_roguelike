@@ -80,7 +80,7 @@ namespace Project.Gameplay.Gameplay.Prepare
                 _highlightService.ApplyAll(context);
                 context.IsInputReady = true;
 
-                _uiService.ShowPreparePhaseAsync().Forget();
+                _uiService.ShowPreparePhase().Forget();
             }
             catch (OperationCanceledException) when (context.CancellationToken.IsCancellationRequested)
             {

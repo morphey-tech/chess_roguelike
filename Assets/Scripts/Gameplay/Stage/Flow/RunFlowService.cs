@@ -24,8 +24,9 @@ namespace Project.Gameplay.Gameplay.Stage.Flow
         private readonly ISceneService _sceneService;
         private readonly IRunTransitionService _transitionService;
         private readonly ISubscriber<string, StagePhaseMessage> _stagePhaseSubscriber;
+        private readonly ISubscriber<ForceStageEndMessage> _forceStageEndSubscriber;
         private readonly ILogger<RunFlowService> _logger;
-        
+
         private IDisposable _disposable;
         private int _isHandling;
 
@@ -37,6 +38,7 @@ namespace Project.Gameplay.Gameplay.Stage.Flow
             ISceneService sceneService,
             IRunTransitionService transitionService,
             ISubscriber<string, StagePhaseMessage> stagePhaseSubscriber,
+            ISubscriber<ForceStageEndMessage> forceStageEndSubscriber,
             ILogService logService, IDisposable disposable)
         {
             _runHolder = runHolder;
@@ -45,18 +47,27 @@ namespace Project.Gameplay.Gameplay.Stage.Flow
             _sceneService = sceneService;
             _transitionService = transitionService;
             _stagePhaseSubscriber = stagePhaseSubscriber;
+            _forceStageEndSubscriber = forceStageEndSubscriber;
             _disposable = disposable;
             _logger = logService.CreateLogger<RunFlowService>();
         }
 
         void IInitializable.Initialize()
         {
-            _disposable = _stagePhaseSubscriber.Subscribe(StagePhaseMessage.STAGE_COMPLETED, OnStagePhase);
+            DisposableBagBuilder bag = DisposableBag.CreateBuilder();
+            _stagePhaseSubscriber.Subscribe(StagePhaseMessage.STAGE_COMPLETED, OnStagePhase).AddTo(bag);
+            _forceStageEndSubscriber.Subscribe(OnForceStageEnd).AddTo(bag);
+            _disposable = bag.Build();
         }
 
         private void OnStagePhase(StagePhaseMessage message)
         {
             HandleStageEnd(message.Result).Forget();
+        }
+        
+        private void OnForceStageEnd(ForceStageEndMessage message)
+        {
+            HandleStageEnd(new StageResult(message.Outcome, turnCount: 0, enemiesKilled: 0)).Forget();
         }
 
         public async UniTask HandleStageEnd(StageResult result)
@@ -68,7 +79,7 @@ namespace Project.Gameplay.Gameplay.Stage.Flow
 
             try
             {
-                await _uiService.HideCombatUiAsync();
+                await _uiService.HideBattlePhase();
 
                 switch (result.Outcome)
                 {

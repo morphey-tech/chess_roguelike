@@ -16,17 +16,17 @@ namespace Project.Gameplay.Gameplay.Stage.Phase
     public sealed class PreparePlacementPhase : IStagePhase, IDisposable
     {
         private readonly PrepareService _prepareService;
-        private readonly ISubscriber<PrepareMessage> _prepareSubscriber;
+        private readonly ISubscriber<string, PrepareMessage> _prepareSubscriber;
         private readonly IPublisher<string, StagePhaseMessage> _stagePhasePublisher;
         private readonly ILogger<PreparePlacementPhase> _logger;
 
         private StageContext _context;
-        private IDisposable? _subscription;
+        private IDisposable? _disposable;
 
         [Inject]
         private PreparePlacementPhase(
             PrepareService prepareService,
-            ISubscriber<PrepareMessage> prepareSubscriber,
+            ISubscriber<string, PrepareMessage> prepareSubscriber,
             IPublisher<string, StagePhaseMessage> stagePhasePublisher,
             ILogService logService)
         {
@@ -39,7 +39,7 @@ namespace Project.Gameplay.Gameplay.Stage.Phase
         public async UniTask<PhaseResult> ExecuteAsync(StageContext context)
         {
             _context = context;
-            _subscription = _prepareSubscriber.Subscribe(OnPrepareMessage);
+            _disposable = _prepareSubscriber.Subscribe(PrepareMessage.PHASE_COMPLETED, OnPrepareMessage);
             IPreparePlacementRules rules = new FrontRowsPlacementRules(context.Grid, allowedRows: 2);
             await _prepareService.Start(context.RunState, context.Grid, rules);
             _logger.Info("PreparePlacementPhase starting");
@@ -48,13 +48,8 @@ namespace Project.Gameplay.Gameplay.Stage.Phase
 
         private void OnPrepareMessage(PrepareMessage message)
         {
-            if (message.Type != PrepareMessage.PHASE_COMPLETED)
-            {
-                return;
-            }
-
-            _subscription?.Dispose();
-            _subscription = null;
+            _disposable?.Dispose();
+            _disposable = null;
 
             _context?.CompletePhase?.Invoke(PhaseResult.Continue);
             _stagePhasePublisher.Publish(StagePhaseMessage.PHASE_COMPLETED, 
@@ -65,7 +60,7 @@ namespace Project.Gameplay.Gameplay.Stage.Phase
 
         void IDisposable.Dispose()
         {
-            _subscription?.Dispose();
+            _disposable?.Dispose();
         }
     }
 }

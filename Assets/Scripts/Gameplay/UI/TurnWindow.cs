@@ -3,59 +3,37 @@ using DG.Tweening;
 using System;
 using MessagePipe;
 using Project.Core.Window;
-using Project.Gameplay.Gameplay.Board.Capacity;
-using Project.Gameplay.Gameplay.Board.Messages;
-using Project.Gameplay.Gameplay.Prepare.Messages;
 using Project.Gameplay.Gameplay.Turn;
 using UnityEngine;
-using UnityEngine.UI;
 using VContainer;
 
 namespace Project.Gameplay.UI
 {
   public class TurnWindow : ParameterlessWindow
   {
-    [SerializeField] private CanvasGroup _preparePhase;
     [SerializeField] private RectTransform _playerStep;
     [SerializeField] private RectTransform _botStep;
-    [SerializeField] private Text _capacityText;
-    [SerializeField] private Button _finishPrepareButton;
 
     private ISubscriber<TurnChangedMessage> _turnChangedPublisher;
-    private ISubscriber<BoardCapacityChangedMessage> _capacityChangedSubscriber;
-    private IPublisher<string, PrepareMessage> _preparePublisher;
-    private BoardCapacityService _capacityService;
-    private IDisposable _turnChangedSubscription;
-    private IDisposable _capacityChangedSubscription;
+    
+    private IDisposable? _disposable;
     private Team? _currentTurnTeam = null;
-    private bool _isPreparePhase = false;
 
     [Inject]
-    private void Construct(
-      ISubscriber<TurnChangedMessage> turnChangedPublisher,
-      ISubscriber<BoardCapacityChangedMessage> capacityChangedSubscriber,
-      IPublisher<string, PrepareMessage> preparePublisher,
-      BoardCapacityService capacityService)
+    private void Construct(ISubscriber<TurnChangedMessage> turnChangedPublisher)
     {
       _turnChangedPublisher = turnChangedPublisher;
-      _capacityChangedSubscriber = capacityChangedSubscriber;
-      _preparePublisher = preparePublisher;
-      _capacityService = capacityService;
     }
 
     protected override void OnShowed()
     {
-      _turnChangedSubscription ??= _turnChangedPublisher.Subscribe(OnTurnChanged);
-      _capacityChangedSubscription ??= _capacityChangedSubscriber.Subscribe(OnCapacityChanged);
-      UpdateCapacity(_capacityService.Used, _capacityService.Capacity);
+      _disposable ??= _turnChangedPublisher.Subscribe(OnTurnChanged);
     }
 
     protected override void OnHidden()
     {
-      _turnChangedSubscription?.Dispose();
-      _turnChangedSubscription = null;
-      _capacityChangedSubscription?.Dispose();
-      _capacityChangedSubscription = null;
+      _disposable?.Dispose();
+      _disposable = null;
     }
 
     public void ForceHideSteps()
@@ -72,52 +50,6 @@ namespace Project.Gameplay.UI
       activeTurn.DOAnchorPos(Vector2.zero, 0.25f).SetEase(Ease.OutCubic);
       inactiveTurn.DOAnchorPos(_currentTurnTeam == Team.Player ? Vector2.up * 100f : -Vector2.up * 100f, 0.25f)
         .SetEase(Ease.OutCubic);
-    }
-
-    public void SetPreparePhase()
-    {
-      _isPreparePhase = true;
-      ForceHideSteps();
-      EnsureFinishPrepareButton();
-    }
-
-    public void SetGamePhase()
-    {
-      _isPreparePhase = false;
-      _preparePhase.DOFade(0, 0.35f).SetEase(Ease.OutCubic);
-      if (_finishPrepareButton != null)
-      {
-        _finishPrepareButton.gameObject.SetActive(false);
-      }
-    }
-
-    private void EnsureFinishPrepareButton()
-    {
-      if (_finishPrepareButton != null)
-      {
-        _finishPrepareButton.gameObject.SetActive(true);
-        _finishPrepareButton.onClick.RemoveAllListeners();
-        _finishPrepareButton.onClick.AddListener(OnFinishPrepareClicked);
-      }
-    }
-
-    private void OnFinishPrepareClicked()
-    {
-      _preparePublisher.Publish(PrepareMessage.COMPLETE_REQUESTED, PrepareMessage.CompleteRequested());
-    }
-
-    private void OnCapacityChanged(BoardCapacityChangedMessage msg)
-    {
-      UpdateCapacity(msg.Used, msg.Capacity);
-    }
-
-    private void UpdateCapacity(int used, int capacity)
-    {
-      if (_capacityText == null)
-      {
-        return;
-      }
-      _capacityText.text = $"{used}/{capacity}";
     }
   }
 }

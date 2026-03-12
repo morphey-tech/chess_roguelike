@@ -23,26 +23,23 @@ namespace Project.Unity.UI
 
         public async UniTask ShowWorldUiAsync()
         {
-            await _uiService.Initialized;
             await _uiService.ShowAsync<WorldUIWindow>();
         }
 
-        public async UniTask ShowPreparePhaseAsync()
+        public async UniTask ShowPreparePhase()
         {
-            await _uiService.Initialized;
-            TurnWindow? wnd = await _uiService.ShowAsync<TurnWindow>();
-            wnd?.SetPreparePhase();
+            await _uiService.ShowAsync<PrepareWindow>();
             // Board capacity window disabled temporarily
             // await _uiService.ShowAsync<BoardCapacityWindow>();
         }
 
-        public async UniTask SetGamePhase()
+        public async UniTask ShowBattlePhase()
         {
-            TurnWindow? wnd = await _uiService.GetOrCreateAsync<TurnWindow>();
-            wnd?.SetGamePhase();
+            _uiService.Hide<PrepareWindow>();
+            await _uiService.ShowAsync<TurnWindow>();
         }
 
-        public UniTask HideCombatUiAsync()
+        public UniTask HideBattlePhase()
         {
             _uiService.Hide<TurnWindow>();
                 // UIService.Hide<BoardCapacityWindow>();

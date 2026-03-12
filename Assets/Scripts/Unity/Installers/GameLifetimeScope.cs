@@ -117,19 +117,11 @@ namespace Project.Unity.Unity.Installers
             builder.RegisterMessageBroker<FigureAttackMessage>(options);
             builder.RegisterMessageBroker<FigureDiedMessage>(options);
 
-            // Board messages
             builder.RegisterMessageBroker<BoardCapacityChangedMessage>(options);
-
-            // Stage/Flow messages
             builder.RegisterMessageBroker<string, StagePhaseMessage>(options);
-
-            // Bonus move messages
+            builder.RegisterMessageBroker<ForceStageEndMessage>(options);
             builder.RegisterMessageBroker<string, BonusMoveMessage>(options);
-
-            // Storm messages
             builder.RegisterMessageBroker<string, StormMessage>(options);
-
-            // UI messages
             builder.RegisterMessageBroker<string, TooltipMessage>(options);
 
             builder.RegisterMessageBroker<string, ArtifactMessage>(options);

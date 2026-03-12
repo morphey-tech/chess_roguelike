@@ -1,9 +1,10 @@
 using System;
 using Cysharp.Threading.Tasks;
 using IngameDebugConsole;
+using MessagePipe;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Stage;
-using Project.Gameplay.Gameplay.Stage.Flow;
+using Project.Gameplay.Gameplay.Stage.Messages;
 using VContainer;
 using VContainer.Unity;
 
@@ -11,20 +12,20 @@ namespace Project.Unity.Unity.Debug
 {
     public sealed class StageOutcomeConsoleCommands : IStartable, IDisposable
     {
-        private readonly RunFlowService _runFlowService;
+        private readonly IPublisher<ForceStageEndMessage> _publisher;
         private readonly ILogger _logger;
         private bool _registered;
 
         [Inject]
         private StageOutcomeConsoleCommands(
-            RunFlowService runFlowService,
+            IPublisher<ForceStageEndMessage> publisher,
             ILogService logService)
         {
-            _runFlowService = runFlowService;
+            _publisher = publisher;
             _logger = logService.CreateLogger<StageOutcomeConsoleCommands>();
         }
 
-        public void Start()
+        void IStartable.Start()
         {
 #if !UNITY_EDITOR && !DEVELOPMENT_BUILD
             return;
@@ -37,16 +38,12 @@ namespace Project.Unity.Unity.Debug
 
         private void TriggerWin()
         {
-            _runFlowService
-                .HandleStageEnd(new StageResult(StageOutcome.Victory, turnCount: 1, enemiesKilled: 0))
-                .Forget();
+            _publisher.Publish(new ForceStageEndMessage(StageOutcome.Victory));
         }
 
         private void TriggerDefeat()
         {
-            _runFlowService
-                .HandleStageEnd(new StageResult(StageOutcome.Defeat, turnCount: 1, enemiesKilled: 0))
-                .Forget();
+            _publisher.Publish(new ForceStageEndMessage(StageOutcome.Defeat));
         }
 
         public void Dispose()

@@ -82,7 +82,7 @@ namespace Project.Gameplay.Gameplay.Installers
             builder.Register<StormInitService>(Lifetime.Singleton)
                 .AsImplementedInterfaces()
                 .AsSelf();
-            builder.RegisterEntryPoint<StormHighlightRenderer>().AsImplementedInterfaces();
+            builder.RegisterEntryPoint<StormHighlightRenderer>();
             builder.Register<StormDamageService>(Lifetime.Singleton)
                 .AsImplementedInterfaces()
                 .AsSelf();
@@ -97,7 +97,7 @@ namespace Project.Gameplay.Gameplay.Installers
             builder.Register<StageCacheResetService>(Lifetime.Singleton);
             builder.Register<StageReloadService>(Lifetime.Singleton).AsSelf();
             builder.Register<RunTransitionService>(Lifetime.Singleton).As<IRunTransitionService>();
-            builder.RegisterEntryPoint<RunFlowService>();
+            builder.Register<RunFlowService>(Lifetime.Scoped);
             builder.Register<GameShutdownCleanupService>(Lifetime.Singleton);
 
             // Stage phases (PrepareZoneCachePhase, PreparePlacementPhase, PrepareService need Unity — register in Unity)
@@ -199,7 +199,7 @@ namespace Project.Gameplay.Gameplay.Installers
             builder.Register<TurnPatternResolver>(Lifetime.Singleton);
             builder.Register<TurnExecutor>(Lifetime.Singleton).As<ITurnExecutor>();
             builder.Register<BonusMoveController>(Lifetime.Singleton).As<IBonusMoveController>();
-            builder.RegisterEntryPoint<BonusMoveSession>().AsImplementedInterfaces();
+            builder.RegisterEntryPoint<BonusMoveSession>();
             builder.Register<TurnService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
 
             // Domain services

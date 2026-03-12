@@ -23,17 +23,17 @@ namespace Project.Unity.Unity.Bootstrap
     /// </summary>
     public class GameSceneBootstrap : MonoSceneBootstrap
     {
-        private ConfigProvider _configProvider;
-        private RunFactory _runFactory;
-        private RunHolder _runHolder;
-        private PlayerRunStateService _runStateService;
-        private PlayerLoadoutService _loadoutService;
-        private RandomService _randomService;
-        private EconomyService _economyService;
-        private IAppFilterService _filterService;
-        private IUIService _uiService;
-
         private const string DefaultRunId = "tutorial";
+        
+        private ConfigProvider _configProvider = null!;
+        private RunFactory _runFactory = null!;
+        private RunHolder _runHolder = null!;
+        private PlayerRunStateService _runStateService = null!;
+        private PlayerLoadoutService _loadoutService = null!;
+        private RandomService _randomService = null!;
+        private EconomyService _economyService = null!; 
+        private IAppFilterService _filterService = null!;
+        private IUIService _uiService = null!;
 
         protected override void OnConstruct()
         {

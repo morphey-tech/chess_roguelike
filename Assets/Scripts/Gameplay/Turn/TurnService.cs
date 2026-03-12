@@ -97,7 +97,7 @@ namespace Project.Gameplay.Gameplay.Turn
         {
             TurnNumber = 1;
             CurrentTeam = Team.Player;
-            await _uiService.SetGamePhase();
+            await _uiService.ShowBattlePhase();
             _turnChangedPublisher.Publish(new TurnChangedMessage(CurrentTeam, TurnNumber));
         }
 
