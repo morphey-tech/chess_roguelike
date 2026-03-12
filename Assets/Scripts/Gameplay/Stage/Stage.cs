@@ -26,7 +26,7 @@ namespace Project.Gameplay.Gameplay.Stage
         private readonly PlayerRunStateModel _runState;
         private readonly List<IStagePhase> _phases;
         private readonly StormInitService _stormInitService;
-        private readonly IPublisher<StageCompletedMessage> _completedPublisher;
+        private readonly IPublisher<string, StagePhaseMessage> _stagePhasePublisher;
         private readonly ILogger<Stage> _logger;
 
         private StageContext _context = null!;
@@ -40,7 +40,7 @@ namespace Project.Gameplay.Gameplay.Stage
             PlayerRunStateModel runState,
             IEnumerable<IStagePhase> phases,
             StormInitService stormInitService,
-            IPublisher<StageCompletedMessage> completedPublisher,
+            IPublisher<string, StagePhaseMessage> stagePhasePublisher,
             ILogService logService)
         {
             _config = config;
@@ -48,7 +48,7 @@ namespace Project.Gameplay.Gameplay.Stage
             _runState = runState;
             _phases = new List<IStagePhase>(phases);
             _stormInitService = stormInitService;
-            _completedPublisher = completedPublisher;
+            _stagePhasePublisher = stagePhasePublisher;
             _logger = logService.CreateLogger<Stage>();
         }
 
@@ -57,7 +57,11 @@ namespace Project.Gameplay.Gameplay.Stage
             _logger.Info($"Stage {Id} beginning, board: {BoardId}, phases: {_phases.Count}");
             _context = new StageContext(this, _config, _runState);
             _context.CompletePhase = OnPhaseCompleted;
-            _stormInitService.SetCurrentStageZoneConfig(_config.StormId);
+            _stormInitService.Configure(_config.StormId);
+            
+            _stagePhasePublisher.Publish(StagePhaseMessage.STAGE_STARTED, 
+                StagePhaseMessage.StageStarted(Id, 0));
+            
             await RunPhasesAsync();
         }
 
@@ -72,6 +76,9 @@ namespace Project.Gameplay.Gameplay.Stage
 
                 IStagePhase phase = _phases[_currentPhaseIndex];
                 _logger.Info($"[Phase {_currentPhaseIndex + 1}/{_phases.Count}] {phase.GetType().Name} starting");
+                
+                _stagePhasePublisher.Publish(StagePhaseMessage.PHASE_STARTED, 
+                    StagePhaseMessage.PhaseStarted(phase.GetType().Name, _currentPhaseIndex, Id));
 
                 PhaseResult result = await phase.ExecuteAsync(_context);
                 if (result == PhaseResult.WaitForCompletion)
@@ -127,7 +134,8 @@ namespace Project.Gameplay.Gameplay.Stage
                 return;
             }
             IsCompleted = true;
-            _completedPublisher.Publish(new StageCompletedMessage(Id, result));
+            _stagePhasePublisher.Publish(StagePhaseMessage.STAGE_COMPLETED, 
+                StagePhaseMessage.StageCompleted(Id, result));
             _logger.Info($"Stage {Id} completed: {result}");
         }
 

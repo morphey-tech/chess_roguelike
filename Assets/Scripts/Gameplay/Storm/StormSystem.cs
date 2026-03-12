@@ -7,7 +7,6 @@ using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
 using Project.Core.Core.Storm.Core;
 using Project.Core.Core.Storm.Messages;
-using Project.Gameplay.ShrinkingZone.Messages;
 
 namespace Project.Gameplay.ShrinkingZone
 {
@@ -16,25 +15,22 @@ namespace Project.Gameplay.ShrinkingZone
     /// </summary>
     public class StormSystem : IStormQueryService, IDisposable
     {
-        public StormState CurrentState => _state;
-        public int CurrentLayer => _currentLayer;
-        public int StepInLayer => _stepInLayer;
-        public int ActivationTurn => _activationTurn;
+        public StormState CurrentState { get; private set; } = StormState.Inactive;
+
+        public int CurrentLayer { get; private set; }
+
+        public int StepInLayer { get; private set; }
+
+        public int ActivationTurn { get; private set; }
         public int? FirstDamageTurn => _firstDamageTurn;
         public bool FirstDamageDealt => _firstDamageDealt;
 
         private readonly StormConfig _config;
         private readonly IStormStrategy _strategy;
-        private readonly IPublisher<StormStateChangedMessage> _stateChangedPublisher;
-        private readonly IPublisher<StormCellsUpdatedMessage> _cellsUpdatedPublisher;
-        private readonly IPublisher<FigureTakeStormDamageMessage> _damagePublisher;
+        private readonly IPublisher<string, StormMessage> _stormPublisher;
         private readonly IDisposable _subscriptions;
         private readonly ILogger<StormSystem> _logger;
 
-        private StormState _state = StormState.Inactive;
-        private int _currentLayer;
-        private int _stepInLayer;
-        private int _activationTurn;
         private int? _firstDamageTurn;
         private bool _firstDamageDealt;
 
@@ -44,92 +40,84 @@ namespace Project.Gameplay.ShrinkingZone
         public StormSystem(
             StormConfig config,
             IStormStrategy strategy,
-            IPublisher<StormStateChangedMessage> stateChangedPublisher,
-            IPublisher<StormCellsUpdatedMessage> cellsUpdatedPublisher,
-            IPublisher<FigureTakeStormDamageMessage> damagePublisher,
-            ISubscriber<StormBattleStartedMessage> battleStartedSubscriber,
-            ISubscriber<StormTurnStartedMessage> turnStartedSubscriber,
-            ISubscriber<StormDamageDealtMessage> damageDealtSubscriber,
-            ISubscriber<StormFigureTurnEndedMessage> figureTurnEndedSubscriber,
+            IPublisher<string, StormMessage> stormPublisher,
+            ISubscriber<string, StormMessage> stormSubscriber,
             ILogService logService)
         {
             _config = config;
             _strategy = strategy ?? throw new ArgumentNullException(nameof(strategy));
-            _stateChangedPublisher = stateChangedPublisher;
-            _cellsUpdatedPublisher = cellsUpdatedPublisher;
-            _damagePublisher = damagePublisher;
+            _stormPublisher = stormPublisher;
             _logger = logService.CreateLogger<StormSystem>();
 
             _warningCells = new HashSet<GridPosition>();
             _dangerCells = new HashSet<GridPosition>();
 
             DisposableBagBuilder bag = DisposableBag.CreateBuilder();
-            battleStartedSubscriber.Subscribe(_ => OnBattleStarted()).AddTo(bag);
-            turnStartedSubscriber.Subscribe(msg => OnTurnStarted(msg.Turn)).AddTo(bag);
-            damageDealtSubscriber.Subscribe(msg => OnDamageDealt(msg.Turn)).AddTo(bag);
-            figureTurnEndedSubscriber.Subscribe(OnFigureTurnEnded).AddTo(bag);
+            stormSubscriber.Subscribe(StormMessage.BATTLE_STARTED, OnBattleStarted).AddTo(bag);
+            stormSubscriber.Subscribe(StormMessage.TURN_STARTED, OnTurnStarted).AddTo(bag);
+            stormSubscriber.Subscribe(StormMessage.DAMAGE_DEALT, OnDamageDealt).AddTo(bag);
+            stormSubscriber.Subscribe(StormMessage.FIGURE_TURN_ENDED, OnFigureTurnEnded).AddTo(bag);
             _subscriptions = bag.Build();
-
-            _logger.Info($"Created with config: min_turn={_config.MinTurn}, max_turn={_config.MaxTurn}");
         }
-
-        private void OnBattleStarted()
+        
+        private void OnBattleStarted(StormMessage message)
         {
-            _state = StormState.Inactive;
-            _currentLayer = 0;
-            _stepInLayer = 0;
-            _activationTurn = CalculateActivationTurn();
+            CurrentState = StormState.Inactive;
+            CurrentLayer = 0;
+            StepInLayer = 0;
+            ActivationTurn = CalculateActivationTurn();
             _firstDamageTurn = null;
             _firstDamageDealt = false;
 
             _warningCells.Clear();
             _dangerCells.Clear();
 
-            _logger.Info($"Battle started, activation_turn={_activationTurn}");
-            PublishStateChange(_state);
+            _logger.Info($"Battle started, activation_turn={ActivationTurn}");
+            PublishStateChange(CurrentState);
         }
 
-        private void OnTurnStarted(int turn)
+        private void OnTurnStarted(StormMessage message)
         {
-            _logger.Debug($"Turn {turn} started, state={_state}, activation_turn={_activationTurn}, firstDamageTurn={_firstDamageTurn?.ToString() ?? "null"}, layer={_currentLayer}, step={_stepInLayer}");
+            _logger.Debug($"Turn {message.Turn} started, state={CurrentState}, activation_turn={ActivationTurn}, firstDamageTurn={_firstDamageTurn?.ToString() ?? "null"}, layer={CurrentLayer}, step={StepInLayer}");
 
-            if (_state == StormState.Inactive && turn >= _activationTurn)
+            if (CurrentState == StormState.Inactive && message.Turn >= ActivationTurn)
             {
-                _state = StormState.Active;
-                _firstDamageTurn = turn;
-                _stepInLayer = 1;
+                CurrentState = StormState.Active;
+                _firstDamageTurn = message.Turn;
+                StepInLayer = 1;
                 UpdateStormCells();
-                _logger.Info($"Zone ACTIVATED at turn {turn}, layer={_currentLayer}, step={_stepInLayer}, dangerCells={_dangerCells.Count}, warningCells={_warningCells.Count}");
-                PublishStateChange(_state);
+                _logger.Info($"Zone ACTIVATED at turn {message.Turn}, layer={CurrentLayer}, step={StepInLayer}, dangerCells={_dangerCells.Count}, warningCells={_warningCells.Count}");
+                PublishStateChange(CurrentState);
             }
 
-            if (_state == StormState.Active && _firstDamageTurn.HasValue)
+            if (CurrentState == StormState.Active && _firstDamageTurn.HasValue)
             {
-                int turnsSinceActivation = turn - _firstDamageTurn.Value;
+                int turnsSinceActivation = message.Turn - _firstDamageTurn.Value;
                 _logger.Debug($"Checking shrink: turnsSinceActivation={turnsSinceActivation}, shrinkInterval={_config.ShrinkInterval}, shouldShrink={turnsSinceActivation > 0 && turnsSinceActivation % _config.ShrinkInterval == 0}");
                 if (turnsSinceActivation > 0 && turnsSinceActivation % _config.ShrinkInterval == 0)
                 {
-                    _logger.Debug($"Shrinking zone: BEFORE layer={_currentLayer}, step={_stepInLayer}");
+                    _logger.Debug($"Shrinking zone: BEFORE layer={CurrentLayer}, step={StepInLayer}");
                     AdvanceStorm();
-                    _logger.Debug($"Shrinking zone: AFTER layer={_currentLayer}, step={_stepInLayer}");
+                    _logger.Debug($"Shrinking zone: AFTER layer={CurrentLayer}, step={StepInLayer}");
                 }
             }
         }
 
-        private void OnDamageDealt(int turn)
+        private void OnDamageDealt(StormMessage message)
         {
-            _logger.Debug($"Damage dealt at turn {turn}, firstDamageDealt={_firstDamageDealt}, state={_state}");
+            _logger.Debug($"Damage dealt at turn {message.Turn}, firstDamageDealt={_firstDamageDealt}, state={CurrentState}");
 
-            if (!_firstDamageDealt && _state == StormState.Inactive)
+            if (!_firstDamageDealt && CurrentState == StormState.Inactive)
             {
                 _firstDamageDealt = true;
-                int oldActivationTurn = _activationTurn;
-                _activationTurn = CalculateActivationTurn();
-                _logger.Info($"First damage recorded, activation_turn: {oldActivationTurn} -> {_activationTurn}");
+                int oldActivationTurn = ActivationTurn;
+                ActivationTurn = CalculateActivationTurn();
+                _logger.Info($"First damage recorded, activation_turn: {oldActivationTurn} -> {ActivationTurn}");
             }
         }
 
-        private void OnFigureTurnEnded(StormFigureTurnEndedMessage msg)
+
+        private void OnFigureTurnEnded(StormMessage msg)
         {
             _logger.Debug($"Figure turn ended at ({msg.Row},{msg.Col})");
         }
@@ -147,9 +135,9 @@ namespace Project.Gameplay.ShrinkingZone
         public int GetDangerCellsCount() => _dangerCells.Count;
         public int GetWarningCellsCount() => _warningCells.Count;
 
-        public StormState GetCurrentState() => _state;
+        public StormState GetCurrentState() => CurrentState;
 
-        public int GetActivationTurn() => _activationTurn;
+        public int GetActivationTurn() => ActivationTurn;
 
         private int CalculateActivationTurn()
         {
@@ -172,16 +160,15 @@ namespace Project.Gameplay.ShrinkingZone
         {
             StormContext context = new(
                 _config.BoardSize,
-                _currentLayer,
-                _stepInLayer,
+                CurrentLayer,
+                StepInLayer,
                 _config.ShrinkInterval,
                 _config.SafeZoneMinSize
             );
 
             _warningCells = _strategy.GetWarningCells(context).ToHashSet();
             _dangerCells = _strategy.GetDangerCells(context).ToHashSet();
-
-            _logger.Info($"Cells updated: layer={_currentLayer}, step={_stepInLayer}, {_warningCells.Count} warning, {_dangerCells.Count} danger");
+            _logger.Info($"Cells updated: layer={CurrentLayer}, step={StepInLayer}, {_warningCells.Count} warning, {_dangerCells.Count} danger");
 
             string dangerCellsStr = string.Join(", ", _dangerCells.Select(c => $"({c.Row},{c.Column})"));
             _logger.Debug($"Danger cells: {dangerCellsStr}");
@@ -189,9 +176,8 @@ namespace Project.Gameplay.ShrinkingZone
             string warningCellsStr = string.Join(", ", _warningCells.Select(c => $"({c.Row},{c.Column})"));
             _logger.Debug($"Warning cells: {warningCellsStr}");
 
-            _cellsUpdatedPublisher.Publish(new StormCellsUpdatedMessage(
-                _warningCells.ToArray(),
-                _dangerCells.ToArray()
+            _stormPublisher.Publish(StormMessage.CELLS_UPDATED, StormMessage.CellsUpdated(
+                _warningCells.ToArray(), _dangerCells.ToArray()
             ));
         }
 
@@ -199,8 +185,8 @@ namespace Project.Gameplay.ShrinkingZone
         {
             StormContext context = new(
                 _config.BoardSize,
-                _currentLayer,
-                _stepInLayer,
+                CurrentLayer,
+                StepInLayer,
                 _config.ShrinkInterval,
                 _config.SafeZoneMinSize
             );
@@ -208,16 +194,16 @@ namespace Project.Gameplay.ShrinkingZone
             if (_strategy.HasNextStep(context))
             {
                 _strategy.AdvanceStep(ref context);
-                _currentLayer = context.CurrentLayer;
-                _stepInLayer = context.StepInLayer;
-                _logger.Info($"Advanced to layer={_currentLayer}, step={_stepInLayer}");
+                CurrentLayer = context.CurrentLayer;
+                StepInLayer = context.StepInLayer;
+                _logger.Info($"Advanced to layer={CurrentLayer}, step={StepInLayer}");
                 UpdateStormCells();
             }
             else
             {
-                _state = StormState.MinSizeReached;
+                CurrentState = StormState.MinSizeReached;
                 _logger.Info("Zone reached minimum size");
-                PublishStateChange(_state);
+                PublishStateChange(CurrentState);
             }
         }
 
@@ -228,17 +214,17 @@ namespace Project.Gameplay.ShrinkingZone
 
         private void PublishStateChange(StormState state)
         {
-            _stateChangedPublisher.Publish(new StormStateChangedMessage(state));
+            _stormPublisher.Publish(StormMessage.STATE_CHANGED, StormMessage.StateChanged(state));
         }
 
         public StormSaveContext SaveState()
         {
             return new StormSaveContext
             {
-                State = _state,
-                CurrentLayer = _currentLayer,
-                StepInLayer = _stepInLayer,
-                ActivationTurn = _activationTurn,
+                State = CurrentState,
+                CurrentLayer = CurrentLayer,
+                StepInLayer = StepInLayer,
+                ActivationTurn = ActivationTurn,
                 FirstDamageTurn = _firstDamageTurn,
                 FirstDamageDealt = _firstDamageDealt
             };
@@ -246,15 +232,15 @@ namespace Project.Gameplay.ShrinkingZone
 
         public void LoadState(StormSaveContext state)
         {
-            _state = state.State;
-            _currentLayer = state.CurrentLayer;
-            _stepInLayer = state.StepInLayer;
-            _activationTurn = state.ActivationTurn;
+            CurrentState = state.State;
+            CurrentLayer = state.CurrentLayer;
+            StepInLayer = state.StepInLayer;
+            ActivationTurn = state.ActivationTurn;
             _firstDamageTurn = state.FirstDamageTurn;
             _firstDamageDealt = state.FirstDamageDealt;
 
             UpdateStormCells();
-            PublishStateChange(_state);
+            PublishStateChange(CurrentState);
         }
 
         void IDisposable.Dispose()

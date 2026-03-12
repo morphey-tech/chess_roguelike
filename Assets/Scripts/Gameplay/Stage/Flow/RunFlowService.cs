@@ -4,25 +4,29 @@ using Cysharp.Threading.Tasks;
 using MessagePipe;
 using Project.Core.Core.Logging;
 using Project.Core.Core.Scene;
+using Project.Gameplay.Gameplay.Bootstrap;
 using Project.Gameplay.Gameplay.Run;
 using Project.Gameplay.Gameplay.Stage.Messages;
 using Project.Gameplay.UI;
 using VContainer;
+using IInitializable = VContainer.Unity.IInitializable;
 
 namespace Project.Gameplay.Gameplay.Stage.Flow
 {
     /// <summary>
     /// Single decision point for stage end transitions (victory/defeat/abort).
     /// </summary>
-    public sealed class RunFlowService : IDisposable
+    public sealed class RunFlowService : IInitializable, IDisposable
     {
         private readonly RunHolder _runHolder;
         private readonly StageReloadService _stageReloadService;
         private readonly IGameUiService _uiService;
         private readonly ISceneService _sceneService;
         private readonly IRunTransitionService _transitionService;
+        private readonly ISubscriber<string, StagePhaseMessage> _stagePhaseSubscriber;
         private readonly ILogger<RunFlowService> _logger;
-        private readonly IDisposable _subscription;
+        
+        private IDisposable _disposable;
         private int _isHandling;
 
         [Inject]
@@ -32,19 +36,25 @@ namespace Project.Gameplay.Gameplay.Stage.Flow
             IGameUiService uiService,
             ISceneService sceneService,
             IRunTransitionService transitionService,
-            ISubscriber<StageCompletedMessage> stageCompletedSubscriber,
-            ILogService logService)
+            ISubscriber<string, StagePhaseMessage> stagePhaseSubscriber,
+            ILogService logService, IDisposable disposable)
         {
             _runHolder = runHolder;
             _stageReloadService = stageReloadService;
             _uiService = uiService;
             _sceneService = sceneService;
             _transitionService = transitionService;
-            _subscription = stageCompletedSubscriber.Subscribe(OnStageCompleted);
+            _stagePhaseSubscriber = stagePhaseSubscriber;
+            _disposable = disposable;
             _logger = logService.CreateLogger<RunFlowService>();
         }
 
-        private void OnStageCompleted(StageCompletedMessage message)
+        void IInitializable.Initialize()
+        {
+            _disposable = _stagePhaseSubscriber.Subscribe(StagePhaseMessage.STAGE_COMPLETED, OnStagePhase);
+        }
+
+        private void OnStagePhase(StagePhaseMessage message)
         {
             HandleStageEnd(message.Result).Forget();
         }
@@ -52,7 +62,9 @@ namespace Project.Gameplay.Gameplay.Stage.Flow
         public async UniTask HandleStageEnd(StageResult result)
         {
             if (Interlocked.Exchange(ref _isHandling, 1) == 1)
+            {
                 return;
+            }
 
             try
             {
@@ -125,9 +137,10 @@ namespace Project.Gameplay.Gameplay.Stage.Flow
             }
         }
 
-        public void Dispose()
+        void IDisposable.Dispose()
         {
-            _subscription?.Dispose();
+            _disposable?.Dispose();
         }
+
     }
 }

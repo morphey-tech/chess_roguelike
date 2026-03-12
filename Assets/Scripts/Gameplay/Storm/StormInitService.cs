@@ -5,7 +5,6 @@ using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Stage.Messages;
 using Project.Gameplay.Gameplay.Stage.Phase;
 using VContainer;
-using VContainer.Unity;
 
 namespace Project.Gameplay.ShrinkingZone
 {
@@ -16,49 +15,42 @@ namespace Project.Gameplay.ShrinkingZone
     {
         private readonly StormBattleService _stormBattle;
         private readonly ILogger<StormInitService> _logger;
-        private readonly IDisposable _subscriptions;
+        private readonly IDisposable _disposable;
         private string? _currentStageZoneConfigId;
 
         [Inject]
         private StormInitService(
             StormBattleService stormBattle,
-            ISubscriber<PhaseStartedMessage> phaseStartedSubscriber,
-            ISubscriber<PhaseCompletedMessage> phaseCompletedSubscriber,
+            ISubscriber<string, StagePhaseMessage> stagePhaseSubscriber,
             ILogService logService)
         {
             _stormBattle = stormBattle;
             _logger = logService.CreateLogger<StormInitService>();
 
             DisposableBagBuilder bag = DisposableBag.CreateBuilder();
-            phaseStartedSubscriber.Subscribe(OnPhaseStarted).AddTo(bag);
-            phaseCompletedSubscriber.Subscribe(OnPhaseCompleted).AddTo(bag);
-            _subscriptions = bag.Build();
+            stagePhaseSubscriber.Subscribe(StagePhaseMessage.PHASE_COMPLETED, OnStagePhase).AddTo(bag);
+            _disposable = bag.Build();
         }
 
-        public void SetCurrentStageZoneConfig(string? zoneConfigId)
+        public void Configure(string? zoneConfigId)
         {
             _currentStageZoneConfigId = zoneConfigId;
             _logger.Info($"Stage zone config set to: {zoneConfigId ?? "null"}");
         }
 
-        private void OnPhaseStarted(PhaseStartedMessage msg)
+        private void OnStagePhase(StagePhaseMessage msg)
         {
-            _logger.Debug($"Phase started: {msg.PhaseId}");
-        }
-
-        private void OnPhaseCompleted(PhaseCompletedMessage msg)
-        {
-            _logger.Debug($"Phase completed: {msg.PhaseId}");
-            if (msg.PhaseId == PhaseIds.BoardSpawn)
+            if (msg.PhaseId != PhaseIds.BoardSpawn)
             {
-                _logger.Info("BoardSpawnPhase completed, initializing zone");
-                _stormBattle.InitializeForStage(_currentStageZoneConfigId).Forget();
+                return;
             }
+            _stormBattle.InitializeForStage(_currentStageZoneConfigId).Forget();
+            _logger.Info("BoardSpawnPhase completed, initializing zone");
         }
 
         void IDisposable.Dispose()
         {
-            _subscriptions?.Dispose();
+            _disposable?.Dispose();
         }
     }
 }

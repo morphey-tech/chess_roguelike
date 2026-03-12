@@ -9,23 +9,24 @@ namespace Project.Gameplay.Gameplay.Stage.Phase
     public sealed class BoardSpawnPhase : IStagePhase
     {
         private readonly BoardSpawnService _boardSpawnService;
-        private readonly IPublisher<PhaseCompletedMessage> _phaseCompletedPublisher;
+        private readonly IPublisher<string, StagePhaseMessage> _stagePhasePublisher;
         private readonly ILogger<BoardSpawnPhase> _logger;
 
         public BoardSpawnPhase(BoardSpawnService boardSpawnService,
-            IPublisher<PhaseCompletedMessage> phaseCompletedPublisher,
+            IPublisher<string, StagePhaseMessage> stagePhasePublisher,
             ILogService logService)
         {
             _boardSpawnService = boardSpawnService;
-            _phaseCompletedPublisher = phaseCompletedPublisher;
+            _stagePhasePublisher = stagePhasePublisher;
             _logger = logService.CreateLogger<BoardSpawnPhase>();
         }
 
         public async UniTask<PhaseResult> ExecuteAsync(StageContext context)
         {
-            _logger.Info($"Spawning board: {context.Stage.BoardId}");
             await _boardSpawnService.SpawnVisualAsync(context.Grid, context.Stage.BoardId);
-            _phaseCompletedPublisher.Publish(new PhaseCompletedMessage(PhaseIds.BoardSpawn));
+            _stagePhasePublisher.Publish(StagePhaseMessage.PHASE_COMPLETED, 
+                StagePhaseMessage.PhaseCompleted(PhaseIds.BoardSpawn));
+            _logger.Info($"Spawning board: {context.Stage.BoardId}");
             return PhaseResult.Continue;
         }
     }

@@ -7,35 +7,41 @@ using Project.Core.Core.Storm.Messages;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
 using VContainer;
+using VContainer.Unity;
 
 namespace Project.Gameplay.ShrinkingZone
 {
     /// <summary>
     /// Рендерер shrinking zone на доске
     /// </summary>
-    public class StormHighlightRenderer : IDisposable
+    public class StormHighlightRenderer : IInitializable, IDisposable
     {
         private readonly MovementService _movementService;
+        private readonly ISubscriber<string, StormMessage> _stormSubscriber;
         private readonly ILogger<StormHighlightRenderer> _logger;
-        private readonly IDisposable _subscriptions;
+        
+        private IDisposable _disposable = null!;
 
         [Inject]
         private StormHighlightRenderer(
             MovementService movementService,
-            ISubscriber<StormCellsUpdatedMessage> cellsSubscriber,
-            ISubscriber<StormStateChangedMessage> stateSubscriber,
+            ISubscriber<string, StormMessage> stormSubscriber,
             ILogService logService)
         {
             _movementService = movementService;
+            _stormSubscriber = stormSubscriber;
             _logger = logService.CreateLogger<StormHighlightRenderer>();
-
-            DisposableBagBuilder bag = DisposableBag.CreateBuilder();
-            cellsSubscriber.Subscribe(OnZoneCellsUpdated).AddTo(bag);
-            stateSubscriber.Subscribe(OnZoneStateChanged).AddTo(bag);
-            _subscriptions = bag.Build();
         }
 
-        private void OnZoneCellsUpdated(StormCellsUpdatedMessage msg)
+        void IInitializable.Initialize()
+        {
+            DisposableBagBuilder bag = DisposableBag.CreateBuilder();
+            _stormSubscriber.Subscribe(StormMessage.CELLS_UPDATED, OnZoneCellsUpdated).AddTo(bag);
+            _stormSubscriber.Subscribe(StormMessage.STATE_CHANGED, OnZoneStateChanged).AddTo(bag);
+            _disposable = bag.Build();
+        }
+
+        private void OnZoneCellsUpdated(StormMessage msg)
         {
             if (_movementService.Grid == null)
             {
@@ -57,9 +63,9 @@ namespace Project.Gameplay.ShrinkingZone
             _logger.Debug($"Zone rendered: {msg.WarningCells.Length} warning, {msg.DangerCells.Length} danger");
         }
 
-        private void OnZoneStateChanged(StormStateChangedMessage msg)
+        private void OnZoneStateChanged(StormMessage msg)
         {
-            if (msg.NewState == StormState.Inactive)
+            if (msg.State == StormState.Inactive)
             {
                 ClearAllCells();
             }
@@ -94,7 +100,7 @@ namespace Project.Gameplay.ShrinkingZone
 
         void IDisposable.Dispose()
         {
-            _subscriptions?.Dispose();
+            _disposable?.Dispose();
             ClearAllCells();
         }
     }

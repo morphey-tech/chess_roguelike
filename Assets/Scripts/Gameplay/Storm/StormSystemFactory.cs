@@ -5,7 +5,6 @@ using Project.Core.Core.Logging;
 using Project.Core.Core.Storm.Core;
 using Project.Core.Core.Storm.Messages;
 using Project.Gameplay.Gameplay.Configs;
-using Project.Gameplay.ShrinkingZone.Messages;
 using VContainer;
 
 namespace Project.Gameplay.ShrinkingZone
@@ -38,31 +37,18 @@ namespace Project.Gameplay.ShrinkingZone
             StormConfig config = repo.Require(zoneConfigId);
             _logger.Info($"Config loaded: min_turn={config.MinTurn}, max_turn={config.MaxTurn}, shrink_interval={config.ShrinkInterval}, damage={config.ZoneDamageFlat}+{config.ZoneDamagePercent*100}%");
 
-            IStormStrategy? strategy = _resolver.Resolve<IStormStrategy>();
-            IPublisher<StormStateChangedMessage> stateChangedPublisher = _resolver.Resolve<IPublisher<StormStateChangedMessage>>();
-            IPublisher<StormCellsUpdatedMessage> cellsUpdatedPublisher = _resolver.Resolve<IPublisher<StormCellsUpdatedMessage>>();
-            IPublisher<FigureTakeStormDamageMessage> damagePublisher = _resolver.Resolve<IPublisher<FigureTakeStormDamageMessage>>();
-            ISubscriber<StormBattleStartedMessage>? battleStartedSubscriber = _resolver.Resolve<ISubscriber<StormBattleStartedMessage>>();
-            ISubscriber<StormTurnStartedMessage>? turnStartedSubscriber = _resolver.Resolve<ISubscriber<StormTurnStartedMessage>>();
-            ISubscriber<StormDamageDealtMessage> damageDealtSubscriber = _resolver.Resolve<ISubscriber<StormDamageDealtMessage>>();
-            ISubscriber<StormFigureTurnEndedMessage> figureTurnEndedSubscriber = _resolver.Resolve<ISubscriber<StormFigureTurnEndedMessage>>();
-
-            _logger.Info($"Creating ZoneShrinkSystem with strategy={strategy?.GetType().Name}");
-            _logger.Debug($"Resolved subscribers: battleStarted={battleStartedSubscriber != null}, turnStarted={turnStartedSubscriber != null}");
+            IStormStrategy strategy = _resolver.Resolve<IStormStrategy>();
+            IPublisher<string, StormMessage> stormPublisher = _resolver.Resolve<IPublisher<string, StormMessage>>();
+            ISubscriber<string, StormMessage> stormSubscriber = _resolver.Resolve<ISubscriber<string, StormMessage>>();
+            _logger.Info($"Creating ZoneShrinkSystem with strategy={strategy.GetType().Name}");
 
             StormSystem system = new(
                 config,
                 strategy,
-                stateChangedPublisher,
-                cellsUpdatedPublisher,
-                damagePublisher,
-                battleStartedSubscriber,
-                turnStartedSubscriber,
-                damageDealtSubscriber,
-                figureTurnEndedSubscriber,
+                stormPublisher,
+                stormSubscriber,
                 _logService);
 
-            _logger.Info("ZoneShrinkSystem created successfully");
             return system;
         }
     }

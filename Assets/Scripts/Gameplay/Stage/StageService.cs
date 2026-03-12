@@ -29,8 +29,7 @@ namespace Project.Gameplay.Gameplay.Stage
         private readonly IStageHighlightRenderer _renderer;
         private readonly ISubscriber<string, FigureSelectMessage> _figureSelectSubscriber;
         private readonly ISubscriber<TurnChangedMessage> _turnSubscriber;
-        private readonly ISubscriber<BonusMoveStartedMessage> _bonusMoveStartedSubscriber;
-        private readonly ISubscriber<BonusMoveCompletedMessage> _bonusMoveCompletedSubscriber;
+        private readonly ISubscriber<string, BonusMoveMessage> _bonusMoveSubscriber;
         private readonly ILogger<StageService> _logger;
 
         private IDisposable _disposable = null!;
@@ -42,16 +41,14 @@ namespace Project.Gameplay.Gameplay.Stage
             IStageHighlightRenderer renderer,
             ISubscriber<string, FigureSelectMessage> figureSelectSubscriber,
             ISubscriber<TurnChangedMessage> turnSubscriber,
-            ISubscriber<BonusMoveStartedMessage> bonusMoveStartedSubscriber,
-            ISubscriber<BonusMoveCompletedMessage> bonusMoveCompletedSubscriber,
+            ISubscriber<string, BonusMoveMessage> bonusMoveSubscriber,
             ILogService logService)
         {
             _query = query;
             _renderer = renderer;
             _figureSelectSubscriber = figureSelectSubscriber;
             _turnSubscriber = turnSubscriber;
-            _bonusMoveStartedSubscriber = bonusMoveStartedSubscriber;
-            _bonusMoveCompletedSubscriber = bonusMoveCompletedSubscriber;
+            _bonusMoveSubscriber = bonusMoveSubscriber;
             _logger = logService.CreateLogger<StageService>();
 
         }
@@ -62,24 +59,24 @@ namespace Project.Gameplay.Gameplay.Stage
             _figureSelectSubscriber.Subscribe(FigureSelectMessage.SELECTED, OnFigureSelected).AddTo(bag);
             _figureSelectSubscriber.Subscribe(FigureSelectMessage.DESELECTED, OnFigureDeselected).AddTo(bag);
             _turnSubscriber.Subscribe(OnTurnChanged).AddTo(bag);
-            _bonusMoveStartedSubscriber.Subscribe(OnBonusMoveStarted).AddTo(bag);
-            _bonusMoveCompletedSubscriber.Subscribe(OnBonusMoveCompleted).AddTo(bag);
+            _bonusMoveSubscriber.Subscribe(BonusMoveMessage.STARTED, OnBonusMoveStarted).AddTo(bag);
+            _bonusMoveSubscriber.Subscribe(BonusMoveMessage.COMPLETED, OnBonusMoveCompleted).AddTo(bag);
             _disposable = bag.Build();
         }
 
-        private void OnBonusMoveStarted(BonusMoveStartedMessage message)
+        private void OnBonusMoveCompleted(BonusMoveMessage message)
+        {
+            _mode = StageMode.Normal;
+            _renderer.Clear();
+            _logger.Debug($"Bonus move completed for {message.Actor}, clearing highlights");
+        }
+
+        private void OnBonusMoveStarted(BonusMoveMessage message)
         {
             _mode = StageMode.BonusMove;
             IReadOnlyCollection<GridPosition> moveTargets = _query.GetBonusMoveTargets();
             _renderer.Show(StageSelectionInfo.ForMoves(moveTargets));
             _logger.Debug($"Bonus move started for {message.Actor}, showing highlights");
-        }
-
-        private void OnBonusMoveCompleted(BonusMoveCompletedMessage message)
-        {
-            _mode = StageMode.Normal;
-            _renderer.Clear();
-            _logger.Debug($"Bonus move completed for {message.Actor}, clearing highlights");
         }
 
         private void OnFigureSelected(FigureSelectMessage message)

@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using MessagePipe;
 using Project.Core.Core.Logging;
 using Project.Core.Core.Storm.Messages;
+using Project.Gameplay.Gameplay.Bootstrap;
 using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Combat.Visual;
 using Project.Gameplay.Gameplay.Figures;
@@ -11,20 +12,23 @@ using Project.Gameplay.Gameplay.Run;
 using Project.Gameplay.Gameplay.Visual;
 using Project.Gameplay.Gameplay.Visual.Commands;
 using VContainer;
+using IInitializable = VContainer.Unity.IInitializable;
 
 namespace Project.Gameplay.ShrinkingZone
 {
     /// <summary>
     /// Сервис применения урона от shrinking zone через правильные каналы
     /// </summary>
-    public class StormDamageService : IDisposable
+    public class StormDamageService : IInitializable, IDisposable
     {
         private readonly IFigureLifeService _figureLifeService;
         private readonly RunHolder _runHolder;
         private readonly VisualPipeline _visualPipeline;
         private readonly ICombatVisualPlanner _visualPlanner;
+        private readonly ISubscriber<string, StormMessage> _stormSubscriber;
         private readonly ILogger<StormDamageService> _logger;
-        private readonly IDisposable _subscriptions;
+
+        private IDisposable _disposable = null!;
 
         [Inject]
         private StormDamageService(
@@ -32,28 +36,30 @@ namespace Project.Gameplay.ShrinkingZone
             RunHolder runHolder,
             VisualPipeline visualPipeline,
             ICombatVisualPlanner visualPlanner,
-            ISubscriber<FigureTakeStormDamageMessage> damageSubscriber,
+            ISubscriber<string, StormMessage> stormSubscriber,
             ILogService logService)
         {
             _figureLifeService = figureLifeService;
             _runHolder = runHolder;
             _visualPipeline = visualPipeline;
             _visualPlanner = visualPlanner;
+            _stormSubscriber = stormSubscriber;
             _logger = logService.CreateLogger<StormDamageService>();
-
-            DisposableBagBuilder bag = DisposableBag.CreateBuilder();
-            damageSubscriber.Subscribe(OnStormDamageTaken).AddTo(bag);
-            _subscriptions = bag.Build();
-            
-            _logger.Debug("ZoneDamageService initialized and subscribed to FigureTakeZoneDamageMessage");
         }
 
-        private void OnStormDamageTaken(FigureTakeStormDamageMessage msg)
+        void IInitializable.Initialize()
+        {
+            DisposableBagBuilder bag = DisposableBag.CreateBuilder();
+            _stormSubscriber.Subscribe(StormMessage.FIGURE_DAMAGE, OnStormDamageTaken).AddTo(bag);
+            _disposable = bag.Build();
+        }
+
+        private void OnStormDamageTaken(StormMessage msg)
         {
             HandleStormDamage(msg).Forget();
         }
 
-        private async UniTaskVoid HandleStormDamage(FigureTakeStormDamageMessage msg)
+        private async UniTaskVoid HandleStormDamage(StormMessage msg)
         {
             _logger.Debug($"Received FigureTakeZoneDamageMessage: target={msg.Target}, damage={msg.Damage}, position=({msg.Position.Row},{msg.Position.Column})");
 
@@ -109,7 +115,7 @@ namespace Project.Gameplay.ShrinkingZone
 
         void IDisposable.Dispose()
         {
-            _subscriptions?.Dispose();
+            _disposable?.Dispose();
         }
     }
 }

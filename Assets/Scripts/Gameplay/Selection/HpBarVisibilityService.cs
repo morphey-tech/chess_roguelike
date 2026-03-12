@@ -32,8 +32,8 @@ namespace Project.Gameplay.Gameplay.Selection
         private readonly ISubscriber<string, FigureBoardMessage> _figureBoardSubscriber;
         private readonly ISubscriber<FigureDiedMessage> _figureDeathSubscriber;
         private readonly ISubscriber<TurnChangedMessage> _turnChangedSubscriber;
-        private readonly ISubscriber<string, PrepareMessage> _prepareSubscriber;
-        private readonly ISubscriber<StageStartedMessage> _stageStartedSubscriber;
+        private readonly ISubscriber<PrepareMessage> _prepareSubscriber;
+        private readonly ISubscriber<string, StagePhaseMessage> _stagePhaseSubscriber;
         private readonly ILogger<HpBarVisibilityService> _logger;
 
         private GameplayConfig _config = new();
@@ -54,8 +54,8 @@ namespace Project.Gameplay.Gameplay.Selection
             ISubscriber<string, FigureBoardMessage> figureBoardSubscriber,
             ISubscriber<FigureDiedMessage> figureDeathSubscriber,
             ISubscriber<TurnChangedMessage> turnChangedSubscriber,
-            ISubscriber<string, PrepareMessage> prepareSubscriber,
-            ISubscriber<StageStartedMessage> stageStartedSubscriber,
+            ISubscriber<PrepareMessage> prepareSubscriber,
+            ISubscriber<string, StagePhaseMessage> stagePhaseSubscriber,
             ILogService logService)
         {
             _figurePresenter = figurePresenter;
@@ -67,7 +67,7 @@ namespace Project.Gameplay.Gameplay.Selection
             _figureDeathSubscriber = figureDeathSubscriber;
             _turnChangedSubscriber = turnChangedSubscriber;
             _prepareSubscriber = prepareSubscriber;
-            _stageStartedSubscriber = stageStartedSubscriber;
+            _stagePhaseSubscriber = stagePhaseSubscriber;
             _logger = logService.CreateLogger<HpBarVisibilityService>();
 
 
@@ -76,14 +76,14 @@ namespace Project.Gameplay.Gameplay.Selection
         void IInitializable.Initialize()
         {
             DisposableBagBuilder bag = DisposableBag.CreateBuilder();
-            _figureBoardSubscriber.Subscribe(FigureSelectMessage.SELECTED, OnFigureSelected).AddTo(bag);
-            _figureBoardSubscriber.Subscribe(FigureSelectMessage.DESELECTED, OnFigureDeselected).AddTo(bag);
+            _figureSelectSubscriber.Subscribe(FigureSelectMessage.SELECTED, OnFigureSelected).AddTo(bag);
+            _figureSelectSubscriber.Subscribe(FigureSelectMessage.DESELECTED, OnFigureDeselected).AddTo(bag);
             _figureBoardSubscriber.Subscribe(FigureBoardMessage.SPAWNED, OnFigureSpawned).AddTo(bag);
             _figureDeathSubscriber.Subscribe(OnFigureDeath).AddTo(bag);
             _hoverChangedSubscriber.Subscribe(OnHoverChanged).AddTo(bag);
             _turnChangedSubscriber.Subscribe(OnTurnChanged).AddTo(bag);
-            _prepareSubscriber.Subscribe(PrepareMessage.PHASE_COMPLETED, OnPreparePhaseCompleted).AddTo(bag);
-            _stageStartedSubscriber.Subscribe(OnStageStarted).AddTo(bag);
+            _prepareSubscriber.Subscribe(OnPrepareMessage).AddTo(bag);
+            _stagePhaseSubscriber.Subscribe(StagePhaseMessage.STAGE_STARTED, OnStagePhase).AddTo(bag);
             _subscriptions = bag.Build();
             
             LoadConfigAsync().AttachExternalCancellation(_disposeCts.Token)
@@ -98,18 +98,21 @@ namespace Project.Gameplay.Gameplay.Selection
             _logger.Info($"HP bar policy loaded: allies={_config.HpBarVisibilityModeAllies}, enemies={_config.HpBarVisibilityModeEnemies}, hideDuringPrepare={_config.HideHpBarsDuringPrepare}");
         }
 
-        private void OnPreparePhaseCompleted(PrepareMessage message)
+        private void OnPrepareMessage(PrepareMessage message)
         {
-            _isPreparePhase = false;
-            RefreshAll();
+            if (message.Type == PrepareMessage.PHASE_COMPLETED)
+            {
+                _isPreparePhase = false;
+                RefreshAll();
+            }
         }
 
-        private void OnStageStarted(StageStartedMessage message)
+        private void OnStagePhase(StagePhaseMessage message)
         {
             _isPreparePhase = true;
         }
 
-        private void OnFigureSelected(FigureBoardMessage message)
+        private void OnFigureSelected(FigureSelectMessage message)
         {
             if (message.Figure is { Team: Team.Player })
             {
@@ -119,15 +122,15 @@ namespace Project.Gameplay.Gameplay.Selection
             {
                 _selectedFriendlyFigureId = null;
             }
-
             RefreshAll();
         }
 
-        private void OnFigureDeselected(FigureBoardMessage message)
+        private void OnFigureDeselected(FigureSelectMessage message)
         {
             if (_selectedFriendlyFigureId.HasValue && _selectedFriendlyFigureId.Value == message.Figure.Id)
+            {
                 _selectedFriendlyFigureId = null;
-
+            }
             RefreshAll();
         }
 

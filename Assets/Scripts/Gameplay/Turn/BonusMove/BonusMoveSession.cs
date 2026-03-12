@@ -10,7 +10,9 @@ using Project.Gameplay.Gameplay.Input.Messages;
 using Project.Gameplay.Gameplay.Visual;
 using Project.Gameplay.Gameplay.Visual.Commands.Contexts;
 using Project.Gameplay.Gameplay.Visual.Commands.Impl;
+using Project.Gameplay.ShrinkingZone;
 using VContainer;
+using VContainer.Unity;
 
 namespace Project.Gameplay.Gameplay.Turn.BonusMove
 {
@@ -25,42 +27,43 @@ namespace Project.Gameplay.Gameplay.Turn.BonusMove
     /// 
     /// This is NOT a service - it's a session object that runs once per bonus move.
     /// </summary>
-    public sealed class BonusMoveSession : IBonusMoveSession, IDisposable
+    public sealed class BonusMoveSession : IInitializable, IBonusMoveSession, IDisposable
     {
         private readonly IBonusMoveController _domainController;
         private readonly VisualPipeline _visualPipeline;
-        private readonly ShrinkingZone.StormBattleService _stormBattle;
-        private readonly IPublisher<BonusMoveStartedMessage> _startedPublisher;
-        private readonly IPublisher<BonusMoveCompletedMessage> _completedPublisher;
+        private readonly StormBattleService _stormBattle;
+        private readonly ISubscriber<CellClickedMessage> _cellClickedSubscriber;
+        private readonly IPublisher<string, BonusMoveMessage> _bonusMovePublisher;
         private readonly ILogger<BonusMoveSession> _logger;
-        private readonly IDisposable _subscription;
 
-        // Session state
         private bool _isActive;
         private Figure _actor;
         private BoardGrid _grid;
         private UniTaskCompletionSource<GridPosition> _clickTcs;
+        private IDisposable _disposable;
 
         [Inject]
-        public BonusMoveSession(
+        private BonusMoveSession(
             IBonusMoveController domainController,
             VisualPipeline visualPipeline,
-            ShrinkingZone.StormBattleService stormBattle,
+            StormBattleService stormBattle,
             ISubscriber<CellClickedMessage> cellClickedSubscriber,
-            IPublisher<BonusMoveStartedMessage> startedPublisher,
-            IPublisher<BonusMoveCompletedMessage> completedPublisher,
+            IPublisher<string, BonusMoveMessage> bonusMovePublisher,
             ILogService logService)
         {
             _domainController = domainController;
             _visualPipeline = visualPipeline;
             _stormBattle = stormBattle;
-            _startedPublisher = startedPublisher;
-            _completedPublisher = completedPublisher;
+            _cellClickedSubscriber = cellClickedSubscriber;
+            _bonusMovePublisher = bonusMovePublisher;
             _logger = logService.CreateLogger<BonusMoveSession>();
 
-            _subscription = cellClickedSubscriber.Subscribe(OnCellClicked);
 
-            _logger.Info("BonusMoveSession created");
+        }
+
+        void IInitializable.Initialize()
+        {
+            _disposable = _cellClickedSubscriber.Subscribe(OnCellClicked);
         }
 
         public async UniTask RunAsync(Figure actor, GridPosition from, int maxDistance, BoardGrid grid)
@@ -79,18 +82,11 @@ namespace Project.Gameplay.Gameplay.Turn.BonusMove
 
             try
             {
-                // Start domain state
                 _domainController.Start(actor, from, maxDistance, grid);
-                
-                // Notify UI to show highlights
-                _startedPublisher.Publish(new BonusMoveStartedMessage(actor));
+                _bonusMovePublisher.Publish(BonusMoveMessage.STARTED, BonusMoveMessage.Started(actor));
 
-                // Wait for valid click
                 await WaitForValidClickAsync();
-
-                // Notify UI to clear highlights
-                _completedPublisher.Publish(new BonusMoveCompletedMessage(actor));
-                
+                _bonusMovePublisher.Publish(BonusMoveMessage.COMPLETED, BonusMoveMessage.Completed(actor));
                 _logger.Info($"Bonus move session completed for {actor.Id}");
             }
             finally
@@ -106,10 +102,8 @@ namespace Project.Gameplay.Gameplay.Turn.BonusMove
         {
             while (_domainController.IsActive)
             {
-                // Wait for next click
-                _clickTcs = new UniTaskCompletionSource<GridPosition>();
-                
                 GridPosition clickedPosition;
+                _clickTcs = new UniTaskCompletionSource<GridPosition>();
                 try
                 {
                     clickedPosition = await _clickTcs.Task;
@@ -121,15 +115,12 @@ namespace Project.Gameplay.Gameplay.Turn.BonusMove
                     return;
                 }
 
-                // Try domain validation + execution
                 if (_domainController.TryExecute(clickedPosition))
                 {
-                    // Domain succeeded - play visual
                     await PlayMoveVisualAsync(clickedPosition);
                     _logger.Info($"Bonus move executed to ({clickedPosition.Row},{clickedPosition.Column})");
                     return;
                 }
-
                 _logger.Debug($"Bonus move rejected: ({clickedPosition.Row},{clickedPosition.Column})");
             }
         }
@@ -141,56 +132,54 @@ namespace Project.Gameplay.Gameplay.Turn.BonusMove
                 scope.Enqueue(new MoveCommand(new MoveVisualContext(_actor.Id, to)));
                 await scope.PlayAsync();
             }
-            
-            // Проверить урон от зоны после бонусного движения
             CheckZoneDamage(_actor, to);
         }
 
         private void CheckZoneDamage(Figure figure, GridPosition position)
         {
-            var status = _stormBattle.GetCellStatus(position.Row, position.Column);
+            StormCellStatus status = _stormBattle.GetCellStatus(position.Row, position.Column);
             if (status == StormCellStatus.Danger)
             {
-                _logger.Debug($"Bonus move: {figure.Id} entered danger zone at ({position.Row},{position.Column})");
                 _stormBattle.ApplyZoneDamage(figure, position);
+                _logger.Debug($"Bonus move: {figure.Id} entered danger zone at ({position.Row},{position.Column})");
             }
         }
 
         private void OnCellClicked(CellClickedMessage message)
         {
-            // Only process clicks when session is active
             if (!_isActive)
+            {
                 return;
-
+            }
             if (_grid == null || !_grid.IsInside(message.Position))
+            {
                 return;
-
-            _logger.Debug($"Click received: ({message.Position.Row},{message.Position.Column})");
-
-            // Complete the waiting task
+            }
             if (_clickTcs != null)
             {
                 _clickTcs.TrySetResult(message.Position);
             }
+            _logger.Debug($"Click received: ({message.Position.Row},{message.Position.Column})");
         }
 
         public void Cancel()
         {
             if (!_isActive)
+            {
                 return;
-
-            _logger.Debug("Cancel requested");
-            
+            }
             if (_clickTcs != null)
             {
                 _clickTcs.TrySetCanceled();
             }
+            _logger.Debug("Cancel requested");
         }
 
         public void Dispose()
         {
             Cancel();
-            _subscription?.Dispose();
+            _disposable?.Dispose();
         }
+
     }
 }

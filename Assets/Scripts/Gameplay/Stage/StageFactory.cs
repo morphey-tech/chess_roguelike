@@ -13,17 +13,17 @@ namespace Project.Gameplay.Gameplay.Stage
     public class StageFactory
     {
         private readonly StormInitService _stormInitService;
-        private readonly IPublisher<StageCompletedMessage> _completedPublisher;
+        private readonly IPublisher<string, StagePhaseMessage> _stagePhasePublisher;
         private readonly ILogService _logService;
 
         [Inject]
         private StageFactory(
             StormInitService stormInitService,
-            IPublisher<StageCompletedMessage> completedPublisher,
+            IPublisher<string, StagePhaseMessage> stagePhasePublisher,
             ILogService logService)
         {
             _stormInitService = stormInitService;
-            _completedPublisher = completedPublisher;
+            _stagePhasePublisher = stagePhasePublisher;
             _logService = logService;
         }
 
@@ -31,12 +31,12 @@ namespace Project.Gameplay.Gameplay.Stage
             IEnumerable<IStagePhase> phases)
         {
             return new Stage(
-                config, 
+                config,
                 grid,
                 runState,
                 phases,
                 _stormInitService,
-                _completedPublisher,
+                _stagePhasePublisher,
                 _logService);
         }
     }

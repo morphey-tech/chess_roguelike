@@ -45,9 +45,6 @@ using Project.Gameplay.UI;
 using Project.Unity.Unity.Debug;
 using Project.Unity.UI;
 using Project.Gameplay.Presentations;
-using Project.Gameplay.ShrinkingZone;
-using Project.Gameplay.ShrinkingZone.Messages;
-using Project.Unity.Unity.Bootstrap;
 using Project.Unity.Unity.Prepare;
 using Project.Unity.Unity.Views;
 using Project.Unity.Unity.Views.Animations.Board;
@@ -124,30 +121,18 @@ namespace Project.Unity.Unity.Installers
             builder.RegisterMessageBroker<BoardCapacityChangedMessage>(options);
 
             // Stage/Flow messages
-            builder.RegisterMessageBroker<StageCompletedMessage>(options);
-            builder.RegisterMessageBroker<PhaseStartedMessage>(options);
-            builder.RegisterMessageBroker<PhaseCompletedMessage>(options);
-            builder.RegisterMessageBroker<StageStartedMessage>(options);
+            builder.RegisterMessageBroker<string, StagePhaseMessage>(options);
 
             // Bonus move messages
-            builder.RegisterMessageBroker<BonusMoveStartedMessage>(options);
-            builder.RegisterMessageBroker<BonusMoveCompletedMessage>(options);
+            builder.RegisterMessageBroker<string, BonusMoveMessage>(options);
 
             // Storm messages
-            builder.RegisterMessageBroker<StormBattleStartedMessage>(options);
-            builder.RegisterMessageBroker<StormTurnStartedMessage>(options);
-            builder.RegisterMessageBroker<StormStateChangedMessage>(options);
-            builder.RegisterMessageBroker<StormCellsUpdatedMessage>(options);
-            builder.RegisterMessageBroker<StormDamageDealtMessage>(options);
-            builder.RegisterMessageBroker<StormFigureTurnEndedMessage>(options);
-            builder.RegisterMessageBroker<FigureTakeStormDamageMessage>(options);
+            builder.RegisterMessageBroker<string, StormMessage>(options);
 
             // UI messages
             builder.RegisterMessageBroker<string, TooltipMessage>(options);
 
-            builder.RegisterMessageBroker<ArtifactAddedMessage>(options);
-            builder.RegisterMessageBroker<ArtifactRemovedMessage>(options);
-            builder.RegisterMessageBroker<ArtifactsClearedMessage>(options);
+            builder.RegisterMessageBroker<string, ArtifactMessage>(options);
             builder.RegisterMessageBroker<string, AppFilterMessage>(options);
         }
 

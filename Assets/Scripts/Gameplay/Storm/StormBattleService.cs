@@ -10,7 +10,6 @@ using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Run;
 using Project.Gameplay.Gameplay.Turn;
-using Project.Gameplay.ShrinkingZone.Messages;
 using VContainer;
 
 namespace Project.Gameplay.ShrinkingZone
@@ -21,10 +20,7 @@ namespace Project.Gameplay.ShrinkingZone
     public class StormBattleService : IDisposable
     {
         private readonly IStormSystemFactory _zoneFactory;
-        private readonly IPublisher<StormBattleStartedMessage> _battleStartedPublisher;
-        private readonly IPublisher<StormTurnStartedMessage> _turnStartedPublisher;
-        private readonly IPublisher<StormDamageDealtMessage> _damageDealtPublisher;
-        private readonly IPublisher<FigureTakeStormDamageMessage> _figureDamagePublisher;
+        private readonly IPublisher<string, StormMessage> _stormPublisher;
         private readonly ILogger<StormBattleService> _logger;
         private readonly IDisposable _subscriptions;
         private readonly RunHolder _runHolder;
@@ -34,20 +30,14 @@ namespace Project.Gameplay.ShrinkingZone
         [Inject]
         private StormBattleService(
             IStormSystemFactory zoneFactory,
-            IPublisher<StormBattleStartedMessage> battleStartedPublisher,
-            IPublisher<StormTurnStartedMessage> turnStartedPublisher,
-            IPublisher<StormDamageDealtMessage> damageDealtPublisher,
-            IPublisher<FigureTakeStormDamageMessage> figureDamagePublisher,
+            IPublisher<string, StormMessage> stormPublisher,
             ISubscriber<TurnChangedMessage> turnSubscriber,
             ISubscriber<FigureDiedMessage> figureDeathSubscriber,
             ILogService logService,
             RunHolder runHolder)
         {
             _zoneFactory = zoneFactory;
-            _battleStartedPublisher = battleStartedPublisher;
-            _turnStartedPublisher = turnStartedPublisher;
-            _damageDealtPublisher = damageDealtPublisher;
-            _figureDamagePublisher = figureDamagePublisher;
+            _stormPublisher = stormPublisher;
             _logger = logService.CreateLogger<StormBattleService>();
             _runHolder = runHolder;
 
@@ -55,7 +45,7 @@ namespace Project.Gameplay.ShrinkingZone
             turnSubscriber.Subscribe(OnTurnChanged).AddTo(bag);
             figureDeathSubscriber.Subscribe(OnFigureDeath).AddTo(bag);
             _subscriptions = bag.Build();
-            
+
             _logger.Debug("ZoneBattleService initialized and subscribed to TurnChangedMessage");
         }
 
@@ -80,7 +70,7 @@ namespace Project.Gameplay.ShrinkingZone
             if (_zoneSystem != null)
             {
                 _logger.Info($"Zone initialized successfully with config '{zoneConfigId}', state={_zoneSystem.CurrentState}");
-                _battleStartedPublisher.Publish(new StormBattleStartedMessage());
+                _stormPublisher.Publish(StormMessage.BATTLE_STARTED, StormMessage.BattleStarted());
             }
             else
             {
@@ -88,16 +78,13 @@ namespace Project.Gameplay.ShrinkingZone
             }
         }
 
-        /// <summary>
-        /// Вызывается в начале каждого хода
-        /// </summary>
-        public void OnTurnStarted(int turn)
+        private void OnTurnStarted(int turn)
         {
             _logger.Debug($"OnTurnStarted(turn={turn}), system={(_zoneSystem != null ? "active" : "null")}");
             if (_zoneSystem != null)
             {
                 _logger.Debug($"Publishing ZoneTurnStartedMessage for turn {turn}");
-                _turnStartedPublisher.Publish(new StormTurnStartedMessage(turn));
+                _stormPublisher.Publish(StormMessage.TURN_STARTED, StormMessage.TurnStarted(turn));
             }
             else
             {
@@ -105,12 +92,12 @@ namespace Project.Gameplay.ShrinkingZone
             }
         }
 
-        public void OnDamageDealt(int turn)
+        private void OnDamageDealt(int turn)
         {
             _logger.Debug($"OnDamageDealt(turn={turn}), system={(_zoneSystem != null ? "active" : "null")}");
             if (_zoneSystem != null)
             {
-                _damageDealtPublisher.Publish(new StormDamageDealtMessage(turn));
+                _stormPublisher.Publish(StormMessage.DAMAGE_DEALT, StormMessage.DamageDealt(turn));
             }
         }
 
@@ -168,7 +155,7 @@ namespace Project.Gameplay.ShrinkingZone
                     figuresInDanger++;
                     int damage = CalculateDamage(figure.Stats.MaxHp);
                     _logger.Debug($"Applying {damage} damage to {figure.Id} at ({cell.Position.Row},{cell.Position.Column}) at start of turn");
-                    _figureDamagePublisher.Publish(new FigureTakeStormDamageMessage(
+                    _stormPublisher.Publish(StormMessage.FIGURE_DAMAGE, StormMessage.FigureDamage(
                         new FigureStormDamageTarget(figure), damage, cell.Position));
                 }
             }
@@ -217,7 +204,7 @@ namespace Project.Gameplay.ShrinkingZone
 
             int damage = CalculateDamage(figure.Stats.MaxHp);
             _logger.Debug($"ApplyZoneDamage: {figure.Id} takes {damage} damage at ({position.Row},{position.Column})");
-            _figureDamagePublisher.Publish(new FigureTakeStormDamageMessage(
+            _stormPublisher.Publish(StormMessage.FIGURE_DAMAGE, StormMessage.FigureDamage(
                 new FigureStormDamageTarget(figure), damage, position));
         }
 
