@@ -58,10 +58,10 @@ namespace Project.Gameplay.Gameplay.Stage
             _context = new StageContext(this, _config, _runState);
             _context.CompletePhase = OnPhaseCompleted;
             _stormInitService.Configure(_config.StormId);
-            
-            _stagePhasePublisher.Publish(StagePhaseMessage.STAGE_STARTED, 
+
+            _stagePhasePublisher.Publish(StagePhaseMessage.STAGE_STARTED,
                 StagePhaseMessage.StageStarted(Id, 0));
-            
+
             await RunPhasesAsync();
         }
 

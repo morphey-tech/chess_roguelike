@@ -42,22 +42,29 @@ namespace Project.Unity.Unity.Prepare
             }
 
             _logger.Warning($"Prepare prefabs: cache miss, loading [{string.Join(", ", figureTypeIds)}] — будет задержка");
-            var cellsRepo = await _configProvider.Get<CellConfigRepository>("cells_conf");
-            var figuresRepo = await _configProvider.Get<FigureConfigRepository>("figures_conf");
+            CellConfigRepository? cellsRepo = await _configProvider.Get<CellConfigRepository>("cells_conf");
+            FigureConfigRepository? figuresRepo = await _configProvider.Get<FigureConfigRepository>("figures_conf");
 
-            GameObject cellPrefab = null;
+            GameObject? cellPrefab = null;
             if (cellsRepo.Cells.Length > 0)
-                cellPrefab = await _assetService.LoadAssetAsync<GameObject>(cellsRepo.Cells[0].AssetKey);
-            var controllerPrefab = await _assetService.LoadAssetAsync<GameObject>(FigureControllerAssetKey);
+            {
+                cellPrefab = await _assetService.LoadAsync<GameObject>(cellsRepo.Cells[0].AssetKey);
+            }
 
-            var figurePrefabs = new Dictionary<string, GameObject>();
+            GameObject? controllerPrefab = await _assetService.LoadAsync<GameObject>(FigureControllerAssetKey);
+            Dictionary<string, GameObject> figurePrefabs = new();
             foreach (string typeId in figureTypeIds.Distinct())
             {
-                var cfg = figuresRepo.Get(typeId);
-                if (cfg == null || string.IsNullOrEmpty(cfg.AssetKey)) continue;
-                var prefab = await _assetService.LoadAssetAsync<GameObject>(cfg.AssetKey);
+                FigureConfig? cfg = figuresRepo.Get(typeId);
+                if (cfg == null || string.IsNullOrEmpty(cfg.AssetKey))
+                {
+                    continue;
+                }
+                GameObject? prefab = await _assetService.LoadAsync<GameObject>(cfg.AssetKey);
                 if (prefab != null)
+                {
                     figurePrefabs[typeId] = prefab;
+                }
             }
 
             return new PrepareZonePrefabs(cellPrefab, controllerPrefab, figurePrefabs);

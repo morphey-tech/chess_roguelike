@@ -12,6 +12,7 @@ using Project.Core.Core.Configs.Artifacts;
 using Project.Core.Window;
 using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.Gameplay.UI;
+using Project.Gameplay.Gameplay.UI.Project.Gameplay.Gameplay.UI;
 
 namespace Project.Gameplay.UI
 {
@@ -108,8 +109,7 @@ namespace Project.Gameplay.UI
 
                 ArtifactItemView? view = await _uiAssetService.CreateAsync<ArtifactItemView>(
                     "ArtifactItemView",
-                    parent: _contentParent,
-                    cancellationToken: ct);
+                    parent: _contentParent, ct: ct);
                 await view.Initialize(config, instance.Stack);
                 _itemViews.Add(view);
             }

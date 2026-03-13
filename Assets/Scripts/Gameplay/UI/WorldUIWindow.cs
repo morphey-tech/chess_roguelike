@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Project.Core;
 using Project.Core.Window;
 using Project.Gameplay.Gameplay.UI;
+using Project.Gameplay.Gameplay.UI.Project.Gameplay.Gameplay.UI;
 using Project.Unity.UI.Components;
 using Project.Unity.UI.Components.Game;
 using UnityEngine;
@@ -27,7 +28,7 @@ namespace Project.Gameplay.UI
 
         public T? Add<T>(T template, Transform followTarget) where T : Component
         {
-            T? result = _uiAssetService.InstantiatePrefabDirectly(template.gameObject, Vector3.zero,
+            T? result = _uiAssetService.Instantiate(template, Vector3.zero,
                     Quaternion.identity)
                 ?.GetComponent<T>();
             AddExisting(result, followTarget);
@@ -36,7 +37,7 @@ namespace Project.Gameplay.UI
 
         public T? Add<T>(T template, Vector3 position, bool isRect = false) where T : Component
         {
-            T? result = _uiAssetService.InstantiatePrefabDirectly(template.gameObject, position, Quaternion.identity)
+            T? result = _uiAssetService.Instantiate(template, position, Quaternion.identity)
                 ?.GetComponent<T>();
             AddExisting(result, position, isRect);
             return result;

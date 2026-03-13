@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -22,8 +23,7 @@ namespace Project.Gameplay.Gameplay.UI
 {
     /// <summary>
     /// Сервис управления окном информации о фигуре.
-    /// Открывает окно при клике на фигуру (ЛКМ).
-    /// Закрывает окно при клике вне фигуры или по ПКМ.
+    /// Окно и prefab пассивок предзагружаются при инициализации сервиса.
     /// </summary>
     public sealed class FigureInfoPreviewService : IInitializable, IDisposable
     {
@@ -79,13 +79,22 @@ namespace Project.Gameplay.Gameplay.UI
             _rightClickPublisher.Subscribe(OnRightClick).AddTo(bag);
             _cancelPublisher.Subscribe(OnCancelRequested).AddTo(bag);
             _disposable = bag.Build();
-            EnsureConfigsAsync().Forget();
+            PreloadWindowAndConfigsAsync().Forget();
         }
 
-        private async UniTaskVoid EnsureConfigsAsync()
+        private async UniTaskVoid PreloadWindowAndConfigsAsync()
         {
-            _figureInfoCache = await _configProvider.Get<FigureInfoConfigRepository>("figures_info_conf");
-            _passiveCache = await _configProvider.Get<PassiveConfigRepository>("passives_conf");
+            try
+            {
+                _figureInfoCache = await _configProvider.Get<FigureInfoConfigRepository>("figures_info_conf");
+                _passiveCache = await _configProvider.Get<PassiveConfigRepository>("passives_conf");
+                _window = await _uiService.GetOrCreateAsync<FigureInfoWindow>();
+                await _window.PreloadPassiveIconPrefab();
+            }
+            catch (Exception e)
+            {
+                _logger.Error($"[FigureInfoPreviewService] Failed to preload window or configs: {e.Message}");
+            }
         }
 
         private void OnFigureHoverChanged(FigureHoverChangedMessage message)
@@ -117,19 +126,10 @@ namespace Project.Gameplay.Gameplay.UI
             }
 
             _cts?.Cancel();
+            _cts?.Dispose();
             _cts = new CancellationTokenSource();
-            try
-            {
-                ShowFigureInfo(figure, _cts.Token).Forget();
-            }
-            catch (OperationCanceledException)
-            {
-                //Swallow
-            }
-            catch (Exception e)
-            {
-                _logger.Error($"[FigureInfoPreviewService] Catch exception while try show figure info. e={e.Message}");
-            }
+
+            ShowFigureInfo(figure, _cts.Token).Forget();
         }
 
         private void OnRightClick(RightClickMessage message)
@@ -157,32 +157,20 @@ namespace Project.Gameplay.Gameplay.UI
 
             if (_window == null)
             {
-                try
-                {
-                    _window = await _uiService.GetOrCreateAsync<FigureInfoWindow>();
-                    token.ThrowIfCancellationRequested();
-                }
-                catch (OperationCanceledException)
-                {
-                    //Swallow
-                    return;
-                }
-                catch (Exception ex)
-                {
-                    _logger.Error($"[FigureInfoPreviewService] Failed to create FigureInfoWindow: {ex.Message}", ex);
-                    return;
-                }
+                _logger.Debug("[FigureInfoPreviewService] Window not ready yet");
+                return;
             }
 
             if (_passiveCache == null)
             {
-                _logger.Debug("[FigureInfoPreviewService] Passive cache is not loaded yet, skipping");
+                _logger.Debug("[FigureInfoPreviewService] Passive cache not loaded yet");
                 return;
             }
 
             try
             {
                 token.ThrowIfCancellationRequested();
+
                 BeforeHitContext previewContext = new()
                 {
                     Attacker = figure,
@@ -212,14 +200,15 @@ namespace Project.Gameplay.Gameplay.UI
                 }
 
                 token.ThrowIfCancellationRequested();
+                await _window.PreloadPassiveIconPrefab();
                 FigureInfoWindow.FigureInfoModel model = new()
                 {
                     Figure = figure,
                     InfoConfig = infoConfig,
                     PassiveConfigs = passiveConfigs
                 };
-
                 _window.Show(model);
+
                 figure.Stats.Attack.ClearByContext(ModifierSourceContext.PreviewCalculation);
                 figure.Stats.Defence.ClearByContext(ModifierSourceContext.PreviewCalculation);
                 figure.Stats.Evasion.ClearByContext(ModifierSourceContext.PreviewCalculation);

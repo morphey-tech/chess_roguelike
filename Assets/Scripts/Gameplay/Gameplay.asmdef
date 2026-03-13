@@ -13,7 +13,8 @@
         "MessagePipe",
         "DOTween.Modules",
         "Unity.TextMeshPro",
-        "LiteUI"
+        "LiteUI",
+        "uPools"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

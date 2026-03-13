@@ -27,14 +27,12 @@ namespace Project.Gameplay.Presentations
         instance.GetComponentsInChildren(includeInactive:true, presenters);
         
         Debug.Log($"[PresentationManagerInstances] InitEntity {instance.name}: found {presenters.Count} presenters");
-        
         foreach (IPresenter presenter in presenters)
         {
           try
           {
             ((MonoBehaviour)presenter).enabled = true;
             await presenter.Init(link);
-            Debug.Log($"[PresentationManagerInstances] Initialized presenter {presenter.GetType().Name} on {instance.name}");
           }
           catch (Exception e)
           {

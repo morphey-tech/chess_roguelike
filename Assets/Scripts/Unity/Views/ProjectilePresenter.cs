@@ -77,13 +77,17 @@ namespace Project.Unity.Unity.Views
         public async UniTask PlayImpactAtAsync(GridPosition position, string impactFxId = null)
         {
             if (string.IsNullOrWhiteSpace(impactFxId))
+            {
                 return;
+            }
             Vector3 worldPos = GetCellTopPosition(position);
             GameObject fx = await _assetService.InstantiateAsync(impactFxId, worldPos, Quaternion.identity, _worldRoot.EffectsRoot);
             if (fx == null)
+            {
                 return;
+            }
             await UniTask.Delay(500);
-            _assetService.ReleaseInstance(fx);
+            _assetService.Release(fx);
         }
 
         public async UniTask CleanupLastProjectileAsync()
@@ -214,7 +218,7 @@ namespace Project.Unity.Unity.Views
 
             if (shouldRelease)
             {
-                _assetService.ReleaseInstance(projectile);
+                _assetService.Release(projectile);
             }
             else
             {

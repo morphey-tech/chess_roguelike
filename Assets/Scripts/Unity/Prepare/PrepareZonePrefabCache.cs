@@ -53,15 +53,17 @@ namespace Project.Unity.Unity.Prepare
         {
             Clear();
             if (figureTypeIds == null || figureTypeIds.Count == 0)
+            {
                 return;
+            }
 
             var cellsRepo = await _configProvider.Get<CellConfigRepository>("cells_conf");
             var figuresRepo = await _configProvider.Get<FigureConfigRepository>("figures_conf");
 
             var loadCell = cellsRepo.Cells.Length > 0
-                ? _assetService.LoadAssetAsync<GameObject>(cellsRepo.Cells[0].AssetKey)
+                ? _assetService.LoadAsync<GameObject>(cellsRepo.Cells[0].AssetKey)
                 : UniTask.FromResult<GameObject>(null);
-            var loadController = _assetService.LoadAssetAsync<GameObject>(FigureControllerAssetKey);
+            var loadController = _assetService.LoadAsync<GameObject>(FigureControllerAssetKey);
 
             var figureTasks = new List<UniTask<(string typeId, GameObject prefab)>>();
             foreach (string typeId in figureTypeIds.Distinct())
@@ -96,7 +98,7 @@ namespace Project.Unity.Unity.Prepare
 
         private async UniTask<(string typeId, GameObject prefab)> LoadFigureAsync(string assetKey, string typeId)
         {
-            var go = await _assetService.LoadAssetAsync<GameObject>(assetKey);
+            var go = await _assetService.LoadAsync<GameObject>(assetKey);
             return (typeId, go);
         }
 

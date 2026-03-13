@@ -67,8 +67,8 @@ namespace Project.Unity.Unity.Views
             try
             {
                 Vector3 rootPosition = _worldRoot.BoardRoot.position;
-                GameObject assetPrefab = await _assetService.LoadAssetAsync<GameObject>(assetKey);
-                GameObject instance = _assetService.InstantiateFromPrefab(assetPrefab, rootPosition,
+                GameObject assetPrefab = await _assetService.LoadAsync<GameObject>(assetKey);
+                GameObject instance = _assetService.Instantiate(assetPrefab, rootPosition,
                     Quaternion.identity,
                     _worldRoot.BoardRoot);
 
@@ -197,7 +197,7 @@ namespace Project.Unity.Unity.Views
 
         private async UniTask LoadAndCachePrefabAsync(string skinId, AssetKey assetKey)
         {
-            GameObject prefab = await _assetService.LoadAssetAsync<GameObject>(assetKey);
+            GameObject prefab = await _assetService.LoadAsync<GameObject>(assetKey);
             _cellPrefabCache[skinId] = prefab;
         }
     }

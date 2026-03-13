@@ -7,7 +7,6 @@ using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Input.Messages;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 using VContainer;
 
@@ -43,11 +42,11 @@ namespace Project.Gameplay.UI
             _currentConfig = config;
             _iconImage.sprite = null;
             _iconImage.enabled = false;
-            
+
             try
             {
-                Sprite? sprite = await _assetService.LoadAssetAsync<Sprite>(config.Icon);
-                
+                Sprite? sprite = await _assetService.LoadAsync<Sprite>(config.Icon);
+
                 if (sprite != null)
                 {
                     _iconImage.sprite = sprite;

@@ -1,12 +1,15 @@
+#nullable enable
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using Project.Core.Core.Configs.Figure;
 using Project.Core.Core.Configs.Passive;
+using Project.Core.Core.Logging;
 using Project.Core.Window;
-using Project.Gameplay.Gameplay.UI;
 using Project.Gameplay.Gameplay.Figures;
-using Project.Gameplay.Gameplay.UI;
+using Project.Gameplay.Gameplay.UI.Project.Gameplay.Gameplay.UI;
 using TMPro;
 using UnityEngine;
 using VContainer;
@@ -16,47 +19,66 @@ namespace Project.Gameplay.UI
     public class FigureInfoWindow : ParameterWindow<FigureInfoWindow.FigureInfoModel>
     {
         [Header("Root")]
-        [SerializeField] private RectTransform _root;
+        [SerializeField] private RectTransform _root = null!;
 
         [Header("Figure Info")]
-        [SerializeField] private TextMeshProUGUI _figureName;
-        [SerializeField] private TextMeshProUGUI _figureDescription;
+        [SerializeField] private TextMeshProUGUI _figureName = null!;
+        [SerializeField] private TextMeshProUGUI _figureDescription = null!;
 
         [Header("Stats")]
-        [SerializeField] private TextMeshProUGUI _hpText;
-        [SerializeField] private TextMeshProUGUI _attackText;
-        [SerializeField] private TextMeshProUGUI _defenceText;
-        [SerializeField] private TextMeshProUGUI _evasionText;
-        [SerializeField] private TextMeshProUGUI _attackRangeText;
+        [SerializeField] private TextMeshProUGUI _hpText = null!;
+        [SerializeField] private TextMeshProUGUI _attackText = null!;
+        [SerializeField] private TextMeshProUGUI _defenceText = null!;
+        [SerializeField] private TextMeshProUGUI _evasionText = null!;
+        [SerializeField] private TextMeshProUGUI _attackRangeText = null!;
 
         [Header("Passives")]
-        [SerializeField] private RectTransform _passivesContainer;
+        [SerializeField] private RectTransform _passivesContainer = null!;
 
+        private IUIAssetService _assetService = null!;
+        private ILogger<FigureInfoWindow> _logger = null!;
+
+        private PassiveIconView? _passiveIconViewPrefab;
         private readonly List<PassiveIconView> _activePassiveIcons = new();
-        private IUIAssetService _iuiAssetService = null!;
+        private readonly List<PassiveIconView> _pooledPassiveIcons = new();
+
+        private CancellationTokenSource? _cts;
 
         [Inject]
-        private void Construct(IUIAssetService iuiAssetService)
+        private void Construct(IUIAssetService assetService, ILogService logService)
         {
-            _iuiAssetService = iuiAssetService;
+            _assetService = assetService ?? throw new ArgumentNullException(nameof(assetService));
+            _logger = logService.CreateLogger<FigureInfoWindow>();
         }
 
-        protected override void OnShow(FigureInfoModel figureInfoModel)
+        public async UniTask PreloadPassiveIconPrefab()
         {
-            Figure figure = figureInfoModel.Figure;
-            FigureStats stats = figure.Stats;
-            FigureInfoConfig? infoConfig = figureInfoModel.InfoConfig;
+            if (_passiveIconViewPrefab != null)
+            {
+                return;
+            }
+            _passiveIconViewPrefab = await _assetService.CreateAsync<PassiveIconView>("PassiveIconView", parent: null);
+            _passiveIconViewPrefab.gameObject.SetActive(false);
+        }
 
-            if (infoConfig != null)
-            {
-                _figureName.text = infoConfig.Name;
-                _figureDescription.text = infoConfig.Description;
-            }
-            else
-            {
-                _figureName.text = figure.TypeId;
-                _figureDescription.text = string.Empty;
-            }
+        protected override void OnShow(FigureInfoModel value)
+        {
+            _cts?.Cancel();
+            _cts?.Dispose();
+            _cts = new CancellationTokenSource();
+
+            UpdateFigureInfo(value);
+            RenderPassives(value.PassiveConfigs, _cts.Token).Forget();
+        }
+
+        private void UpdateFigureInfo(FigureInfoModel model)
+        {
+            Figure figure = model.Figure;
+            FigureStats stats = figure.Stats;
+            FigureInfoConfig? infoConfig = model.InfoConfig;
+
+            _figureName.text = infoConfig?.Name ?? figure.TypeId;
+            _figureDescription.text = infoConfig?.Description ?? string.Empty;
 
             _hpText.text = $"{stats.CurrentHp.Value}/{stats.MaxHp}";
             _attackText.text = $"{stats.Attack.Value}";
@@ -67,76 +89,90 @@ namespace Project.Gameplay.UI
             SetStatColor(_attackText, stats.Attack.Value, stats.Attack.BaseValue);
             SetStatColor(_defenceText, stats.Defence.Value, stats.Defence.BaseValue);
             SetStatColor(_evasionText, stats.Evasion.Value, stats.Evasion.BaseValue);
-
-            List<PassiveConfig> passiveConfigs = figureInfoModel.PassiveConfigs;
-            RenderPassives(passiveConfigs).Forget();
         }
 
-        private static void SetStatColor(TextMeshProUGUI text, float currentValue, float baseValue)
+        private static void SetStatColor(TextMeshProUGUI text, float current, float baseValue)
         {
-            if (currentValue > baseValue)
-            {
-                text.color = Color.green;
-            }
-            else if (currentValue < baseValue)
-            {
-                text.color = Color.red;
-            }
-            else
-            {
-                text.color = Color.white;
-            }
+            text.color = current > baseValue ? Color.green
+                        : current < baseValue ? Color.red
+                        : Color.white;
         }
 
-        //Надо бы это всё дело на пулы перетащить либо еще куда, дестрой просто так - фе
         protected override void OnHidden()
         {
+            _cts?.Cancel();
             foreach (PassiveIconView? icon in _activePassiveIcons)
             {
-                if (icon != null)
-                {
-                    Destroy(icon.gameObject);
-                }
+                icon.gameObject.SetActive(false);
             }
             _activePassiveIcons.Clear();
         }
 
-        private async UniTask RenderPassives(List<PassiveConfig> passiveConfigs)
+        private async UniTask RenderPassives(List<PassiveConfig> passiveConfigs, CancellationToken token)
         {
             foreach (PassiveIconView? icon in _activePassiveIcons)
             {
-                if (icon != null)
-                {
-                    Destroy(icon.gameObject);
-                }
+                icon.gameObject.SetActive(false);
+                _pooledPassiveIcons.Add(icon);
             }
             _activePassiveIcons.Clear();
 
-            if (passiveConfigs.Count == 0)
+            if (_passiveIconViewPrefab == null || passiveConfigs.Count == 0)
             {
                 return;
             }
 
-            List<UniTask> setupTasks = new(passiveConfigs.Count);
-            CancellationToken ct = gameObject.GetCancellationTokenOnDestroy();
-            
             foreach (PassiveConfig? passiveConfig in passiveConfigs)
             {
-                PassiveIconView? iconView = await _iuiAssetService.CreateAsync<PassiveIconView>(
-                    "PassiveIconView", 
-                    parent: _passivesContainer,
-                    cancellationToken: ct);
-                setupTasks.Add(iconView.Setup(passiveConfig));
+                token.ThrowIfCancellationRequested();
+
+                PassiveIconView iconView;
+                if (_pooledPassiveIcons.Count > 0)
+                {
+                    iconView = _pooledPassiveIcons[0];
+                    _pooledPassiveIcons.RemoveAt(0);
+                }
+                else
+                {
+                    iconView = _assetService.Instantiate(_passiveIconViewPrefab, _passivesContainer);
+                }
+
+                iconView.transform.localScale = Vector3.zero;
+                iconView.gameObject.SetActive(true);
                 _activePassiveIcons.Add(iconView);
+
+                try
+                {
+                    await iconView.Setup(passiveConfig).AttachExternalCancellation(token);
+                    await iconView.transform.DOScale(Vector3.one, 0.15f)
+                        .SetEase(Ease.OutBack)
+                        .AsyncWaitForCompletion();
+                }
+                catch (OperationCanceledException)
+                {
+                    iconView.gameObject.SetActive(false);
+                    break;
+                }
+                catch (Exception e)
+                {
+                    _logger.Error($"[FigureInfoWindow] Failed to setup passive icon: {e}");
+                    iconView.gameObject.SetActive(false);
+                }
             }
-            await UniTask.WhenAll(setupTasks);
+        }
+
+        private void OnDestroy()
+        {
+            _cts?.Cancel();
+            _cts?.Dispose();
         }
 
         public class FigureInfoModel
         {
-            public Figure Figure { get; set; }
+            public Figure Figure { get; set; } = null!;
             public FigureInfoConfig? InfoConfig { get; set; }
             public List<PassiveConfig> PassiveConfigs { get; set; } = new();
         }
+
     }
 }

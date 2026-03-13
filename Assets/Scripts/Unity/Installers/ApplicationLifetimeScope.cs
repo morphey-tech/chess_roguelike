@@ -73,6 +73,7 @@ namespace Project.Unity.Unity.Installers
                 .AsSelf();
             builder.RegisterEntryPoint<ConfigHotReloadService>()
                 .AsSelf();
+            builder.RegisterEntryPoint<FigureIconCacheService>();
 
             builder.Register<PlayerLoadoutService>(Lifetime.Singleton);
             builder.Register<PlayerRunStateService>(Lifetime.Singleton);

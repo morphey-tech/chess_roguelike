@@ -110,7 +110,7 @@ namespace Project.Gameplay.Gameplay.Configs
         {
             try
             {
-                var textAsset = await _assetService.LoadAssetAsync<TextAsset>(key);
+                TextAsset? textAsset = await _assetService.LoadAsync<TextAsset>(key, ct: cancellationToken);
                 if (textAsset != null)
                 {
                     string json = textAsset.text;
@@ -141,7 +141,7 @@ namespace Project.Gameplay.Gameplay.Configs
         {
             try
             {
-                TextAsset? textAsset = await _assetService.LoadAssetAsync<TextAsset>(key);
+                TextAsset? textAsset = await _assetService.LoadAsync<TextAsset>(key, cancellationToken);
                 if (textAsset != null)
                 {
                     string json = textAsset.text;

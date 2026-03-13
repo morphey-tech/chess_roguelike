@@ -7,6 +7,7 @@ using Cysharp.Threading.Tasks;
 using Project.Core.Core.Assets;
 using Project.Core.Core.Logging;
 using Project.Core.Window;
+using Project.Gameplay.Gameplay.UI.Project.Gameplay.Gameplay.UI;
 using UnityEngine;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
@@ -47,9 +48,7 @@ namespace Project.Gameplay.Gameplay.UI
       _uiAssetService = uiAssetService;
       _logService = logService;
       _log = _logService.CreateLogger<WindowsController>();
-      _log.Debug("[WindowsController] InitAsync started");
       SetCanvasSettings();
-      _log.Debug("[WindowsController] InitAsync completed");
     }
 
     private void SetCanvasSettings()
@@ -388,8 +387,9 @@ namespace Project.Gameplay.Gameplay.UI
         _windows.Add(id, window);
 
         //хз почему оно просто не спавнится так как надо
-        window.GetComponent<RectTransform>().anchoredPosition = window.transform.parent.GetComponent<RectTransform>().anchoredPosition;
-        window.GetComponent<RectTransform>().sizeDelta = window.transform.parent.GetComponent<RectTransform>().sizeDelta;
+        RectTransform rectTransform = window.GetComponent<RectTransform>();
+        rectTransform.anchoredPosition = window.transform.parent.GetComponent<RectTransform>().anchoredPosition;
+        rectTransform.sizeDelta = window.transform.parent.GetComponent<RectTransform>().sizeDelta;
         window.name = id.Name;
         window.Init(_logService);
 

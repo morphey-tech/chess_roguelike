@@ -20,7 +20,7 @@ namespace Project.Unity.Unity.Views.Presentations
         [SerializeField] private Transform _pivot;
 
         private static WorldUIWindow? _cachedWorldUi;
-        private static IUIService? _uiService;
+        private static IUIService _uiService;
 
         private EntityLink _entityLink;
         private HealthBar? _healthView;
@@ -49,7 +49,6 @@ namespace Project.Unity.Unity.Views.Presentations
 
             if (_cachedWorldUi == null)
             {
-                await _uiService!.Initialized;
                 _cachedWorldUi = await _uiService.GetOrCreateAsync<WorldUIWindow>();
             }
 

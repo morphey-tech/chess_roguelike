@@ -3,6 +3,7 @@
 using System;
 using Cysharp.Threading.Tasks;
 using Project.Core.Core.Logging;
+using Project.Gameplay.Gameplay.UI.Project.Gameplay.Gameplay.UI;
 using UnityEngine;
 using VContainer;
 using Object = UnityEngine.Object;
@@ -59,15 +60,10 @@ namespace Project.Gameplay.Gameplay.UI
             {
                 _logger.Debug("[WindowsControllerInitializer] Loading WindowsController from Addressables...");
 
-                // Загружаем префаб через AssetService
-                GameObject? prefab = await _uiAssetService.LoadPrefabAsync("UI/Windows");
-                
-                // Инстанцируем и не выгружаем префаб (WindowsController живёт всегда)
-                _controller = Object.Instantiate(prefab).GetComponent<WindowsController>();
+                _controller = await _uiAssetService.CreateAsync<WindowsController>("UI/Windows");
                 Object.DontDestroyOnLoad(_controller.gameObject);
 
                 _logger.Debug("[WindowsControllerInitializer] WindowsController instantiated");
-
                 await _controller.InitAsync(_uiAssetService, _logService);
 
                 _initialized = true;

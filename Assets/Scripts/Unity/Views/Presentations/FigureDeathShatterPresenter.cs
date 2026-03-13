@@ -119,7 +119,7 @@ namespace Project.Unity.Unity.Views.Presentations
             Material? fallbackMaterial = null;
             if (!_config.UseOriginalMaterials && !string.IsNullOrEmpty(_config.FallbackMaterialKey))
             {
-                fallbackMaterial = await _assetService.LoadAssetAsync<Material>(_config.FallbackMaterialKey);
+                fallbackMaterial = await _assetService.LoadAsync<Material>(_config.FallbackMaterialKey);
             }
 
             foreach ((MeshFilter mf, MeshRenderer mr) in _validMeshesCache)

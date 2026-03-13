@@ -44,8 +44,8 @@ namespace Project.Gameplay.Gameplay.UI
 
             _rarityBG.color = rarityColor;
             _stacks.text = stacks <= 0 ? string.Empty : stacks.ToString();
-            //Message to exception
-            _icon.sprite = await _assetService.LoadAssetAsync<Sprite>(config.Icon) 
+            //Message to exception and maybe ct?
+            _icon.sprite = await _assetService.LoadAsync<Sprite>(config.Icon) 
                            ?? throw new InvalidOperationException();
         }
     }

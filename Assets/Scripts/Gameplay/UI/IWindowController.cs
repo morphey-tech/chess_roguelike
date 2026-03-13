@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Project.Core.Core.Logging;
 using Project.Core.Window;
+using Project.Gameplay.Gameplay.UI.Project.Gameplay.Gameplay.UI;
 using UnityEngine;
 
 namespace Project.Gameplay.Gameplay.UI

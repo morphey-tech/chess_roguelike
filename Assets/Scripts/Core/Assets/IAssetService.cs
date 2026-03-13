@@ -1,35 +1,48 @@
-using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Project.Core.Core.Assets
 {
     public interface IAssetService
     {
-        /// <summary>
-        /// Инициализирует каталог Addressables
-        /// </summary>
-        UniTask InitializeAsync(CancellationToken cancellationToken = default);
+        UniTask<T> LoadAsync<T>(string address, CancellationToken ct = default)
+            where T : Object;
 
-        UniTask<T?> LoadAssetAsync<T>(string address, CancellationToken cancellationToken = default) where T : UnityEngine.Object;
-        UniTask<T?> LoadAssetAsync<T>(AssetKey key, CancellationToken cancellationToken = default) where T : UnityEngine.Object;
-        UniTask<GameObject?> InstantiateAsync(string address, Vector3 position,
-            Quaternion rotation, Transform? parent = null, CancellationToken cancellationToken = default);
-        UniTask<GameObject?> InstantiateAsync(AssetKey key, Vector3 position,
-            Quaternion rotation, Transform? parent = null, CancellationToken cancellationToken = default);
-        GameObject? InstantiateFromPrefab(GameObject prefab, Vector3 position,
-            Quaternion rotation, Transform? parent = null);
-        GameObject? InstantiatePrefabDirectly(GameObject prefab, Vector3 position,
-            Quaternion rotation, Transform? parent = null);
-        void Release<T>(T asset) where T : UnityEngine.Object;
-        void ReleaseInstance(GameObject instance);
-        void ReleaseAll();
-        UniTask PreloadAsync(string address, CancellationToken cancellationToken = default);
-        UniTask PreloadAsync(string[] addresses, CancellationToken cancellationToken = default);
-        bool IsLoaded(string address);
-        UniTask<bool> IsRemote(string address, CancellationToken cancellationToken = default);
+        UniTask<T> InstantiateAsync<T>(
+            string address,
+            Vector3 position,
+            Quaternion rotation,
+            Transform? parent = null,
+            CancellationToken ct = default)
+            where T : Component;
+
+        UniTask<GameObject> InstantiateAsync(
+            string address,
+            Vector3 position,
+            Quaternion rotation,
+            Transform? parent = null,
+            CancellationToken ct = default);
+
+        T Instantiate<T>(
+            GameObject prefab,
+            Vector3 position,
+            Quaternion rotation,
+            Transform? parent = null)
+            where T : Component;
+
+        GameObject Instantiate(
+            GameObject prefab,
+            Vector3 position,
+            Quaternion rotation,
+            Transform? parent = null);
+
+        void Release(string address);
+        void Release(Object obj);
+
+        UniTask PreloadAsync(string address, CancellationToken ct = default);
+
+        void Dispose();
     }
 }
-
-

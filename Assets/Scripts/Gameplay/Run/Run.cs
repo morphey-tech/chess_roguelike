@@ -18,7 +18,7 @@ namespace Project.Gameplay.Gameplay.Run
     {
         public Stage.Stage? CurrentStage { get; private set; }
         public bool IsCompleted => GetCurrentStageIndex() >= _config.Stages.Length;
-        
+
         private readonly RunConfig _config;
         private readonly ConfigProvider _configProvider;
         private readonly StageFactory _stageFactory;
