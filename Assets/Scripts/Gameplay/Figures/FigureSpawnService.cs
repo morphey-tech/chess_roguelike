@@ -1,5 +1,6 @@
 using Project.Core.Core.Combat;
 using System;
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using MessagePipe;
 using Project.Core.Core.Configs.Figure;
@@ -9,9 +10,11 @@ using Project.Core.Core.Logging;
 using Project.Core.Core.Triggers;
 using Project.Gameplay.Gameplay.Board.Capacity;
 using Project.Gameplay.Gameplay.Combat;
+using Project.Gameplay.Gameplay.Combat.Imp;
 using Project.Gameplay.Gameplay.Configs;
 using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Movement;
+using Project.Gameplay.Gameplay.Save.Models;
 using Project.Gameplay.Gameplay.Turn;
 using Project.Gameplay.Presentations;
 using VContainer;
@@ -193,6 +196,46 @@ namespace Project.Gameplay.Gameplay.Figures
                     _capacityService.ReleaseByType(figure.TypeId);
                 }
                 throw;
+            }
+        }
+
+        /// <summary>
+        /// Применить сохранённое состояние к фигуре (HP, статы, пассивки, эффекты).
+        /// Вызывается после спавна фигуры.
+        /// </summary>
+        public void ApplyFigureState(Figure figure, FigureState state)
+        {
+            // Применяем HP
+            figure.Stats.CurrentHp.Value = state.CurrentHp;
+
+            // Применяем модификаторы к статам (если отличаются от базовых)
+            ApplyStatModifier(figure.Stats.Attack, state.Attack);
+            ApplyStatModifier(figure.Stats.Defence, state.Defence);
+            ApplyStatModifier(figure.Stats.Evasion, state.Evasion);
+
+            // Применяем статус-эффекты
+            ApplyEffectStates(figure, state.Effects);
+        }
+
+        private static void ApplyStatModifier(FigureStat<float> stat, float targetValue)
+        {
+            float baseValue = stat.BaseValue;
+
+            // Если текущее значение отличается от базового, добавляем модификатор
+            if (Math.Abs(targetValue - baseValue) > 0.01f)
+            {
+                float delta = targetValue - baseValue;
+                stat.AddModifier(new CombatFlatModifier("saved_state", delta, 0, 1, false));
+            }
+        }
+
+        private void ApplyEffectStates(Figure figure, List<EffectState> effectStates)
+        {
+            foreach (EffectState effectState in effectStates)
+            {
+                // TODO: Восстановить эффект по ID
+                // Для этого нужен реестр эффектов или фабрика
+                _logger.Debug($"Restore effect {effectState.EffectId} (turns={effectState.RemainingTurns}, stacks={effectState.StackCount})");
             }
         }
 

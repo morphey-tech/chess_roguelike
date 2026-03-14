@@ -101,6 +101,7 @@ namespace Project.Gameplay.Gameplay.Installers
             builder.Register<RunTransitionService>(Lifetime.Singleton).As<IRunTransitionService>();
             builder.Register<RunFlowService>(Lifetime.Scoped);
             builder.Register<GameShutdownCleanupService>(Lifetime.Singleton);
+            builder.RegisterEntryPoint<FigureStatePersistenceService>();
 
             // Stage phases (PrepareZoneCachePhase, PreparePlacementPhase, PrepareService need Unity — register in Unity)
             builder.Register<BoardSpawnPhase>(Lifetime.Transient);

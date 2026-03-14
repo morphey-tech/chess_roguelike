@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Run;
 using Project.Gameplay.Gameplay.Save.Service;
+using VContainer;
 
 namespace Project.Gameplay.Gameplay.Stage
 {
@@ -14,9 +15,11 @@ namespace Project.Gameplay.Gameplay.Stage
         private readonly StageRuntimeResetService _runtimeResetService;
         private readonly StageCacheResetService _cacheResetService;
         private readonly ILogger _logger;
+        
         private int _reloading;
 
-        public StageReloadService(
+        [Inject]
+        private StageReloadService(
             PlayerRunStateService runStateService,
             RunHolder runHolder,
             StageRunStateResetService runStateResetService,
@@ -52,10 +55,10 @@ namespace Project.Gameplay.Gameplay.Stage
                 _runStateResetService.ResetForStage(_runStateService.Current, stageId);
                 PrepareForStageTransition(resetRunStateToHand: false);
 
-                _logger.Info($"Reloading stage '{stageId}' in-place");
                 // Fire-and-forget: stage phases run indefinitely (wait for player input).
                 // Awaiting here would keep _reloading=1 forever, blocking subsequent reloads.
                 _runHolder.Current.RestartCurrentStageAsync().Forget();
+                _logger.Info($"Reloading stage '{stageId}' in-place");
             }
             finally
             {
@@ -70,11 +73,13 @@ namespace Project.Gameplay.Gameplay.Stage
         public void PrepareForStageTransition(bool resetRunStateToHand = true)
         {
             if (!_runStateService.HasRun || _runStateService.Current == null)
+            {
                 return;
-
+            }
             if (resetRunStateToHand)
+            {
                 _runStateResetService.ResetFiguresToHand(_runStateService.Current);
-
+            }
             _runtimeResetService.ResetRuntime();
             _cacheResetService.ResetCaches();
         }
