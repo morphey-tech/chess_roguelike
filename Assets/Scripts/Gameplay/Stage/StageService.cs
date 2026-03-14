@@ -89,7 +89,8 @@ namespace Project.Gameplay.Gameplay.Stage
             if (message.Figure != null)
             {
                 StageSelectionInfo info = _query.GetSelectionInfo(message.Figure, message.Position);
-                _renderer.Show(StageSelectionInfo.ForCombat(info.MoveTargets, info.AttackTargets));
+                IReadOnlyCollection<GridPosition> underAttackCells = _query.GetUnderAttackCells(message.Figure, message.Position);
+                _renderer.Show(StageSelectionInfo.ForCombat(info.MoveTargets, info.AttackTargets, underAttackCells, message.Position));
                 message.Figure.EnsureComponent(new SelectTag());
                 _logger.Debug($"Figure {message.Figure.Id} selected at ({message.Position.Row}, {message.Position.Column})");
             }

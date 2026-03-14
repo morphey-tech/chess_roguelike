@@ -28,6 +28,12 @@ namespace Project.Gameplay.Gameplay.Attack.Rules
             Figure attacker = context.Attacker;
             BoardGrid grid = context.Grid;
 
+            // Если Target null (проверка клетки), пропускаем TauntRule
+            if (context.Target == null)
+            {
+                return true;
+            }
+
             Team enemyTeam = attacker.Team == Team.Player
                 ? Team.Enemy
                 : Team.Player;

@@ -29,26 +29,46 @@ namespace Project.Gameplay.Gameplay.Stage
 
             int moveCount = 0;
             int attackCount = 0;
-            var moveTargets = info.MoveTargets as HashSet<GridPosition> 
+            int underAttackCount = 0;
+            var moveTargets = info.MoveTargets as HashSet<GridPosition>
                               ?? new HashSet<GridPosition>(info.MoveTargets);
-            var attackTargets = info.AttackTargets as HashSet<GridPosition> 
+            var attackTargets = info.AttackTargets as HashSet<GridPosition>
                                 ?? new HashSet<GridPosition>(info.AttackTargets);
+            var underAttackTargets = info.UnderAttackTargets as HashSet<GridPosition>
+                                     ?? new HashSet<GridPosition>(info.UnderAttackTargets);
+
+            _logger.Info($"StageHighlightRenderer: moveTargets={moveTargets.Count}, attackTargets={attackTargets.Count}, underAttackTargets={underAttackTargets.Count}");
 
             foreach (var boardCell in _movementService.Grid.AllCells())
             {
                 var pos = boardCell.Position;
 
+                // Приоритет 1: Клетки атаки (наивысший приоритет)
                 if (attackTargets.Contains(pos))
                 {
                     boardCell.Del<HighlightTag>();
+                    boardCell.Del<UnderAttackHighlightTag>();
                     boardCell.EnsureComponent(new AttackHighlightTag());
                     attackCount++;
                     continue;
                 }
 
+                // Приоритет 2: Клетка под атакой (включая текущую позицию фигуры)
+                if (underAttackTargets.Contains(pos))
+                {
+                    boardCell.Del<HighlightTag>();
+                    boardCell.Del<AttackHighlightTag>();
+                    boardCell.EnsureComponent(new UnderAttackHighlightTag());
+                    underAttackCount++;
+                    _logger.Info($"  UnderAttack: ({pos.Row},{pos.Column})");
+                    continue;
+                }
+
+                // Приоритет 3: Клетки для хода
                 if (moveTargets.Contains(pos))
                 {
                     boardCell.Del<AttackHighlightTag>();
+                    boardCell.Del<UnderAttackHighlightTag>();
                     boardCell.EnsureComponent(new HighlightTag());
                     moveCount++;
                 }
@@ -56,15 +76,29 @@ namespace Project.Gameplay.Gameplay.Stage
                 {
                     boardCell.Del<HighlightTag>();
                     boardCell.Del<AttackHighlightTag>();
+                    boardCell.Del<UnderAttackHighlightTag>();
                 }
             }
 
-            _logger.Info($"StageHighlightRenderer: move={moveCount}, attack={attackCount}");
+            _logger.Info($"StageHighlightRenderer: move={moveCount}, attack={attackCount}, underAttack={underAttackCount}");
         }
 
         public void Clear()
         {
-            Show(new StageSelectionInfo(null, null));
+            if (_movementService.Grid == null)
+            {
+                return;
+            }
+
+            // Очищаем все подсветки со всех клеток
+            foreach (var boardCell in _movementService.Grid.AllCells())
+            {
+                boardCell.Del<HighlightTag>();
+                boardCell.Del<AttackHighlightTag>();
+                boardCell.Del<UnderAttackHighlightTag>();
+            }
+
+            _logger.Info("StageHighlightRenderer: cleared all highlights");
         }
     }
 }

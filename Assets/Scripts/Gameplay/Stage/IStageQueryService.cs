@@ -8,6 +8,7 @@ namespace Project.Gameplay.Gameplay.Stage
     {
         StageSelectionInfo GetSelectionInfo(Figure actor, GridPosition pos);
         IReadOnlyCollection<GridPosition> GetBonusMoveTargets();
+        IReadOnlyCollection<GridPosition> GetUnderAttackCells(Figure actor, GridPosition pos);
         void Clear();
     }
 }

@@ -8,5 +8,6 @@ namespace Project.Gameplay.Gameplay.Attack
     public interface IAttackQueryService
     {
         IReadOnlyCollection<GridPosition> GetTargets(Figure actor, GridPosition from, BoardGrid grid);
+        bool CanAttackCell(Figure attacker, GridPosition from, GridPosition targetCell, BoardGrid grid);
     }
 }

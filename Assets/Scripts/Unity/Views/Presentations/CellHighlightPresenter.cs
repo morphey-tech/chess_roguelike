@@ -18,6 +18,7 @@ namespace Project.Unity.Unity.Views.Presentations
         [Header("Actions")]
         [SerializeField] private GameObject _highlightRenderer;
         [SerializeField] private GameObject _attackRenderer;
+        [SerializeField] private GameObject _underAttackRenderer;
         
         [Header("Zone")]
         [SerializeField] private ShapeRenderer _zonePreviewRenderer;
@@ -56,6 +57,9 @@ namespace Project.Unity.Unity.Views.Presentations
                 case AttackHighlightTag _:
                     SetAttackHighlight();
                     break;
+                case UnderAttackHighlightTag _:
+                    SetUnderAttackHighlight();
+                    break;
                 case StormWarningTag _:
                     ShowWarningsZone();
                     break;
@@ -68,7 +72,9 @@ namespace Project.Unity.Unity.Views.Presentations
         private void OnComponentRemoved(CollectionRemoveEvent<IEntityComponent> evt)
         {
             Entity entity = _link.GetEntity();
-            if (!entity.Exists<HighlightTag>() && !entity.Exists<AttackHighlightTag>())
+            if (!entity.Exists<HighlightTag>() && 
+                !entity.Exists<AttackHighlightTag>() && 
+                !entity.Exists<UnderAttackHighlightTag>())
             {
                 SetDefaultHighlight();
             }
@@ -80,6 +86,8 @@ namespace Project.Unity.Unity.Views.Presentations
                 _highlightRenderer.SetActive(false);
             if (_attackRenderer != null)
                 _attackRenderer.SetActive(false);
+            if (_underAttackRenderer != null)
+                _underAttackRenderer.SetActive(false);
         }
         
         private void SetHighlight()
@@ -96,6 +104,18 @@ namespace Project.Unity.Unity.Views.Presentations
                 _highlightRenderer.SetActive(false);
             if (_attackRenderer != null)
                 _attackRenderer.SetActive(true);
+            if (_underAttackRenderer != null)
+                _underAttackRenderer.SetActive(false);
+        }
+
+        private void SetUnderAttackHighlight()
+        {
+            if (_highlightRenderer != null)
+                _highlightRenderer.SetActive(false);
+            if (_attackRenderer != null)
+                _attackRenderer.SetActive(false);
+            if (_underAttackRenderer != null)
+                _underAttackRenderer.SetActive(true);
         }
 
         private void ShowWarningsZone()
