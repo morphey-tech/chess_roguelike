@@ -9,6 +9,7 @@ using Project.Core.Core.Configs.Passive;
 using Project.Core.Core.Logging;
 using Project.Core.Window;
 using Project.Gameplay.Gameplay.Figures;
+using Project.Gameplay.Gameplay.UI;
 using Project.Gameplay.Gameplay.UI.Project.Gameplay.Gameplay.UI;
 using TMPro;
 using UnityEngine;
@@ -34,6 +35,9 @@ namespace Project.Gameplay.UI
 
         [Header("Passives")]
         [SerializeField] private RectTransform _passivesContainer = null!;
+
+        [Header("Stat Tooltips")]
+        [SerializeField] private StatTooltipHandler[] _statHandlers = Array.Empty<StatTooltipHandler>();
 
         public Figure? CurrentFigure { get; private set; }
         
@@ -70,7 +74,19 @@ namespace Project.Gameplay.UI
             _cts = new CancellationTokenSource();
 
             UpdateFigureInfo(value);
+            SetupStatTooltips(value);
             RenderPassives(value.PassiveConfigs, _cts.Token).Forget();
+        }
+
+        private void SetupStatTooltips(FigureInfoModel model)
+        {
+            foreach (StatTooltipHandler handler in _statHandlers)
+            {
+                if (handler != null)
+                {
+                    handler.Setup(model);
+                }
+            }
         }
 
         private void UpdateFigureInfo(FigureInfoModel model)
