@@ -87,21 +87,18 @@ namespace Project.Gameplay.Gameplay.Stage
 
         private void OnFigureDied(FigureDiedMessage message)
         {
-            // Удаляем фигуру из кэша и инвалидируем карты для пересчёта
             _threatMapService.RemoveFigureThreatById(message.FigureId, message.Team);
             _threatMapService.Invalidate();
         }
 
         private void OnFigureSpawned(FigureBoardMessage message)
         {
-            // Добавляем фигуру и инвалидируем карты для пересчёта
             _threatMapService.UpdateFigureThreat(message.Figure);
             _threatMapService.Invalidate();
         }
 
         private void OnFigureMoved(FigureBoardMessage message)
         {
-            // Обновляем фигуру и инвалидируем карты для пересчёта
             _threatMapService.UpdateFigureThreat(message.Figure);
             _threatMapService.Invalidate();
         }

@@ -1,4 +1,5 @@
 using Project.Core.Core.Configs.Passive;
+using Project.Core.Core.Logging;
 using Project.Core.Core.Random;
 using Project.Gameplay.Gameplay.Combat.Passives;
 
@@ -7,6 +8,7 @@ namespace Project.Gameplay.Gameplay.Combat
     public class PassiveFactory
     {
         private readonly IRandomService _random;
+        private readonly ILogService _logService;
 
         private const string SWARM = "swarm";
         private const string ATTACK_FOR_ALLY = "attack_for_ally";
@@ -30,9 +32,10 @@ namespace Project.Gameplay.Gameplay.Combat
         private const string SPLASH = "splash";
         private const string PIERCE = "pierce";
 
-        public PassiveFactory(IRandomService random)
+        public PassiveFactory(IRandomService random, ILogService logService)
         {
             _random = random;
+            _logService = logService;
         }
 
         public IPassive? Create(PassiveConfig config)
@@ -57,7 +60,7 @@ namespace Project.Gameplay.Gameplay.Combat
                     config.GetFloat("evasion_bonus", 0.1f),
                     _random, config.GetInt("duration", 2)),
                 PROVOCATION => new ProvocationPassive(),
-                DESPERATION => new DesperationPassive(config.Id),
+                DESPERATION => new DesperationPassive(config.Id, _logService),
                 ROYAL_PRESENCE => new RoyalPresencePassive(config.Id, config.GetFloat("damage_bonus", 1f), config.GetInt("aura_radius", 2)),
                 ESCAPE => new EscapePassive(config.Id),
                 IMPACT => new ImpactPassive(config.Id, config.GetInt("bonus_damage", 2)),

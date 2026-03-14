@@ -3,11 +3,13 @@ using System.Linq;
 using NUnit.Framework;
 using Project.Core.Core.Combat;
 using Project.Core.Core.Grid;
+using Project.Core.Core.Logging;
 using Project.Core.Core.Triggers;
 using Project.Gameplay.Gameplay.Combat.Contexts;
 using Project.Gameplay.Gameplay.Combat.Passives;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
+using Project.Gameplay.Gameplay.Logging;
 
 namespace Project.Tests.Combat.Passives
 {
@@ -21,7 +23,7 @@ namespace Project.Tests.Combat.Passives
         {
             // Arrange
             var figure = CreateFigure(attack: 10, position: new GridPosition(0, 0));
-            figure.AddPassive(new DesperationPassive("desperation"));
+            figure.AddPassive(new DesperationPassive("desperation", new LogService()));
             figure.AddPassive(new SwarmPassive("swarm", damagePerAlly: 2, duration: 1));
             
             // Create allies nearby
