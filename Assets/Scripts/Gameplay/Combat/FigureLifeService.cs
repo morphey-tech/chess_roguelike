@@ -46,7 +46,7 @@ namespace Project.Gameplay.Gameplay.Combat
         public void HandleDeathFromCombat(CombatEffectContext context, Figure unit, BoardCell cell)
         {
             cell.RemoveFigure();
-            _figureBoardPublisher.Publish(FigureBoardMessage.REMOVED, 
+            _figureBoardPublisher.Publish(FigureBoardMessage.REMOVED,
                 new FigureBoardMessage(unit, cell.Position));
             context.AddVisualEvent(new DeathVisualEvent(unit.Id, null));
 

@@ -8,6 +8,7 @@ using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Movement;
 using Project.Gameplay.Gameplay.Turn;
 using Project.Gameplay.Movement;
+using MessagePipe;
 using VContainer;
 
 namespace Project.Gameplay.Gameplay.Figures
@@ -19,6 +20,7 @@ namespace Project.Gameplay.Gameplay.Figures
         private readonly MovementStrategyFactory _strategyFactory;
         private readonly TriggerService _triggerService;
         private readonly TurnService _turnService;
+        private readonly IPublisher<string, FigureBoardMessage> _figureBoardPublisher;
         private readonly ILogger<MovementService> _logger;
 
         [Inject]
@@ -26,11 +28,13 @@ namespace Project.Gameplay.Gameplay.Figures
             MovementStrategyFactory strategyFactory,
             TriggerService triggerService,
             TurnService turnService,
+            IPublisher<string, FigureBoardMessage> figureBoardPublisher,
             ILogService logService)
         {
             _strategyFactory = strategyFactory;
             _triggerService = triggerService;
             _turnService = turnService;
+            _figureBoardPublisher = figureBoardPublisher;
             _logger = logService.CreateLogger<MovementService>();
         }
 
@@ -120,6 +124,10 @@ namespace Project.Gameplay.Gameplay.Figures
             Grid.RemoveFigure(figure);
             Grid.PlaceFigure(figure, to);
             toCell.Effects.OnEnter(toCell);
+
+            // Публикуем событие о движении
+            _figureBoardPublisher.Publish(FigureBoardMessage.MOVED,
+                new FigureBoardMessage(figure, to, from));
 
             // Set moved flag
             figure.MovedThisTurn = true;

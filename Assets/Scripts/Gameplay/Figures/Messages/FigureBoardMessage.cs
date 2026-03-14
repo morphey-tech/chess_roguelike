@@ -7,14 +7,17 @@ namespace Project.Gameplay.Gameplay.Figures
     {
         public const string SPAWNED = "figureSpawned";
         public const string REMOVED = "figureRemoved";
+        public const string MOVED = "figureMoved";
 
         public readonly Figure Figure;
         public readonly GridPosition Position;
+        public readonly GridPosition? FromPosition;
 
-        public FigureBoardMessage(Figure figure, GridPosition position)
+        public FigureBoardMessage(Figure figure, GridPosition position, GridPosition? fromPosition = null)
         {
             Figure = figure;
             Position = position;
+            FromPosition = fromPosition;
         }
     }
 }

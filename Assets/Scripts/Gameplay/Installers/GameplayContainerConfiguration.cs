@@ -11,6 +11,7 @@ using Project.Gameplay.Gameplay.Board;
 using Project.Gameplay.Gameplay.Board.Capacity;
 using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Combat.Damage;
+using Project.Gameplay.Gameplay.Combat.Threat;
 using Project.Gameplay.Gameplay.Combat.Visual;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Filters;
@@ -168,6 +169,9 @@ namespace Project.Gameplay.Gameplay.Installers
                     new LootVisualEventMapper()
                 })
                 .As<ICombatVisualPlanner>();
+            
+            // Threat
+            builder.Register<ThreatMapService>(Lifetime.Singleton);
 
             // Turn
             builder.Register<ConditionRegistry>(Lifetime.Singleton)

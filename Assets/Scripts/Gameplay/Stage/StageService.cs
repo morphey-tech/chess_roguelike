@@ -5,6 +5,8 @@ using Project.Core.Core.Configs.Figure;
 using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Components;
+using Project.Gameplay.Gameplay.Combat;
+using Project.Gameplay.Gameplay.Combat.Threat;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Selection;
 using Project.Gameplay.Gameplay.Turn;
@@ -17,7 +19,7 @@ namespace Project.Gameplay.Gameplay.Stage
     /// <summary>
     /// Stage coordinator - handles highlights and visual state.
     /// Does NOT contain game logic or turn execution.
-    /// 
+    ///
     /// Responsibilities:
     /// - Highlight management for selection and bonus moves
     /// - SelectTag management on figures
@@ -30,6 +32,9 @@ namespace Project.Gameplay.Gameplay.Stage
         private readonly ISubscriber<string, FigureSelectMessage> _figureSelectSubscriber;
         private readonly ISubscriber<TurnChangedMessage> _turnSubscriber;
         private readonly ISubscriber<string, BonusMoveMessage> _bonusMoveSubscriber;
+        private readonly ISubscriber<FigureDiedMessage> _figureDiedSubscriber;
+        private readonly ISubscriber<string, FigureBoardMessage> _figureBoardPublisher;
+        private readonly ThreatMapService _threatMapService;
         private readonly ILogger<StageService> _logger;
 
         private IDisposable _disposable = null!;
@@ -42,6 +47,9 @@ namespace Project.Gameplay.Gameplay.Stage
             ISubscriber<string, FigureSelectMessage> figureSelectSubscriber,
             ISubscriber<TurnChangedMessage> turnSubscriber,
             ISubscriber<string, BonusMoveMessage> bonusMoveSubscriber,
+            ISubscriber<FigureDiedMessage> figureDiedSubscriber,
+            ISubscriber<string, FigureBoardMessage> figureBoardPublisher,
+            ThreatMapService threatMapService,
             ILogService logService)
         {
             _query = query;
@@ -49,6 +57,9 @@ namespace Project.Gameplay.Gameplay.Stage
             _figureSelectSubscriber = figureSelectSubscriber;
             _turnSubscriber = turnSubscriber;
             _bonusMoveSubscriber = bonusMoveSubscriber;
+            _figureDiedSubscriber = figureDiedSubscriber;
+            _figureBoardPublisher = figureBoardPublisher;
+            _threatMapService = threatMapService;
             _logger = logService.CreateLogger<StageService>();
 
         }
@@ -61,7 +72,31 @@ namespace Project.Gameplay.Gameplay.Stage
             _turnSubscriber.Subscribe(OnTurnChanged).AddTo(bag);
             _bonusMoveSubscriber.Subscribe(BonusMoveMessage.STARTED, OnBonusMoveStarted).AddTo(bag);
             _bonusMoveSubscriber.Subscribe(BonusMoveMessage.COMPLETED, OnBonusMoveCompleted).AddTo(bag);
+            _figureDiedSubscriber.Subscribe(OnFigureDied).AddTo(bag);
+            _figureBoardPublisher.Subscribe(FigureBoardMessage.SPAWNED, OnFigureSpawned).AddTo(bag);
+            _figureBoardPublisher.Subscribe(FigureBoardMessage.MOVED, OnFigureMoved).AddTo(bag);
             _disposable = bag.Build();
+        }
+
+        private void OnFigureDied(FigureDiedMessage message)
+        {
+            // Инвалидируем кэш угроз при смерти фигуры
+            _threatMapService.Invalidate();
+            _logger.Debug($"Figure {message.FigureId} died, invalidated threat map cache");
+        }
+
+        private void OnFigureSpawned(FigureBoardMessage message)
+        {
+            // Инвалидируем кэш угроз при спавне фигуры
+            _threatMapService.Invalidate();
+            _logger.Debug($"Figure spawned, invalidated threat map cache");
+        }
+
+        private void OnFigureMoved(FigureBoardMessage message)
+        {
+            // Инвалидируем кэш угроз при движении фигуры
+            _threatMapService.Invalidate();
+            _logger.Debug($"Figure moved, invalidated threat map cache");
         }
 
         private void OnBonusMoveCompleted(BonusMoveMessage message)

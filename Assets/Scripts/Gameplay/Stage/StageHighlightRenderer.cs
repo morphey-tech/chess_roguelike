@@ -37,8 +37,6 @@ namespace Project.Gameplay.Gameplay.Stage
             var underAttackTargets = info.UnderAttackTargets as HashSet<GridPosition>
                                      ?? new HashSet<GridPosition>(info.UnderAttackTargets);
 
-            _logger.Info($"StageHighlightRenderer: moveTargets={moveTargets.Count}, attackTargets={attackTargets.Count}, underAttackTargets={underAttackTargets.Count}");
-
             foreach (var boardCell in _movementService.Grid.AllCells())
             {
                 var pos = boardCell.Position;
@@ -60,7 +58,6 @@ namespace Project.Gameplay.Gameplay.Stage
                     boardCell.Del<AttackHighlightTag>();
                     boardCell.EnsureComponent(new UnderAttackHighlightTag());
                     underAttackCount++;
-                    _logger.Info($"  UnderAttack: ({pos.Row},{pos.Column})");
                     continue;
                 }
 

@@ -4,6 +4,7 @@ using System.Linq;
 using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Attack;
+using Project.Gameplay.Gameplay.Combat.Threat;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
 using Project.Gameplay.Gameplay.Turn;
@@ -19,18 +20,21 @@ namespace Project.Gameplay.Gameplay.Stage
         private readonly MovementService _movementService;
         private readonly IBonusMoveController _bonusMoveController;
         private readonly IAttackQueryService _attackQueryService;
+        private readonly ThreatMapService _threatMapService;
         private readonly ILogger<StageQueryService> _logger;
 
         [Inject]
         private StageQueryService(
             MovementService movementService,
             IAttackQueryService attackQueryService,
+            ThreatMapService threatMapService,
             IBonusMoveController bonusMoveController,
             TurnPatternResolver patternResolver,
             ILogService logService)
         {
             _movementService = movementService;
             _attackQueryService = attackQueryService;
+            _threatMapService = threatMapService;
             _bonusMoveController = bonusMoveController;
             _logger = logService.CreateLogger<StageQueryService>();
         }
@@ -84,61 +88,35 @@ namespace Project.Gameplay.Gameplay.Stage
 
         public IReadOnlyCollection<GridPosition> GetUnderAttackCells(Figure actor, GridPosition pos)
         {
-            HashSet<GridPosition> underAttackCells = new();
-            Team enemyTeam = actor.Team == Team.Player ? Team.Enemy : Team.Player;
-            BoardGrid grid = _movementService.Grid;
+            HashSet<GridPosition> result = new();
 
-            // Получаем все клетки, куда может пойти фигура
+            Team enemyTeam = actor.Team == Team.Player
+                ? Team.Enemy
+                : Team.Player;
+
+            ThreatMap threatMap = _threatMapService.GetThreatMap(enemyTeam);
+
             StageSelectionInfo selectionInfo = GetSelectionInfo(actor, pos);
-            
-            List<Figure> enemies = grid.GetFiguresByTeam(enemyTeam).ToList();
-            _logger.Info($"GetUnderAttackCells: {enemies.Count} enemies, actor at ({pos.Row},{pos.Column}), {selectionInfo.MoveTargets.Count} move targets");
-            
-            // Проверяем текущую позицию - если фигура под атакой, подсвечиваем
-            foreach (Figure enemy in enemies)
-            {
-                BoardCell? enemyCell = grid.FindFigure(enemy);
-                if (enemyCell == null)
-                    continue;
 
-                bool canAttack = _attackQueryService.CanAttackCell(enemy, enemyCell.Position, pos, grid);
-                _logger.Info($"  Enemy {enemy.Id} at ({enemyCell.Position.Row},{enemyCell.Position.Column}) can attack current pos ({pos.Row},{pos.Column}): {canAttack}");
-                if (canAttack)
-                {
-                    _logger.Info($"  Current cell ({pos.Row},{pos.Column}) is under attack by enemy {enemy.Id}");
-                    underAttackCells.Add(pos);
-                    break;
-                }
-            }
+            _logger.Debug($"GetUnderAttackCells: {selectionInfo.MoveTargets.Count} move targets, checking threats...");
             
-            // Для каждой клетки, куда можем пойти, проверяем, может ли враг атаковать её
-            foreach (GridPosition cellToCheck in selectionInfo.MoveTargets)
+            foreach (GridPosition move in selectionInfo.MoveTargets)
             {
-                // Пропускаем текущую позицию - уже проверили
-                if (cellToCheck == pos)
-                    continue;
-                    
-                foreach (Figure enemy in enemies)
+                if (threatMap.IsThreatened(move))
                 {
-                    BoardCell? enemyCell = grid.FindFigure(enemy);
-                    if (enemyCell == null)
-                    {
-                        _logger.Warning($"  Enemy {enemy.Id} not found on grid");
-                        continue;
-                    }
-
-                    // Проверяем, может ли враг атаковать эту клетку
-                    if (_attackQueryService.CanAttackCell(enemy, enemyCell.Position, cellToCheck, grid))
-                    {
-                        _logger.Info($"  Cell ({cellToCheck.Row},{cellToCheck.Column}) is under attack by enemy {enemy.Id}");
-                        underAttackCells.Add(cellToCheck);
-                        break; // Достаточно одного врага
-                    }
+                    _logger.Debug($"  Cell ({move.Row},{move.Column}) is threatened");
+                    result.Add(move);
                 }
             }
 
-            _logger.Info($"GetUnderAttackCells: total {underAttackCells.Count} under-attack cells: {string.Join(",", underAttackCells.Select(p => $"({p.Row},{p.Column})"))}");
-            return underAttackCells;
+            if (threatMap.IsThreatened(pos))
+            {
+                _logger.Debug($"  Current cell ({pos.Row},{pos.Column}) is threatened");
+                result.Add(pos);
+            }
+
+            _logger.Debug($"GetUnderAttackCells: total {result.Count} threatened cells");
+            return result;
         }
 
         public void Clear()
