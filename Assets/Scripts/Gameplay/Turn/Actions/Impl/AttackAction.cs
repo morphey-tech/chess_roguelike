@@ -112,12 +112,15 @@ namespace Project.Gameplay.Gameplay.Turn.Actions.Impl
         public IReadOnlyCollection<ActionPreview> GetPreviews(Figure actor, GridPosition from, BoardGrid grid)
         {
             IList<ActionPreview> result = new List<ActionPreview>();
-            foreach (GridPosition enemyPos in _attackQueryService.GetTargets(actor, from, grid))
+            var targets = _attackQueryService.GetTargets(actor, from, grid);
+            _logger.Debug($"AttackAction.GetPreviews: {actor.Id} from=({from.Row},{from.Column}) targets={targets.Count}");
+            
+            foreach (GridPosition enemyPos in targets)
             {
                 BoardCell enemyCell = grid.GetBoardCell(enemyPos);
                 result.Add(new ActionPreview
                 {
-                    MoveTo = enemyCell.Position,
+                    AttackPosition = enemyCell.Position,
                     Target = enemyCell.OccupiedBy
                 });
             }

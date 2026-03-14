@@ -23,6 +23,7 @@ using Project.Gameplay.Gameplay.Movement.Strategies;
 using Project.Gameplay.Gameplay.Run;
 using Project.Gameplay.Gameplay.Shutdown;
 using Project.Gameplay.Gameplay.Stage;
+using Project.Gameplay.Gameplay.Stage.Analysis;
 using Project.Gameplay.Gameplay.Stage.Flow;
 using Project.Gameplay.Gameplay.Stage.Phase;
 using Project.Gameplay.Gameplay.Turn;
@@ -172,6 +173,9 @@ namespace Project.Gameplay.Gameplay.Installers
             
             // Threat
             builder.Register<ThreatMapService>(Lifetime.Singleton);
+            
+            // Stage Analysis
+            builder.Register<StageAnalysisService>(Lifetime.Singleton);
 
             // Turn
             builder.Register<ConditionRegistry>(Lifetime.Singleton)

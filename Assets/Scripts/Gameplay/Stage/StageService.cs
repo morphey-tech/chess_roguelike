@@ -9,6 +9,7 @@ using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Combat.Threat;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Selection;
+using Project.Gameplay.Gameplay.Stage.Analysis;
 using Project.Gameplay.Gameplay.Turn;
 using Project.Gameplay.Gameplay.Turn.BonusMove;
 using VContainer;
@@ -34,7 +35,9 @@ namespace Project.Gameplay.Gameplay.Stage
         private readonly ISubscriber<string, BonusMoveMessage> _bonusMoveSubscriber;
         private readonly ISubscriber<FigureDiedMessage> _figureDiedSubscriber;
         private readonly ISubscriber<string, FigureBoardMessage> _figureBoardPublisher;
+        private readonly StageAnalysisService _analysisService;
         private readonly ThreatMapService _threatMapService;
+        private readonly MovementService _movementService;
         private readonly ILogger<StageService> _logger;
 
         private IDisposable _disposable = null!;
@@ -49,7 +52,9 @@ namespace Project.Gameplay.Gameplay.Stage
             ISubscriber<string, BonusMoveMessage> bonusMoveSubscriber,
             ISubscriber<FigureDiedMessage> figureDiedSubscriber,
             ISubscriber<string, FigureBoardMessage> figureBoardPublisher,
+            StageAnalysisService analysisService,
             ThreatMapService threatMapService,
+            MovementService movementService,
             ILogService logService)
         {
             _query = query;
@@ -59,7 +64,9 @@ namespace Project.Gameplay.Gameplay.Stage
             _bonusMoveSubscriber = bonusMoveSubscriber;
             _figureDiedSubscriber = figureDiedSubscriber;
             _figureBoardPublisher = figureBoardPublisher;
+            _analysisService = analysisService;
             _threatMapService = threatMapService;
+            _movementService = movementService;
             _logger = logService.CreateLogger<StageService>();
 
         }
@@ -80,16 +87,22 @@ namespace Project.Gameplay.Gameplay.Stage
 
         private void OnFigureDied(FigureDiedMessage message)
         {
+            // Удаляем фигуру из кэша и инвалидируем карты для пересчёта
+            _threatMapService.RemoveFigureThreatById(message.FigureId, message.Team);
             _threatMapService.Invalidate();
         }
 
         private void OnFigureSpawned(FigureBoardMessage message)
         {
+            // Добавляем фигуру и инвалидируем карты для пересчёта
+            _threatMapService.UpdateFigureThreat(message.Figure);
             _threatMapService.Invalidate();
         }
 
         private void OnFigureMoved(FigureBoardMessage message)
         {
+            // Обновляем фигуру и инвалидируем карты для пересчёта
+            _threatMapService.UpdateFigureThreat(message.Figure);
             _threatMapService.Invalidate();
         }
 
@@ -104,7 +117,7 @@ namespace Project.Gameplay.Gameplay.Stage
         {
             _mode = StageMode.BonusMove;
             IReadOnlyCollection<GridPosition> moveTargets = _query.GetBonusMoveTargets();
-            _renderer.Show(StageSelectionInfo.ForMoves(moveTargets));
+            _renderer.ShowMovesOnly(moveTargets);
             _logger.Debug($"Bonus move started for {message.Actor}, showing highlights");
         }
 
@@ -117,9 +130,8 @@ namespace Project.Gameplay.Gameplay.Stage
 
             if (message.Figure != null)
             {
-                StageSelectionInfo info = _query.GetSelectionInfo(message.Figure, message.Position);
-                IReadOnlyCollection<GridPosition> underAttackCells = _query.GetUnderAttackCells(message.Figure, message.Position);
-                _renderer.Show(StageSelectionInfo.ForCombat(info.MoveTargets, info.AttackTargets, underAttackCells, message.Position));
+                StageActorAnalysis analysis = _analysisService.AnalyzeActor(message.Figure, message.Position);
+                _renderer.Show(analysis);
                 message.Figure.EnsureComponent(new SelectTag());
                 _logger.Debug($"Figure {message.Figure.Id} selected at ({message.Position.Row}, {message.Position.Column})");
             }

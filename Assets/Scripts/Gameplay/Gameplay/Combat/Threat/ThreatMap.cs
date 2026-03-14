@@ -20,7 +20,8 @@ namespace Project.Gameplay.Gameplay.Combat.Threat
             Width = width;
             Height = height;
 
-            _grid = new List<Figure>[width, height];
+            // [row, column] = [height, width]
+            _grid = new List<Figure>[height, width];
         }
 
         /// <summary>
@@ -28,11 +29,11 @@ namespace Project.Gameplay.Gameplay.Combat.Threat
         /// </summary>
         public void Clear()
         {
-            for (int x = 0; x < Width; x++)
+            for (int row = 0; row < Height; row++)
             {
-                for (int y = 0; y < Height; y++)
+                for (int col = 0; col < Width; col++)
                 {
-                    _grid[x, y]?.Clear();
+                    _grid[row, col]?.Clear();
                 }
             }
         }
@@ -54,6 +55,24 @@ namespace Project.Gameplay.Gameplay.Combat.Threat
             }
 
             list.Add(attacker);
+        }
+
+        /// <summary>
+        /// Удалить угрозу от конкретной фигуры для клетки.
+        /// </summary>
+        public void RemoveThreat(GridPosition pos, Figure attacker)
+        {
+            if (!IsValidPosition(pos))
+                return;
+
+            var list = _grid[pos.Row, pos.Column];
+            if (list == null)
+                return;
+
+            list.Remove(attacker);
+
+            if (list.Count == 0)
+                _grid[pos.Row, pos.Column] = null;
         }
 
         /// <summary>

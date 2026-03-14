@@ -3,6 +3,7 @@ using Project.Core.Core.Grid;
 using Project.Core.Core.Logging;
 using Project.Gameplay.Components;
 using Project.Gameplay.Gameplay.Figures;
+using Project.Gameplay.Gameplay.Stage.Analysis;
 using VContainer;
 
 namespace Project.Gameplay.Gameplay.Stage
@@ -19,7 +20,7 @@ namespace Project.Gameplay.Gameplay.Stage
             _logger = logService.CreateLogger<StageHighlightRenderer>();
         }
 
-        public void Show(StageSelectionInfo info)
+        public void Show(StageActorAnalysis analysis)
         {
             if (_movementService.Grid == null)
             {
@@ -30,12 +31,12 @@ namespace Project.Gameplay.Gameplay.Stage
             int moveCount = 0;
             int attackCount = 0;
             int underAttackCount = 0;
-            var moveTargets = info.MoveTargets as HashSet<GridPosition>
-                              ?? new HashSet<GridPosition>(info.MoveTargets);
-            var attackTargets = info.AttackTargets as HashSet<GridPosition>
-                                ?? new HashSet<GridPosition>(info.AttackTargets);
-            var underAttackTargets = info.UnderAttackTargets as HashSet<GridPosition>
-                                     ?? new HashSet<GridPosition>(info.UnderAttackTargets);
+            var moveTargets = analysis.MoveTargets as HashSet<GridPosition>
+                              ?? new HashSet<GridPosition>(analysis.MoveTargets);
+            var attackTargets = analysis.AttackTargets as HashSet<GridPosition>
+                                ?? new HashSet<GridPosition>(analysis.AttackTargets);
+            var dangerousCells = analysis.DangerousCells as HashSet<GridPosition>
+                                 ?? new HashSet<GridPosition>(analysis.DangerousCells);
 
             foreach (var boardCell in _movementService.Grid.AllCells())
             {
@@ -52,7 +53,7 @@ namespace Project.Gameplay.Gameplay.Stage
                 }
 
                 // Приоритет 2: Клетка под атакой (включая текущую позицию фигуры)
-                if (underAttackTargets.Contains(pos))
+                if (dangerousCells.Contains(pos))
                 {
                     boardCell.Del<HighlightTag>();
                     boardCell.Del<AttackHighlightTag>();
@@ -77,7 +78,41 @@ namespace Project.Gameplay.Gameplay.Stage
                 }
             }
 
-            _logger.Info($"StageHighlightRenderer: move={moveCount}, attack={attackCount}, underAttack={underAttackCount}");
+            _logger.Info($"StageHighlightRenderer: move={moveCount}, attack={attackCount}, dangerous={underAttackCount}");
+        }
+
+        public void ShowMovesOnly(IReadOnlyCollection<GridPosition> moveTargets)
+        {
+            if (_movementService.Grid == null)
+            {
+                _logger.Warning("StageHighlightRenderer: Grid is null");
+                return;
+            }
+
+            int moveCount = 0;
+            var moves = moveTargets as HashSet<GridPosition>
+                        ?? new HashSet<GridPosition>(moveTargets);
+
+            foreach (var boardCell in _movementService.Grid.AllCells())
+            {
+                var pos = boardCell.Position;
+
+                if (moves.Contains(pos))
+                {
+                    boardCell.Del<AttackHighlightTag>();
+                    boardCell.Del<UnderAttackHighlightTag>();
+                    boardCell.EnsureComponent(new HighlightTag());
+                    moveCount++;
+                }
+                else
+                {
+                    boardCell.Del<HighlightTag>();
+                    boardCell.Del<AttackHighlightTag>();
+                    boardCell.Del<UnderAttackHighlightTag>();
+                }
+            }
+
+            _logger.Info($"StageHighlightRenderer: move={moveCount}");
         }
 
         public void Clear()

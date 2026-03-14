@@ -2,8 +2,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Project.Core.Core.Combat;
 using Project.Core.Core.Grid;
+using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Attack.Strategies;
-using Project.Gameplay.Gameplay.Combat.Passives;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
 using UnityEngine;
@@ -17,11 +17,13 @@ namespace Project.Gameplay.Gameplay.Attack
     public sealed class AttackQueryService : IAttackQueryService
     {
         private readonly AttackStrategyFactory _strategyFactory;
+        private readonly ILogger<AttackQueryService> _logger;
 
         [Inject]
-        private AttackQueryService(AttackStrategyFactory strategyFactory)
+        private AttackQueryService(AttackStrategyFactory strategyFactory, ILogService logService)
         {
             _strategyFactory = strategyFactory;
+            _logger = logService.CreateLogger<AttackQueryService>();
         }
 
         /// <summary>
@@ -33,11 +35,12 @@ namespace Project.Gameplay.Gameplay.Attack
             {
                 return new List<GridPosition>();
             }
-            
-            var strategy = _strategyFactory.Get(actor.AttackId);
+
             var targets = new List<GridPosition>();
-            
-            foreach (var enemy in grid.GetFiguresByTeam(actor.Team == Team.Player 
+
+            // Базовые цели по стратегии атаки
+            var strategy = _strategyFactory.Get(actor.AttackId);
+            foreach (var enemy in grid.GetFiguresByTeam(actor.Team == Team.Player
                          ? Team.Enemy : Team.Player))
             {
                 var cell = grid.FindFigure(enemy);
@@ -46,7 +49,18 @@ namespace Project.Gameplay.Gameplay.Attack
                     targets.Add(cell.Position);
                 }
             }
-            
+
+            int baseCount = targets.Count;
+
+            // Применяем фильтры от пассивок
+            var context = new AttackContext(actor, from, grid);
+            foreach (var passive in actor.BasePassives.OfType<IAttackFilter>())
+            {
+                _logger.Debug($"GetTargets: applying filter {passive.GetType().Name} for {actor.Id}");
+                passive.FilterTargets(targets, context);
+            }
+
+            _logger.Debug($"GetTargets: {actor.Id} from=({from.Row},{from.Column}) base={baseCount} filters={targets.Count - baseCount} total={targets.Count}");
             return targets;
         }
 
@@ -61,23 +75,36 @@ namespace Project.Gameplay.Gameplay.Attack
             {
                 return false;
             }
-            
+
             if (!grid.IsInside(targetCell))
             {
                 return false;
             }
-            
-            // Проверяем Desperation - если активен и нет союзников рядом, может атаковать любую соседнюю клетку
-            if (HasActiveDesperation(attacker, grid))
+
+            // Нельзя атаковать клетку со своей фигурой
+            BoardCell? cell = grid.GetBoardCell(targetCell);
+            if (cell.OccupiedBy != null && cell.OccupiedBy.Team == attacker.Team)
             {
-                return AttackUtils.GetDistance(from, targetCell) == 1;
+                return false;
             }
-            
+
+            // Проверяем модификаторы от пассивок (например Desperation)
+            foreach (var passive in attacker.BasePassives.OfType<IAttackRangeModifier>())
+            {
+                if (passive.CanAttackCell(attacker, from, targetCell, grid))
+                {
+                    _logger.Debug($"CanAttackCell: {attacker.Id} -> ({targetCell.Row},{targetCell.Column}) = true (via {passive.GetType().Name})");
+                    return true;
+                }
+            }
+
             // Получаем стратегию атаки и проверяем направление
             var strategy = _strategyFactory.Get(attacker.AttackId);
-            return CanAttackPosition(strategy, attacker, from, targetCell, grid);
+            bool result = CanAttackPosition(strategy, attacker, from, targetCell, grid);
+            _logger.Debug($"CanAttackCell: {attacker.Id} -> ({targetCell.Row},{targetCell.Column}) = {result} (via {strategy.Id})");
+            return result;
         }
-        
+
         /// <summary>
         /// Проверяет, может ли стратегия атаки атаковать позицию (без проверки наличия фигуры).
         /// </summary>
@@ -88,7 +115,7 @@ namespace Project.Gameplay.Gameplay.Attack
             {
                 return false;
             }
-            
+
             // Проверяем направление в зависимости от стратегии
             return strategy switch
             {
@@ -99,7 +126,7 @@ namespace Project.Gameplay.Gameplay.Attack
                 _ => true
             };
         }
-        
+
         /// <summary>
         /// Проверяет, может ли PawnAttack атаковать позицию.
         /// Пешка атакует только по диагонали вперед на 1 клетку.
@@ -108,18 +135,18 @@ namespace Project.Gameplay.Gameplay.Attack
         {
             int rowDiff = to.Row - from.Row;
             int colDiff = Mathf.Abs(to.Column - from.Column);
-            
+
             // Пешка атакует только по диагонали (|rowDiff| == 1, |colDiff| == 1)
             if (Mathf.Abs(rowDiff) != 1 || colDiff != 1)
             {
                 return false;
             }
-            
+
             // Проверяем направление (вперед)
             bool isPlayer = attacker.Team == Team.Player;
             return (isPlayer && rowDiff > 0) || (!isPlayer && rowDiff < 0);
         }
-        
+
         /// <summary>
         /// Проверяет, может ли DiagonalAttack атаковать позицию.
         /// Атакует только по диагонали (|rowDiff| == |colDiff|).
@@ -128,22 +155,9 @@ namespace Project.Gameplay.Gameplay.Attack
         {
             int rowDiff = Mathf.Abs(to.Row - from.Row);
             int colDiff = Mathf.Abs(to.Column - from.Column);
-            
+
             // Диагональ: |rowDiff| == |colDiff| и не 0
             return rowDiff == colDiff && rowDiff > 0;
-        }
-        
-        /// <summary>
-        /// Проверяет, активен ли у фигуры Desperation (нет союзников рядом).
-        /// </summary>
-        private static bool HasActiveDesperation(Figure figure, BoardGrid grid)
-        {
-            if (!figure.BasePassives.Any(p => p is DesperationPassive))
-            {
-                return false;
-            }
-            
-            return grid.CountAlliesAround(figure) == 0;
         }
     }
 }
