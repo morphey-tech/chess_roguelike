@@ -3,8 +3,8 @@
     {
       "id": "swarm",
       "type": "swarm",
-      "name": "Рой",
-      "description": "Наносит урон всем врагам рядом в конце хода",
+      "name": "Стая",
+      "description": "Получает <color=#00FF00>+1</color> урон за каждого союзника по близости.",
       "icon": "swarm_passive_icon",
       "params": {
         "damage": 1,
@@ -14,7 +14,7 @@
     {
       "id": "lifesteal_50",
       "type": "lifesteal",
-      "name": "Вампиризм 50%",
+      "name": "Вампиризм%",
       "description": "Восстанавливает 50% от нанесённого урона в виде здоровья",
       "icon": "passives/lifesteal_icon",
       "params": {
@@ -24,7 +24,7 @@
     {
       "id": "lifesteal_25",
       "type": "lifesteal",
-      "name": "Вампиризм 25%",
+      "name": "Вампиризм",
       "description": "Восстанавливает 25% от нанесённого урона в виде здоровья",
       "icon": "passives/lifesteal_icon",
       "params": {
@@ -45,7 +45,7 @@
     {
       "id": "crit_20",
       "type": "critical",
-      "name": "Критический удар 20%",
+      "name": "Критический удар",
       "description": "20% шанс нанести двойной урон",
       "icon": "passives/crit_icon",
       "params": {
@@ -56,7 +56,7 @@
     {
       "id": "crit_50_3x",
       "type": "critical",
-      "name": "Критический удар 50%",
+      "name": "Критический удар",
       "description": "50% шанс нанести тройной урон",
       "icon": "passives/crit_icon",
       "params": {
@@ -78,7 +78,7 @@
       "id": "retreat_slippery",
       "type": "retreat_on_no_kill",
       "name": "Отступление",
-      "description": "Отступает на 1 клетку при убийстве врага",
+      "description": "Отступает на 1 клетку после нанесение не смертельного урона",
       "icon": "escape_passive_icon",
       "params": {
         "distance": 1
@@ -98,7 +98,7 @@
       "id": "push_on_hit",
       "type": "push_on_hit",
       "name": "Толчок",
-      "description": "Отталкивает врага при атаке",
+      "description": "Толкает врага по направлении атаки. При столкновении наносит <color=#00FF00>+1</color> урон",
       "icon": "impact_passive_icon",
       "params": {
         "bonus_damage": 1
@@ -108,7 +108,7 @@
       "id": "momentum",
       "type": "momentum",
       "name": "Инерция",
-      "description": "+50% урона после перемещения",
+      "description": "Каждая атака прибавляет <color=#00FF00>+0.5</color> урона. Сбрасывается при получении урона.",
       "icon": "momentum_passive_icon",
       "params": {
         "bonus_damage": 0.5
@@ -118,7 +118,7 @@
       "id": "agile_dodge",
       "type": "agile_dodge",
       "name": "Уклонение",
-      "description": "50% шанс уклониться от атаки",
+      "description": "Дает <color=#00FF00>50%</color> уклонения на 1 ход, после передвижения",
       "icon": "agile_dodge_passive",
       "params": {
         "chance": 0.5
@@ -128,7 +128,7 @@
       "id": "first_shot",
       "type": "first_shot",
       "name": "Первый выстрел",
-      "description": "+2 урона к первой атаке в ходу",
+      "description": "Первый выстрел по врагу наносит <color=#00FF00>+2</color> урона",
       "icon": "first_shot_passive_icon",
       "params": {
         "bonus_damage": 2
@@ -138,7 +138,7 @@
       "id": "fury",
       "type": "fury",
       "name": "Ярость",
-      "description": "+50% урона за каждое убийство (макс. 4 стага)",
+      "description": "Каждая атака прибавляет <color=#00FF00>+0.5</color> урона. Сбрасывается при получении урона. Макс.4",
       "icon": "momentum_passive_icon",
       "params": {
         "damage": 0.5,
@@ -162,7 +162,7 @@
       "id": "provocation",
       "type": "provocation",
       "name": "Провокация",
-      "description": "Враги обязаны атаковать эту фигуру",
+      "description": "Враги по близости фигуры обязаны атаковать ее",
       "icon": "provocation_passive_icon",
       "params": {}
     },
@@ -170,7 +170,7 @@
       "id": "desperation",
       "type": "desperation",
       "name": "Отчаяние",
-      "description": "+50% урона при здоровье ниже 50%",
+      "description": "Когда остается в одиночестве, урон сокращается до <color=#FF0000>1</color>. Позволяет атаковать ближайшие клетки",
       "icon": "desperation_passive_icon",
       "params": {}
     },

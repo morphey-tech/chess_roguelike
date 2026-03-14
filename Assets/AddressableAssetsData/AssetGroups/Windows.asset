@@ -25,8 +25,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 78a2a125c2a4e488993789766b39273c
-    m_Address: ResourcesWindow
+  - m_GUID: 574c1d4332d7907cf8914f3368911132
+    m_Address: CombatHUDWindow
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -47,11 +47,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b44556a4dbc76e1b0b8a921fdbe8bc8f
     m_Address: ArtifactsWindow
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: cb53cfd1a482bcb3ea09b8b1340a8e01
-    m_Address: TurnWindow
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

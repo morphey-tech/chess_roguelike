@@ -58,8 +58,6 @@ namespace Project.Unity.Unity.Bootstrap
             await InitializeRunStateAsync(runConfig);
 
             _economyService.StartNewRun();
-            await ShowResourcesWindowAsync();
-
             Run run = _runFactory.Create(runConfig);
             _runHolder.Set(run);
             run.Begin().Forget();
@@ -84,13 +82,6 @@ namespace Project.Unity.Unity.Bootstrap
                 Log.Error("Error at run filters", e);
             }
             Log.Info("App filters executed");
-        }
-
-        private async UniTask ShowResourcesWindowAsync()
-        {
-            // UIService уже инициализирован фильтром UIInitializationFilter
-            await _uiService.ShowAsync<ResourcesWindow>();
-            Log.Info("Resources window shown");
         }
 
         private async UniTask InitializeRunStateAsync(RunConfig runConfig)

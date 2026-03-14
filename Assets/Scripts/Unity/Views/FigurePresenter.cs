@@ -48,6 +48,7 @@ namespace Project.Unity.Unity.Views
             public FigureDeathPresenter? Death { get; set; }
             public FigureHitPresenter? Hit { get; set; }
             public DamageTextPresenter? DamageText { get; set; }
+            public FigureHealthPresenter? Health { get; set; }
         }
 
         [Inject]
@@ -98,8 +99,6 @@ namespace Project.Unity.Unity.Views
             // IMMEDIATELY hide to prevent flicker - before any other operations
             controller.transform.localScale = Vector3.zero;
 
-            ApplyInitialHpBarVisibility(controllerLink, figure, _gameplayConfig);
-            
             _figures[figure.Id] = controller;
             _positions[figure.Id] = pos;
 
@@ -120,9 +119,19 @@ namespace Project.Unity.Unity.Views
                 Attack = controllerLink.GetComponentInChildren<FigureAttackPresenter>(true),
                 Death = controllerLink.GetComponentInChildren<FigureDeathPresenter>(true),
                 Hit = controllerLink.GetComponentInChildren<FigureHitPresenter>(true),
-                DamageText = controllerLink.GetComponentInChildren<DamageTextPresenter>(true)
+                DamageText = controllerLink.GetComponentInChildren<DamageTextPresenter>(true),
+                Health = controllerLink.GetComponentInChildren<FigureHealthPresenter>(true)
             };
             _visuals[figure.Id] = visuals;
+
+            // Инициализируем FigureHealthPresenter
+            if (visuals.Health != null)
+            {
+                await visuals.Health.Init(controllerLink);
+            }
+
+            // Применяем начальную видимость HP бара
+            ApplyInitialHpBarVisibility(visuals.Health, figure, _gameplayConfig);
 
             // Настроить FigureDeathShatterPresenter если есть
             FigureDeathShatterPresenter? shatterPresenter = controllerLink.GetComponentInChildren<FigureDeathShatterPresenter>(true);
@@ -421,18 +430,14 @@ namespace Project.Unity.Unity.Views
 
         private FigureHealthPresenter? GetHealthPresenter(int figureId)
         {
-            if (!_figures.TryGetValue(figureId, out GameObject controller))
+            if (!_visuals.TryGetValue(figureId, out FigureVisualSet visuals))
                 return null;
-            return controller.GetComponentInChildren<FigureHealthPresenter>(true);
+            return visuals.Health;
         }
 
-        private static void ApplyInitialHpBarVisibility(EntityLink controllerLink, Figure figure, GameplayConfig config)
+        private static void ApplyInitialHpBarVisibility(FigureHealthPresenter? health, Figure figure, GameplayConfig config)
         {
-            if (controllerLink == null || figure == null || config == null)
-                return;
-
-            FigureHealthPresenter? health = controllerLink.GetComponentInChildren<FigureHealthPresenter>(true);
-            if (health == null)
+            if (health == null || figure == null || config == null)
                 return;
 
             bool visible = HpBarVisibilityPolicy.ShouldShow(

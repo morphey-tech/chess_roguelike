@@ -124,11 +124,16 @@ namespace Project.Gameplay.Gameplay.UI
                 CloseWindow();
                 return;
             }
+            
+            if (_window != null && _window.IsVisible() && _window.CurrentFigure == figure)
+            {
+                CloseWindow();
+                return;
+            }
 
             _cts?.Cancel();
             _cts?.Dispose();
             _cts = new CancellationTokenSource();
-
             ShowFigureInfo(figure, _cts.Token).Forget();
         }
 

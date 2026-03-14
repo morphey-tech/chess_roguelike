@@ -32,7 +32,7 @@ namespace Project.Gameplay.Gameplay.Selection
         private readonly ISubscriber<string, FigureBoardMessage> _figureBoardSubscriber;
         private readonly ISubscriber<FigureDiedMessage> _figureDeathSubscriber;
         private readonly ISubscriber<TurnChangedMessage> _turnChangedSubscriber;
-        private readonly ISubscriber<PrepareMessage> _prepareSubscriber;
+        private readonly ISubscriber<string, PrepareMessage> _prepareSubscriber;
         private readonly ISubscriber<string, StagePhaseMessage> _stagePhaseSubscriber;
         private readonly ILogger<HpBarVisibilityService> _logger;
 
@@ -54,7 +54,7 @@ namespace Project.Gameplay.Gameplay.Selection
             ISubscriber<string, FigureBoardMessage> figureBoardSubscriber,
             ISubscriber<FigureDiedMessage> figureDeathSubscriber,
             ISubscriber<TurnChangedMessage> turnChangedSubscriber,
-            ISubscriber<PrepareMessage> prepareSubscriber,
+            ISubscriber<string, PrepareMessage> prepareSubscriber,
             ISubscriber<string, StagePhaseMessage> stagePhaseSubscriber,
             ILogService logService)
         {
@@ -82,7 +82,7 @@ namespace Project.Gameplay.Gameplay.Selection
             _figureDeathSubscriber.Subscribe(OnFigureDeath).AddTo(bag);
             _hoverChangedSubscriber.Subscribe(OnHoverChanged).AddTo(bag);
             _turnChangedSubscriber.Subscribe(OnTurnChanged).AddTo(bag);
-            _prepareSubscriber.Subscribe(OnPrepareMessage).AddTo(bag);
+            _prepareSubscriber.Subscribe(PrepareMessage.PHASE_COMPLETED, OnPrepareMessage).AddTo(bag);
             _stagePhaseSubscriber.Subscribe(StagePhaseMessage.STAGE_STARTED, OnStagePhase).AddTo(bag);
             _subscriptions = bag.Build();
             
@@ -100,11 +100,8 @@ namespace Project.Gameplay.Gameplay.Selection
 
         private void OnPrepareMessage(PrepareMessage message)
         {
-            if (message.Type == PrepareMessage.PHASE_COMPLETED)
-            {
-                _isPreparePhase = false;
-                RefreshAll();
-            }
+            _isPreparePhase = false;
+            RefreshAll();
         }
 
         private void OnStagePhase(StagePhaseMessage message)

@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using Project.Core.Core.Combat;
+using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.UI;
 using Project.Gameplay.Presentations;
@@ -28,17 +29,20 @@ namespace Project.Unity.Unity.Views.Presentations
         private CanvasGroup? _canvasGroup;
         private bool _initialized = false;
         private CompositeDisposable? _disposables;
+        private ILogger<FigureHealthPresenter> _logger;
 
         [Inject]
-        private void Construct(IUIService uiService)
+        private void Construct(IUIService uiService, ILogService logService)
         {
             _uiService = uiService;
+            _logger = logService.CreateLogger<FigureHealthPresenter>();
         }
 
         public async UniTask Init(EntityLink link)
         {
             if(link.GetEntity() is not Figure figure)
             {
+                _logger.Warning("Init failed: entity is not a Figure");
                 return;
             }
 
@@ -47,10 +51,29 @@ namespace Project.Unity.Unity.Views.Presentations
             _initialized = true;
             _disposables = new CompositeDisposable();
 
+            if (_viewTemplate == null)
+            {
+                _logger.Error("Init failed: _viewTemplate is null!");
+                return;
+            }
+
+            if (_pivot == null)
+            {
+                _logger.Error("Init failed: _pivot is null!");
+                return;
+            }
+
             if (_cachedWorldUi == null)
             {
                 _cachedWorldUi = await _uiService.GetOrCreateAsync<WorldUIWindow>();
+                if (_cachedWorldUi == null)
+                {
+                    _logger.Error("Init failed: _cachedWorldUi is null after GetOrCreateAsync!");
+                    return;
+                }
             }
+
+            _logger.Info($"Init: _viewTemplate={_viewTemplate}, _pivot={_pivot}, _cachedWorldUi={_cachedWorldUi}");
 
             TryCreateHealthBar();
             _figure.Stats.CurrentHp
@@ -72,16 +95,21 @@ namespace Project.Unity.Unity.Views.Presentations
         {
             if (_healthView != null || _figure == null || _cachedWorldUi == null)
             {
+                _logger.Warning($"TryCreateHealthBar skipped: healthView={_healthView != null}, figure={_figure != null}, cachedWorldUi={_cachedWorldUi != null}");
                 return;
             }
 
+            _logger.Info($"TryCreateHealthBar: creating with template={_viewTemplate}, pivot={_pivot}");
             _healthView = _cachedWorldUi.Add(_viewTemplate, _pivot);
             if (_healthView == null)
             {
+                _logger.Error("TryCreateHealthBar: _cachedWorldUi.Add returned null!");
                 return;
             }
+            _logger.Info($"TryCreateHealthBar: created healthView={_healthView}");
             Color color = _figure.Team == Team.Player ? _playerTeamColor : _enemyTeamColor;
             _healthView.Init(_figure.Stats.CurrentHp.Value, _figure.Stats.MaxHp, color);
+            _logger.Info($"TryCreateHealthBar: initialized with hp={_figure.Stats.CurrentHp.Value}/{_figure.Stats.MaxHp}");
         }
 
         public void Hide()

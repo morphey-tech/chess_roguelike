@@ -1,4 +1,5 @@
 using System;
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,16 +14,22 @@ namespace Project.Unity.UI.Components.Game
         [SerializeField] private Transform _dividerContainer;
         [SerializeField] private Image _dividerTemplate;
         [SerializeField] private TextMeshProUGUI _hpText;
+        [SerializeField] private Image _lethalIcon;
 
         [Header("Settings")]
         [SerializeField] private float _dividerWidth = 2f;
 
-        private Image[] _dividers = Array.Empty<Image>();
+        [Header("Lethal Icon Settings")]
+        [SerializeField] private float _lethalPulseDuration = 0.5f;
+        [SerializeField] private float _lethalPulseScale = 1.2f;
+
+        private Image[] _dividers;
         private float _current;
         private float _currentView;
         private float _damagePreview;
         private float _maxHp;
         private bool _hasDamagePreview;
+        private Tween? _lethalPulseTween;
 
         public void Init(float current, float max, Color mainFillColor)
         {
@@ -31,6 +38,15 @@ namespace Project.Unity.UI.Components.Game
             _maxHp = max;
             _mainFill.color = mainFillColor;
             _hasDamagePreview = false;
+
+            if (_lethalPulseTween != null && _lethalPulseTween.IsActive())
+            {
+                _lethalPulseTween.Kill();
+            }
+            if (_lethalIcon != null)
+            {
+                _lethalIcon.transform.localScale = Vector3.one;
+            }
 
             CreateDividers();
             SyncView();
@@ -44,7 +60,6 @@ namespace Project.Unity.UI.Components.Game
                 return;
             }
 
-            // Очищаем контейнер
             for (int i = _dividerContainer.childCount - 1; i >= 0; i--)
             {
                 Destroy(_dividerContainer.GetChild(i).gameObject);
@@ -83,10 +98,8 @@ namespace Project.Unity.UI.Components.Game
 
         private void SyncView()
         {
-            if (_mainFill != null)
-            {
-                _mainFill.fillAmount = Mathf.Clamp01(_currentView / _maxHp);
-            }
+            _mainFill.fillAmount = Mathf.Clamp01(_currentView / _maxHp);
+
             if (_damageFill != null)
             {
                 if (_hasDamagePreview && _current > 0)
@@ -123,11 +136,33 @@ namespace Project.Unity.UI.Components.Game
                     _damageFill.gameObject.SetActive(false);
                 }
             }
-            
-            // Обновляем текст HP
-            if (_hpText != null)
+
+            bool isLethal = _hasDamagePreview && (_current - _damagePreview <= 0);
+            _hpText.gameObject.SetActive(!isLethal);
+            if (!isLethal)
             {
                 _hpText.text = $"{Mathf.CeilToInt(_current)}/{Mathf.CeilToInt(_maxHp)}";
+            }
+
+            _lethalIcon.gameObject.SetActive(isLethal);
+            if (isLethal)
+            {
+                if (_lethalPulseTween == null || !_lethalPulseTween.IsActive())
+                {
+                    _lethalPulseTween = _lethalIcon.transform
+                        .DOScale(_lethalPulseScale, _lethalPulseDuration)
+                        .SetEase(Ease.InOutSine)
+                        .SetLoops(-1, LoopType.Yoyo)
+                        .SetTarget(_lethalIcon);
+                }
+            }
+            else
+            {
+                if (_lethalPulseTween != null && _lethalPulseTween.IsActive())
+                {
+                    _lethalPulseTween.Kill();
+                    _lethalIcon.transform.localScale = Vector3.one;
+                }
             }
         }
 
@@ -148,7 +183,20 @@ namespace Project.Unity.UI.Components.Game
         public void ClearDamagePreview()
         {
             _hasDamagePreview = false;
+            if (_lethalPulseTween != null && _lethalPulseTween.IsActive())
+            {
+                _lethalPulseTween.Kill();
+                if (_lethalIcon != null)
+                {
+                    _lethalIcon.transform.localScale = Vector3.one;
+                }
+            }
             SyncView();
+        }
+
+        private void OnDestroy()
+        {
+            _lethalPulseTween?.Kill();
         }
     }
 }

@@ -17,5 +17,11 @@ namespace Project.Core.Core.Configs.Economy
 
         [JsonProperty("meta")]
         public bool Meta { get; set; }
+        
+        [JsonProperty("name")]
+        public string Name { get; set; }
+        
+        [JsonProperty("description")]
+        public string Description { get; set; }
     }
 }

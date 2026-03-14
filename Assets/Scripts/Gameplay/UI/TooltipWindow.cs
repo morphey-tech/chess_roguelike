@@ -37,45 +37,27 @@ namespace Project.Gameplay.UI
         public void Show(string content, Vector2 position)
         {
             if (_contentText == null || _rootRect == null)
-            {
                 return;
-            }
 
             _contentText.text = content;
             _contentText.gameObject.SetActive(true);
-            LayoutRebuilder.ForceRebuildLayoutImmediate(_rootRect);
 
-            Vector2 preferredSize = _contentText.GetPreferredValues();
+            // 1. Получаем предпочтительный размер текста с ограничением по maxWidth
+            Vector2 preferredSize = _contentText.GetPreferredValues(content, _maxWidth - _paddingX * 2, 0f);
 
-            float targetWidth = Mathf.Max(preferredSize.x + (_paddingX * 2), _minWidth);
-            targetWidth = Mathf.Min(targetWidth, _maxWidth);
-            float targetHeight = preferredSize.y + (_paddingY * 2);
+            float targetWidth = Mathf.Clamp(preferredSize.x + _paddingX * 2, _minWidth, _maxWidth);
+            float targetHeight = Mathf.Max(preferredSize.y + _paddingY * 2, 30f);
 
-            if (preferredSize.x + (_paddingX * 2) > _maxWidth)
-            {
-                _contentText.rectTransform.sizeDelta = new Vector2(_maxWidth - (_paddingX * 2), 0);
-                LayoutRebuilder.ForceRebuildLayoutImmediate(_rootRect);
-                preferredSize = _contentText.GetPreferredValues();
-                targetWidth = _maxWidth;
-                targetHeight = preferredSize.y + (_paddingY * 2);
-            }
-
-            targetWidth = Mathf.Max(targetWidth, _minWidth);
-            targetHeight = Mathf.Max(targetHeight, 30f);
-
+            // 2. Применяем размеры к окну
             _rootRect.sizeDelta = new Vector2(targetWidth, targetHeight);
 
-            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                    _rectTransform,
-                    position,
-                    null,
-                    out Vector2 localPosition))
+            // 3. Позиционирование окна относительно курсора
+            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(_rectTransform, position, null, out Vector2 localPosition))
             {
                 float halfWidth = targetWidth * 0.5f;
                 float halfHeight = targetHeight * 0.5f;
 
                 bool isLeftSide = position.x < Screen.width * 0.5f;
-
                 float offsetX = isLeftSide ? _cursorOffset + halfWidth : -(_cursorOffset + halfWidth);
                 float offsetY = -halfHeight;
 
@@ -84,25 +66,8 @@ namespace Project.Gameplay.UI
                 float canvasHalfWidth = _rectTransform.rect.width * 0.5f;
                 float canvasHalfHeight = _rectTransform.rect.height * 0.5f;
 
-                if (targetPosition.x - halfWidth < -canvasHalfWidth)
-                {
-                    targetPosition.x = -canvasHalfWidth + halfWidth + 5;
-                }
-
-                if (targetPosition.x + halfWidth > canvasHalfWidth)
-                {
-                    targetPosition.x = canvasHalfWidth - halfWidth - 5;
-                }
-
-                if (targetPosition.y - halfHeight < -canvasHalfHeight)
-                {
-                    targetPosition.y = -canvasHalfHeight + halfHeight + 5;
-                }
-
-                if (targetPosition.y + halfHeight > canvasHalfHeight)
-                {
-                    targetPosition.y = canvasHalfHeight - halfHeight - 5;
-                }
+                targetPosition.x = Mathf.Clamp(targetPosition.x, -canvasHalfWidth + halfWidth + 5, canvasHalfWidth - halfWidth - 5);
+                targetPosition.y = Mathf.Clamp(targetPosition.y, -canvasHalfHeight + halfHeight + 5, canvasHalfHeight - halfHeight - 5);
 
                 _rootRect.anchoredPosition = targetPosition;
             }

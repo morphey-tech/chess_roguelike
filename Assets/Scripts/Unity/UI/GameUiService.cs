@@ -3,6 +3,7 @@ using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Stage;
 using Project.Gameplay.Gameplay.Stage.Flow;
 using Project.Gameplay.Gameplay.UI;
+using Project.Gameplay.Gameplay.UI.Combat;
 using Project.Gameplay.UI;
 using UnityEngine;
 using VContainer;
@@ -36,13 +37,14 @@ namespace Project.Unity.UI
         public async UniTask ShowBattlePhase()
         {
             _uiService.Hide<PrepareWindow>();
-            await _uiService.ShowAsync<TurnWindow>();
+            //await _uiService.ShowAsync<TurnWindow>();
+            await _uiService.ShowAsync<CombatHUDWindow>();
         }
 
         public UniTask HideBattlePhase()
         {
-            _uiService.Hide<TurnWindow>();
-                // UIService.Hide<BoardCapacityWindow>();
+            _uiService.Hide<CombatHUDWindow>();
+            // UIService.Hide<BoardCapacityWindow>();
             return UniTask.CompletedTask;
         }
 

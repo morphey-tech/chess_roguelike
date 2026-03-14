@@ -4,31 +4,41 @@
       "id": "gold",
       "icon": "gold_icon",
       "max": 9999,
-      "meta": false
+      "meta": false,
+      "name" : "Золото",
+      "description" : "Ну золото и золото"
     },
     {
       "id": "crystals",
       "icon": "crystals_icon",
       "max": 999999,
-      "meta": true
+      "meta": true,
+      "name" : "Золото",
+      "description" : "Ну золото и золото"
     },
     {
       "id": "keys",
       "icon": "keys_icon",
       "max": 99,
-      "meta": false
+      "meta": false,
+      "name" : "Золото",
+      "description" : "Ну золото и золото"
     },
     {
       "id": "crowns",
       "icon": "crown_currency_icon",
       "max": 9999,
-      "meta": false
+      "meta": false,
+      "name" : "Кроны",
+      "description" : "Боевое золото. Укрепляй свое войско!"
     },
     {
       "id": "scrolls",
       "icon": "scroll_currency_icon",
       "max": 9999,
-      "meta": true
+      "meta": true,
+      "name" : "Свитки Чести",
+      "description" : "Твоя слава. Укрепляй свою власть!"
     }
   ]
 }

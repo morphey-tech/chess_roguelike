@@ -42,6 +42,7 @@ MonoBehaviour:
   m_BundleRedirectLimit: -1
   m_SharedBundleSettings: 0
   m_SharedBundleSettingsCustomGroupIndex: 0
+  m_simulatedLoadDelay: 0.1
   m_ContiguousBundles: 1
   m_StripUnityVersionFromBundleBuild: 0
   m_DisableVisibleSubAssetRepresentations: 0
@@ -62,6 +63,7 @@ MonoBehaviour:
   m_GroupAssets:
   - {fileID: 11400000, guid: 703e2ba23eeaaeb4d9bfccc54ea99efd, type: 2}
   - {fileID: 11400000, guid: aafe7a743296fff978188c9b1bd8e601, type: 2}
+  - {fileID: 11400000, guid: 87beffcd2f13561f092bf03b584ecf02, type: 2}
   - {fileID: 11400000, guid: ac176aeaf393a74c28dd976a81976280, type: 2}
   - {fileID: 11400000, guid: 2367ea839eab3c027a1d4dd0b89e8cc2, type: 2}
   - {fileID: 11400000, guid: 90b05bc862a481f2ab4e124c924fd00d, type: 2}

@@ -35,6 +35,8 @@ namespace Project.Gameplay.UI
         [Header("Passives")]
         [SerializeField] private RectTransform _passivesContainer = null!;
 
+        public Figure? CurrentFigure { get; private set; }
+        
         private IUIAssetService _assetService = null!;
         private ILogger<FigureInfoWindow> _logger = null!;
 
@@ -73,11 +75,11 @@ namespace Project.Gameplay.UI
 
         private void UpdateFigureInfo(FigureInfoModel model)
         {
-            Figure figure = model.Figure;
-            FigureStats stats = figure.Stats;
+            CurrentFigure = model.Figure;
+            FigureStats stats = CurrentFigure.Stats;
             FigureInfoConfig? infoConfig = model.InfoConfig;
 
-            _figureName.text = infoConfig?.Name ?? figure.TypeId;
+            _figureName.text = infoConfig?.Name ?? CurrentFigure.TypeId;
             _figureDescription.text = infoConfig?.Description ?? string.Empty;
 
             _hpText.text = $"{stats.CurrentHp.Value}/{stats.MaxHp}";
@@ -106,6 +108,7 @@ namespace Project.Gameplay.UI
                 icon.gameObject.SetActive(false);
             }
             _activePassiveIcons.Clear();
+            CurrentFigure = null;
         }
 
         private async UniTask RenderPassives(List<PassiveConfig> passiveConfigs, CancellationToken token)
