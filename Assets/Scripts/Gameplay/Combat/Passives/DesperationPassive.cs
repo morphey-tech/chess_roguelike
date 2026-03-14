@@ -87,7 +87,7 @@ namespace Project.Gameplay.Gameplay.Combat.Passives
                     if (row == 0 && col == 0)
                         continue;
 
-                    GridPosition pos = new(context.From.Row + row, context.From.Column + col);
+                    GridPosition pos = new GridPosition(context.From.Row + row, context.From.Column + col);
                     if (context.Grid.IsInside(pos) && !targets.Contains(pos))
                     {
                         BoardCell cell = context.Grid.GetBoardCell(pos);

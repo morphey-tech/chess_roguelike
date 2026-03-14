@@ -6,7 +6,6 @@ using Project.Core.Core.Logging;
 using Project.Gameplay.Gameplay.Attack;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
-using UnityEngine;
 using VContainer;
 
 namespace Project.Gameplay.Gameplay.Combat.Threat
@@ -18,7 +17,7 @@ namespace Project.Gameplay.Gameplay.Combat.Threat
         private readonly ILogger<ThreatMapService> _logger;
 
         private readonly Dictionary<Team, ThreatMap> _threatMaps = new Dictionary<Team, ThreatMap>();
-        private readonly Dictionary<Figure, List<GridPosition>> _figureThreats = new Dictionary<Figure, List<GridPosition>>();
+        private readonly Dictionary<Team, Dictionary<Figure, List<GridPosition>>> _figureThreats = new Dictionary<Team, Dictionary<Figure, List<GridPosition>>>();
         private bool _isIncremental;
 
         public BoardGrid? Grid => _movementService.Grid;
@@ -74,18 +73,12 @@ namespace Project.Gameplay.Gameplay.Combat.Threat
 
             map.Clear();
 
-            List<Figure> figuresToRemove = new List<Figure>();
-            foreach (KeyValuePair<Figure, List<GridPosition>> kvp in _figureThreats)
+            if (!_figureThreats.TryGetValue(team, out Dictionary<Figure, List<GridPosition>>? teamFigureThreats))
             {
-                if (kvp.Key.Team == team)
-                {
-                    figuresToRemove.Add(kvp.Key);
-                }
+                teamFigureThreats = new Dictionary<Figure, List<GridPosition>>();
+                _figureThreats[team] = teamFigureThreats;
             }
-            foreach (Figure figure in figuresToRemove)
-            {
-                _figureThreats.Remove(figure);
-            }
+            teamFigureThreats.Clear();
 
             int threatCount = 0;
             foreach (Figure figure in grid.GetFiguresByTeam(team))
@@ -94,7 +87,7 @@ namespace Project.Gameplay.Gameplay.Combat.Threat
                 if (cell == null)
                     continue;
 
-                RegisterFigureThreat(figure, cell, map);
+                RegisterFigureThreat(figure, cell, map, teamFigureThreats);
                 threatCount++;
             }
 
@@ -102,42 +95,21 @@ namespace Project.Gameplay.Gameplay.Combat.Threat
             _logger.Debug($"BuildThreatMap: team={team} figures={threatCount}");
         }
 
-        private void RegisterFigureThreat(Figure figure, BoardCell cell, ThreatMap threatMap)
+        private void RegisterFigureThreat(Figure figure, BoardCell cell, ThreatMap threatMap, Dictionary<Figure, List<GridPosition>> teamFigureThreats)
         {
-            BoardGrid grid = _movementService.Grid;
-            if (grid == null)
-                return;
-
-            int attackRange = figure.Stats.AttackRange;
-            int minRow = Mathf.Max(0, cell.Position.Row - attackRange);
-            int maxRow = Mathf.Min(grid.Height - 1, cell.Position.Row + attackRange);
-            int minCol = Mathf.Max(0, cell.Position.Column - attackRange);
-            int maxCol = Mathf.Min(grid.Width - 1, cell.Position.Column + attackRange);
-
+            IAttackStrategy strategy = _attackQueryService.GetStrategy(figure.AttackId);
             List<GridPosition> threatList = new List<GridPosition>();
 
-            for (int row = minRow; row <= maxRow; row++)
+            foreach (GridPosition pos in strategy.GetAttackPositions(figure, cell.Position, _movementService.Grid))
             {
-                for (int col = minCol; col <= maxCol; col++)
+                if (_attackQueryService.CanAttackCell(figure, cell.Position, pos, _movementService.Grid))
                 {
-                    GridPosition pos = new GridPosition(row, col);
-
-                    if (pos == cell.Position)
-                        continue;
-
-                    BoardCell? targetCell = grid.GetBoardCell(pos);
-                    if (targetCell.OccupiedBy != null && targetCell.OccupiedBy.Team == figure.Team)
-                        continue;
-
-                    if (_attackQueryService.CanAttackCell(figure, cell.Position, pos, grid))
-                    {
-                        threatMap.AddThreat(pos, figure);
-                        threatList.Add(pos);
-                    }
+                    threatMap.AddThreat(pos, figure);
+                    threatList.Add(pos);
                 }
             }
 
-            _figureThreats[figure] = threatList;
+            teamFigureThreats[figure] = threatList;
             _logger.Debug($"RegisterFigureThreat: {figure.Id} team={figure.Team} pos=({cell.Position.Row},{cell.Position.Column}) threats={threatList.Count}");
         }
 
@@ -176,12 +148,21 @@ namespace Project.Gameplay.Gameplay.Combat.Threat
                 _logger.Debug($"UpdateFigureThreat({figure.Id}): created new threat map for team {figure.Team}");
             }
 
-            RegisterFigureThreat(figure, cell, threatMap);
+            if (!_figureThreats.TryGetValue(figure.Team, out Dictionary<Figure, List<GridPosition>>? teamFigureThreats))
+            {
+                teamFigureThreats = new Dictionary<Figure, List<GridPosition>>();
+                _figureThreats[figure.Team] = teamFigureThreats;
+            }
+
+            RegisterFigureThreat(figure, cell, threatMap, teamFigureThreats);
         }
 
         public void RemoveFigureThreat(Figure figure)
         {
-            if (!_figureThreats.TryGetValue(figure, out List<GridPosition>? cells))
+            if (!_figureThreats.TryGetValue(figure.Team, out Dictionary<Figure, List<GridPosition>>? teamFigureThreats))
+                return;
+
+            if (!teamFigureThreats.TryGetValue(figure, out List<GridPosition>? cells))
                 return;
 
             if (_threatMaps.TryGetValue(figure.Team, out ThreatMap? threatMap))
@@ -192,13 +173,16 @@ namespace Project.Gameplay.Gameplay.Combat.Threat
                 }
             }
 
-            _figureThreats.Remove(figure);
+            teamFigureThreats.Remove(figure);
         }
 
         public void RemoveFigureThreatById(int figureId, Team team)
         {
+            if (!_figureThreats.TryGetValue(team, out Dictionary<Figure, List<GridPosition>>? teamFigureThreats))
+                return;
+
             Figure? figureToRemove = null;
-            foreach (KeyValuePair<Figure, List<GridPosition>> kvp in _figureThreats)
+            foreach (KeyValuePair<Figure, List<GridPosition>> kvp in teamFigureThreats)
             {
                 if (kvp.Key.Id == figureId)
                 {

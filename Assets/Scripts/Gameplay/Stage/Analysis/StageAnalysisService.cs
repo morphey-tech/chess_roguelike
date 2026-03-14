@@ -17,15 +17,18 @@ namespace Project.Gameplay.Gameplay.Stage.Analysis
     {
         private readonly ThreatMapService _threatMapService;
         private readonly IStageQueryService _stageQueryService;
+        private readonly IAttackQueryService _attackQueryService;
         private readonly ILogger<StageAnalysisService> _logger;
 
         public StageAnalysisService(
             ThreatMapService threatMapService,
             IStageQueryService stageQueryService,
+            IAttackQueryService attackQueryService,
             ILogService logService)
         {
             _threatMapService = threatMapService;
             _stageQueryService = stageQueryService;
+            _attackQueryService = attackQueryService;
             _logger = logService.CreateLogger<StageAnalysisService>();
         }
 
@@ -50,28 +53,56 @@ namespace Project.Gameplay.Gameplay.Stage.Analysis
         {
             StageSelectionInfo selection = _stageQueryService.GetSelectionInfo(actor, pos);
 
-            Team enemyTeam = actor.Team == Team.Player
-                ? Team.Enemy
-                : Team.Player;
+            Team enemyTeam = actor.Team == Team.Player ? Team.Enemy : Team.Player;
 
             ThreatMap threatMap = _threatMapService.GetThreatMap(enemyTeam);
-            List<GridPosition> dangerous = new();
-            
+            List<GridPosition> dangerous = new List<GridPosition>();
+
             foreach (GridPosition move in selection.MoveTargets)
             {
                 if (threatMap.IsThreatened(move))
                 {
-                    dangerous.Add(move);
+                    IReadOnlyList<Figure>? attackers = threatMap.GetAttackers(move);
+                    if (attackers != null)
+                    {
+                        foreach (Figure attacker in attackers)
+                        {
+                            BoardCell? attackerCell = _threatMapService.Grid?.FindFigure(attacker);
+                            if (attackerCell == null)
+                                continue;
+
+                            if (_attackQueryService.CanAttackCell(attacker, attackerCell.Position, move, _threatMapService.Grid))
+                            {
+                                dangerous.Add(move);
+                                break;
+                            }
+                        }
+                    }
                 }
             }
 
             if (threatMap.IsThreatened(pos))
             {
-                dangerous.Add(pos);
+                IReadOnlyList<Figure>? attackers = threatMap.GetAttackers(pos);
+                if (attackers != null)
+                {
+                    foreach (Figure attacker in attackers)
+                    {
+                        BoardCell? attackerCell = _threatMapService.Grid?.FindFigure(attacker);
+                        if (attackerCell == null)
+                            continue;
+
+                        if (_attackQueryService.CanAttackCell(attacker, attackerCell.Position, pos, _threatMapService.Grid))
+                        {
+                            dangerous.Add(pos);
+                            break;
+                        }
+                    }
+                }
             }
 
             _logger.Debug($"AnalyzeActor: {actor.Id} team={actor.Team} pos=({pos.Row},{pos.Column}) moves={selection.MoveTargets.Count} attacks={selection.AttackTargets.Count} dangerous={dangerous.Count} enemyTeam={enemyTeam}");
-            
+
             if (dangerous.Count > 0)
             {
                 _logger.Debug($"  Dangerous cells: {string.Join(", ", dangerous.Select(p => $"({p.Row},{p.Column})"))}");

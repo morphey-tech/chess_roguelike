@@ -17,15 +17,6 @@ using VContainer.Unity;
 
 namespace Project.Gameplay.Gameplay.Stage
 {
-    /// <summary>
-    /// Stage coordinator - handles highlights and visual state.
-    /// Does NOT contain game logic or turn execution.
-    ///
-    /// Responsibilities:
-    /// - Highlight management for selection and bonus moves
-    /// - SelectTag management on figures
-    /// - Reacting to turn changes for cleanup
-    /// </summary>
     public class StageService : IInitializable, IDisposable
     {
         private readonly IStageQueryService _query;
@@ -68,7 +59,6 @@ namespace Project.Gameplay.Gameplay.Stage
             _threatMapService = threatMapService;
             _movementService = movementService;
             _logger = logService.CreateLogger<StageService>();
-
         }
 
         void IInitializable.Initialize()
@@ -138,7 +128,7 @@ namespace Project.Gameplay.Gameplay.Stage
                 _logger.Debug("Selection cleared");
             }
         }
-        
+
         private void OnFigureDeselected(FigureSelectMessage message)
         {
             message.Figure.Del<SelectTag>();
@@ -159,12 +149,11 @@ namespace Project.Gameplay.Gameplay.Stage
         {
             _disposable?.Dispose();
         }
-        
+
         private enum StageMode
         {
             Normal,
             BonusMove
         }
-
     }
 }

@@ -1,5 +1,6 @@
-using Project.Core.Core.Combat;
 using System;
+using System.Collections.Generic;
+using Project.Core.Core.Combat;
 using Project.Core.Core.Configs.Stats;
 using Project.Core.Core.Grid;
 using Project.Gameplay.Gameplay.Combat;
@@ -8,12 +9,6 @@ using Project.Gameplay.Gameplay.Grid;
 
 namespace Project.Gameplay.Gameplay.Attack.Strategies
 {
-    /// <summary>
-    /// Pawn attack: 1 cell diagonally forward (forward-left or forward-right).
-    /// Forward direction is based on team (Player moves to higher row, Enemy to lower row).
-    /// In Unity: Row 0 is near camera (bottom), Row 7 is far (top).
-    /// Player starts at bottom and attacks toward higher row numbers.
-    /// </summary>
     public sealed class PawnAttack : IAttackStrategy
     {
         public string Id => STRATEGY_ID;
@@ -32,7 +27,7 @@ namespace Project.Gameplay.Gameplay.Attack.Strategies
             int dr = to.Row - from.Row;
             int dc = to.Column - from.Column;
 
-            bool isDiagonalForward = (dr == forwardDr && Math.Abs(dc) == 1);
+            bool isDiagonalForward = dr == forwardDr && Math.Abs(dc) == 1;
 
             if (!isDiagonalForward)
             {
@@ -41,6 +36,32 @@ namespace Project.Gameplay.Gameplay.Attack.Strategies
 
             BoardCell targetCell = grid.GetBoardCell(to);
             return targetCell.OccupiedBy != null && targetCell.OccupiedBy.Team != attacker.Team;
+        }
+
+        public bool CanAttackPosition(Figure attacker, GridPosition from, GridPosition to, BoardGrid grid)
+        {
+            if (!grid.IsInside(to))
+            {
+                return false;
+            }
+
+            int forwardDr = attacker.Team == Team.Player ? 1 : -1;
+            int dr = to.Row - from.Row;
+            int dc = to.Column - from.Column;
+
+            return dr == forwardDr && Math.Abs(dc) == 1;
+        }
+
+        public IEnumerable<GridPosition> GetAttackPositions(Figure attacker, GridPosition from, BoardGrid grid)
+        {
+            int forwardDr = attacker.Team == Team.Player ? 1 : -1;
+            GridPosition left = new GridPosition(from.Row + forwardDr, from.Column - 1);
+            GridPosition right = new GridPosition(from.Row + forwardDr, from.Column + 1);
+
+            if (grid.IsInside(left))
+                yield return left;
+            if (grid.IsInside(right))
+                yield return right;
         }
 
         public HitContext CreateHitContext(Figure attacker, Figure defender, GridPosition attackerPos, GridPosition defenderPos, BoardGrid grid)

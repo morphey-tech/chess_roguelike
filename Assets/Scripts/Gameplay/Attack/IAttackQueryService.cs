@@ -9,5 +9,6 @@ namespace Project.Gameplay.Gameplay.Attack
     {
         IReadOnlyCollection<GridPosition> GetTargets(Figure actor, GridPosition from, BoardGrid grid);
         bool CanAttackCell(Figure attacker, GridPosition from, GridPosition targetCell, BoardGrid grid);
+        IAttackStrategy GetStrategy(string attackId);
     }
 }

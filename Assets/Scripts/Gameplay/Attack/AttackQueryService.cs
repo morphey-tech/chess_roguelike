@@ -32,8 +32,7 @@ namespace Project.Gameplay.Gameplay.Attack
 
             List<GridPosition> targets = new List<GridPosition>();
             IAttackStrategy strategy = _strategyFactory.Get(actor.AttackId);
-            foreach (Figure enemy in grid.GetFiguresByTeam(actor.Team == Team.Player
-                         ? Team.Enemy : Team.Player))
+            foreach (Figure enemy in grid.GetFiguresByTeam(actor.Team == Team.Player ? Team.Enemy : Team.Player))
             {
                 BoardCell? cell = grid.FindFigure(enemy);
                 if (cell != null && strategy.CanAttack(actor, from, cell.Position, grid))
@@ -81,48 +80,14 @@ namespace Project.Gameplay.Gameplay.Attack
             }
 
             IAttackStrategy strategy = _strategyFactory.Get(attacker.AttackId);
-            bool result = CanAttackPosition(strategy, attacker, from, targetCell, grid);
+            bool result = strategy.CanAttackPosition(attacker, from, targetCell, grid);
             _logger.Debug($"CanAttackCell: {attacker.Id} -> ({targetCell.Row},{targetCell.Column}) = {result} (via {strategy.Id})");
             return result;
         }
 
-        private static bool CanAttackPosition(IAttackStrategy strategy, Figure attacker, GridPosition from, GridPosition to, BoardGrid grid)
+        public IAttackStrategy GetStrategy(string attackId)
         {
-            if (!AttackUtils.IsInRange(from, to, attacker.Stats.AttackRange))
-            {
-                return false;
-            }
-
-            return strategy switch
-            {
-                SimpleAttack => true,
-                RangedAttack => true,
-                PawnAttack => CanAttackPosition((PawnAttack)strategy, attacker, from, to),
-                DiagonalAttack => CanAttackPosition((DiagonalAttack)strategy, from, to),
-                _ => true
-            };
-        }
-
-        private static bool CanAttackPosition(PawnAttack strategy, Figure attacker, GridPosition from, GridPosition to)
-        {
-            int rowDiff = to.Row - from.Row;
-            int colDiff = Mathf.Abs(to.Column - from.Column);
-
-            if (Mathf.Abs(rowDiff) != 1 || colDiff != 1)
-            {
-                return false;
-            }
-
-            bool isPlayer = attacker.Team == Team.Player;
-            return (isPlayer && rowDiff > 0) || (!isPlayer && rowDiff < 0);
-        }
-
-        private static bool CanAttackPosition(DiagonalAttack strategy, GridPosition from, GridPosition to)
-        {
-            int rowDiff = Mathf.Abs(to.Row - from.Row);
-            int colDiff = Mathf.Abs(to.Column - from.Column);
-
-            return rowDiff == colDiff && rowDiff > 0;
+            return _strategyFactory.Get(attackId);
         }
     }
 }

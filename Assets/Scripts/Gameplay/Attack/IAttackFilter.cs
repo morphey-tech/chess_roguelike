@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Project.Core.Core.Grid;
+using Project.Gameplay.Gameplay.Combat;
 using Project.Gameplay.Gameplay.Figures;
 using Project.Gameplay.Gameplay.Grid;
 
