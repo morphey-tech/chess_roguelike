@@ -108,7 +108,7 @@
       "id": "momentum",
       "type": "momentum",
       "name": "Инерция",
-      "description": "Каждая атака прибавляет <color=#00FF00>+0.5</color> урона. Сбрасывается при получении урона.",
+      "description": "Прибавляет <color=#00FF00>+0.5</color> урона за каждую пройденную клетку до цели.",
       "icon": "momentum_passive_icon",
       "params": {
         "bonus_damage": 0.5
@@ -118,7 +118,7 @@
       "id": "agile_dodge",
       "type": "agile_dodge",
       "name": "Уклонение",
-      "description": "Дает <color=#00FF00>50%</color> уклонения на 1 ход, после передвижения",
+      "description": "После передвижения дает <color=#00FF00>50%</color> уклонения на 1 атаку.",
       "icon": "agile_dodge_passive",
       "params": {
         "chance": 0.5
@@ -128,7 +128,7 @@
       "id": "first_shot",
       "type": "first_shot",
       "name": "Первый выстрел",
-      "description": "Первый выстрел по врагу наносит <color=#00FF00>+2</color> урона",
+      "description": "Первая атака по врагу наносит <color=#00FF00>+2</color> урона.",
       "icon": "first_shot_passive_icon",
       "params": {
         "bonus_damage": 2
@@ -178,7 +178,7 @@
       "id": "royal_presence",
       "type": "royal_presence",
       "name": "Королевское присутствие",
-      "description": "+100% урона союзникам в радиусе 2 клеток",
+      "description": "После передвижения увеличивает урон случайного союзника поблизости на <color=#00FF00>+1</color>.",
       "icon": "royal_presence_passive_icon",
       "params": {
         "damage_bonus": 1,
@@ -189,7 +189,7 @@
       "id": "escape",
       "type": "escape",
       "name": "Побег",
-      "description": "Может уйти с поля боя при низком здоровье",
+      "description": "Может сбежать на <color=#00FF00>1</color> клетку, если нанес не смертельный удар.",
       "icon": "escape_passive_icon",
       "params": {}
     },
@@ -197,7 +197,7 @@
       "id": "impact",
       "type": "impact",
       "name": "Удар",
-      "description": "+2 урона к первой атаке",
+      "description": "Толкает цель по направлении атаки. При столкновении наносит <color=#00FF00>+2</color> уроона.",
       "icon": "impact_passive_icon",
       "params": {
         "bonus_damage": 2
@@ -207,7 +207,7 @@
       "id": "melee_override",
       "type": "melee_override",
       "name": "Ближний бой",
-      "description": "Уменьшает урон в ближнем бою на 50%",
+      "description": "Не может атаковать на расстоянии если поблизости враг.",
       "icon": "melee_override_passive_icon",
       "params": {
         "melee_damage_multiplier": 0.5
@@ -217,7 +217,7 @@
       "id": "splash",
       "type": "splash",
       "name": "Всплеск",
-      "description": "Урон по области вокруг цели",
+      "description": "Соседние две клетки от цели получают <color=#00FF00>50%</color> урона.",
       "icon": "splash_passive_icon",
       "params": {}
     },
@@ -225,7 +225,7 @@
       "id": "pierce",
       "type": "pierce",
       "name": "Пронзающий удар",
-      "description": "Атака проходит сквозь цель",
+      "description": "Первая фигура позади цели получается <color=#00FF00>75%</color>, следующая <color=#00FF00>50%</color> урона.",
       "icon": "pierce_passive_icon",
       "params": {}
     }

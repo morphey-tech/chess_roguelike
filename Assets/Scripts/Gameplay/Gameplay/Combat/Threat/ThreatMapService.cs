@@ -16,8 +16,8 @@ namespace Project.Gameplay.Gameplay.Combat.Threat
         private readonly IAttackQueryService _attackQueryService;
         private readonly ILogger<ThreatMapService> _logger;
 
-        private readonly Dictionary<Team, ThreatMap> _threatMaps = new Dictionary<Team, ThreatMap>();
-        private readonly Dictionary<Team, Dictionary<Figure, List<GridPosition>>> _figureThreats = new Dictionary<Team, Dictionary<Figure, List<GridPosition>>>();
+        private readonly Dictionary<Team, ThreatMap> _threatMaps = new();
+        private readonly Dictionary<Team, Dictionary<Figure, List<GridPosition>>> _figureThreats = new();
         private bool _isIncremental;
 
         public BoardGrid? Grid => _movementService.Grid;
@@ -98,7 +98,7 @@ namespace Project.Gameplay.Gameplay.Combat.Threat
         private void RegisterFigureThreat(Figure figure, BoardCell cell, ThreatMap threatMap, Dictionary<Figure, List<GridPosition>> teamFigureThreats)
         {
             IAttackStrategy strategy = _attackQueryService.GetStrategy(figure.AttackId);
-            List<GridPosition> threatList = new List<GridPosition>();
+            List<GridPosition> threatList = new();
 
             foreach (GridPosition pos in strategy.GetAttackPositions(figure, cell.Position, _movementService.Grid))
             {
