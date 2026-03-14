@@ -80,23 +80,17 @@ namespace Project.Gameplay.Gameplay.Stage
 
         private void OnFigureDied(FigureDiedMessage message)
         {
-            // Инвалидируем кэш угроз при смерти фигуры
             _threatMapService.Invalidate();
-            _logger.Debug($"Figure {message.FigureId} died, invalidated threat map cache");
         }
 
         private void OnFigureSpawned(FigureBoardMessage message)
         {
-            // Инвалидируем кэш угроз при спавне фигуры
             _threatMapService.Invalidate();
-            _logger.Debug($"Figure spawned, invalidated threat map cache");
         }
 
         private void OnFigureMoved(FigureBoardMessage message)
         {
-            // Инвалидируем кэш угроз при движении фигуры
             _threatMapService.Invalidate();
-            _logger.Debug($"Figure moved, invalidated threat map cache");
         }
 
         private void OnBonusMoveCompleted(BonusMoveMessage message)

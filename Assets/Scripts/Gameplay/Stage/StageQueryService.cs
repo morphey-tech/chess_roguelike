@@ -98,24 +98,19 @@ namespace Project.Gameplay.Gameplay.Stage
 
             StageSelectionInfo selectionInfo = GetSelectionInfo(actor, pos);
 
-            _logger.Debug($"GetUnderAttackCells: {selectionInfo.MoveTargets.Count} move targets, checking threats...");
-            
             foreach (GridPosition move in selectionInfo.MoveTargets)
             {
                 if (threatMap.IsThreatened(move))
                 {
-                    _logger.Debug($"  Cell ({move.Row},{move.Column}) is threatened");
                     result.Add(move);
                 }
             }
 
             if (threatMap.IsThreatened(pos))
             {
-                _logger.Debug($"  Current cell ({pos.Row},{pos.Column}) is threatened");
                 result.Add(pos);
             }
 
-            _logger.Debug($"GetUnderAttackCells: total {result.Count} threatened cells");
             return result;
         }
 
